@@ -1,0 +1,250 @@
+{
+  "color": {
+    "brand": {
+      "primary": {
+        "value": "#0A8080"
+      },
+      "secondary": {
+        "value": "#F45D48"
+      },
+      "accent": {
+        "value": "#0A8080"
+      },
+      "background": {
+        "value": "#FFFFFF"
+      },
+      "text": {
+        "value": "#1C1C1C"
+      }
+    },
+    "scales": {
+      "primary": {
+        "50": {
+          "value": "#F1F9F9"
+        },
+        "100": {
+          "value": "#DFF6F6"
+        },
+        "200": {
+          "value": "#B3F9F9"
+        },
+        "300": {
+          "value": "#7BF5F5"
+        },
+        "400": {
+          "value": "#38EFEF"
+        },
+        "500": {
+          "value": "#11DADA"
+        },
+        "600": {
+          "value": "#0DAAAA"
+        },
+        "700": {
+          "value": "#0A8484"
+        },
+        "800": {
+          "value": "#075F5F"
+        },
+        "900": {
+          "value": "#064141"
+        },
+        "950": {
+          "value": "#072222"
+        }
+      },
+      "secondary": {
+        "50": {
+          "value": "#F9F1F0"
+        },
+        "100": {
+          "value": "#F7E1DE"
+        },
+        "200": {
+          "value": "#FABBB2"
+        },
+        "300": {
+          "value": "#F78878"
+        },
+        "400": {
+          "value": "#F34C35"
+        },
+        "500": {
+          "value": "#DD270D"
+        },
+        "600": {
+          "value": "#AD1E0A"
+        },
+        "700": {
+          "value": "#871808"
+        },
+        "800": {
+          "value": "#601106"
+        },
+        "900": {
+          "value": "#420D05"
+        },
+        "950": {
+          "value": "#220A07"
+        }
+      },
+      "accent": {
+        "50": {
+          "value": "#F1F9F9"
+        },
+        "100": {
+          "value": "#DFF6F6"
+        },
+        "200": {
+          "value": "#B3F9F9"
+        },
+        "300": {
+          "value": "#7BF5F5"
+        },
+        "400": {
+          "value": "#38EFEF"
+        },
+        "500": {
+          "value": "#11DADA"
+        },
+        "600": {
+          "value": "#0DAAAA"
+        },
+        "700": {
+          "value": "#0A8484"
+        },
+        "800": {
+          "value": "#075F5F"
+        },
+        "900": {
+          "value": "#064141"
+        },
+        "950": {
+          "value": "#072222"
+        }
+      },
+      "neutral": {
+        "50": {
+          "value": "#F5F5F5"
+        },
+        "100": {
+          "value": "#EBEBEB"
+        },
+        "200": {
+          "value": "#D6D6D6"
+        },
+        "300": {
+          "value": "#B8B8B8"
+        },
+        "400": {
+          "value": "#949494"
+        },
+        "500": {
+          "value": "#757575"
+        },
+        "600": {
+          "value": "#5C5C5C"
+        },
+        "700": {
+          "value": "#474747"
+        },
+        "800": {
+          "value": "#333333"
+        },
+        "900": {
+          "value": "#242424"
+        },
+        "950": {
+          "value": "#141414"
+        }
+      }
+    }
+  },
+  "font": {
+    "family": {
+      "heading": {
+        "value": "GCentra"
+      },
+      "body": {
+        "value": "Roboto"
+      }
+    },
+    "weight": {
+      "heading": [
+        {
+          "value": 600
+        },
+        {
+          "value": 700
+        }
+      ],
+      "body": [
+        {
+          "value": 400
+        },
+        {
+          "value": 500
+        },
+        {
+          "value": 600
+        }
+      ]
+    }
+  },
+  "size": {
+    "type": {
+      "xs": {
+        "value": "0.640rem"
+      },
+      "sm": {
+        "value": "0.800rem"
+      },
+      "base": {
+        "value": "1rem"
+      },
+      "lg": {
+        "value": "1.250rem"
+      },
+      "xl": {
+        "value": "1.563rem"
+      },
+      "2xl": {
+        "value": "1.953rem"
+      },
+      "3xl": {
+        "value": "2.441rem"
+      },
+      "4xl": {
+        "value": "3.052rem"
+      },
+      "5xl": {
+        "value": "3.815rem"
+      }
+    },
+    "radius": {
+      "sm": {
+        "value": "4px"
+      },
+      "md": {
+        "value": "8px"
+      },
+      "lg": {
+        "value": "12px"
+      },
+      "xl": {
+        "value": "16px"
+      }
+    }
+  },
+  "meta": {
+    "project": {
+      "value": "tinies"
+    },
+    "generator": {
+      "value": "Refine Design"
+    },
+    "typeScaleRatio": {
+      "value": 1.25
+    }
+  }
+}
