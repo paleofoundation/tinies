@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "dzyne": {
+      "url": "https://dzyne.app/api/mcp/mcp"
+    }
+  }
+}
