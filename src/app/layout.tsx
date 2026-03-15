@@ -27,8 +27,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={plusJakarta.variable}>
       <body
-        className="min-h-screen bg-[#F7F7F8] text-[#1B2432] antialiased flex flex-col"
-        style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+        className="min-h-screen antialiased flex flex-col"
+        style={{
+          fontFamily: "var(--font-body), sans-serif",
+          backgroundColor: "var(--color-background)",
+          color: "var(--color-text)",
+        }}
       >
         <Header />
         <div className="flex-1">{children}</div>

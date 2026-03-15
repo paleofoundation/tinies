@@ -1,21 +1,92 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
-  --tiny-font-display: "DM Serif Display", serif;
-  --tiny-font-body: "Plus Jakarta Sans", sans-serif;
-  --tiny-color-primary: #f45d48;
-  --tiny-color-secondary: #0a6e5c;
-  --tiny-color-text: #1b2432;
-  --tiny-color-text-subtle: #6b7280;
-  --tiny-color-bg: #f7f7f8;
-  --tiny-color-surface: #ffffff;
-  --tiny-color-highlight: #f5c5a3;
-  --tiny-color-border: #e5e7eb;
-  --tiny-radius-card: 14px;
-  --tiny-radius-pill: 999px;
-  --tiny-shadow-card: 0 18px 40px rgba(15, 23, 42, 0.08);
-  --tiny-space-section: 80px;
-  --tiny-space-card: 36px;
-  --tiny-max-width: 1170px;
+  /* Brand colors — Tinies palette */
+  --color-primary: #0A6E5C;
+  --color-secondary: #F45D48;
+  --color-accent: #0A6E5C;
+  --color-background: #F7F7F8;
+  --color-surface: #FFFFFF;
+  --color-text: #1B2432;
+  --color-text-secondary: rgba(27, 36, 50, 0.7);
+  --color-text-muted: rgba(27, 36, 50, 0.5);
+  --color-border: #E5E7EB;
+
+  /* Primary (kale teal) scale */
+  --color-primary-50: #ECFDF5;
+  --color-primary-100: #D1FAE5;
+  --color-primary-200: #A7F3D0;
+  --color-primary-300: #6EE7B7;
+  --color-primary-400: #34D399;
+  --color-primary-500: #10B981;
+  --color-primary-600: #0A6E5C;
+  --color-primary-700: #065F46;
+  --color-primary-800: #064E3B;
+  --color-primary-900: #043E2F;
+  --color-primary-950: #022C22;
+
+  /* Secondary (coral) scale */
+  --color-secondary-50: #FEF2F0;
+  --color-secondary-100: #FDE1DE;
+  --color-secondary-200: #FABBB2;
+  --color-secondary-300: #F78878;
+  --color-secondary-400: #F45D48;
+  --color-secondary-500: #DD270D;
+  --color-secondary-600: #AD1E0A;
+  --color-secondary-700: #871808;
+  --color-secondary-800: #601106;
+  --color-secondary-900: #420D05;
+  --color-secondary-950: #220A07;
+
+  /* Neutral scale */
+  --color-neutral-50: #F5F5F5;
+  --color-neutral-100: #EBEBEA;
+  --color-neutral-200: #D7D6D6;
+  --color-neutral-300: #B9B9B6;
+  --color-neutral-400: #949890;
+  --color-neutral-500: #707B70;
+  --color-neutral-600: #57615A;
+  --color-neutral-700: #434C48;
+  --color-neutral-800: #2F3736;
+  --color-neutral-900: #212626;
+  --color-neutral-950: #131516;
+
+  /* Typography */
+  --font-heading: 'DM Serif Display', serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --type-scale-ratio: 1.25;
+
+  /* Type scale */
+  --text-xs: 0.640rem;
+  --text-sm: 0.800rem;
+  --text-base: 1rem;
+  --text-lg: 1.250rem;
+  --text-xl: 1.563rem;
+  --text-2xl: 1.953rem;
+  --text-3xl: 2.441rem;
+  --text-4xl: 3.052rem;
+  --text-5xl: 3.815rem;
+
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-xl: 16px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(10, 110, 92, 0.06);
+  --shadow-md: 0 4px 16px rgba(10, 110, 92, 0.08);
+  --shadow-lg: 0 8px 32px rgba(10, 110, 92, 0.1);
+
+  /* Spacing */
+  --space-section: 80px;
+  --space-card: 36px;
+  --max-width: 1170px;
+}
+
+/* Header nav link hover */
+header nav a[href]:hover {
+  color: var(--color-primary);
 }

@@ -71,28 +71,28 @@ export default function ProviderDashboardPage() {
   const score = getCompletenessScore();
 
   return (
-    <div className="min-h-screen bg-[#F7F7F8] text-[#1B2432]">
-      <main className="mx-auto max-w-[1170px] px-4 py-20 sm:px-6 sm:py-20">
-        <h1 className="text-2xl font-normal text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-display), serif" }}>Provider dashboard</h1>
-        <p className="mt-1 text-[#6B7280]">Manage your profile, bookings, and earnings.</p>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
+      <main className="mx-auto px-4 py-20 sm:px-6 sm:py-20" style={{ maxWidth: "var(--max-width)" }}>
+        <h1 className="font-normal" style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-2xl)", color: "var(--color-text)" }}>Provider dashboard</h1>
+        <p className="mt-1" style={{ color: "var(--color-text-secondary)" }}>Manage your profile, bookings, and earnings.</p>
 
         {/* Profile completeness */}
-        <section className="mt-8 rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:p-8">
+        <section className="mt-8 rounded-[var(--radius-lg)] border p-8 sm:p-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="font-normal text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-display), serif" }}>Profile completeness</h2>
-              <p className="mt-0.5 text-sm text-[#6B7280]">
+              <h2 className="font-normal" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>Profile completeness</h2>
+              <p className="mt-0.5 text-sm" style={{ color: "var(--color-text-secondary)" }}>
                 {score === 100 ? "Complete! You're ready to receive bookings." : "Complete your profile to appear in search and get more bookings."}
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="h-3 w-32 overflow-hidden rounded-full bg-[#E5E7EB] sm:w-40">
+              <div className="h-3 w-32 overflow-hidden rounded-full bg-[var(--color-border)] sm:w-40">
                 <div
-                  className="h-full rounded-full bg-[#0A6E5C] transition-all"
+                  className="h-full rounded-full bg-[var(--color-primary)] transition-all"
                   style={{ width: `${score}%` }}
                 />
               </div>
-              <span className="text-sm font-semibold tabular-nums text-[#1B2432]">{score}%</span>
+              <span className="text-sm font-semibold tabular-nums" style={{ color: "var(--color-text)" }}>{score}%</span>
             </div>
           </div>
           {score < 100 && (
@@ -101,10 +101,11 @@ export default function ProviderDashboardPage() {
                 <li key={item.key}>
                   <Link
                     href={item.href}
-                    className="flex items-center justify-between rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-3 py-2 text-sm text-[#1B2432] transition-colors hover:bg-[#0A6E5C]/5"
+                    className="flex items-center justify-between rounded-[var(--radius-lg)] border px-3 py-2 text-sm transition-colors hover:bg-[var(--color-primary-50)]"
+                    style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)", color: "var(--color-text)" }}
                   >
                     <span>{item.label}</span>
-                    <ChevronRight className="h-4 w-4 text-[#6B7280]" />
+                    <ChevronRight className="h-4 w-4" style={{ color: "var(--color-text-secondary)" }} />
                   </Link>
                 </li>
               ))}
@@ -112,7 +113,8 @@ export default function ProviderDashboardPage() {
           )}
           <Link
             href="/dashboard/provider/edit-profile"
-            className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#0A6E5C] hover:underline"
+            className="mt-4 inline-flex items-center gap-2 text-sm font-semibold hover:underline"
+            style={{ color: "var(--color-primary)" }}
           >
             <Settings className="h-4 w-4" />
             Edit profile
@@ -120,7 +122,7 @@ export default function ProviderDashboardPage() {
         </section>
 
         {/* Tabs */}
-        <div className="mt-8 border-b border-[#E5E7EB]">
+        <div className="mt-8 border-b border-[var(--color-border)]">
           <nav className="flex gap-1 overflow-x-auto" aria-label="Dashboard sections">
             {TABS.map((t) => (
               <button
@@ -129,10 +131,10 @@ export default function ProviderDashboardPage() {
                 onClick={() => setTab(t.id)}
                 className={`flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-semibold transition-colors ${
                   tab === t.id
-                    ? "border-[#0A6E5C] text-[#0A6E5C]"
-                    : "border-transparent text-[#6B7280] hover:text-[#1B2432]"
+                    ? "border-[var(--color-primary)]"
+                    : "border-transparent"
                 }`}
-                style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                style={{ fontFamily: "var(--font-body), sans-serif", color: tab === t.id ? "var(--color-primary)" : "var(--color-text-secondary)" }}
               >
                 <t.icon className="h-4 w-4" />
                 {t.label}
@@ -144,77 +146,77 @@ export default function ProviderDashboardPage() {
         {/* Tab content */}
         <div className="mt-6">
           {tab === "profile" && (
-            <section className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:p-8">
-              <h2 className="font-normal text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-display), serif" }}>My Profile</h2>
-              <p className="mt-1 text-sm text-[#6B7280]">
+            <section className="rounded-[var(--radius-lg)] border p-8 sm:p-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
+              <h2 className="font-normal" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>My Profile</h2>
+              <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
                 Your public profile is what pet owners see. Keep it up to date.
               </p>
               <div className="mt-6 space-y-4">
-                <div className="flex items-center gap-3 rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] p-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#0A6E5C]/10 text-[#0A6E5C]">
+                <div className="flex items-center gap-3 rounded-[var(--radius-lg)] border p-4" style={{ backgroundColor: "var(--color-background)", borderColor: "var(--color-border)" }}>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-primary-50)] text-[var(--color-primary)]">
                     <Camera className="h-6 w-6" />
                   </div>
                   <div>
-                    <p className="font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>Photo & bio</p>
-                    <p className="text-sm text-[#6B7280]">Add a profile photo and write your bio.</p>
+                    <p className="font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>Photo & bio</p>
+                    <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Add a profile photo and write your bio.</p>
                   </div>
-                  <Link href="/dashboard/provider/edit-profile#photo" className="ml-auto text-sm font-semibold text-[#0A6E5C] hover:underline">Edit</Link>
+                  <Link href="/dashboard/provider/edit-profile#photo" className="ml-auto text-sm font-semibold hover:underline" style={{ color: "var(--color-primary)" }}>Edit</Link>
                 </div>
-                <div className="flex items-center gap-3 rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] p-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#0A6E5C]/10 text-[#0A6E5C]">
+                <div className="flex items-center gap-3 rounded-[var(--radius-lg)] border p-4" style={{ backgroundColor: "var(--color-background)", borderColor: "var(--color-border)" }}>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-primary-50)] text-[var(--color-primary)]">
                     <FileText className="h-6 w-6" />
                   </div>
                   <div>
-                    <p className="font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>Services & pricing</p>
-                    <p className="text-sm text-[#6B7280]">Set which services you offer and your rates.</p>
+                    <p className="font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>Services & pricing</p>
+                    <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Set which services you offer and your rates.</p>
                   </div>
-                  <Link href="/dashboard/provider/edit-profile#services" className="ml-auto text-sm font-semibold text-[#0A6E5C] hover:underline">Edit</Link>
+                  <Link href="/dashboard/provider/edit-profile#services" className="ml-auto text-sm font-semibold hover:underline" style={{ color: "var(--color-primary)" }}>Edit</Link>
                 </div>
-                <div className="flex items-center gap-3 rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] p-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#0A6E5C]/10 text-[#0A6E5C]">
+                <div className="flex items-center gap-3 rounded-[var(--radius-lg)] border p-4" style={{ backgroundColor: "var(--color-background)", borderColor: "var(--color-border)" }}>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-primary-50)] text-[var(--color-primary)]">
                     <PawPrint className="h-6 w-6" />
                   </div>
                   <div>
-                    <p className="font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>Pet preferences</p>
-                    <p className="text-sm text-[#6B7280]">Dogs, cats, size limits.</p>
+                    <p className="font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>Pet preferences</p>
+                    <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Dogs, cats, size limits.</p>
                   </div>
-                  <Link href="/dashboard/provider/edit-profile#pets" className="ml-auto text-sm font-semibold text-[#0A6E5C] hover:underline">Edit</Link>
+                  <Link href="/dashboard/provider/edit-profile#pets" className="ml-auto text-sm font-semibold hover:underline" style={{ color: "var(--color-primary)" }}>Edit</Link>
                 </div>
-                <div className="flex items-center gap-3 rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] p-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#0A6E5C]/10 text-[#0A6E5C]">
+                <div className="flex items-center gap-3 rounded-[var(--radius-lg)] border p-4" style={{ backgroundColor: "var(--color-background)", borderColor: "var(--color-border)" }}>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-primary-50)] text-[var(--color-primary)]">
                     <Shield className="h-6 w-6" />
                   </div>
                   <div>
-                    <p className="font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>Verification</p>
-                    <p className="text-sm text-[#6B7280]">Upload ID to get verified and appear in search.</p>
+                    <p className="font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>Verification</p>
+                    <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Upload ID to get verified and appear in search.</p>
                   </div>
-                  <Link href="/dashboard/provider/edit-profile#verification" className="ml-auto text-sm font-semibold text-[#0A6E5C] hover:underline">Edit</Link>
+                  <Link href="/dashboard/provider/edit-profile#verification" className="ml-auto text-sm font-semibold hover:underline" style={{ color: "var(--color-primary)" }}>Edit</Link>
                 </div>
               </div>
             </section>
           )}
 
           {tab === "bookings" && (
-            <section className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:p-8">
-              <h2 className="font-normal text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-display), serif" }}>My Bookings</h2>
-              <p className="mt-1 text-sm text-[#6B7280]">Pending, active, and past bookings.</p>
+            <section className="rounded-[var(--radius-lg)] border p-8 sm:p-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
+              <h2 className="font-normal" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>My Bookings</h2>
+              <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>Pending, active, and past bookings.</p>
               <ul className="mt-6 space-y-3">
                 {MOCK_BOOKINGS.map((b) => (
                   <li
                     key={b.id}
-                    className="flex flex-wrap items-center justify-between gap-3 rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] p-4"
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-lg)] border p-4"
                   >
                     <div>
-                      <p className="font-medium text-[#1B2432]">{b.petName} · {b.service}</p>
-                      <p className="text-sm text-[#6B7280]">{b.date}</p>
+                      <p className="font-medium" style={{ color: "var(--color-text)" }}>{b.petName} · {b.service}</p>
+                      <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>{b.date}</p>
                     </div>
                     <span
                       className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
                         b.status === "pending"
                           ? "bg-amber-100 text-amber-800"
                           : b.status === "active"
-                            ? "bg-[#0A6E5C]/15 text-[#0A6E5C]"
-                            : "bg-[#6B7280]/15 text-[#6B7280]"
+                            ? "bg-[var(--color-primary)]/15 "
+                            : "bg-[var(--color-neutral-200)] text-[var(--color-text-secondary)] "
                       }`}
                     >
                       {b.status}
@@ -226,39 +228,39 @@ export default function ProviderDashboardPage() {
           )}
 
           {tab === "earnings" && (
-            <section className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:p-8">
-              <h2 className="font-normal text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-display), serif" }}>Earnings</h2>
-              <p className="mt-1 text-sm text-[#6B7280]">Your payouts and history.</p>
+            <section className="rounded-[var(--radius-lg)] border p-8 sm:p-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
+              <h2 className="font-normal" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>Earnings</h2>
+              <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>Your payouts and history.</p>
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] p-4">
-                  <p className="text-sm text-[#6B7280]">Total earned</p>
-                  <p className="mt-1 text-2xl font-bold text-[#F45D48]">€0.00</p>
+                <div className="rounded-[var(--radius-lg)] border p-4" style={{ backgroundColor: "var(--color-background)", borderColor: "var(--color-border)" }}>
+                  <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Total earned</p>
+                  <p className="mt-1 text-2xl font-bold" style={{ color: "var(--color-secondary)" }}>€0.00</p>
                 </div>
-                <div className="rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] p-4">
-                  <p className="text-sm text-[#6B7280]">Pending payout</p>
-                  <p className="mt-1 text-2xl font-bold text-[#0A6E5C]">€0.00</p>
+                <div className="rounded-[var(--radius-lg)] border p-4" style={{ backgroundColor: "var(--color-background)", borderColor: "var(--color-border)" }}>
+                  <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Pending payout</p>
+                  <p className="mt-1 text-2xl font-bold" style={{ color: "var(--color-primary)" }}>€0.00</p>
                 </div>
               </div>
-              <h3 className="mt-6 font-medium text-[#1B2432]">Payout history</h3>
-              <p className="mt-2 text-sm text-[#6B7280]">No payouts yet. Complete a booking to start earning.</p>
+              <h3 className="mt-6 font-medium" style={{ color: "var(--color-text)" }}>Payout history</h3>
+              <p className="mt-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>No payouts yet. Complete a booking to start earning.</p>
             </section>
           )}
 
           {tab === "messages" && (
-            <section className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:p-8">
-              <h2 className="font-normal text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-display), serif" }}>Messages</h2>
-              <p className="mt-1 text-sm text-[#6B7280]">Conversations with pet owners.</p>
-              <div className="mt-6 flex flex-col items-center justify-center rounded-[14px] border border-dashed border-[#E5E7EB] bg-[#F7F7F8] py-12 text-center">
-                <MessageSquare className="h-12 w-12 text-[#6B7280]/50" />
-                <p className="mt-3 text-sm text-[#6B7280]">No messages yet.</p>
-                <p className="mt-1 text-sm text-[#6B7280]">When owners contact you, conversations will appear here.</p>
+            <section className="rounded-[var(--radius-lg)] border p-8 sm:p-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
+              <h2 className="font-normal" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>Messages</h2>
+              <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>Conversations with pet owners.</p>
+              <div className="mt-6 flex flex-col items-center justify-center rounded-[var(--radius-lg)] border border-dashed py-12 text-center" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}>
+                <MessageSquare className="h-12 w-12" style={{ color: "var(--color-text-muted)" }} />
+                <p className="mt-3 text-sm" style={{ color: "var(--color-text-secondary)" }}>No messages yet.</p>
+                <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>When owners contact you, conversations will appear here.</p>
               </div>
             </section>
           )}
         </div>
 
         <p className="mt-8">
-          <Link href="/" className="text-sm text-[#6B7280] hover:text-[#1B2432] hover:underline">
+          <Link href="/" className="text-sm hover:underline" style={{ color: "var(--color-text-secondary)" }}>
             ← Back to home
           </Link>
         </p>

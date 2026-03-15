@@ -3,105 +3,146 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="bg-[#0A6E5C] text-white px-4 py-14 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-[1170px]">
+    <footer
+      className="px-4 py-14 sm:px-6 lg:px-8"
+      style={{ backgroundColor: "var(--color-primary-950)" }}
+    >
+      <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
         <div className="flex flex-col gap-10 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p
               className="text-xl text-white"
-              style={{ fontFamily: "var(--tiny-font-display), serif" }}
+              style={{ fontFamily: "var(--font-heading), serif" }}
             >
               tinies.app
             </p>
-            <p className="mt-2 text-sm text-white/90">No matter the size.</p>
-            <p className="mt-2 text-sm text-white/80 max-w-xs">
+            <p
+              className="mt-2 text-lg italic text-white"
+              style={{ fontFamily: "var(--font-heading), serif" }}
+            >
+              Book a walk. Help a tiny.
+            </p>
+            <p className="mt-2 text-sm max-w-xs" style={{ color: "rgba(255,255,255,0.7)" }}>
               Trusted pet care and rescue adoption in Cyprus.
             </p>
           </div>
           <nav className="flex flex-wrap gap-8 sm:gap-12" aria-label="Footer">
             <div className="flex flex-col gap-3">
               <p
-                className="text-xs font-semibold uppercase tracking-wider text-white/80"
-                style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                className="text-xs font-semibold uppercase tracking-wider"
+                style={{
+                  fontFamily: "var(--font-body), sans-serif",
+                  color: "rgba(255,255,255,0.7)",
+                }}
               >
                 Services
               </p>
               <Link
                 href="/services"
-                className="text-sm text-white/90 transition-opacity hover:opacity-100 hover:underline"
-                style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                className="text-sm transition-opacity hover:opacity-100 hover:underline"
+                style={{
+                  fontFamily: "var(--font-body), sans-serif",
+                  color: "rgba(255,255,255,0.9)",
+                }}
               >
                 Find care
               </Link>
               <Link
                 href="/services/search"
-                className="text-sm text-white/90 transition-opacity hover:opacity-100 hover:underline"
-                style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                className="text-sm transition-opacity hover:opacity-100 hover:underline"
+                style={{
+                  fontFamily: "var(--font-body), sans-serif",
+                  color: "rgba(255,255,255,0.9)",
+                }}
               >
                 Search
               </Link>
             </div>
             <div className="flex flex-col gap-3">
               <p
-                className="text-xs font-semibold uppercase tracking-wider text-white/80"
-                style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                className="text-xs font-semibold uppercase tracking-wider"
+                style={{
+                  fontFamily: "var(--font-body), sans-serif",
+                  color: "rgba(255,255,255,0.7)",
+                }}
               >
                 Adopt
               </p>
               <Link
                 href="/adopt"
-                className="text-sm text-white/90 transition-opacity hover:opacity-100 hover:underline"
-                style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                className="text-sm transition-opacity hover:opacity-100 hover:underline"
+                style={{
+                  fontFamily: "var(--font-body), sans-serif",
+                  color: "rgba(255,255,255,0.9)",
+                }}
               >
                 Adopt a Tiny
               </Link>
               <Link
                 href="/adopt/happy-tails"
-                className="text-sm text-white/90 transition-opacity hover:opacity-100 hover:underline"
-                style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                className="text-sm transition-opacity hover:opacity-100 hover:underline"
+                style={{
+                  fontFamily: "var(--font-body), sans-serif",
+                  color: "rgba(255,255,255,0.9)",
+                }}
               >
                 Happy Tails
               </Link>
             </div>
             <div className="flex flex-col gap-3">
               <p
-                className="text-xs font-semibold uppercase tracking-wider text-white/80"
-                style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                className="text-xs font-semibold uppercase tracking-wider"
+                style={{
+                  fontFamily: "var(--font-body), sans-serif",
+                  color: "rgba(255,255,255,0.7)",
+                }}
               >
                 Company
               </p>
               <Link
                 href="/giving"
-                className="text-sm text-white/90 transition-opacity hover:opacity-100 hover:underline"
-                style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                className="text-sm transition-opacity hover:opacity-100 hover:underline"
+                style={{
+                  fontFamily: "var(--font-body), sans-serif",
+                  color: "rgba(255,255,255,0.9)",
+                }}
               >
                 Giving
               </Link>
               <Link
                 href="/how-it-works"
-                className="text-sm text-white/90 transition-opacity hover:opacity-100 hover:underline"
-                style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                className="text-sm transition-opacity hover:opacity-100 hover:underline"
+                style={{
+                  fontFamily: "var(--font-body), sans-serif",
+                  color: "rgba(255,255,255,0.9)",
+                }}
               >
                 How it works
               </Link>
               <Link
                 href="/about"
-                className="text-sm text-white/90 transition-opacity hover:opacity-100 hover:underline"
-                style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                className="text-sm transition-opacity hover:opacity-100 hover:underline"
+                style={{
+                  fontFamily: "var(--font-body), sans-serif",
+                  color: "rgba(255,255,255,0.9)",
+                }}
               >
                 About
               </Link>
             </div>
           </nav>
         </div>
-        <div className="mt-14 pt-10 border-t border-white/20 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-14 flex flex-col gap-4 border-t pt-10 sm:flex-row sm:items-center sm:justify-between" style={{ borderColor: "rgba(255,255,255,0.2)" }}>
           <p
-            className="text-sm text-white/80"
-            style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+            className="text-sm"
+            style={{
+              fontFamily: "var(--font-body), sans-serif",
+              color: "rgba(255,255,255,0.8)",
+            }}
           >
             © {new Date().getFullYear()} Tinies. All rights reserved.
           </p>
-          <div className="flex items-center gap-2 text-white/80 text-sm" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+          <div className="flex items-center gap-2 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "rgba(255,255,255,0.8)" }}>
             <MapPin className="h-4 w-4" />
             Cyprus
           </div>

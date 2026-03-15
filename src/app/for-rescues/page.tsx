@@ -33,16 +33,16 @@ const BENEFITS = [
 
 export default function ForRescuesPage() {
   return (
-    <div className="min-h-screen bg-[#F7F7F8] text-[#1B2432]">
-      <main className="mx-auto max-w-[1170px] px-4 py-20 sm:px-6 lg:px-8">
+    <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
+      <main className="mx-auto px-4 py-20 sm:px-6 lg:px-8" style={{ maxWidth: "var(--max-width)" }}>
         <div className="text-center">
           <h1
-            className="text-3xl font-normal tracking-tight text-[#1B2432] sm:text-4xl"
-            style={{ fontFamily: "var(--tiny-font-display), serif" }}
+            className="font-normal tracking-tight sm:text-4xl"
+            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
           >
             For rescue organisations
           </h1>
-          <p className="mt-4 text-lg text-[#6B7280] max-w-xl mx-auto" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+          <p className="mt-4 mx-auto max-w-xl text-lg" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
             List your animals for free. Reach adopters across Cyprus and Europe. Manage applications through your dashboard. You run the adoptions — we give you the tools and the audience.
           </p>
         </div>
@@ -51,36 +51,37 @@ export default function ForRescuesPage() {
           {BENEFITS.map((item) => (
             <div
               key={item.title}
-              className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition-shadow hover:shadow-[0_18px_40px_rgba(15,23,42,0.12)]"
+              className="rounded-[var(--radius-lg)] border p-8 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]"
+              style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)", padding: "var(--space-card)" }}
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#0A6E5C]/10 text-[#0A6E5C]">
+              <div className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-lg)]" style={{ backgroundColor: "var(--color-primary-50)", color: "var(--color-primary)" }}>
                 <item.icon className="h-5 w-5" />
               </div>
-              <h2 className="mt-6 font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+              <h2 className="mt-6 font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)", fontSize: "var(--text-lg)" }}>
                 {item.title}
               </h2>
-              <p className="mt-3 text-sm text-[#6B7280] leading-relaxed" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+              <p className="mt-3 text-sm leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
                 {item.text}
               </p>
             </div>
           ))}
         </section>
 
-        <section className="mt-20 rounded-[14px] bg-[#0A6E5C] px-8 py-14 text-center text-white sm:px-12 sm:py-16">
+        <section className="mt-20 rounded-[var(--radius-lg)] px-8 py-14 text-center text-white sm:px-12 sm:py-16" style={{ backgroundColor: "var(--color-primary)" }}>
           <h2
-            className="text-xl font-normal sm:text-2xl"
-            style={{ fontFamily: "var(--tiny-font-display), serif" }}
+            className="font-normal sm:text-2xl"
+            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-xl)", color: "white" }}
           >
             Get your rescue on Tinies
           </h2>
-          <p className="mt-3 text-white/90 text-sm sm:text-base max-w-md mx-auto" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+          <p className="mx-auto mt-3 max-w-md text-sm sm:text-base" style={{ fontFamily: "var(--font-body), sans-serif", color: "rgba(255,255,255,0.9)" }}>
             Create your organisation profile, add your adoptable animals, and
             start receiving applications. You run the adoptions — we give you the platform.
           </p>
           <Link
             href="/dashboard/rescue"
-            className="mt-8 inline-flex items-center rounded-[999px] bg-white px-6 h-12 font-semibold text-[#0A6E5C] transition-opacity hover:opacity-95"
-            style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+            className="mt-8 inline-flex h-12 items-center rounded-[var(--radius-pill)] bg-white px-8 font-semibold transition-opacity hover:opacity-95"
+            style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", color: "var(--color-primary)" }}
           >
             Sign up as a rescue
           </Link>
@@ -89,8 +90,8 @@ export default function ForRescuesPage() {
         <p className="mt-16 text-center">
           <Link
             href="/"
-            className="text-[#6B7280] hover:text-[#1B2432] hover:underline"
-            style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+            className="hover:underline"
+            style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}
           >
             Back to home
           </Link>

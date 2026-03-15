@@ -26,31 +26,31 @@ const ADOPTABLES = [
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#F7F7F8] text-[#1B2432]">
+    <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
       {/* Hero */}
       <header className="relative overflow-hidden px-4 pt-10 pb-16 sm:px-6 sm:pt-16 sm:pb-24 lg:px-8">
-        <div className="absolute inset-0 bg-[#0A6E5C]/5 rounded-b-[3rem] sm:rounded-b-[4rem]" />
-        <div className="relative mx-auto max-w-[1170px] text-center">
+        <div className="absolute inset-0 rounded-b-[3rem] sm:rounded-b-[4rem]" style={{ backgroundColor: "rgba(10, 110, 92, 0.05)" }} />
+        <div className="relative mx-auto text-center" style={{ maxWidth: "var(--max-width)" }}>
           <h1
-            className="text-4xl font-normal tracking-tight text-[#1B2432] sm:text-5xl lg:text-6xl"
-            style={{ fontFamily: "var(--tiny-font-display), serif" }}
+            className="font-normal tracking-tight sm:text-5xl"
+            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-4xl)", color: "var(--color-text)" }}
           >
             No matter the size.
           </h1>
-          <p className="mt-4 text-lg text-[#6B7280] sm:text-xl max-w-xl mx-auto" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+          <p className="mt-4 mx-auto max-w-xl text-lg sm:text-xl" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
             Trusted pet care and rescue adoption in Cyprus
           </p>
-          <p className="mt-2 text-base font-medium text-[#0A6E5C] sm:text-lg" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+          <p className="mt-2 text-base font-medium sm:text-lg" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-primary)" }}>
             Every booking helps a tiny.
           </p>
 
           {/* Search area */}
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-stretch sm:justify-center sm:gap-0 sm:rounded-[14px] sm:bg-white sm:overflow-hidden sm:max-w-xl sm:mx-auto sm:border sm:border-[#E5E7EB] sm:shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
+          <div className="mt-8 flex flex-col gap-3 sm:mx-auto sm:max-w-xl sm:flex-row sm:items-stretch sm:justify-center sm:gap-0 sm:overflow-hidden sm:rounded-[var(--radius-lg)] sm:border sm:shadow-[var(--shadow-md)]" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}>
             <div className="relative flex-1">
-              <ChevronDown className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#6B7280] pointer-events-none" />
+              <ChevronDown className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 pointer-events-none" style={{ color: "var(--color-text-muted)" }} />
               <select
-                className="w-full appearance-none rounded-[14px] border border-[#E5E7EB] bg-white py-3.5 pl-11 pr-4 text-[#1B2432] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40 sm:rounded-none sm:border-0 sm:border-r border-r-[#E5E7EB]"
-                style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                className="w-full appearance-none rounded-[var(--radius-lg)] border py-3.5 pl-11 pr-4 focus:outline-none focus:ring-2 sm:rounded-none sm:border-0 sm:border-r"
+                style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
                 defaultValue=""
                 aria-label="Service type"
               >
@@ -66,8 +66,8 @@ export default function Home() {
             </div>
             <Link
               href="/services/search"
-              className="inline-flex items-center justify-center gap-2 rounded-[999px] bg-[#0A6E5C] px-6 h-12 font-semibold text-white transition-opacity hover:opacity-90 sm:rounded-none sm:rounded-r-[14px]"
-              style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-[var(--radius-pill)] px-6 font-semibold text-white transition-opacity hover:opacity-90 sm:rounded-none sm:rounded-r-[var(--radius-lg)]"
+              style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-primary)" }}
             >
               <Search className="h-5 w-5" />
               Find Care
@@ -77,42 +77,42 @@ export default function Home() {
       </header>
 
       {/* How It Works */}
-      <section className="px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-[1170px]">
+      <section className="px-4 py-20 sm:px-6 lg:px-8" style={{ paddingTop: "var(--space-section)", paddingBottom: "var(--space-section)" }}>
+        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
           <h2
-            className="text-2xl font-normal text-[#1B2432] sm:text-3xl text-center"
-            style={{ fontFamily: "var(--tiny-font-display), serif" }}
+            className="text-center"
+            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
           >
             How it works
           </h2>
-          <p className="mt-2 text-[#6B7280] text-center max-w-lg mx-auto" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+          <p className="mt-2 mx-auto max-w-lg text-center" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
             Book trusted pet care in three simple steps.
           </p>
           <div className="mt-12 grid gap-10 sm:grid-cols-3 sm:gap-8">
             <div className="flex flex-col items-center text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0A6E5C]/10 text-[#0A6E5C]">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full" style={{ backgroundColor: "var(--color-primary-50)", color: "var(--color-primary)" }}>
                 <Search className="h-7 w-7" />
               </div>
-              <h3 className="mt-4 font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>Search</h3>
-              <p className="mt-1 text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+              <h3 className="mt-4 font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>Search</h3>
+              <p className="mt-1 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
                 Find verified providers near you
               </p>
             </div>
             <div className="flex flex-col items-center text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0A6E5C]/10 text-[#0A6E5C]">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full" style={{ backgroundColor: "var(--color-primary-50)", color: "var(--color-primary)" }}>
                 <CreditCard className="h-7 w-7" />
               </div>
-              <h3 className="mt-4 font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>Book</h3>
-              <p className="mt-1 text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+              <h3 className="mt-4 font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>Book</h3>
+              <p className="mt-1 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
                 Secure payment, instant confirmation
               </p>
             </div>
             <div className="flex flex-col items-center text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0A6E5C]/10 text-[#0A6E5C]">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full" style={{ backgroundColor: "var(--color-primary-50)", color: "var(--color-primary)" }}>
                 <Camera className="h-7 w-7" />
               </div>
-              <h3 className="mt-4 font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>Relax</h3>
-              <p className="mt-1 text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+              <h3 className="mt-4 font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>Relax</h3>
+              <p className="mt-1 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
                 Photo updates while you&apos;re away
               </p>
             </div>
@@ -121,34 +121,35 @@ export default function Home() {
       </section>
 
       {/* Tinies Looking for Homes */}
-      <section className="px-4 py-20 sm:px-6 lg:px-8 bg-white rounded-t-[2rem] sm:rounded-t-[3rem]">
-        <div className="mx-auto max-w-[1170px]">
+      <section className="rounded-t-[2rem] bg-white px-4 py-20 sm:px-6 sm:rounded-t-[3rem] lg:px-8" style={{ paddingTop: "var(--space-section)", paddingBottom: "var(--space-section)" }}>
+        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
           <h2
-            className="text-2xl font-normal text-[#1B2432] sm:text-3xl text-center"
-            style={{ fontFamily: "var(--tiny-font-display), serif" }}
+            className="text-center"
+            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
           >
             Tinies looking for homes
           </h2>
-          <p className="mt-2 text-[#6B7280] text-center max-w-lg mx-auto" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+          <p className="mt-2 mx-auto max-w-lg text-center" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
             Adopt a rescue animal and give them a forever home.
           </p>
           <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {ADOPTABLES.map((animal) => (
               <article
                 key={animal.id}
-                className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition-shadow hover:shadow-[0_18px_40px_rgba(15,23,42,0.12)]"
+                className="rounded-[var(--radius-lg)] border p-8 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]"
+                style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)", padding: "var(--space-card)" }}
               >
-                <div className="flex h-32 items-center justify-center rounded-[14px] bg-[#F7F7F8] text-6xl border border-[#E5E7EB]">
+                <div className="flex h-32 items-center justify-center rounded-[var(--radius-lg)] border text-6xl" style={{ backgroundColor: "var(--color-background)", borderColor: "var(--color-border)" }}>
                   {animal.emoji}
                 </div>
-                <h3 className="mt-6 font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+                <h3 className="mt-6 font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
                   {animal.name}
                 </h3>
-                <p className="text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>{animal.age}</p>
+                <p className="text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>{animal.age}</p>
                 <Link
                   href={`/adopt/${animal.id}`}
-                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-[999px] bg-[#F45D48] px-4 h-12 font-semibold text-white transition-opacity hover:opacity-90"
-                  style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                  className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] px-4 font-semibold text-white transition-opacity hover:opacity-90"
+                  style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-secondary)" }}
                 >
                   <Heart className="h-4 w-4" />
                   Adopt this Tiny
@@ -159,8 +160,8 @@ export default function Home() {
           <div className="mt-12 text-center">
             <Link
               href="/adopt"
-              className="inline-flex items-center gap-2 text-[#0A6E5C] font-semibold hover:underline"
-              style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+              className="inline-flex items-center gap-2 font-semibold hover:underline"
+              style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-primary)" }}
             >
               View all adoptable Tinies
               <span aria-hidden>→</span>
@@ -170,44 +171,44 @@ export default function Home() {
       </section>
 
       {/* Trust signals bar */}
-      <section className="px-4 py-20 sm:px-6 lg:px-8 border-t border-[#E5E7EB]">
-        <div className="mx-auto max-w-[1170px]">
-          <div className="flex flex-col gap-10 sm:flex-row sm:justify-around sm:gap-6 text-center">
+      <section className="border-t px-4 py-20 sm:px-6 lg:px-8" style={{ borderColor: "var(--color-border)", paddingTop: "var(--space-section)", paddingBottom: "var(--space-section)" }}>
+        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
+          <div className="flex flex-col gap-10 text-center sm:flex-row sm:justify-around sm:gap-6">
             <div className="flex flex-col items-center gap-2">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#0A6E5C]/15 text-[#0A6E5C]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full" style={{ backgroundColor: "var(--color-primary-100)", color: "var(--color-primary)" }}>
                 <PawPrint className="h-6 w-6" />
               </div>
-              <p className="text-xl font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+              <p className="text-xl font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
                 50+ Verified Providers
               </p>
-              <p className="text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>Across Cyprus</p>
+              <p className="text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>Across Cyprus</p>
             </div>
             <div className="flex flex-col items-center gap-2">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#F45D48]/15 text-[#F45D48]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full" style={{ backgroundColor: "var(--color-secondary-100)", color: "var(--color-secondary)" }}>
                 <Heart className="h-6 w-6" />
               </div>
-              <p className="text-xl font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+              <p className="text-xl font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
                 100+ Happy Tinies Adopted
               </p>
-              <p className="text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>And counting</p>
+              <p className="text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>And counting</p>
             </div>
             <div className="flex flex-col items-center gap-2">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#0A6E5C]/15 text-[#0A6E5C]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full" style={{ backgroundColor: "var(--color-primary-100)", color: "var(--color-primary)" }}>
                 <Leaf className="h-6 w-6" />
               </div>
-              <p className="text-xl font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+              <p className="text-xl font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
                 90% of our commission goes to rescue animal care
               </p>
-              <p className="text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>Food, vet care, shelter</p>
+              <p className="text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>Food, vet care, shelter</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Why Tinies */}
-      <section className="px-4 py-20 sm:px-6 lg:px-8 bg-white border-t border-[#E5E7EB]">
+      <section className="border-t bg-white px-4 py-20 sm:px-6 lg:px-8" style={{ borderColor: "var(--color-border)", paddingTop: "var(--space-section)", paddingBottom: "var(--space-section)" }}>
         <div className="mx-auto max-w-[720px] text-center">
-          <p className="text-[#1B2432] leading-relaxed" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+          <p className="leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)", fontSize: "var(--text-base)" }}>
             Tinies was built to fund Gardens of St Gertrude, a cat sanctuary in Parekklisia caring for 92 cats. Every booking on this platform helps feed, shelter, and provide medical care for rescue animals across Cyprus.
           </p>
         </div>

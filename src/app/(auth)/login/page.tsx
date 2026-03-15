@@ -53,21 +53,21 @@ function LoginContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F7F8] text-[#1B2432]">
+    <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
       <main className="mx-auto flex min-h-[calc(100vh-8rem)] max-w-md flex-col justify-center px-4 py-20 sm:px-6">
-        <div className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:p-10">
+        <div className="rounded-[var(--radius-lg)] border p-8 sm:p-10" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
           <div className="text-center">
-            <h1 className="text-2xl font-normal tracking-tight text-[#1B2432] sm:text-3xl" style={{ fontFamily: "var(--tiny-font-display), serif" }}>
+            <h1 className="font-normal tracking-tight sm:text-3xl" style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-2xl)", color: "var(--color-text)" }}>
               Sign in
             </h1>
-            <p className="mt-2 text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+            <p className="mt-2 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
               No matter the size.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-5">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+              <label htmlFor="email" className="block text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
                 Email
               </label>
               <input
@@ -76,13 +76,13 @@ function LoginContent() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1.5 block w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] placeholder:text-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
-                style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                className="mt-1.5 block w-full rounded-[var(--radius-lg)] border px-4 py-2.5 focus:outline-none focus:ring-2"
+                style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-background)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
                 placeholder="you@example.com"
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+              <label htmlFor="password" className="block text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
                 Password
               </label>
               <input
@@ -91,16 +91,16 @@ function LoginContent() {
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1.5 block w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] placeholder:text-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
-                style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                className="mt-1.5 block w-full rounded-[var(--radius-lg)] border px-4 py-2.5 focus:outline-none focus:ring-2"
+                style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-background)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
                 placeholder="••••••••"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-[999px] h-12 bg-[#0A6E5C] px-4 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-70"
-              style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+              className="w-full rounded-[var(--radius-pill)] h-12 px-6 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-70"
+              style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-primary)" }}
             >
               {loading ? "Signing in…" : "Sign in"}
             </button>
@@ -109,18 +109,18 @@ function LoginContent() {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-[#E5E7EB]" />
+                <div className="w-full border-t" style={{ borderColor: "var(--color-border)" }} />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-2 text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>Or continue with</span>
+                <span className="bg-white px-2" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>Or continue with</span>
               </div>
             </div>
             <button
               type="button"
               onClick={handleGoogleSignIn}
               disabled={googleLoading}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-[999px] border-2 border-[#0A6E5C] bg-white px-4 h-12 font-semibold text-[#1B2432] transition-opacity hover:opacity-90 disabled:opacity-70"
-              style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] border-2 bg-white px-6 h-12 font-semibold transition-opacity hover:opacity-90 disabled:opacity-70"
+              style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", borderColor: "var(--color-primary)", color: "var(--color-text)" }}
             >
               {googleLoading ? (
                 "Redirecting…"
@@ -150,9 +150,9 @@ function LoginContent() {
             </button>
           </div>
 
-          <p className="mt-8 text-center text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+          <p className="mt-8 text-center text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="font-medium text-[#0A6E5C] hover:underline">
+            <Link href="/signup" className="font-medium hover:underline" style={{ color: "var(--color-primary)" }}>
               Sign up
             </Link>
           </p>

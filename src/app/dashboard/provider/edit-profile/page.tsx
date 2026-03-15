@@ -94,50 +94,50 @@ export default function ProviderEditProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F7F8] text-[#1B2432]">
-      <main className="mx-auto max-w-[1170px] px-4 py-20 sm:px-6 sm:py-20">
+    <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
+      <main className="mx-auto px-4 py-20 sm:px-6 sm:py-20" style={{ maxWidth: "var(--max-width)" }}>
         <div className="mb-8">
-          <Link href="/dashboard/provider" className="text-sm text-[#6B7280] hover:text-[#1B2432] hover:underline">
+          <Link href="/dashboard/provider" className="text-sm hover:underline" style={{ color: "var(--color-text-secondary)" }}>
             ← Back to dashboard
           </Link>
-          <h1 className="mt-2 text-2xl font-normal text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-display), serif" }}>Edit profile</h1>
-          <p className="mt-1 text-[#6B7280]">Complete your provider profile to appear in search.</p>
+          <h1 className="mt-2 text-2xl font-normal " style={{ fontFamily: "var(--font-heading), serif" }}>Edit profile</h1>
+          <p className="mt-1 ">Complete your provider profile to appear in search.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-10">
           {/* Profile photo */}
-          <section id="photo" className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:p-8">
-            <h2 className="font-normal text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-display), serif" }}>Profile photo</h2>
-            <p className="mt-1 text-sm text-[#6B7280]">A clear photo of you (not your pet). Required for verification.</p>
+          <section id="photo" className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-8 shadow-[var(--shadow-md)] sm:p-8">
+            <h2 className="font-normal " style={{ fontFamily: "var(--font-heading), serif" }}>Profile photo</h2>
+            <p className="mt-1 text-sm ">A clear photo of you (not your pet). Required for verification.</p>
             <div className="mt-4">
-              <label className="flex cursor-pointer flex-col items-center justify-center rounded-[14px] border-2 border-dashed border-[#E5E7EB] bg-[#F7F7F8] py-8 transition-colors hover:border-[#0A6E5C]/40">
+              <label className="flex cursor-pointer flex-col items-center justify-center rounded-[var(--radius-lg)] border-2 border-dashed border-[var(--color-border)]  py-8 transition-colors hover:border-[var(--color-primary)]/40">
                 <input type="file" accept="image/*" className="hidden" />
-                <span className="text-sm font-semibold text-[#0A6E5C]">Choose file</span>
-                <span className="mt-1 text-xs text-[#6B7280]">or drag and drop</span>
+                <span className="text-sm font-semibold text-[var(--color-primary)]">Choose file</span>
+                <span className="mt-1 text-xs ">or drag and drop</span>
               </label>
             </div>
           </section>
 
           {/* Bio */}
-          <section id="bio" className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:p-8">
-            <h2 className="font-normal text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-display), serif" }}>Bio</h2>
-            <p className="mt-1 text-sm text-[#6B7280]">Min 200 characters, max 1000. Tell owners about yourself and your experience.</p>
+          <section id="bio" className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-8 shadow-[var(--shadow-md)] sm:p-8">
+            <h2 className="font-normal " style={{ fontFamily: "var(--font-heading), serif" }}>Bio</h2>
+            <p className="mt-1 text-sm ">Min 200 characters, max 1000. Tell owners about yourself and your experience.</p>
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               rows={6}
-              className="mt-4 w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-3 text-[#1B2432] placeholder:text-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
+              className="mt-4 w-full rounded-[var(--radius-lg)] border border-[var(--color-border)]  px-4 py-3  focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
               placeholder="I've been caring for dogs and cats for..."
             />
-            <p className={`mt-2 text-sm ${bioLength < 200 ? "text-[#6B7280]" : bioLength > 1000 ? "text-[#DC2626]" : "text-[#0A6E5C]"}`}>
+            <p className={`mt-2 text-sm ${bioLength < 200 ? "" : bioLength > 1000 ? "text-[#DC2626]" : "text-[var(--color-primary)]"}`}>
               {bioLength} / 1000 characters {bioLength >= 200 && bioLength <= 1000 && "✓"}
             </p>
           </section>
 
           {/* Services */}
-          <section id="services" className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:p-8">
-            <h2 className="font-normal text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-display), serif" }}>Services & pricing</h2>
-            <p className="mt-1 text-sm text-[#6B7280]">Select services and set your rates (in EUR).</p>
+          <section id="services" className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-8 shadow-[var(--shadow-md)] sm:p-8">
+            <h2 className="font-normal " style={{ fontFamily: "var(--font-heading), serif" }}>Services & pricing</h2>
+            <p className="mt-1 text-sm ">Select services and set your rates (in EUR).</p>
             <div className="mt-6 space-y-6">
               {(
                 [
@@ -148,48 +148,48 @@ export default function ProviderEditProfilePage() {
                   [ServiceType.daycare, "Daycare"],
                 ] as const
               ).map(([type, label]) => (
-                <div key={type} className="rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] p-4">
+                <div key={type} className="rounded-[var(--radius-lg)] border border-[var(--color-border)]  p-4">
                   <label className="flex cursor-pointer items-center gap-3">
                     <input
                       type="checkbox"
                       checked={services[type] ?? false}
                       onChange={() => toggleService(type)}
-                      className="h-4 w-4 rounded border-[#0A6E5C]/30 text-[#0A6E5C] focus:ring-[#0A6E5C]"
+                      className="h-4 w-4 rounded border-[var(--color-primary)]/30 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
                     />
-                    <span className="font-medium text-[#1B2432]">{label}</span>
+                    <span className="font-medium ">{label}</span>
                   </label>
                   {services[type] && (
                     <div className="mt-4 grid gap-4 sm:grid-cols-2">
                       <div>
-                        <label className="block text-sm text-[#6B7280]">Base price (€)</label>
+                        <label className="block text-sm ">Base price (€)</label>
                         <input
                           type="number"
                           min="0"
                           step="0.01"
                           value={serviceConfig[type]?.basePrice ?? ""}
                           onChange={(e) => setServiceConfigField(type, "basePrice", e.target.value)}
-                          className="mt-1 w-full rounded-[14px] border border-[#E5E7EB] bg-white px-3 py-2 text-[#1B2432] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
+                          className="mt-1 w-full rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white px-3 py-2  focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
                           placeholder="15.00"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm text-[#6B7280]">Additional pet (€)</label>
+                        <label className="block text-sm ">Additional pet (€)</label>
                         <input
                           type="number"
                           min="0"
                           step="0.01"
                           value={serviceConfig[type]?.additionalPetPrice ?? ""}
                           onChange={(e) => setServiceConfigField(type, "additionalPetPrice", e.target.value)}
-                          className="mt-1 w-full rounded-[14px] border border-[#E5E7EB] bg-white px-3 py-2 text-[#1B2432] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
+                          className="mt-1 w-full rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white px-3 py-2  focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
                           placeholder="8.00"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm text-[#6B7280]">Price unit</label>
+                        <label className="block text-sm ">Price unit</label>
                         <select
                           value={serviceConfig[type]?.priceUnit ?? "per_walk"}
                           onChange={(e) => setServiceConfigField(type, "priceUnit", e.target.value)}
-                          className="mt-1 w-full rounded-[14px] border border-[#E5E7EB] bg-white px-3 py-2 text-[#1B2432] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
+                          className="mt-1 w-full rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white px-3 py-2  focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
                         >
                           {PRICE_UNITS.map((u) => (
                             <option key={u.value} value={u.value}>{u.label}</option>
@@ -197,14 +197,14 @@ export default function ProviderEditProfilePage() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm text-[#6B7280]">Max pets</label>
+                        <label className="block text-sm ">Max pets</label>
                         <input
                           type="number"
                           min="1"
                           max="10"
                           value={serviceConfig[type]?.maxPets ?? "2"}
                           onChange={(e) => setServiceConfigField(type, "maxPets", e.target.value)}
-                          className="mt-1 w-full rounded-[14px] border border-[#E5E7EB] bg-white px-3 py-2 text-[#1B2432] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
+                          className="mt-1 w-full rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white px-3 py-2  focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
                         />
                       </div>
                     </div>
@@ -215,16 +215,16 @@ export default function ProviderEditProfilePage() {
           </section>
 
           {/* Service area */}
-          <section id="area" className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:p-8">
-            <h2 className="font-normal text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-display), serif" }}>Service area</h2>
-            <p className="mt-1 text-sm text-[#6B7280]">Where you're willing to provide care.</p>
+          <section id="area" className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-8 shadow-[var(--shadow-md)] sm:p-8">
+            <h2 className="font-normal " style={{ fontFamily: "var(--font-heading), serif" }}>Service area</h2>
+            <p className="mt-1 text-sm ">Where you're willing to provide care.</p>
             <div className="mt-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[#1B2432]">District</label>
+                <label className="block text-sm font-medium ">District</label>
                 <select
                   value={district}
                   onChange={(e) => setDistrict(e.target.value)}
-                  className="mt-1.5 w-full rounded-lg border border-[#0A6E5C]/20 bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
+                  className="mt-1.5 w-full rounded-lg border border-[var(--color-primary)]/20  px-4 py-2.5  focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
                 >
                   <option value="">Select district</option>
                   {DISTRICTS.map((d) => (
@@ -233,37 +233,37 @@ export default function ProviderEditProfilePage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#1B2432]">Radius: {radiusKm} km</label>
+                <label className="block text-sm font-medium ">Radius: {radiusKm} km</label>
                 <input
                   type="range"
                   min={1}
                   max={25}
                   value={radiusKm}
                   onChange={(e) => setRadiusKm(Number(e.target.value))}
-                  className="mt-2 w-full accent-[#0A6E5C]"
+                  className="mt-2 w-full accent-[var(--color-primary)]"
                 />
               </div>
             </div>
           </section>
 
           {/* Availability */}
-          <section id="availability" className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:p-8">
-            <h2 className="font-normal text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-display), serif" }}>Availability</h2>
-            <p className="mt-1 text-sm text-[#6B7280]">When you're available. Toggle on the slots you can accept bookings.</p>
+          <section id="availability" className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-8 shadow-[var(--shadow-md)] sm:p-8">
+            <h2 className="font-normal " style={{ fontFamily: "var(--font-heading), serif" }}>Availability</h2>
+            <p className="mt-1 text-sm ">When you're available. Toggle on the slots you can accept bookings.</p>
             <div className="mt-4 overflow-x-auto">
               <table className="w-full min-w-[320px] text-sm">
                 <thead>
                   <tr>
-                    <th className="pb-2 text-left font-medium text-[#6B7280]"></th>
+                    <th className="pb-2 text-left font-medium "></th>
                     {DAYS.map((d) => (
-                      <th key={d} className="pb-2 text-center font-medium text-[#1B2432]">{d}</th>
+                      <th key={d} className="pb-2 text-center font-medium ">{d}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {SLOTS.map((slot) => (
                     <tr key={slot}>
-                      <td className="py-2 font-medium text-[#6B7280]">{slot}</td>
+                      <td className="py-2 font-medium ">{slot}</td>
                       {DAYS.map((day) => {
                         const key = `${day}-${slot}`;
                         const checked = availability[key] ?? false;
@@ -272,10 +272,10 @@ export default function ProviderEditProfilePage() {
                             <button
                               type="button"
                               onClick={() => toggleAvailability(day, slot)}
-                              className={`h-8 w-8 rounded-[14px] border-2 transition-colors ${
+                              className={`h-8 w-8 rounded-[var(--radius-lg)] border-2 transition-colors ${
                                 checked
-                                  ? "border-[#0A6E5C] bg-[#0A6E5C] text-white"
-                                  : "border-[#E5E7EB] bg-[#F7F7F8] text-[#6B7280] hover:border-[#0A6E5C]/40"
+                                  ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-white"
+                                  : "border-[var(--color-border)]   hover:border-[var(--color-primary)]/40"
                               }`}
                             >
                               {checked ? "✓" : ""}
@@ -291,9 +291,9 @@ export default function ProviderEditProfilePage() {
           </section>
 
           {/* Pet preferences */}
-          <section id="pets" className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:p-8">
-            <h2 className="font-normal text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-display), serif" }}>Pet preferences</h2>
-            <p className="mt-1 text-sm text-[#6B7280]">Types and size restrictions.</p>
+          <section id="pets" className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-8 shadow-[var(--shadow-md)] sm:p-8">
+            <h2 className="font-normal " style={{ fontFamily: "var(--font-heading), serif" }}>Pet preferences</h2>
+            <p className="mt-1 text-sm ">Types and size restrictions.</p>
             <div className="mt-4 space-y-3">
               {(["dogs", "cats", "other"] as const).map((animal) => (
                 <label key={animal} className="flex cursor-pointer items-center gap-3">
@@ -301,18 +301,18 @@ export default function ProviderEditProfilePage() {
                     type="checkbox"
                     checked={petPrefs[animal]}
                     onChange={() => setPetPrefs((p) => ({ ...p, [animal]: !p[animal] }))}
-                    className="h-4 w-4 rounded border-[#0A6E5C]/30 text-[#0A6E5C] focus:ring-[#0A6E5C]"
+                    className="h-4 w-4 rounded border-[var(--color-primary)]/30 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
                   />
-                  <span className="capitalize text-[#1B2432]">{animal}</span>
+                  <span className="capitalize ">{animal}</span>
                 </label>
               ))}
             </div>
             <div className="mt-4">
-              <label className="block text-sm font-medium text-[#1B2432]">Size restrictions</label>
+              <label className="block text-sm font-medium ">Size restrictions</label>
               <select
                 value={sizeRestriction}
                 onChange={(e) => setSizeRestriction(e.target.value)}
-                className="mt-1.5 w-full rounded-lg border border-[#0A6E5C]/20 bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
+                className="mt-1.5 w-full rounded-lg border border-[var(--color-primary)]/20  px-4 py-2.5  focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
               >
                 <option value="">Select restriction</option>
                 {SIZE_RESTRICTIONS.map((s) => (
@@ -323,19 +323,19 @@ export default function ProviderEditProfilePage() {
           </section>
 
           {/* Verification placeholder */}
-          <section id="verification" className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:p-8">
-            <h2 className="font-normal text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-display), serif" }}>Identity verification</h2>
-            <p className="mt-1 text-sm text-[#6B7280]">Upload a government ID. We review within 24–48 hours. Required to appear in search.</p>
-            <label className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-[14px] border-2 border-dashed border-[#E5E7EB] bg-[#F7F7F8] py-6 transition-colors hover:border-[#0A6E5C]/40">
+          <section id="verification" className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-8 shadow-[var(--shadow-md)] sm:p-8">
+            <h2 className="font-normal " style={{ fontFamily: "var(--font-heading), serif" }}>Identity verification</h2>
+            <p className="mt-1 text-sm ">Upload a government ID. We review within 24–48 hours. Required to appear in search.</p>
+            <label className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-[var(--radius-lg)] border-2 border-dashed border-[var(--color-border)]  py-6 transition-colors hover:border-[var(--color-primary)]/40">
               <input type="file" accept="image/*,.pdf" className="hidden" />
-              <span className="text-sm font-semibold text-[#0A6E5C]">Upload ID document</span>
+              <span className="text-sm font-semibold text-[var(--color-primary)]">Upload ID document</span>
             </label>
           </section>
 
           {/* Cancellation policy */}
-          <section id="cancellation" className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:p-8">
-            <h2 className="font-normal text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-display), serif" }}>Cancellation policy</h2>
-            <p className="mt-1 text-sm text-[#6B7280]">Choose one. Owners see this before booking.</p>
+          <section id="cancellation" className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-8 shadow-[var(--shadow-md)] sm:p-8">
+            <h2 className="font-normal " style={{ fontFamily: "var(--font-heading), serif" }}>Cancellation policy</h2>
+            <p className="mt-1 text-sm ">Choose one. Owners see this before booking.</p>
             <div className="mt-4 space-y-3">
               {(
                 [
@@ -346,10 +346,10 @@ export default function ProviderEditProfilePage() {
               ).map(([value, label]) => (
                 <label
                   key={value}
-                  className={`flex cursor-pointer items-start gap-3 rounded-[14px] border px-4 py-3 ${
+                  className={`flex cursor-pointer items-start gap-3 rounded-[var(--radius-lg)] border px-4 py-3 ${
                     cancellationPolicy === value
-                      ? "border-[#0A6E5C] bg-[#0A6E5C]/5"
-                      : "border-[#E5E7EB] bg-[#F7F7F8]"
+                      ? "border-[var(--color-primary)] bg-[var(--color-primary)]/5"
+                      : "border-[var(--color-border)] "
                   }`}
                 >
                   <input
@@ -358,11 +358,11 @@ export default function ProviderEditProfilePage() {
                     value={value}
                     checked={cancellationPolicy === value}
                     onChange={() => setCancellationPolicy(value)}
-                    className="mt-1 h-4 w-4 border-[#0A6E5C]/30 text-[#0A6E5C] focus:ring-[#0A6E5C]"
+                    className="mt-1 h-4 w-4 border-[var(--color-primary)]/30 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
                   />
                   <div>
-                    <span className="font-medium text-[#1B2432]">{label}</span>
-                    <p className="mt-0.5 text-sm text-[#6B7280]">{CANCELLATION_EXPLANATIONS[value]}</p>
+                    <span className="font-medium ">{label}</span>
+                    <p className="mt-0.5 text-sm ">{CANCELLATION_EXPLANATIONS[value]}</p>
                   </div>
                 </label>
               ))}
@@ -372,14 +372,14 @@ export default function ProviderEditProfilePage() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <Link
               href="/dashboard/provider"
-              className="text-sm text-[#6B7280] hover:text-[#1B2432] hover:underline"
+              className="text-sm  hover: hover:underline"
             >
               Cancel
             </Link>
             <button
               type="submit"
               disabled={submitting || !bioValid}
-              className="rounded-[999px] h-12 bg-[#0A6E5C] px-6 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-70"
+              className="rounded-[var(--radius-pill)] h-12 bg-[var(--color-primary)] px-6 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-70"
             >
               {submitting ? "Saving…" : "Save profile"}
             </button>

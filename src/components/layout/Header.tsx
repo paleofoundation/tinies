@@ -50,12 +50,25 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#E5E7EB] bg-white">
-      <div className="mx-auto flex h-16 max-w-[1170px] items-center justify-between px-4 sm:px-6 lg:px-8">
+    <header
+      className="sticky top-0 z-50 border-b"
+      style={{
+        backgroundColor: "var(--color-surface)",
+        borderColor: "var(--color-border)",
+      }}
+    >
+      <div
+        className="mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8"
+        style={{ maxWidth: "var(--max-width)" }}
+      >
         <Link
           href="/"
-          className="text-xl text-[#1B2432] transition-opacity hover:opacity-80"
-          style={{ fontFamily: "var(--tiny-font-display), serif" }}
+          className="transition-opacity hover:opacity-80"
+          style={{
+            fontFamily: "var(--font-heading), serif",
+            fontSize: "var(--text-xl)",
+            color: "var(--color-text)",
+          }}
         >
           tinies.app
         </Link>
@@ -64,8 +77,11 @@ export function Header() {
             <Link
               key={href}
               href={href}
-              className="text-sm font-medium text-[#1B2432] transition-opacity hover:opacity-70 hidden sm:inline-block"
-              style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+              className="hidden text-sm font-medium transition-colors sm:inline-block"
+              style={{
+                fontFamily: "var(--font-body), sans-serif",
+                color: "var(--color-text)",
+              }}
             >
               {label}
             </Link>
@@ -73,14 +89,25 @@ export function Header() {
           {!loading && (
             user ? (
               <div className="flex items-center gap-3">
-                <span className="text-sm text-[#1B2432] truncate max-w-[120px] sm:max-w-[180px]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+                <span
+                  className="truncate text-sm max-w-[120px] sm:max-w-[180px]"
+                  style={{
+                    fontFamily: "var(--font-body), sans-serif",
+                    color: "var(--color-text)",
+                  }}
+                >
                   {displayName(user)}
                 </span>
                 <button
                   type="button"
                   onClick={handleSignOut}
-                  className="rounded-[999px] border-2 border-[#0A6E5C] bg-transparent px-4 py-2 h-10 text-sm font-semibold text-[#0A6E5C] transition-opacity hover:opacity-90"
-                  style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                  className="h-12 rounded-[var(--radius-pill)] border-2 bg-transparent px-6 font-semibold transition-opacity hover:opacity-90"
+                  style={{
+                    fontFamily: "var(--font-body), sans-serif",
+                    fontSize: "var(--text-base)",
+                    borderColor: "var(--color-primary)",
+                    color: "var(--color-primary)",
+                  }}
                 >
                   Sign Out
                 </button>
@@ -88,8 +115,12 @@ export function Header() {
             ) : (
               <Link
                 href="/login"
-                className="rounded-[999px] bg-[#0A6E5C] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 h-12 flex items-center"
-                style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                className="flex h-12 items-center rounded-[var(--radius-pill)] px-8 font-semibold text-white transition-opacity hover:opacity-90"
+                style={{
+                  fontFamily: "var(--font-body), sans-serif",
+                  fontSize: "var(--text-base)",
+                  backgroundColor: "var(--color-primary)",
+                }}
               >
                 Sign In
               </Link>

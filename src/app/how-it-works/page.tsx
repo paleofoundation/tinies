@@ -71,46 +71,47 @@ const ADOPTER_STEPS = [
 
 export default function HowItWorksPage() {
   return (
-    <div className="min-h-screen bg-[#F7F7F8] text-[#1B2432]">
-      <main className="mx-auto max-w-[1170px] px-4 py-20 sm:px-6 lg:px-8">
+    <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
+      <main className="mx-auto px-4 py-20 sm:px-6 lg:px-8" style={{ maxWidth: "var(--max-width)" }}>
         <h1
-          className="text-3xl font-normal tracking-tight text-[#1B2432] sm:text-4xl"
-          style={{ fontFamily: "var(--tiny-font-display), serif" }}
+          className="font-normal tracking-tight sm:text-4xl"
+          style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
         >
           How it works
         </h1>
-        <p className="mt-2 text-lg text-[#6B7280] max-w-2xl" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+        <p className="mt-2 max-w-2xl text-lg" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
           Tinies is a marketplace. We connect pet owners with independent service providers, and adopters with rescue organisations and transport providers. We don&apos;t walk dogs, sit pets, or run adoptions ourselves — we provide the platform, handle payment, and take a small commission so we can fund rescue animal care.
         </p>
 
         {/* For Pet Owners */}
         <section className="mt-20">
           <h2
-            className="text-2xl font-normal text-[#1B2432]"
-            style={{ fontFamily: "var(--tiny-font-display), serif" }}
+            className="font-normal"
+            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
           >
             For pet owners
           </h2>
-          <p className="mt-2 text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+          <p className="mt-2" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
             Book trusted care in a few clicks.
           </p>
           <ul className="mt-10 space-y-8">
             {OWNER_STEPS.map((step, i) => (
               <li
                 key={step.title}
-                className="flex gap-4 rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:gap-6"
+                className="flex gap-4 rounded-[var(--radius-lg)] border p-8 sm:gap-6"
+                style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)", padding: "var(--space-card)" }}
               >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#0A6E5C]/10 text-[#0A6E5C] sm:h-14 sm:w-14">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full sm:h-14 sm:w-14" style={{ backgroundColor: "var(--color-primary-50)", color: "var(--color-primary)" }}>
                   <step.icon className="h-6 w-6 sm:h-7 sm:w-7" />
                 </div>
                 <div>
-                  <span className="text-sm font-semibold text-[#0A6E5C]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+                  <span className="text-sm font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-primary)" }}>
                     Step {i + 1}
                   </span>
-                  <h3 className="mt-2 text-lg font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+                  <h3 className="mt-2 text-lg font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
                     {step.title}
                   </h3>
-                  <p className="mt-2 text-[#6B7280] leading-relaxed" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+                  <p className="mt-2 leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)", fontSize: "var(--text-base)" }}>
                     {step.text}
                   </p>
                 </div>
@@ -120,8 +121,8 @@ export default function HowItWorksPage() {
           <div className="mt-10">
             <Link
               href="/services/search"
-              className="inline-flex items-center rounded-[999px] bg-[#0A6E5C] px-6 h-12 font-semibold text-white transition-opacity hover:opacity-90"
-              style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+              className="inline-flex h-12 items-center rounded-[var(--radius-pill)] px-8 font-semibold text-white transition-opacity hover:opacity-90"
+              style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-primary)" }}
             >
               Find care
             </Link>
@@ -131,31 +132,32 @@ export default function HowItWorksPage() {
         {/* For Adopters */}
         <section className="mt-20">
           <h2
-            className="text-2xl font-normal text-[#1B2432]"
-            style={{ fontFamily: "var(--tiny-font-display), serif" }}
+            className="font-normal"
+            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
           >
             For adopters
           </h2>
-          <p className="mt-2 text-[#6B7280] max-w-2xl" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+          <p className="mt-2 max-w-2xl" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
             Rescue organisations list animals available for adoption. Transport providers offer their logistics services. You browse, apply, and connect — all through Tinies. We provide the platform and payment; rescues and transport providers run their side. Think of it like Airbnb: we don&apos;t own the homes.
           </p>
           <ul className="mt-10 space-y-8">
             {ADOPTER_STEPS.map((step, i) => (
               <li
                 key={step.title}
-                className="flex gap-4 rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:gap-6"
+                className="flex gap-4 rounded-[var(--radius-lg)] border p-8 sm:gap-6"
+                style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)", padding: "var(--space-card)" }}
               >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#F45D48]/10 text-[#F45D48] sm:h-14 sm:w-14">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full sm:h-14 sm:w-14" style={{ backgroundColor: "var(--color-secondary-50)", color: "var(--color-secondary)" }}>
                   <step.icon className="h-6 w-6 sm:h-7 sm:w-7" />
                 </div>
                 <div>
-                  <span className="text-sm font-semibold text-[#F45D48]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+                  <span className="text-sm font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-secondary)" }}>
                     Step {i + 1}
                   </span>
-                  <h3 className="mt-2 text-lg font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+                  <h3 className="mt-2 text-lg font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
                     {step.title}
                   </h3>
-                  <p className="mt-2 text-[#6B7280] leading-relaxed" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+                  <p className="mt-2 leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)", fontSize: "var(--text-base)" }}>
                     {step.text}
                   </p>
                 </div>
@@ -165,8 +167,8 @@ export default function HowItWorksPage() {
           <div className="mt-10">
             <Link
               href="/adopt"
-              className="inline-flex items-center rounded-[999px] bg-[#F45D48] px-6 h-12 font-semibold text-white transition-opacity hover:opacity-90"
-              style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+              className="inline-flex h-12 items-center rounded-[var(--radius-pill)] px-8 font-semibold text-white transition-opacity hover:opacity-90"
+              style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-secondary)" }}
             >
               Browse animals
             </Link>
@@ -176,8 +178,8 @@ export default function HowItWorksPage() {
         <p className="mt-20 text-center">
           <Link
             href="/"
-            className="text-[#6B7280] hover:text-[#1B2432] hover:underline"
-            style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+            className="hover:underline"
+            style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}
           >
             Back to home
           </Link>

@@ -38,18 +38,18 @@ const ANIMALS = [
 
 export default function AdoptPage() {
   return (
-    <div className="min-h-screen bg-[#F7F7F8] text-[#1B2432]">
+    <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
       {/* Hero */}
       <section className="relative overflow-hidden px-4 pt-10 pb-12 sm:px-6 sm:pt-14 sm:pb-16 lg:px-8">
-        <div className="absolute inset-0 bg-[#F45D48]/5 rounded-b-[3rem] sm:rounded-b-[4rem]" />
-        <div className="relative mx-auto max-w-[1170px] text-center">
+        <div className="absolute inset-0 rounded-b-[3rem] sm:rounded-b-[4rem]" style={{ backgroundColor: "rgba(244, 93, 72, 0.05)" }} />
+        <div className="relative mx-auto text-center" style={{ maxWidth: "var(--max-width)" }}>
           <h1
-            className="text-4xl font-normal tracking-tight text-[#1B2432] sm:text-5xl lg:text-6xl"
-            style={{ fontFamily: "var(--tiny-font-display), serif" }}
+            className="font-normal tracking-tight sm:text-5xl lg:text-6xl"
+            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-4xl)", color: "var(--color-text)" }}
           >
             Every tiny deserves a home.
           </h1>
-          <p className="mt-4 text-lg text-[#6B7280] max-w-2xl mx-auto" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+          <p className="mt-4 mx-auto max-w-2xl text-lg" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
             Rescue organisations list their animals on Tinies. Browse dogs and cats, apply through the platform, and connect with rescues and transport providers — locally in Cyprus or internationally.
           </p>
         </div>
@@ -57,34 +57,34 @@ export default function AdoptPage() {
 
       {/* Two paths: Local vs International */}
       <section className="px-4 pb-10 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-[1170px]">
+        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
           <div className="grid gap-8 sm:grid-cols-2">
-            <div className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
-              <h2 className="text-lg font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+            <div className="rounded-[var(--radius-lg)] border p-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)", padding: "var(--space-card)" }}>
+              <h2 className="text-lg font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
                 Adopt locally in Cyprus
               </h2>
-              <p className="mt-3 text-sm text-[#6B7280] leading-relaxed" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
-                You're in Cyprus and ready to adopt. Browse animals listed by rescues near you, meet them, and take your tiny home. Each rescue sets their own adoption process and fees.
+              <p className="mt-3 text-sm leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+                You&apos;re in Cyprus and ready to adopt. Browse animals listed by rescues near you, meet them, and take your tiny home. Each rescue sets their own adoption process and fees.
               </p>
               <Link
                 href="#animals"
-                className="mt-6 inline-flex items-center text-[#0A6E5C] font-semibold hover:underline"
-                style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                className="mt-6 inline-flex items-center font-semibold hover:underline"
+                style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-primary)" }}
               >
                 Browse local animals →
               </Link>
             </div>
-            <div className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
-              <h2 className="text-lg font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+            <div className="rounded-[var(--radius-lg)] border p-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)", padding: "var(--space-card)" }}>
+              <h2 className="text-lg font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
                 Adopt internationally from Cyprus
               </h2>
-              <p className="mt-3 text-sm text-[#6B7280] leading-relaxed" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
-                You're in the UK, Germany, or elsewhere in the EU. Apply through Tinies; rescues and transport providers handle vet prep, EU pet passport, and transport. One platform — they run the process.
+              <p className="mt-3 text-sm leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+                You&apos;re in the UK, Germany, or elsewhere in the EU. Apply through Tinies; rescues and transport providers handle vet prep, EU pet passport, and transport. One platform — they run the process.
               </p>
               <Link
                 href="/adopt/from-cyprus-to-uk"
-                className="mt-6 inline-flex items-center text-[#F45D48] font-semibold hover:underline"
-                style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                className="mt-6 inline-flex items-center font-semibold hover:underline"
+                style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-secondary)" }}
               >
                 See adoption to your country →
               </Link>
@@ -95,24 +95,27 @@ export default function AdoptPage() {
 
       {/* Filters */}
       <section className="px-4 pb-8 sm:px-6 lg:px-8" aria-label="Filter adoptable animals">
-        <div className="mx-auto max-w-[1170px]">
-          <div className="flex flex-wrap items-center gap-4 rounded-[14px] border border-[#E5E7EB] bg-white px-6 py-4 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
-            <span className="flex items-center gap-2 text-sm font-medium text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
+          <div className="flex flex-wrap items-center gap-4 rounded-[var(--radius-lg)] border px-6 py-4" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
+            <span className="flex items-center gap-2 text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
               <Filter className="h-4 w-4" />
               Filters
             </span>
             <div className="flex flex-wrap items-center gap-3">
-              <span className="text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>Species:</span>
-              <div className="flex rounded-[999px] border border-[#E5E7EB] bg-[#F7F7F8] p-0.5">
+              <span className="text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>Species:</span>
+              <div className="flex rounded-[var(--radius-pill)] border p-0.5" style={{ backgroundColor: "var(--color-background)", borderColor: "var(--color-border)" }}>
                 {(["All", "Dogs", "Cats"] as const).map((opt) => (
                   <button
                     key={opt}
                     type="button"
-                    className={`rounded-[999px] px-4 py-2 text-sm font-medium transition-colors ${opt === "All"
-                      ? "bg-[#0A6E5C] text-white"
-                      : "text-[#6B7280] hover:bg-[#0A6E5C]/10 hover:text-[#1B2432]"
+                    className={`rounded-[var(--radius-pill)] px-4 py-2 text-sm font-medium transition-colors ${opt === "All"
+                      ? "text-white"
+                      : "hover:bg-[var(--color-primary-50)]"
                     }`}
-                    style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                    style={{
+                      fontFamily: "var(--font-body), sans-serif",
+                      ...(opt === "All" ? { backgroundColor: "var(--color-primary)" } : { color: "var(--color-text-secondary)" }),
+                    }}
                   >
                     {opt}
                   </button>
@@ -120,8 +123,8 @@ export default function AdoptPage() {
               </div>
             </div>
             <select
-              className="rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2 text-sm text-[#1B2432] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
-              style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+              className="rounded-[var(--radius-lg)] border px-4 py-2 text-sm focus:outline-none focus:ring-2"
+              style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-background)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
               aria-label="District"
               defaultValue=""
             >
@@ -130,8 +133,8 @@ export default function AdoptPage() {
               ))}
             </select>
             <select
-              className="rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2 text-sm text-[#1B2432] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
-              style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+              className="rounded-[var(--radius-lg)] border px-4 py-2 text-sm focus:outline-none focus:ring-2"
+              style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-background)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
               aria-label="Age range"
               defaultValue=""
             >
@@ -144,42 +147,43 @@ export default function AdoptPage() {
       </section>
 
       {/* Animal grid */}
-      <section id="animals" className="px-4 pb-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-[1170px]">
+      <section id="animals" className="px-4 pb-20 sm:px-6 lg:px-8" style={{ paddingBottom: "var(--space-section)" }}>
+        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
           <h2
-            className="text-xl font-normal text-[#1B2432] sm:text-2xl"
-            style={{ fontFamily: "var(--tiny-font-display), serif" }}
+            className="font-normal sm:text-2xl"
+            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-xl)", color: "var(--color-text)" }}
           >
             Tinies looking for homes
           </h2>
-          <p className="mt-2 text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+          <p className="mt-2" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
             Animals listed by rescue organisations — waiting for you.
           </p>
           <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {ANIMALS.map((animal) => (
               <article
                 key={animal.id}
-                className="group rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition-shadow hover:shadow-[0_18px_40px_rgba(15,23,42,0.12)]"
+                className="group rounded-[var(--radius-lg)] border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]"
+                style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}
               >
-                <div className="flex h-40 items-center justify-center rounded-t-[14px] bg-[#F7F7F8] text-6xl border-b border-[#E5E7EB] group-hover:bg-[#0A6E5C]/5">
+                <div className="flex h-40 items-center justify-center rounded-t-[var(--radius-lg)] border-b text-6xl group-hover:bg-[var(--color-primary-50)]" style={{ backgroundColor: "var(--color-background)", borderColor: "var(--color-border)" }}>
                   {animal.emoji}
                 </div>
-                <div className="p-8">
-                  <h3 className="font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>{animal.name}</h3>
-                  <p className="mt-1 text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+                <div className="p-8" style={{ padding: "var(--space-card)" }}>
+                  <h3 className="font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>{animal.name}</h3>
+                  <p className="mt-1 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
                     {animal.species} · {animal.breed}
                   </p>
-                  <p className="mt-1 text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+                  <p className="mt-1 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
                     {animal.age} · {animal.sex}
                   </p>
-                  <p className="mt-2 flex items-center gap-1 text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+                  <p className="mt-2 flex items-center gap-1 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
                     <MapPin className="h-3.5 w-3.5 shrink-0" />
                     {animal.location}
                   </p>
                   <Link
                     href={`/adopt/${animal.id}`}
-                    className="mt-6 flex w-full items-center justify-center gap-2 rounded-[999px] bg-[#F45D48] px-4 h-12 font-semibold text-white transition-opacity hover:opacity-90"
-                    style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                    className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] px-4 font-semibold text-white transition-opacity hover:opacity-90"
+                    style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-secondary)" }}
                   >
                     <Heart className="h-4 w-4" />
                     Adopt this Tiny

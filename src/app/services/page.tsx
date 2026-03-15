@@ -36,38 +36,39 @@ const HOW_IT_WORKS = [
 
 export default function ServicesPage() {
   return (
-    <div className="min-h-screen bg-[#F7F7F8] text-[#1B2432]">
+    <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
       <section className="relative overflow-hidden px-4 pt-10 pb-12 sm:px-6 sm:pt-14 sm:pb-16 lg:px-8">
-        <div className="absolute inset-0 bg-[#0A6E5C]/5 rounded-b-[3rem] sm:rounded-b-[4rem]" />
-        <div className="relative mx-auto max-w-[1170px] text-center">
+        <div className="absolute inset-0 rounded-b-[3rem] sm:rounded-b-[4rem]" style={{ backgroundColor: "rgba(10, 110, 92, 0.05)" }} />
+        <div className="relative mx-auto text-center" style={{ maxWidth: "var(--max-width)" }}>
           <h1
-            className="text-4xl font-normal tracking-tight text-[#1B2432] sm:text-5xl"
-            style={{ fontFamily: "var(--tiny-font-display), serif" }}
+            className="font-normal tracking-tight sm:text-5xl"
+            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-4xl)", color: "var(--color-text)" }}
           >
             Find trusted care for your tiny.
           </h1>
-          <p className="mt-4 text-lg text-[#6B7280] max-w-xl mx-auto" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+          <p className="mt-4 mx-auto max-w-xl text-lg" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
             Dog walking, sitting, boarding, drop-ins, and daycare from verified providers in Cyprus.
           </p>
         </div>
       </section>
 
-      <section className="px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-[1170px]">
+      <section className="px-4 py-20 sm:px-6 lg:px-8" style={{ paddingTop: "var(--space-section)", paddingBottom: "var(--space-section)" }}>
+        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {CATEGORIES.map((cat) => (
               <Link
                 key={cat.type}
                 href={`/services/search?type=${cat.type}`}
-                className="group rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition-shadow hover:shadow-[0_18px_40px_rgba(15,23,42,0.12)]"
+                className="group rounded-[var(--radius-lg)] border p-8 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]"
+                style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)", padding: "var(--space-card)" }}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-[#0A6E5C]/10 text-[#0A6E5C] group-hover:bg-[#0A6E5C]/15">
+                <div className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-lg)] group-hover:bg-[var(--color-primary-100)]" style={{ backgroundColor: "var(--color-primary-50)", color: "var(--color-primary)" }}>
                   <cat.icon className="h-6 w-6" />
                 </div>
-                <h2 className="mt-6 font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>{cat.name}</h2>
-                <p className="mt-3 text-sm text-[#6B7280] leading-relaxed" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>{cat.description}</p>
-                <p className="mt-3 text-sm font-semibold text-[#F45D48]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>{cat.priceRange}</p>
-                <span className="mt-6 inline-flex items-center text-sm font-semibold text-[#0A6E5C] group-hover:underline" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+                <h2 className="mt-6 font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)", fontSize: "var(--text-lg)" }}>{cat.name}</h2>
+                <p className="mt-3 text-sm leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>{cat.description}</p>
+                <p className="mt-3 text-sm font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-secondary)" }}>{cat.priceRange}</p>
+                <span className="mt-6 inline-flex items-center text-sm font-semibold group-hover:underline" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-primary)" }}>
                   Find providers →
                 </span>
               </Link>
@@ -76,51 +77,51 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      <section className="px-4 py-20 sm:px-6 lg:px-8 bg-white rounded-t-[2rem]">
-        <div className="mx-auto max-w-[1170px]">
+      <section className="rounded-t-[2rem] bg-white px-4 py-20 sm:px-6 lg:px-8" style={{ paddingTop: "var(--space-section)", paddingBottom: "var(--space-section)" }}>
+        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
           <h2
-            className="text-2xl font-normal text-[#1B2432] text-center"
-            style={{ fontFamily: "var(--tiny-font-display), serif" }}
+            className="text-center font-normal"
+            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
           >
             How booking works
           </h2>
           <div className="mt-12 grid gap-10 sm:grid-cols-3">
             {HOW_IT_WORKS.map((step) => (
               <div key={step.title} className="text-center">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#0A6E5C]/10 text-[#0A6E5C]">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full" style={{ backgroundColor: "var(--color-primary-50)", color: "var(--color-primary)" }}>
                   <step.icon className="h-7 w-7" />
                 </div>
-                <h3 className="mt-6 font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>{step.title}</h3>
-                <p className="mt-2 text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>{step.text}</p>
+                <h3 className="mt-6 font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>{step.title}</h3>
+                <p className="mt-2 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>{step.text}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="px-4 py-20 sm:px-6 lg:px-8 border-t border-[#E5E7EB]">
-        <div className="mx-auto max-w-[1170px]">
-          <div className="flex flex-col gap-10 sm:flex-row sm:justify-around text-center">
+      <section className="border-t px-4 py-20 sm:px-6 lg:px-8" style={{ borderColor: "var(--color-border)", paddingTop: "var(--space-section)", paddingBottom: "var(--space-section)" }}>
+        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
+          <div className="flex flex-col gap-10 text-center sm:flex-row sm:justify-around">
             <div className="flex flex-col items-center gap-2">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#0A6E5C]/15 text-[#0A6E5C]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full" style={{ backgroundColor: "var(--color-primary-100)", color: "var(--color-primary)" }}>
                 <PawPrint className="h-6 w-6" />
               </div>
-              <p className="font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>50+ Verified Providers</p>
-              <p className="text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>Across Cyprus</p>
+              <p className="font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>50+ Verified Providers</p>
+              <p className="text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>Across Cyprus</p>
             </div>
             <div className="flex flex-col items-center gap-2">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#F45D48]/15 text-[#F45D48]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full" style={{ backgroundColor: "var(--color-secondary-100)", color: "var(--color-secondary)" }}>
                 <Heart className="h-6 w-6" />
               </div>
-              <p className="font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>100+ Happy Tinies</p>
-              <p className="text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>Booked and cared for</p>
+              <p className="font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>100+ Happy Tinies</p>
+              <p className="text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>Booked and cared for</p>
             </div>
             <div className="flex flex-col items-center gap-2">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#0A6E5C]/15 text-[#0A6E5C]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full" style={{ backgroundColor: "var(--color-primary-100)", color: "var(--color-primary)" }}>
                 <Leaf className="h-6 w-6" />
               </div>
-              <p className="font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>10% Supports Rescue</p>
-              <p className="text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>Tinies Giving Fund</p>
+              <p className="font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>10% Supports Rescue</p>
+              <p className="text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>Tinies Giving Fund</p>
             </div>
           </div>
         </div>

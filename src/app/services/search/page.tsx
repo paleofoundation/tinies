@@ -53,28 +53,28 @@ export default function ServicesSearchPage() {
   const pageTitle = useMemo(() => getServiceLabel(serviceType), [serviceType]);
 
   return (
-    <div className="min-h-screen bg-[#F7F7F8] text-[#1B2432]">
-      <div className="mx-auto max-w-[1170px] px-4 py-20 sm:px-6 lg:px-8">
+    <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
+      <div className="mx-auto px-4 py-20 sm:px-6 lg:px-8" style={{ maxWidth: "var(--max-width)" }}>
         <h1
-          className="text-2xl font-normal text-[#1B2432] sm:text-3xl"
-          style={{ fontFamily: "var(--tiny-font-display), serif" }}
+          className="font-normal sm:text-3xl"
+          style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-2xl)", color: "var(--color-text)" }}
         >
           {pageTitle}
         </h1>
-        <p className="mt-2 text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>Verified providers in Cyprus</p>
+        <p className="mt-2" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>Verified providers in Cyprus</p>
 
         <div className="mt-10 flex flex-col gap-10 lg:flex-row">
           <aside className="lg:w-56 lg:shrink-0">
-            <div className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
-              <h2 className="font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>Filters</h2>
+            <div className="rounded-[var(--radius-lg)] border p-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)", padding: "var(--space-card)" }}>
+              <h2 className="font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>Filters</h2>
               <div className="mt-6 space-y-4">
                 <div>
-                  <label className="block text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>Service type</label>
+                  <label className="block text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>Service type</label>
                   <select
                     value={serviceType}
                     onChange={(e) => setServiceType(e.target.value)}
-                    className="mt-2 w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-sm text-[#1B2432] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
-                    style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                    className="mt-2 w-full rounded-[var(--radius-lg)] border px-4 py-2.5 text-sm focus:outline-none focus:ring-2"
+                    style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-background)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
                   >
                     {SERVICE_TYPES.map((t) => (
                       <option key={t.value || "all"} value={t.value}>{t.label}</option>
@@ -82,12 +82,12 @@ export default function ServicesSearchPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>District</label>
+                  <label className="block text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>District</label>
                   <select
                     value={district}
                     onChange={(e) => setDistrict(e.target.value)}
-                    className="mt-2 w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-sm text-[#1B2432] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
-                    style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                    className="mt-2 w-full rounded-[var(--radius-lg)] border px-4 py-2.5 text-sm focus:outline-none focus:ring-2"
+                    style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-background)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
                   >
                     {DISTRICTS.map((d) => (
                       <option key={d} value={d === "All districts" ? "" : d}>{d}</option>
@@ -96,30 +96,32 @@ export default function ServicesSearchPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>Min €</label>
+                    <label className="block text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>Min €</label>
                     <input
                       type="number"
                       min="0"
                       placeholder="0"
                       value={priceMin}
                       onChange={(e) => setPriceMin(e.target.value)}
-                      className="mt-2 w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
+                      className="mt-2 w-full rounded-[var(--radius-lg)] border px-4 py-2.5 text-sm focus:outline-none focus:ring-2"
+                      style={{ backgroundColor: "var(--color-background)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>Max €</label>
+                    <label className="block text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>Max €</label>
                     <input
                       type="number"
                       min="0"
                       placeholder="100"
                       value={priceMax}
                       onChange={(e) => setPriceMax(e.target.value)}
-                      className="mt-2 w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
+                      className="mt-2 w-full rounded-[var(--radius-lg)] border px-4 py-2.5 text-sm focus:outline-none focus:ring-2"
+                      style={{ backgroundColor: "var(--color-background)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm text-[#6B7280]">Minimum rating</label>
+                  <label className="block text-sm" style={{ color: "var(--color-text-secondary)" }}>Minimum rating</label>
                   <div className="mt-2 flex gap-1">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
@@ -129,8 +131,9 @@ export default function ServicesSearchPage() {
                         className={`rounded p-1 transition-colors ${
                           minRating !== null && star <= minRating
                             ? "text-amber-500"
-                            : "text-[#6B7280]/40 hover:text-amber-500/70"
+                            : "hover:text-amber-500/70"
                         }`}
+                        style={minRating === null || star > minRating ? { color: "var(--color-text-muted)" } : undefined}
                         aria-label={`${star} stars minimum`}
                       >
                         <Star className="h-5 w-5 fill-current" />
@@ -145,13 +148,13 @@ export default function ServicesSearchPage() {
           {/* Main content */}
           <div className="min-w-0 flex-1">
             <div className="mb-6 flex items-center justify-between">
-              <p className="text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>{PLACEHOLDER_PROVIDERS.length} providers</p>
-              <div className="flex rounded-[999px] border border-[#E5E7EB] bg-white p-0.5">
+              <p className="text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>{PLACEHOLDER_PROVIDERS.length} providers</p>
+              <div className="flex rounded-[var(--radius-pill)] border p-0.5" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}>
                 <button
                   type="button"
                   onClick={() => setView("list")}
-                  className={`flex items-center gap-2 rounded-[999px] px-4 py-2 text-sm font-semibold transition-colors ${view === "list" ? "bg-[#0A6E5C] text-white" : "text-[#6B7280] hover:bg-[#0A6E5C]/10"}`}
-                  style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                  className={`flex items-center gap-2 rounded-[var(--radius-pill)] px-4 py-2 text-sm font-semibold transition-colors ${view === "list" ? "text-white" : "hover:bg-[var(--color-primary-50)]"}`}
+                  style={{ fontFamily: "var(--font-body), sans-serif", ...(view === "list" ? { backgroundColor: "var(--color-primary)" } : { color: "var(--color-text-secondary)" }) }}
                 >
                   <List className="h-4 w-4" />
                   List
@@ -159,8 +162,8 @@ export default function ServicesSearchPage() {
                 <button
                   type="button"
                   onClick={() => setView("map")}
-                  className={`flex items-center gap-2 rounded-[999px] px-4 py-2 text-sm font-semibold transition-colors ${view === "map" ? "bg-[#0A6E5C] text-white" : "text-[#6B7280] hover:bg-[#0A6E5C]/10"}`}
-                  style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                  className={`flex items-center gap-2 rounded-[var(--radius-pill)] px-4 py-2 text-sm font-semibold transition-colors ${view === "map" ? "text-white" : "hover:bg-[var(--color-primary-50)]"}`}
+                  style={{ fontFamily: "var(--font-body), sans-serif", ...(view === "map" ? { backgroundColor: "var(--color-primary)" } : { color: "var(--color-text-secondary)" }) }}
                 >
                   <Map className="h-4 w-4" />
                   Map
@@ -173,7 +176,8 @@ export default function ServicesSearchPage() {
                 {PLACEHOLDER_PROVIDERS.map((provider) => (
                   <li
                     key={provider.slug}
-                    className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition-shadow hover:shadow-[0_18px_40px_rgba(15,23,42,0.12)]"
+                    className="rounded-[var(--radius-lg)] border p-8 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]"
+                    style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)", padding: "var(--space-card)" }}
                   >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                       <div
@@ -184,14 +188,14 @@ export default function ServicesSearchPage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h2 className="font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>{provider.name}</h2>
-                          <span className="flex items-center gap-1 text-sm text-[#6B7280]">
+                          <h2 className="font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>{provider.name}</h2>
+                          <span className="flex items-center gap-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
                             <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
                             {provider.rating}
                           </span>
-                          <span className="text-sm text-[#6B7280]">({provider.reviewCount} reviews)</span>
+                          <span className="text-sm" style={{ color: "var(--color-text-secondary)" }}>({provider.reviewCount} reviews)</span>
                         </div>
-                        <p className="mt-1 flex items-center gap-1 text-sm text-[#6B7280]">
+                        <p className="mt-1 flex items-center gap-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
                           <MapPin className="h-3.5 w-3.5 shrink-0" />
                           {provider.district}
                         </p>
@@ -199,19 +203,20 @@ export default function ServicesSearchPage() {
                           {provider.services.map((s) => (
                             <span
                               key={s}
-                              className="rounded-[999px] bg-[#0A6E5C]/10 px-2.5 py-0.5 text-xs font-medium text-[#0A6E5C]"
+                              className="rounded-[var(--radius-pill)] border px-2.5 py-0.5 text-xs font-medium"
+                              style={{ backgroundColor: "var(--color-primary-50)", color: "var(--color-primary)", borderColor: "var(--color-primary-200)" }}
                             >
                               {s}
                             </span>
                           ))}
                         </div>
-                        <p className="mt-2 line-clamp-2 text-sm text-[#6B7280]">{provider.bio}</p>
+                        <p className="mt-2 line-clamp-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>{provider.bio}</p>
                         <div className="mt-3 flex flex-wrap items-center gap-3">
-                          <span className="font-semibold text-[#F45D48]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>From {provider.price}</span>
+                          <span className="font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-secondary)" }}>From {provider.price}</span>
                           <Link
                             href={`/services/provider/${provider.slug}`}
-                            className="rounded-[999px] bg-[#0A6E5C] px-5 h-12 font-semibold text-white transition-opacity hover:opacity-90 inline-flex items-center"
-                            style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                            className="inline-flex h-12 items-center rounded-[var(--radius-pill)] px-6 font-semibold text-white transition-opacity hover:opacity-90"
+                            style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-primary)" }}
                           >
                             View Profile
                           </Link>
@@ -222,10 +227,10 @@ export default function ServicesSearchPage() {
                 ))}
               </ul>
             ) : (
-              <div className="flex flex-col items-center justify-center rounded-[14px] border-2 border-dashed border-[#E5E7EB] bg-[#F7F7F8] py-20 text-center">
-                <Map className="h-16 w-16 text-[#6B7280]/40" />
-                <p className="mt-4 font-semibold text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>Map coming soon</p>
-                <p className="mt-2 text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>Switch to list view to browse providers.</p>
+              <div className="flex flex-col items-center justify-center rounded-[var(--radius-lg)] border-2 border-dashed py-20 text-center" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}>
+                <Map className="h-16 w-16" style={{ color: "var(--color-text-muted)" }} />
+                <p className="mt-4 font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>Map coming soon</p>
+                <p className="mt-2 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>Switch to list view to browse providers.</p>
               </div>
             )}
           </div>

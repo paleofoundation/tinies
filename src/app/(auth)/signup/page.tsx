@@ -64,21 +64,21 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F7F8] text-[#1B2432]">
+    <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
       <main className="mx-auto flex min-h-[calc(100vh-8rem)] max-w-md flex-col justify-center px-4 py-20 sm:px-6">
-        <div className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:p-10">
+        <div className="rounded-[var(--radius-lg)] border p-8 sm:p-10" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
           <div className="text-center">
-            <h1 className="text-2xl font-normal tracking-tight text-[#1B2432] sm:text-3xl" style={{ fontFamily: "var(--tiny-font-display), serif" }}>
+            <h1 className="font-normal tracking-tight sm:text-3xl" style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-2xl)", color: "var(--color-text)" }}>
               Create an account
             </h1>
-            <p className="mt-2 text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+            <p className="mt-2 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
               No matter the size. Join Tinies.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-5">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+              <label htmlFor="name" className="block text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
                 Name
               </label>
               <input
@@ -87,13 +87,13 @@ export default function SignupPage() {
                 autoComplete="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="mt-1.5 block w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] placeholder:text-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
-                style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                className="mt-1.5 block w-full rounded-[var(--radius-lg)] border px-4 py-2.5 focus:outline-none focus:ring-2"
+                style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-background)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
                 placeholder="Your name"
               />
             </div>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+              <label htmlFor="email" className="block text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
                 Email
               </label>
               <input
@@ -102,13 +102,13 @@ export default function SignupPage() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1.5 block w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] placeholder:text-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
-                style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                className="mt-1.5 block w-full rounded-[var(--radius-lg)] border px-4 py-2.5 focus:outline-none focus:ring-2"
+                style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-background)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
                 placeholder="you@example.com"
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+              <label htmlFor="password" className="block text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
                 Password
               </label>
               <input
@@ -117,14 +117,14 @@ export default function SignupPage() {
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1.5 block w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] placeholder:text-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
-                style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                className="mt-1.5 block w-full rounded-[var(--radius-lg)] border px-4 py-2.5 focus:outline-none focus:ring-2"
+                style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-background)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
                 placeholder="At least 6 characters"
               />
             </div>
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
-                Phone <span className="text-[#6B7280]">(optional)</span>
+              <label htmlFor="phone" className="block text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
+                Phone <span style={{ color: "var(--color-text-secondary)" }}>(optional)</span>
               </label>
               <input
                 id="phone"
@@ -132,22 +132,22 @@ export default function SignupPage() {
                 autoComplete="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="mt-1.5 block w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] placeholder:text-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
-                style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                className="mt-1.5 block w-full rounded-[var(--radius-lg)] border px-4 py-2.5 focus:outline-none focus:ring-2"
+                style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-background)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
                 placeholder="+357..."
               />
             </div>
 
             <div>
-              <span className="block text-sm font-medium text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+              <span className="block text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
                 I am a
               </span>
               <div className="mt-2 space-y-2">
                 {ROLES.map((r) => (
                   <label
                     key={r.value}
-                    className="flex cursor-pointer items-center gap-3 rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 has-[:checked]:border-[#0A6E5C] has-[:checked]:bg-[#0A6E5C]/5"
-                    style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                    className="flex cursor-pointer items-center gap-3 rounded-[var(--radius-lg)] border px-4 py-2.5 has-[:checked]:border-[var(--color-primary)] has-[:checked]:bg-[var(--color-primary-50)]"
+                    style={{ fontFamily: "var(--font-body), sans-serif", borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}
                   >
                     <input
                       type="radio"
@@ -155,9 +155,9 @@ export default function SignupPage() {
                       value={r.value}
                       checked={role === r.value}
                       onChange={(e) => setRole(e.target.value)}
-                      className="h-4 w-4 border-[#0A6E5C]/30 text-[#0A6E5C] focus:ring-[#0A6E5C]"
+                      className="h-4 w-4 focus:ring-[var(--color-primary)]"
                     />
-                    <span className="text-sm font-medium text-[#1B2432]">{r.label}</span>
+                    <span className="text-sm font-medium" style={{ color: "var(--color-text)" }}>{r.label}</span>
                   </label>
                 ))}
               </div>
@@ -165,15 +165,15 @@ export default function SignupPage() {
 
             {showDistrict && (
               <div>
-                <label htmlFor="district" className="block text-sm font-medium text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+                <label htmlFor="district" className="block text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
                   District
                 </label>
                 <select
                   id="district"
                   value={district}
                   onChange={(e) => setDistrict(e.target.value)}
-                  className="mt-1.5 block w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
-                  style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+                  className="mt-1.5 block w-full rounded-[var(--radius-lg)] border px-4 py-2.5 focus:outline-none focus:ring-2"
+                  style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-background)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
                 >
                   <option value="">Select district</option>
                   {DISTRICTS.map((d) => (
@@ -188,16 +188,16 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-[999px] h-12 bg-[#0A6E5C] px-4 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-70"
-              style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+              className="w-full rounded-[var(--radius-pill)] h-12 px-6 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-70"
+              style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-primary)" }}
             >
               {loading ? "Creating account…" : "Sign up"}
             </button>
           </form>
 
-          <p className="mt-8 text-center text-sm text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+          <p className="mt-8 text-center text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
             Already have an account?{" "}
-            <Link href="/login" className="font-medium text-[#0A6E5C] hover:underline">
+            <Link href="/login" className="font-medium hover:underline" style={{ color: "var(--color-primary)" }}>
               Sign in
             </Link>
           </p>

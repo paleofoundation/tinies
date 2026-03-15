@@ -8,14 +8,14 @@ export const metadata: Metadata = {
 
 export default function OwnerDashboardPage() {
   return (
-    <div className="min-h-screen bg-[#F7F7F8] text-[#1B2432]">
-      <main className="mx-auto max-w-[1170px] px-4 py-20 sm:px-6 sm:py-20">
-        <h1 className="text-2xl font-normal text-[#1B2432]" style={{ fontFamily: "var(--tiny-font-display), serif" }}>Owner dashboard</h1>
-        <p className="mt-2 text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
+      <main className="mx-auto px-4 py-20 sm:px-6 sm:py-20" style={{ maxWidth: "var(--max-width)" }}>
+        <h1 className="font-normal" style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-2xl)", color: "var(--color-text)" }}>Owner dashboard</h1>
+        <p className="mt-2" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
           Your bookings and pets will appear here.
         </p>
         <p className="mt-6">
-          <Link href="/" className="text-[#0A6E5C] font-semibold hover:underline" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+          <Link href="/" className="font-semibold hover:underline" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-primary)" }}>
             ← Back to home
           </Link>
         </p>

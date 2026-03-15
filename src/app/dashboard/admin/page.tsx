@@ -26,31 +26,31 @@ export default async function AdminDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F7F8] text-[#1B2432]">
-      <main className="mx-auto max-w-[1170px] px-4 py-20 sm:px-6 sm:py-20">
+    <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
+      <main className="mx-auto px-4 py-20 sm:px-6 sm:py-20" style={{ maxWidth: "var(--max-width)" }}>
         <h1
-          className="text-2xl font-normal text-[#1B2432] sm:text-3xl"
-          style={{ fontFamily: "var(--tiny-font-display), serif" }}
+          className="font-normal sm:text-3xl"
+          style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-2xl)", color: "var(--color-text)" }}
         >
           Admin dashboard
         </h1>
-        <p className="mt-1 text-[#6B7280]" style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}>
+        <p className="mt-1" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
           Manage adoption listings and platform settings.
         </p>
 
         {/* Adoption Listings tab */}
-        <section className="mt-8 rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
+        <section className="mt-8 rounded-[var(--radius-lg)] border p-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <h2
-              className="text-lg font-normal text-[#1B2432]"
-              style={{ fontFamily: "var(--tiny-font-display), serif" }}
+              className="text-lg font-normal"
+              style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}
             >
               Adoption Listings
             </h2>
             <Link
               href="/dashboard/admin/adoptions/new"
-              className="inline-flex items-center justify-center rounded-[999px] bg-[#0A6E5C] px-5 h-12 font-semibold text-white transition-opacity hover:opacity-90"
-              style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+              className="inline-flex h-12 items-center justify-center rounded-[var(--radius-pill)] px-6 font-semibold text-white transition-opacity hover:opacity-90"
+              style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-primary)" }}
             >
               Add New Listing
             </Link>
@@ -59,36 +59,36 @@ export default async function AdminDashboardPage() {
           <div className="mt-6 overflow-x-auto">
             <table className="w-full min-w-[600px] text-sm">
               <thead>
-                <tr className="border-b border-[#E5E7EB]">
-                  <th className="pb-3 pr-4 text-left font-semibold text-[#1B2432]">Name</th>
-                  <th className="pb-3 pr-4 text-left font-semibold text-[#1B2432]">Species</th>
-                  <th className="pb-3 pr-4 text-left font-semibold text-[#1B2432]">Breed</th>
-                  <th className="pb-3 pr-4 text-left font-semibold text-[#1B2432]">Age</th>
-                  <th className="pb-3 pr-4 text-left font-semibold text-[#1B2432]">Status</th>
-                  <th className="pb-3 pr-4 text-left font-semibold text-[#1B2432]">Date added</th>
-                  <th className="pb-3 text-left font-semibold text-[#1B2432]">Actions</th>
+                <tr className="border-b border-[var(--color-border)]">
+                  <th className="pb-3 pr-4 text-left font-semibold ">Name</th>
+                  <th className="pb-3 pr-4 text-left font-semibold ">Species</th>
+                  <th className="pb-3 pr-4 text-left font-semibold ">Breed</th>
+                  <th className="pb-3 pr-4 text-left font-semibold ">Age</th>
+                  <th className="pb-3 pr-4 text-left font-semibold ">Status</th>
+                  <th className="pb-3 pr-4 text-left font-semibold ">Date added</th>
+                  <th className="pb-3 text-left font-semibold ">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {listings.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-8 text-center text-[#6B7280]">
+                    <td colSpan={7} className="py-8 text-center ">
                       No adoption listings yet. Add one to get started.
                     </td>
                   </tr>
                 ) : (
                   listings.map((row) => (
-                    <tr key={row.id} className="border-b border-[#E5E7EB] last:border-0">
-                      <td className="py-3 pr-4 font-medium text-[#1B2432]">{row.name}</td>
-                      <td className="py-3 pr-4 text-[#6B7280]">{row.species}</td>
-                      <td className="py-3 pr-4 text-[#6B7280]">{row.breed ?? "—"}</td>
-                      <td className="py-3 pr-4 text-[#6B7280]">{row.estimatedAge ?? "—"}</td>
+                    <tr key={row.id} className="border-b border-[var(--color-border)] last:border-0">
+                      <td className="py-3 pr-4 font-medium ">{row.name}</td>
+                      <td className="py-3 pr-4 ">{row.species}</td>
+                      <td className="py-3 pr-4 ">{row.breed ?? "—"}</td>
+                      <td className="py-3 pr-4 ">{row.estimatedAge ?? "—"}</td>
                       <td className="py-3 pr-4">
-                        <span className="rounded-[999px] bg-[#0A6E5C]/15 px-2.5 py-0.5 text-[#0A6E5C] font-medium">
+                        <span className="rounded-[var(--radius-pill)] border px-2.5 py-0.5 font-medium" style={{ backgroundColor: "var(--color-primary-50)", color: "var(--color-primary)", borderColor: "var(--color-primary-200)" }}>
                           {statusLabel[row.status] ?? row.status}
                         </span>
                       </td>
-                      <td className="py-3 pr-4 text-[#6B7280]">
+                      <td className="py-3 pr-4 ">
                         {new Date(row.createdAt).toLocaleDateString("en-GB", {
                           day: "numeric",
                           month: "short",
@@ -98,7 +98,8 @@ export default async function AdminDashboardPage() {
                       <td className="py-3">
                         <Link
                           href={`/dashboard/admin/adoptions/${row.id}/edit`}
-                          className="font-semibold text-[#0A6E5C] hover:underline"
+                          className="font-semibold hover:underline"
+            style={{ color: "var(--color-primary)" }}
                         >
                           Edit
                         </Link>
@@ -114,8 +115,8 @@ export default async function AdminDashboardPage() {
         <p className="mt-8">
           <Link
             href="/"
-            className="text-sm text-[#6B7280] hover:text-[#1B2432] hover:underline"
-            style={{ fontFamily: "var(--tiny-font-body), sans-serif" }}
+            className="text-sm hover:underline"
+            style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}
           >
             ← Back to home
           </Link>
