@@ -17,6 +17,8 @@ export const metadata: Metadata = {
     "No matter the size. Book verified pet care or adopt a rescue animal in Cyprus.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default function RootLayout({
   children,
 }: Readonly<{
