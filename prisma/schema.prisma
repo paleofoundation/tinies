@@ -1,0 +1,769 @@
+// Tinies - Pet services marketplace & rescue adoption (Cyprus)
+// https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum UserRole {
+  owner
+  provider
+  rescue
+  adopter
+  admin
+}
+
+enum ServiceType {
+  walking
+  sitting
+  boarding
+  drop_in
+  daycare
+}
+
+enum BookingStatus {
+  pending
+  accepted
+  declined
+  active
+  completed
+  cancelled
+}
+
+enum CancellationPolicy {
+  flexible
+  moderate
+  strict
+}
+
+enum ClaimType {
+  pet_injury
+  property_damage
+  provider_no_show
+  owner_no_show
+}
+
+enum DisputeType {
+  service_quality
+  pet_welfare
+  communication
+  payment
+}
+
+enum DisputeRuling {
+  no_action
+  warning
+  partial_refund
+  full_refund
+  provider_suspended
+  owner_restricted
+}
+
+enum AdoptionListingStatus {
+  available
+  application_pending
+  matched
+  in_transit
+  adopted
+}
+
+enum ApplicationStatus {
+  new
+  under_review
+  approved
+  declined
+  withdrawn
+}
+
+enum PlacementStatus {
+  preparing
+  vet_complete
+  transport_booked
+  in_transit
+  delivered
+  follow_up
+}
+
+enum PayoutStatus {
+  pending
+  processing
+  completed
+  failed
+}
+
+enum DonationSource {
+  roundup
+  signup
+  guardian
+  platform_commission
+}
+
+enum GuardianTier {
+  friend
+  guardian
+  champion
+  custom
+}
+
+enum GuardianStatus {
+  active
+  paused
+  cancelled
+}
+
+enum MeetAndGreetStatus {
+  requested
+  confirmed
+  completed
+  cancelled
+  expired
+}
+
+enum LocationType {
+  owner_home
+  provider_home
+  neutral
+  video
+}
+
+// ---------------------------------------------------------------------------
+// Users & profiles
+// ---------------------------------------------------------------------------
+
+model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  phone             String?
+  passwordHash      String    @map("password_hash")
+  name              String
+  role              UserRole
+  country           String?
+  district          String?
+  avatarUrl         String?   @map("avatar_url")
+  emailVerified     Boolean   @default(false) @map("email_verified")
+  phoneVerified     Boolean   @default(false) @map("phone_verified")
+  languagePreference String?  @map("language_preference")
+  totalDonated      Float?    @map("total_donated")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  petsAsOwner           Pet[]
+  providerProfile       ProviderProfile?
+  bookingsAsOwner       Booking[]           @relation("BookingOwner")
+  bookingsAsProvider    Booking[]           @relation("BookingProvider")
+  reviewsWritten       Review[]            @relation("ReviewReviewer")
+  messagesSent         Message[]            @relation("MessageSender")
+  messagesReceived     Message[]            @relation("MessageRecipient")
+  rescueOrg            RescueOrg?
+  adoptionApplications AdoptionApplication[]
+  placementsAsAdopter  AdoptionPlacement[]
+  donations            Donation[]
+  guardianSubscriptions GuardianSubscription[]
+  givingPreferences    UserGivingPreference?
+  guaranteeClaimsReported GuaranteeClaim[]  @relation("GuaranteeClaimReporter")
+  guaranteeClaimsAdmin GuaranteeClaim[]     @relation("GuaranteeClaimAdmin")
+  guaranteeClaimsPayoutRecipient GuaranteeClaim[] @relation("GuaranteeClaimPayoutRecipient")
+  disputesOpened       Dispute[]            @relation("DisputeOpenedBy")
+  disputesAsRespondent  Dispute[]            @relation("DisputeRespondent")
+  disputesAdmin        Dispute[]            @relation("DisputeAdmin")
+  meetAndGreetsAsOwner MeetAndGreet[]       @relation("MeetAndGreetOwner")
+  meetAndGreetsAsProvider MeetAndGreet[]    @relation("MeetAndGreetProvider")
+  givingDistributionsApproved GivingFundDistribution[]
+
+  @@index([email])
+  @@index([role])
+  @@index([district])
+  @@map("users")
+}
+
+model Pet {
+  id              String   @id @default(uuid())
+  ownerId         String   @map("owner_id")
+  name            String
+  species         String   // dog | cat | other
+  breed           String?
+  ageYears        Float?   @map("age_years")
+  weightKg        Float?   @map("weight_kg")
+  sex             String?
+  spayedNeutered  Boolean? @map("spayed_neutered")
+  temperament     String?
+  medicalNotes    String?  @map("medical_notes")
+  dietaryNeeds    String?  @map("dietary_needs")
+  vetName         String?  @map("vet_name")
+  vetPhone        String?  @map("vet_phone")
+  photos          String[]
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId])
+  @@map("pets")
+}
+
+model ProviderProfile {
+  id                   String    @id @default(uuid())
+  userId               String    @unique @map("user_id")
+  bio                  String?
+  yearsExperience      Int?      @map("years_experience")
+  servicesOffered      Json      @map("services_offered") // [{ type, base_price, additional_pet_price, price_unit, max_pets }]
+  serviceAreaLat       Float?    @map("service_area_lat")
+  serviceAreaLng       Float?    @map("service_area_lng")
+  serviceAreaRadiusKm  Float?    @map("service_area_radius_km")
+  maxPets              Int?      @map("max_pets")
+  petTypesAccepted    String?   @map("pet_types_accepted")
+  availability        Json?     @map("availability") // weekly schedule
+  idDocumentUrl        String?   @map("id_document_url")
+  verified             Boolean   @default(false)
+  verifiedAt           DateTime? @map("verified_at")
+  responseRate         Float?    @map("response_rate")
+  avgRating            Float?    @map("avg_rating")
+  reviewCount         Int       @default(0) @map("review_count")
+  cancellationPolicy   CancellationPolicy @default(flexible) @map("cancellation_policy")
+  cancellationRate     Float?    @map("cancellation_rate")
+  photos              String[]
+  slug                String    @unique
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviews  Review[]
+  payouts  Payout[]
+
+  @@index([userId])
+  @@index([verified])
+  @@index([slug])
+  @@index([serviceAreaLat, serviceAreaLng])
+  @@map("provider_profiles")
+}
+
+// ---------------------------------------------------------------------------
+// Bookings, reviews, messages
+// ---------------------------------------------------------------------------
+
+model Booking {
+  id                      String          @id @default(uuid())
+  ownerId                 String          @map("owner_id")
+  providerId              String          @map("provider_id")
+  petIds                  String[]        @map("pet_ids")
+  serviceType             ServiceType     @map("service_type")
+  startDatetime           DateTime        @map("start_datetime")
+  endDatetime             DateTime        @map("end_datetime")
+  specialInstructions     String?         @map("special_instructions")
+  status                  BookingStatus
+  totalPrice              Int             @map("total_price") // cents
+  commissionAmount        Int             @map("commission_amount") // cents
+  priceBreakdown          Json?           @map("price_breakdown")
+  stripePaymentIntentId   String?         @map("stripe_payment_intent_id")
+  cancelledAt             DateTime?       @map("cancelled_at")
+  cancelledBy             String?         @map("cancelled_by") // user id
+  cancellationReason     String?         @map("cancellation_reason")
+  refundAmount            Int?            @map("refund_amount") // cents
+  refundStripeId          String?         @map("refund_stripe_id")
+  refundStatus            String?         @map("refund_status")
+  hasGuaranteeClaim       Boolean         @default(false) @map("has_guarantee_claim")
+  hasDispute              Boolean         @default(false) @map("has_dispute")
+  walkStartedAt           DateTime?       @map("walk_started_at")
+  walkEndedAt             DateTime?       @map("walk_ended_at")
+  walkRoute               Json?           @map("walk_route") // [{ lat, lng, timestamp }]
+  walkDistanceKm          Float?          @map("walk_distance_km")
+  walkDurationMinutes    Int?            @map("walk_duration_minutes")
+  walkSummaryMapUrl       String?         @map("walk_summary_map_url")
+  createdAt               DateTime        @default(now()) @map("created_at")
+  updatedAt               DateTime        @updatedAt @map("updated_at")
+
+  owner    User    @relation("BookingOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  provider User    @relation("BookingProvider", fields: [providerId], references: [id], onDelete: Restrict)
+  reviews  Review[]
+  messages Message[]
+  guaranteeClaims GuaranteeClaim[]
+  disputes Dispute[]
+  meetAndGreets MeetAndGreet[]
+  donations Donation[]
+
+  @@index([ownerId])
+  @@index([providerId])
+  @@index([status])
+  @@index([startDatetime])
+  @@index([createdAt])
+  @@map("bookings")
+}
+
+model Review {
+  id              String    @id @default(uuid())
+  bookingId       String    @map("booking_id")
+  reviewerId      String    @map("reviewer_id")
+  providerId      String    @map("provider_id")
+  rating          Int       // 1-5
+  text            String
+  photos          String[]
+  providerResponse String?  @map("provider_response")
+  responseAt      DateTime? @map("response_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  booking        Booking        @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  reviewer       User           @relation("ReviewReviewer", fields: [reviewerId], references: [id], onDelete: Restrict)
+  providerProfile ProviderProfile @relation(fields: [providerId], references: [userId], onDelete: Restrict)
+
+  @@unique([bookingId]) // one review per booking
+  @@index([bookingId])
+  @@index([reviewerId])
+  @@index([providerId])
+  @@map("reviews")
+}
+
+model Message {
+  id                    String    @id @default(uuid())
+  conversationId        String    @map("conversation_id")
+  senderId               String    @map("sender_id")
+  recipientId            String    @map("recipient_id")
+  bookingId              String?   @map("booking_id")
+  adoptionApplicationId  String?   @map("adoption_application_id")
+  content                String
+  photos                 String[]
+  readAt                 DateTime? @map("read_at")
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
+
+  sender   User    @relation("MessageSender", fields: [senderId], references: [id], onDelete: Restrict)
+  recipient User   @relation("MessageRecipient", fields: [recipientId], references: [id], onDelete: Restrict)
+  booking  Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  adoptionApplication AdoptionApplication? @relation(fields: [adoptionApplicationId], references: [id], onDelete: SetNull)
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([recipientId])
+  @@index([bookingId])
+  @@index([adoptionApplicationId])
+  @@index([createdAt])
+  @@map("messages")
+}
+
+// ---------------------------------------------------------------------------
+// Rescue & adoption
+// ---------------------------------------------------------------------------
+
+model RescueOrg {
+  id                  String    @id @default(uuid())
+  userId              String    @unique @map("user_id")
+  name                String
+  mission             String?
+  location            String?
+  charityRegistration String?   @map("charity_registration")
+  website             String?
+  socialLinks         Json?     @map("social_links")
+  logoUrl             String?   @map("logo_url")
+  verified            Boolean   @default(false)
+  slug                String    @unique
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listings  AdoptionListing[]
+  placements AdoptionPlacement[]
+
+  @@index([userId])
+  @@index([verified])
+  @@index([slug])
+  @@map("rescue_orgs")
+}
+
+model AdoptionListing {
+  id                   String    @id @default(uuid())
+  orgId                String    @map("org_id")
+  name                 String
+  species              String
+  breed                String?
+  estimatedAge         String?   @map("estimated_age")
+  sex                  String?
+  spayedNeutered       Boolean?  @map("spayed_neutered")
+  temperament          String?
+  medicalHistory       String?   @map("medical_history")
+  specialNeeds         String?   @map("special_needs")
+  localAdoptionFee     Int?      @map("local_adoption_fee") // cents
+  internationalEligible Boolean  @default(false) @map("international_eligible")
+  destinationCountries String[] @map("destination_countries")
+  photos               String[]
+  status               AdoptionListingStatus
+  slug                 String    @unique
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  org          RescueOrg @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  applications AdoptionApplication[]
+  placements   AdoptionPlacement[]
+
+  @@index([orgId])
+  @@index([status])
+  @@index([species])
+  @@index([slug])
+  @@map("adoption_listings")
+}
+
+model AdoptionApplication {
+  id               String            @id @default(uuid())
+  listingId        String            @map("listing_id")
+  applicantId      String            @map("applicant_id")
+  country          String
+  city             String
+  livingSituation  String?           @map("living_situation")
+  hasGarden        Boolean?          @map("has_garden")
+  otherPets        String?           @map("other_pets")
+  childrenAges     String?           @map("children_ages")
+  experience       String?
+  reason           String?
+  vetReference     String?           @map("vet_reference")
+  status           ApplicationStatus
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+
+  listing   AdoptionListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  applicant User           @relation(fields: [applicantId], references: [id], onDelete: Restrict)
+  placement AdoptionPlacement?
+  messages  Message[]
+
+  @@index([listingId])
+  @@index([applicantId])
+  @@index([status])
+  @@map("adoption_applications")
+}
+
+model AdoptionPlacement {
+  id                     String         @id @default(uuid())
+  listingId              String         @map("listing_id")
+  applicationId          String         @unique @map("application_id")
+  rescueOrgId            String         @map("rescue_org_id")
+  adopterId              String         @map("adopter_id")
+  destinationCountry    String         @map("destination_country")
+  vetPrepStatus          Json?          @map("vet_prep_status")
+  transportMethod        String?        @map("transport_method")
+  transportProviderId    String?        @map("transport_provider_id")
+  transportBookedDate    DateTime?      @map("transport_booked_date")
+  departureDate          DateTime?      @map("departure_date")
+  arrivalDate            DateTime?      @map("arrival_date")
+  totalFee               Int            @map("total_fee") // cents
+  vetCost                Int?           @map("vet_cost") // cents
+  transportCost          Int?           @map("transport_cost") // cents
+  coordinationFee        Int?           @map("coordination_fee") // cents
+  stripePaymentIntentId  String?        @map("stripe_payment_intent_id")
+  status                 PlacementStatus
+  checkin1w              DateTime?      @map("checkin_1w")
+  checkin1m              DateTime?      @map("checkin_1m")
+  checkin3m              DateTime?      @map("checkin_3m")
+  createdAt              DateTime       @default(now()) @map("created_at")
+  updatedAt              DateTime       @updatedAt @map("updated_at")
+
+  listing   AdoptionListing  @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  application AdoptionApplication @relation(fields: [applicationId], references: [id], onDelete: Restrict)
+  rescueOrg  RescueOrg  @relation(fields: [rescueOrgId], references: [id], onDelete: Restrict)
+  adopter   User        @relation(fields: [adopterId], references: [id], onDelete: Restrict)
+  transportProvider TransportProvider? @relation(fields: [transportProviderId], references: [id], onDelete: SetNull)
+
+  @@index([listingId])
+  @@index([applicationId])
+  @@index([rescueOrgId])
+  @@index([adopterId])
+  @@index([transportProviderId])
+  @@index([status])
+  @@map("adoption_placements")
+}
+
+model TransportProvider {
+  id              String   @id @default(uuid())
+  name            String
+  type            String   // courier | cargo | volunteer
+  countriesServed String[] @map("countries_served")
+  contactInfo     String?  @map("contact_info")
+  pricingNotes    String?  @map("pricing_notes")
+  rating          Float?
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  placements AdoptionPlacement[]
+
+  @@index([active])
+  @@map("transport_providers")
+}
+
+// ---------------------------------------------------------------------------
+// Payouts (providers)
+// ---------------------------------------------------------------------------
+
+model Payout {
+  id                String       @id @default(uuid())
+  providerId        String       @map("provider_id")
+  amount            Int          // cents
+  commission        Int          // cents
+  netAmount         Int          @map("net_amount") // cents
+  stripeTransferId  String?      @map("stripe_transfer_id")
+  periodStart       DateTime     @map("period_start")
+  periodEnd         DateTime     @map("period_end")
+  status            PayoutStatus
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @updatedAt @map("updated_at")
+
+  providerProfile ProviderProfile @relation(fields: [providerId], references: [userId], onDelete: Restrict)
+
+  @@index([providerId])
+  @@index([status])
+  @@index([periodStart, periodEnd])
+  @@map("payouts")
+}
+
+// ---------------------------------------------------------------------------
+// Giving: charities, donations, guardian, distributions
+// ---------------------------------------------------------------------------
+
+model Charity {
+  id                  String    @id @default(uuid())
+  name                String
+  registrationNumber  String?   @map("registration_number")
+  mission             String?
+  website             String?
+  socialLinks         Json?     @map("social_links")
+  logoUrl             String?   @map("logo_url")
+  photos              String[]
+  primaryContactName  String?   @map("primary_contact_name")
+  primaryContactEmail String?   @map("primary_contact_email")
+  bankIban            String?   @map("bank_iban")
+  howFundsUsed        String?   @map("how_funds_used")
+  verified            Boolean   @default(false)
+  verifiedAt          DateTime? @map("verified_at")
+  featured            Boolean   @default(false)
+  featuredSince       DateTime? @map("featured_since")
+  animalsInCare       Int?      @map("animals_in_care")
+  district            String?
+  totalReceived       Float?    @map("total_received")
+  supporterCount      Int?      @map("supporter_count")
+  annualUpdateText    String?   @map("annual_update_text")
+  annualUpdateDate    DateTime? @map("annual_update_date")
+  slug                String    @unique
+  active              Boolean   @default(true)
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  donations           Donation[]
+  guardianSubscriptions GuardianSubscription[]
+  userGivingPreferences UserGivingPreference[]
+
+  @@index([verified])
+  @@index([featured])
+  @@index([slug])
+  @@index([active])
+  @@map("charities")
+}
+
+model Donation {
+  id                    String         @id @default(uuid())
+  userId                String?        @map("user_id")
+  charityId             String?        @map("charity_id")
+  source                DonationSource
+  amount                Int            // cents
+  bookingId             String?        @map("booking_id")
+  stripePaymentIntentId String?       @map("stripe_payment_intent_id")
+  stripeInvoiceId       String?       @map("stripe_invoice_id")
+  createdAt             DateTime      @default(now()) @map("created_at")
+  updatedAt             DateTime      @updatedAt @map("updated_at")
+
+  user    User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  charity Charity? @relation(fields: [charityId], references: [id], onDelete: SetNull)
+  booking Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([charityId])
+  @@index([bookingId])
+  @@index([source])
+  @@index([createdAt])
+  @@map("donations")
+}
+
+model GuardianSubscription {
+  id                    String         @id @default(uuid())
+  userId                String         @map("user_id")
+  charityId             String?       @map("charity_id")
+  stripeSubscriptionId  String?       @unique @map("stripe_subscription_id")
+  amountMonthly         Int            @map("amount_monthly") // cents
+  tier                  GuardianTier
+  status                GuardianStatus
+  startedAt             DateTime?      @map("started_at")
+  pausedAt              DateTime?     @map("paused_at")
+  cancelledAt           DateTime?     @map("cancelled_at")
+  createdAt             DateTime      @default(now()) @map("created_at")
+  updatedAt             DateTime      @updatedAt @map("updated_at")
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  charity Charity? @relation(fields: [charityId], references: [id], onDelete: SetNull)
+  userGivingPreferences UserGivingPreference[]
+
+  @@index([userId])
+  @@index([charityId])
+  @@index([status])
+  @@map("guardian_subscriptions")
+}
+
+model UserGivingPreference {
+  id                      String    @id @default(uuid())
+  userId                  String    @unique @map("user_id")
+  preferredCharityId      String?   @map("preferred_charity_id")
+  roundupEnabled          Boolean   @default(true) @map("roundup_enabled")
+  guardianSubscriptionId  String?   @map("guardian_subscription_id")
+  createdAt               DateTime  @default(now()) @map("created_at")
+  updatedAt               DateTime  @updatedAt @map("updated_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  charity  Charity? @relation(fields: [preferredCharityId], references: [id], onDelete: SetNull)
+  guardianSubscription GuardianSubscription? @relation(fields: [guardianSubscriptionId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([preferredCharityId])
+  @@map("user_giving_preferences")
+}
+
+// ---------------------------------------------------------------------------
+// Trust & safety: guarantee claims, disputes, meet-and-greets
+// ---------------------------------------------------------------------------
+
+model GuaranteeClaim {
+  id                     String    @id @default(uuid())
+  bookingId              String    @map("booking_id")
+  reporterId             String    @map("reporter_id")
+  claimType              ClaimType @map("claim_type")
+  description            String
+  photos                 String[]
+  otherPartyResponse     String?   @map("other_party_response")
+  otherPartyPhotos       String[]  @map("other_party_photos")
+  adminId                String?   @map("admin_id")
+  ruling                 String?   // approved full/partial/denied - free text or extend with enum later
+  rulingNotes            String?   @map("ruling_notes")
+  payoutAmount           Int?      @map("payout_amount") // cents
+  payoutRecipientId      String?   @map("payout_recipient_id")
+  payoutStripeTransferId String?   @map("payout_stripe_transfer_id")
+  status                 String    // submitted | under_review | awaiting_response | resolved | appealed | appeal_resolved
+  appealNotes            String?   @map("appeal_notes")
+  appealRuling           String?   @map("appeal_ruling")
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
+
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  reporter  User    @relation("GuaranteeClaimReporter", fields: [reporterId], references: [id], onDelete: Restrict)
+  admin     User?   @relation("GuaranteeClaimAdmin", fields: [adminId], references: [id], onDelete: SetNull)
+  payoutRecipient User? @relation("GuaranteeClaimPayoutRecipient", fields: [payoutRecipientId], references: [id], onDelete: SetNull)
+
+  @@index([bookingId])
+  @@index([reporterId])
+  @@index([adminId])
+  @@index([status])
+  @@map("guarantee_claims")
+}
+
+model Dispute {
+  id                  String        @id @default(uuid())
+  bookingId           String        @map("booking_id")
+  openedBy            String        @map("opened_by")
+  disputeType         DisputeType   @map("dispute_type")
+  description         String
+  evidencePhotos      String[]      @map("evidence_photos")
+  respondentId        String        @map("respondent_id")
+  respondentResponse  String?       @map("respondent_response")
+  respondentPhotos    String[]      @map("respondent_photos")
+  adminId             String?       @map("admin_id")
+  ruling              DisputeRuling?
+  rulingNotes         String?       @map("ruling_notes")
+  refundAmount        Int?          @map("refund_amount") // cents
+  status              String        // opened | awaiting_response | under_review | resolved
+  resolvedAt          DateTime?     @map("resolved_at")
+  createdAt           DateTime      @default(now()) @map("created_at")
+  updatedAt           DateTime      @updatedAt @map("updated_at")
+
+  booking    Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  openedByUser User  @relation("DisputeOpenedBy", fields: [openedBy], references: [id], onDelete: Restrict)
+  respondent User   @relation("DisputeRespondent", fields: [respondentId], references: [id], onDelete: Restrict)
+  admin      User?   @relation("DisputeAdmin", fields: [adminId], references: [id], onDelete: SetNull)
+
+  @@index([bookingId])
+  @@index([openedBy])
+  @@index([respondentId])
+  @@index([adminId])
+  @@index([status])
+  @@map("disputes")
+}
+
+model MeetAndGreet {
+  id                 String             @id @default(uuid())
+  ownerId            String             @map("owner_id")
+  providerId         String             @map("provider_id")
+  petIds             String[]           @map("pet_ids")
+  requestedDatetime  DateTime          @map("requested_datetime")
+  confirmedDatetime  DateTime?          @map("confirmed_datetime")
+  locationType       LocationType       @map("location_type")
+  locationNotes      String?            @map("location_notes")
+  status             MeetAndGreetStatus
+  ownerNotesAfter    String?            @map("owner_notes_after")
+  providerNotesAfter String?            @map("provider_notes_after")
+  ledToBooking       Boolean            @default(false) @map("led_to_booking")
+  bookingId          String?            @map("booking_id")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+
+  owner    User     @relation("MeetAndGreetOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  provider User     @relation("MeetAndGreetProvider", fields: [providerId], references: [id], onDelete: Cascade)
+  booking  Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+
+  @@index([ownerId])
+  @@index([providerId])
+  @@index([bookingId])
+  @@index([status])
+  @@index([requestedDatetime])
+  @@map("meet_and_greets")
+}
+
+// ---------------------------------------------------------------------------
+// Giving fund & webhooks
+// ---------------------------------------------------------------------------
+
+model GivingFundDistribution {
+  id                  String    @id @default(uuid())
+  month               DateTime  @db.Date // first of month
+  totalFundAmount     Int       @map("total_fund_amount") // cents
+  distributionMethod String    @map("distribution_method") // equal | weighted
+  perCharityAmounts   Json      @map("per_charity_amounts") // [{ charity_id, amount }]
+  approvedBy          String    @map("approved_by")
+  approvedAt          DateTime  @map("approved_at")
+  payoutStatus        PayoutStatus @map("payout_status")
+  stripeTransferIds   Json?     @map("stripe_transfer_ids")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  approvedByUser User @relation(fields: [approvedBy], references: [id], onDelete: Restrict)
+
+  @@index([month])
+  @@index([approvedBy])
+  @@index([payoutStatus])
+  @@map("giving_fund_distributions")
+}
+
+model ProcessedWebhookEvent {
+  id            String   @id @default(uuid())
+  stripeEventId String   @unique @map("stripe_event_id")
+  eventType     String   @map("event_type")
+  processedAt   DateTime @map("processed_at")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([stripeEventId])
+  @@index([eventType])
+  @@index([processedAt])
+  @@map("processed_webhook_events")
+}

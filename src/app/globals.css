@@ -1,0 +1,21 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap");
+@import "tailwindcss";
+
+:root {
+  --tiny-font-display: "DM Serif Display", serif;
+  --tiny-font-body: "Plus Jakarta Sans", sans-serif;
+  --tiny-color-primary: #f45d48;
+  --tiny-color-secondary: #0a6e5c;
+  --tiny-color-text: #1b2432;
+  --tiny-color-text-subtle: #6b7280;
+  --tiny-color-bg: #f7f7f8;
+  --tiny-color-surface: #ffffff;
+  --tiny-color-highlight: #f5c5a3;
+  --tiny-color-border: #e5e7eb;
+  --tiny-radius-card: 14px;
+  --tiny-radius-pill: 999px;
+  --tiny-shadow-card: 0 18px 40px rgba(15, 23, 42, 0.08);
+  --tiny-space-section: 80px;
+  --tiny-space-card: 36px;
+  --tiny-max-width: 1170px;
+}
