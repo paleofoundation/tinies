@@ -723,6 +723,202 @@ function countryToFlag(country: string | null): string {
   return map[c] ?? "🌍";
 }
 
+// ---------------------------------------------------------------------------
+// Quick Donate (5.6) — public /give page, no login required
+// ---------------------------------------------------------------------------
+
+export type CreateQuickDonationInput = {
+  amountCents: number;
+  charityId: string | null;
+  donorName?: string | null;
+  donorEmail?: string | null;
+  showOnLeaderboard?: boolean;
+};
+
+/** Create PaymentIntent for one-time quick donate. No login required. Webhook records Donation. */
+export async function createQuickDonation(params: CreateQuickDonationInput): Promise<{ clientSecret: string | null; error?: string }> {
+  if (params.amountCents < 100) return { clientSecret: null, error: "Minimum donation is €1." };
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const userId = user?.id ?? "";
+  try {
+    const stripe = getStripeServer();
+    const piParams: Parameters<ReturnType<typeof getStripeServer>["paymentIntents"]["create"]>[0] = {
+      amount: params.amountCents,
+      currency: "eur",
+      metadata: {
+        type: "quick_donation",
+        userId,
+        charityId: params.charityId ?? "",
+        amountCents: String(params.amountCents),
+        showOnLeaderboard: params.showOnLeaderboard ? "1" : "0",
+      },
+      automatic_payment_methods: { enabled: true },
+    };
+    if (params.donorEmail?.trim()) piParams.receipt_email = params.donorEmail.trim();
+    const pi = await stripe.paymentIntents.create(piParams);
+    return { clientSecret: pi.client_secret ?? null };
+  } catch (e) {
+    console.error("createQuickDonation", e);
+    return { clientSecret: null, error: e instanceof Error ? e.message : "Failed to create payment." };
+  }
+}
+
+/** Get or create a Prisma User for guest (no Supabase auth). Used for monthly quick donate. */
+async function getOrCreateGuestUser(email: string, name: string): Promise<string> {
+  const existing = await prisma.user.findUnique({
+    where: { email: email.trim().toLowerCase() },
+    select: { id: true },
+  });
+  if (existing) return existing.id;
+  const id = crypto.randomUUID();
+  await prisma.user.create({
+    data: {
+      id,
+      email: email.trim().toLowerCase(),
+      name: (name || email).trim().slice(0, 200),
+      passwordHash: "guest-no-login",
+      role: "owner",
+    },
+  });
+  return id;
+}
+
+export type CreateQuickGuardianSubscriptionInput = {
+  amountCents: number;
+  tier: GuardianTier;
+  charityId: string | null;
+  donorEmail: string;
+  donorName?: string | null;
+  showOnLeaderboard?: boolean;
+};
+
+/** Create Guardian subscription for quick donate (guest or logged-in). Returns clientSecret for Payment Element. */
+export async function createQuickGuardianSubscription(params: CreateQuickGuardianSubscriptionInput): Promise<{
+  clientSecret: string | null;
+  subscriptionId: string | null;
+  error?: string;
+}> {
+  if (params.amountCents < 100) return { clientSecret: null, subscriptionId: null, error: "Minimum €1/month." };
+  const email = params.donorEmail?.trim();
+  if (!email) return { clientSecret: null, subscriptionId: null, error: "Email is required for monthly giving." };
+  const supabase = await createClient();
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+  let userId: string;
+  let userEmail: string;
+  let userName: string;
+  if (authUser) {
+    userId = authUser.id;
+    userEmail = authUser.email ?? email;
+    userName = (authUser.user_metadata?.name as string) ?? params.donorName ?? email;
+    const dbUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    });
+    if (!dbUser) {
+      await prisma.user.upsert({
+        where: { id: userId },
+        create: {
+          id: userId,
+          email: userEmail,
+          name: userName,
+          passwordHash: "supabase-auth-placeholder",
+          role: "owner",
+        },
+        update: {},
+      });
+    }
+  } else {
+    userId = await getOrCreateGuestUser(email, params.donorName ?? email);
+    userEmail = email;
+    userName = params.donorName?.trim() ?? email;
+  }
+  try {
+    const stripe = getStripeServer();
+    const customerId = await getOrCreateStripeCustomer(userId, userEmail, userName);
+    let productId = GUARDIAN_PRODUCT_ID;
+    if (!productId) {
+      const products = await stripe.products.list({ active: true });
+      const guardian = products.data.find((p) => p.name === "Tinies Guardian");
+      if (guardian) productId = guardian.id;
+      else {
+        const product = await stripe.products.create({
+          name: "Tinies Guardian",
+          description: "Monthly giving to animal rescue",
+        });
+        productId = product.id;
+      }
+    }
+    const price = await stripe.prices.create({
+      unit_amount: params.amountCents,
+      currency: "eur",
+      recurring: { interval: "month" },
+      product: productId,
+    });
+    const subscription = await stripe.subscriptions.create({
+      customer: customerId,
+      items: [{ price: price.id }],
+      payment_behavior: "default_incomplete",
+      expand: ["latest_invoice.payment_intent"],
+      metadata: {
+        userId,
+        charityId: params.charityId ?? "",
+        tier: params.tier,
+      },
+    });
+    const invoice = subscription.latest_invoice as { payment_intent?: { client_secret: string } } | null;
+    const clientSecret = invoice?.payment_intent?.client_secret ?? null;
+    const guardianSub = await prisma.guardianSubscription.create({
+      data: {
+        userId,
+        charityId: params.charityId || null,
+        stripeSubscriptionId: subscription.id,
+        amountMonthly: params.amountCents,
+        tier: params.tier,
+        status: "active",
+        startedAt: new Date(),
+      },
+    });
+    await prisma.userGivingPreference.upsert({
+      where: { userId },
+      create: {
+        userId,
+        preferredCharityId: params.charityId,
+        guardianSubscriptionId: guardianSub.id,
+        showOnLeaderboard: params.showOnLeaderboard ?? false,
+      },
+      update: {
+        preferredCharityId: params.charityId,
+        guardianSubscriptionId: guardianSub.id,
+        showOnLeaderboard: params.showOnLeaderboard ?? false,
+      },
+    });
+    revalidatePath("/giving");
+    revalidatePath("/give");
+    return { clientSecret, subscriptionId: subscription.id };
+  } catch (e) {
+    console.error("createQuickGuardianSubscription", e);
+    return {
+      clientSecret: null,
+      subscriptionId: null,
+      error: e instanceof Error ? e.message : "Failed to create subscription.",
+    };
+  }
+}
+
+/** Featured charities + Giving Fund for quick donate selector. */
+export async function getFeaturedCharitiesForQuickDonate(): Promise<
+  { id: string | null; name: string; slug: string | null; logoUrl: string | null }[]
+> {
+  const fund = { id: null as string | null, name: "Tinies Giving Fund", slug: null as string | null, logoUrl: null as string | null };
+  const list = await prisma.charity.findMany({
+    where: { featured: true, active: true },
+    orderBy: { featuredSince: "asc" },
+    select: { id: true, name: true, slug: true, logoUrl: true },
+  });
+  return [fund, ...list.map((c) => ({ id: c.id, name: c.name, slug: c.slug, logoUrl: c.logoUrl }))];
+}
+
 /** Update showOnLeaderboard for current user. */
 export async function updateShowOnLeaderboard(show: boolean): Promise<{ error?: string }> {
   const supabase = await createClient();

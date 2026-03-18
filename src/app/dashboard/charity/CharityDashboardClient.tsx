@@ -20,6 +20,7 @@ import {
   updateCharityProfile,
 } from "@/lib/charity/actions";
 import type { DonationRow, PayoutRow } from "@/lib/charity/actions";
+import { QRCodeGenerator } from "@/components/giving/QRCodeGenerator";
 import { toast } from "sonner";
 
 type TabId = "overview" | "donations" | "supporters" | "payouts" | "profile";
@@ -246,8 +247,9 @@ export function CharityDashboardClient({
                   {overview.nextPayoutMonth && <p className="mt-0.5 text-xs" style={{ color: "var(--color-text-secondary)" }}>{overview.nextPayoutMonth}</p>}
                 </div>
               </div>
-              <div className="mt-8">
-                <p className="text-sm font-medium" style={{ color: "var(--color-text)" }}>Monthly donations (last 12 months)</p>
+              <div className="mt-8 flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p className="text-sm font-medium" style={{ color: "var(--color-text)" }}>Monthly donations (last 12 months)</p>
                 <div className="mt-4 flex items-end gap-1" style={{ minHeight: "120px" }}>
                   {overview.monthlyTrend.map((t) => (
                     <div key={t.month} className="flex flex-1 flex-col items-center gap-1">
@@ -262,6 +264,12 @@ export function CharityDashboardClient({
                       <span className="text-[10px]" style={{ color: "var(--color-text-secondary)" }}>{formatMonthLabel(t.month)}</span>
                     </div>
                   ))}
+                </div>
+                </div>
+                <div className="shrink-0">
+                  <p className="mb-2 text-sm font-medium" style={{ color: "var(--color-text)" }}>Quick Donate QR Code</p>
+                  <p className="mb-3 text-xs" style={{ color: "var(--color-text-secondary)" }}>Share this so supporters can give in 15 seconds.</p>
+                  <QRCodeGenerator url={`/give/${charity.slug}`} label={charity.name} size={200} />
                 </div>
               </div>
             </section>

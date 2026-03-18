@@ -5,6 +5,7 @@ import { getAllPlacements } from "./adoptions/actions";
 import { AdoptionPipelineSection } from "./AdoptionPipelineSection";
 import { getOpenDisputesForAdmin, getOpenClaimsForAdmin } from "@/lib/disputes/actions";
 import { DisputesClaimsSection } from "./DisputesClaimsSection";
+import { AdminQRCodeSection } from "./AdminQRCodeSection";
 
 // TODO: enforce admin role – redirect or 403 if user is not admin (e.g. check session user role or app_metadata)
 
@@ -19,7 +20,8 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   const { disputes: openDisputes = [] } = await getOpenDisputesForAdmin().then((r) => (r.error ? { disputes: [] } : r));
   const { claims: openClaims = [] } = await getOpenClaimsForAdmin().then((r) => (r.error ? { claims: [] } : r));
 
-  const listings = await prisma.adoptionListing.findMany({
+  const [listings, charitiesForQr] = await Promise.all([
+    prisma.adoptionListing.findMany({
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
@@ -30,7 +32,13 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
       status: true,
       createdAt: true,
     },
-  });
+  }),
+    prisma.charity.findMany({
+      where: { active: true },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true, slug: true },
+    }),
+  ]);
 
   const statusLabel: Record<string, string> = {
     available: "Available",
@@ -143,6 +151,8 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
         </Suspense>
 
         <DisputesClaimsSection initialDisputes={openDisputes} initialClaims={openClaims} />
+
+        <AdminQRCodeSection charities={charitiesForQr} />
 
         <p className="mt-8">
           <Link

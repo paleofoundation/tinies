@@ -89,15 +89,15 @@ export async function POST(request: NextRequest) {
             });
           }
         }
-        if (type === "one_time_donation") {
+        if (type === "one_time_donation" || type === "quick_donation") {
           const userId = pi.metadata?.userId ?? "";
           const charityId = pi.metadata?.charityId || null;
           const amountCents = parseInt(pi.metadata?.amountCents ?? "0", 10);
-          if (charityId && amountCents > 0) {
+          if (amountCents > 0) {
             await prisma.donation.create({
               data: {
                 userId: userId || undefined,
-                charityId,
+                charityId: charityId || null,
                 source: DonationSource.one_time,
                 amount: amountCents,
                 stripePaymentIntentId: pi.id,
