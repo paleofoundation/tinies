@@ -44,7 +44,7 @@ export async function requestMeetAndGreet(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "You must be signed in to request a meet & greet." };
-  if (!data.petIds?.length) return { error: "Select at least one pet." });
+  if (!data.petIds?.length) return { error: "Select at least one pet." };
 
   const profile = await prisma.providerProfile.findUnique({
     where: { slug: data.providerSlug },

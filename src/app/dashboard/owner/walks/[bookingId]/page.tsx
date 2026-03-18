@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getWalkRoute } from "../../../actions";
+import { getWalkRoute } from "../../actions";
 import { WatchLiveWalkClient } from "./WatchLiveWalkClient";
 
 type Props = { params: Promise<{ bookingId: string }> };
