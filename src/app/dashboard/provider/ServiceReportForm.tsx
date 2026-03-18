@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { uploadServiceReportPhoto, submitServiceReport, type SubmitServiceReportInput } from "./actions";
-import type { ProviderBookingCard } from "./actions";
+import { uploadServiceReportPhoto, submitServiceReport } from "./actions";
+import type { ProviderBookingCard, SubmitServiceReportInput } from "@/lib/utils/provider-helpers";
 
 const ACTIVITY_OPTIONS = [
   { id: "fed", label: "Fed" },

@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { MapPin, Square } from "lucide-react";
 import { startWalk, endWalk } from "./actions";
 import { WalkTracker } from "@/components/maps/WalkTracker";
-import type { ProviderBookingCard } from "./actions";
+import type { ProviderBookingCard } from "@/lib/utils/provider-helpers";
 
 const TRACK_INTERVAL_MS = 30 * 1000;
 const API_URL = typeof window !== "undefined" ? window.location.origin : "";

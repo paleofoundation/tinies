@@ -6,7 +6,8 @@ import { toast } from "sonner";
 import { ServiceType, CancellationPolicy } from "@/lib/constants";
 import { ServiceAreaPicker, type ServiceAreaValue } from "@/components/maps";
 import { VerifyIdentityButton } from "../VerifyIdentityButton";
-import { getProviderHomeDetailsForEdit, updateProviderHomeDetails, getProviderHolidaysForEdit, updateProviderHolidays, HOLIDAY_OPTIONS } from "../actions";
+import { getProviderHomeDetailsForEdit, updateProviderHomeDetails, getProviderHolidaysForEdit, updateProviderHolidays } from "../actions";
+import { HOLIDAY_OPTIONS } from "@/lib/utils/provider-helpers";
 
 const DISTRICTS = ["Nicosia", "Limassol", "Larnaca", "Paphos", "Famagusta"] as const;
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;

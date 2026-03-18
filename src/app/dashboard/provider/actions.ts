@@ -16,6 +16,20 @@ import BookingExpiredEmail from "@/lib/email/templates/booking-expired";
 import { sendSMS, buildBookingAcceptedSMS } from "@/lib/sms";
 import { DonationSource } from "@prisma/client";
 import slugify from "slugify";
+import type {
+  CreateStripeConnectOnboardingResult,
+  ProviderStripeStatus,
+  ProviderBookingCard,
+  ProviderEarnings,
+  ProviderReviewForDashboard,
+  SubmitServiceReportInput,
+  ProviderWizardProfile,
+  ProviderCompletenessResult,
+  ServiceOfferInput,
+  ProviderHomeDetails,
+  UpdateProviderHomeDetailsInput,
+} from "@/lib/utils/provider-helpers";
+import { HOLIDAY_OPTIONS } from "@/lib/utils/provider-helpers";
 
 const PENDING_RESPONSE_HOURS = 4;
 /** 10% of commission goes to Giving Fund (platform_commission donation). */
@@ -24,11 +38,6 @@ const GIVING_COMMISSION_RATE = 0.1;
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 const DASHBOARD_RETURN = `${APP_URL}/dashboard/provider`;
 const DASHBOARD_REFRESH = `${APP_URL}/dashboard/provider?refresh=stripe`;
-
-export type ProviderStripeStatus = {
-  hasProfile: boolean;
-  hasStripeConnect: boolean;
-};
 
 /** Get current user's provider profile and Stripe Connect status. */
 export async function getProviderStripeStatus(): Promise<ProviderStripeStatus> {
@@ -49,11 +58,6 @@ export async function getProviderStripeStatus(): Promise<ProviderStripeStatus> {
     hasStripeConnect: Boolean(profile.stripeConnectAccountId),
   };
 }
-
-export type CreateStripeConnectOnboardingResult = {
-  url?: string;
-  error?: string;
-};
 
 /** Create or reuse Stripe Connect account and return onboarding link. Redirect user to returned url. */
 export async function createStripeConnectOnboardingLink(): Promise<CreateStripeConnectOnboardingResult> {
@@ -107,37 +111,6 @@ export async function createStripeConnectOnboardingLink(): Promise<CreateStripeC
 // ---------------------------------------------------------------------------
 // Provider booking management (Phase 1.4)
 // ---------------------------------------------------------------------------
-
-export type ProviderBookingCard = {
-  id: string;
-  ownerName: string;
-  petNames: string[];
-  serviceType: string;
-  startDatetime: Date;
-  endDatetime: Date;
-  totalPriceCents: number;
-  specialInstructions: string | null;
-  status: string;
-  createdAt: Date;
-  stripePaymentIntentId: string | null;
-  walkStartedAt: Date | null;
-  walkEndedAt: Date | null;
-  walkRoute: { lat: number; lng: number; timestamp: number }[] | null;
-  walkDistanceKm: number | null;
-  walkDurationMinutes: number | null;
-  walkSummaryMapUrl: string | null;
-  walkActivities: { type: string; lat: number; lng: number; timestamp: number }[] | null;
-  serviceReport: {
-    arrivalTime?: string;
-    departureTime?: string;
-    notes?: string;
-    photos?: string[];
-    activities?: string[];
-    submittedAt?: string;
-  } | null;
-  hasDispute: boolean;
-  hasGuaranteeClaim: boolean;
-};
 
 export async function getProviderBookings(): Promise<{
   bookings: ProviderBookingCard[];
@@ -199,12 +172,6 @@ export async function getProviderBookings(): Promise<{
     return { bookings: [], error: "Failed to load bookings." };
   }
 }
-
-export type ProviderEarnings = {
-  totalEarnedCents: number;
-  tipsTotalCents: number;
-  completedBookingsCount: number;
-};
 
 export async function getProviderEarnings(): Promise<{ earnings: ProviderEarnings | null; error?: string }> {
   const supabase = await createClient();
@@ -460,16 +427,6 @@ export async function expireStaleBookings(): Promise<{ expired: number; error?: 
 // ---------------------------------------------------------------------------
 // Review responses (Phase 2.2)
 // ---------------------------------------------------------------------------
-
-export type ProviderReviewForDashboard = {
-  id: string;
-  reviewerName: string;
-  rating: number;
-  text: string;
-  createdAt: Date;
-  providerResponse: string | null;
-  responseAt: Date | null;
-};
 
 /** Get current provider's reviews (for dashboard). */
 export async function getProviderReviews(): Promise<{
@@ -728,14 +685,6 @@ export async function uploadServiceReportPhoto(
   }
 }
 
-export type SubmitServiceReportInput = {
-  arrivalTime?: string;
-  departureTime?: string;
-  notes?: string;
-  photos?: string[];
-  activities?: string[];
-};
-
 export async function submitServiceReport(bookingId: string, input: SubmitServiceReportInput): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -783,30 +732,6 @@ const WIZARD_WEIGHTS = {
   cancellationPolicy: 12.5,
 } as const;
 const COMPLETENESS_THRESHOLD = 80;
-
-export type ProviderWizardProfile = {
-  profileId: string;
-  userId: string;
-  slug: string;
-  district: string | null;
-  avatarUrl: string | null;
-  bio: string | null;
-  servicesOffered: { type: string; base_price?: number; additional_pet_price?: number; price_unit?: string; max_pets?: number }[];
-  photos: string[];
-  availability: Record<string, boolean> | null;
-  petTypesAccepted: string | null;
-  maxPets: number | null;
-  idDocumentUrl: string | null;
-  cancellationPolicy: string;
-};
-
-export type ProviderCompletenessResult = {
-  percentage: number;
-  showWizard: boolean;
-  profile: ProviderWizardProfile | null;
-  incompleteSteps: ("profilePhoto" | "bio" | "services" | "photos" | "availability" | "petPrefs" | "idVerification" | "cancellationPolicy")[];
-  error?: string;
-};
 
 /** Ensure Prisma User exists for current Supabase user (e.g. first dashboard visit). */
 async function ensureProviderUser(userId: string, email: string, name: string): Promise<void> {
@@ -1030,8 +955,6 @@ export async function updateProviderWizardBio(bio: string): Promise<{ error?: st
   }
 }
 
-export type ServiceOfferInput = { type: string; base_price: number; additional_pet_price: number; price_unit: string; max_pets: number };
-
 export async function updateProviderWizardServices(servicesOffered: ServiceOfferInput[]): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -1138,19 +1061,6 @@ export async function updateProviderWizardCancellationPolicy(policy: string): Pr
 // Home details (Phase 6.3)
 // ---------------------------------------------------------------------------
 
-export type ProviderHomeDetails = {
-  homeType: string | null;
-  hasYard: boolean | null;
-  yardFenced: boolean | null;
-  smokingHome: boolean | null;
-  petsInHome: string | null;
-  childrenInHome: string | null;
-  dogsOnFurniture: boolean | null;
-  pottyBreakFrequency: string | null;
-  typicalDay: string | null;
-  infoWantedAboutPet: string | null;
-};
-
 export async function getProviderHomeDetailsForEdit(): Promise<ProviderHomeDetails | null> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -1172,19 +1082,6 @@ export async function getProviderHomeDetailsForEdit(): Promise<ProviderHomeDetai
   });
   return profile;
 }
-
-export type UpdateProviderHomeDetailsInput = {
-  homeType?: string | null;
-  hasYard?: boolean | null;
-  yardFenced?: boolean | null;
-  smokingHome?: boolean | null;
-  petsInHome?: string | null;
-  childrenInHome?: string | null;
-  dogsOnFurniture?: boolean | null;
-  pottyBreakFrequency?: string | null;
-  typicalDay?: string | null;
-  infoWantedAboutPet?: string | null;
-};
 
 export async function updateProviderHomeDetails(input: UpdateProviderHomeDetailsInput): Promise<{ error?: string }> {
   const supabase = await createClient();
@@ -1217,13 +1114,6 @@ export async function updateProviderHomeDetails(input: UpdateProviderHomeDetails
 // ---------------------------------------------------------------------------
 // Holiday availability (6.6e)
 // ---------------------------------------------------------------------------
-
-export const HOLIDAY_OPTIONS: { id: string; label: string }[] = [
-  { id: "christmas-2026", label: "Christmas 2026" },
-  { id: "new-year-2027", label: "New Year 2027" },
-  { id: "easter-2027", label: "Easter 2027" },
-  { id: "summer-2027", label: "Summer 2027" },
-];
 
 export async function getProviderHolidaysForEdit(): Promise<{ confirmedHolidays: string[] } | null> {
   const supabase = await createClient();

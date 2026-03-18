@@ -25,7 +25,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
-import type { ProviderStripeStatus, ProviderBookingCard, ProviderReviewForDashboard, ProviderEarnings } from "./actions";
+import type { ProviderStripeStatus, ProviderBookingCard, ProviderReviewForDashboard, ProviderEarnings } from "@/lib/utils/provider-helpers";
 import type { ProviderMeetAndGreetCard } from "@/lib/meet-and-greet/actions";
 import {
   getProviderMeetAndGreets,

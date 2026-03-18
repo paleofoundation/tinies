@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, Camera, Upload } from "lucide-react";
 import { ServiceType, CancellationPolicy } from "@/lib/constants";
-import type { ProviderWizardProfile } from "./actions";
+import type { ProviderWizardProfile } from "@/lib/utils/provider-helpers";
 import {
   uploadProviderWizardFile,
   updateProviderWizardPhoto,
@@ -19,7 +19,7 @@ import {
   getProviderAreaPriceGuidance,
 } from "./actions";
 import { VerifyIdentityButton } from "./VerifyIdentityButton";
-import type { ServiceOfferInput } from "./actions";
+import type { ServiceOfferInput } from "@/lib/utils/provider-helpers";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 const SLOTS = ["Morning", "Afternoon", "Evening"] as const;
