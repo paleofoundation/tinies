@@ -5,6 +5,9 @@ import { prisma } from "@/lib/prisma";
 import { getStripeServer } from "@/lib/stripe";
 import { DonationSource, GuardianTier } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { sendEmail } from "@/lib/email";
+import MonthlyGivingReceiptEmail from "@/lib/email/templates/monthly-giving-receipt";
+import CharityPayoutNotificationEmail from "@/lib/email/templates/charity-payout-notification";
 
 const GUARDIAN_PRODUCT_ID = process.env.STRIPE_GUARDIAN_PRODUCT_ID;
 
@@ -936,5 +939,53 @@ export async function updateShowOnLeaderboard(show: boolean): Promise<{ error?: 
   } catch (e) {
     console.error("updateShowOnLeaderboard", e);
     return { error: e instanceof Error ? e.message : "Failed to update." };
+  }
+}
+
+/** Send monthly giving receipt to a donor. Call from cron or admin for each donor who had activity that month. Does not throw. */
+export async function sendMonthlyGivingReceiptEmail(params: {
+  to: string;
+  month: string;
+  roundUpsEur: string;
+  guardianEur: string;
+  totalEur: string;
+  charityNames: string[];
+}): Promise<void> {
+  try {
+    await sendEmail({
+      to: params.to,
+      subject: `Your Tinies Giving summary for ${params.month}`,
+      react: MonthlyGivingReceiptEmail({
+        month: params.month,
+        roundUpsEur: params.roundUpsEur,
+        guardianEur: params.guardianEur,
+        totalEur: params.totalEur,
+        charityNames: params.charityNames,
+      }),
+    });
+  } catch (e) {
+    console.error("sendMonthlyGivingReceiptEmail failed", e);
+  }
+}
+
+/** Send charity payout notification to charity contact. Call when a payout is recorded. Does not throw. */
+export async function sendCharityPayoutNotificationEmail(params: {
+  to: string;
+  month: string;
+  amountEur: string;
+  donorCount: number;
+}): Promise<void> {
+  try {
+    await sendEmail({
+      to: params.to,
+      subject: `Your Tinies Giving payout for ${params.month}`,
+      react: CharityPayoutNotificationEmail({
+        month: params.month,
+        amountEur: params.amountEur,
+        donorCount: params.donorCount,
+      }),
+    });
+  } catch (e) {
+    console.error("sendCharityPayoutNotificationEmail failed", e);
   }
 }

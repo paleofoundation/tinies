@@ -3,8 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
+import { sendEmail } from "@/lib/email";
+import NewMessageNotificationEmail from "@/lib/email/templates/new-message-notification";
 
 const PREVIEW_LENGTH = 80;
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+const NEW_MESSAGE_EMAIL_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 /** Deterministic conversation id from two user ids (sorted). */
 export function getConversationId(userId1: string, userId2: string): string {
@@ -200,6 +204,42 @@ export async function sendMessage(
         photos: input.photos ?? [],
       },
     });
+    try {
+      const since = new Date(Date.now() - NEW_MESSAGE_EMAIL_WINDOW_MS);
+      const count = await prisma.message.count({
+        where: {
+          conversationId,
+          recipientId: input.recipientId,
+          createdAt: { gte: since },
+        },
+      });
+      if (count === 1) {
+        const [sender, recipient] = await Promise.all([
+          prisma.user.findUnique({
+            where: { id: senderId },
+            select: { name: true },
+          }),
+          prisma.user.findUnique({
+            where: { id: input.recipientId },
+            select: { email: true },
+          }),
+        ]);
+        if (recipient?.email && sender?.name) {
+          const context = input.bookingId ? "your booking" : "your conversation";
+          await sendEmail({
+            to: recipient.email,
+            subject: `New message from ${sender.name} on Tinies`,
+            react: NewMessageNotificationEmail({
+              senderName: sender.name,
+              context,
+              messagesUrl: `${APP_URL}/dashboard/messages/${conversationId}`,
+            }),
+          });
+        }
+      }
+    } catch (emailErr) {
+      console.error("sendMessage: new-message notification email failed", emailErr);
+    }
     revalidatePath("/dashboard/messages");
     revalidatePath(`/dashboard/messages/${conversationId}`);
     return {};

@@ -10,6 +10,7 @@ import {
 } from "@/lib/stripe";
 import { sendEmail } from "@/lib/email";
 import BookingAcceptedEmail from "@/lib/email/templates/booking-accepted";
+import PaymentReceiptEmail from "@/lib/email/templates/payment-receipt";
 import BookingDeclinedEmail from "@/lib/email/templates/booking-declined";
 import BookingExpiredEmail from "@/lib/email/templates/booking-expired";
 import { sendSMS, buildBookingAcceptedSMS } from "@/lib/sms";
@@ -252,6 +253,33 @@ export async function acceptBooking(bookingId: string): Promise<{ error?: string
             date: dateStr,
           }),
         });
+        const serviceLabel =
+          full.serviceType === "walking"
+            ? "Dog walking"
+            : full.serviceType === "sitting"
+              ? "Pet sitting"
+              : full.serviceType === "boarding"
+                ? "Overnight boarding"
+                : full.serviceType === "drop_in"
+                  ? "Drop-in visit"
+                  : full.serviceType === "daycare"
+                    ? "Daycare"
+                    : full.serviceType;
+        const amountEur = (full.totalPrice / 100).toFixed(2);
+        try {
+          await sendEmail({
+            to: full.owner.email,
+            subject: `Payment receipt: EUR ${amountEur}`,
+            react: PaymentReceiptEmail({
+              amountEur,
+              serviceType: serviceLabel,
+              providerName: full.provider.name,
+              transactionId: full.stripePaymentIntentId ?? "",
+            }),
+          });
+        } catch (receiptErr) {
+          console.error("acceptBooking: payment receipt email failed", receiptErr);
+        }
       }
       if (full?.owner?.phoneVerified && full?.owner?.phone) {
         await sendSMS({

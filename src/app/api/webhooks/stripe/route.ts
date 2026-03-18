@@ -3,12 +3,14 @@ import { prisma } from "@/lib/prisma";
 import { constructWebhookEvent } from "@/lib/stripe";
 import { sendEmail } from "@/lib/email";
 import ProviderIdentityVerifiedEmail from "@/lib/email/templates/provider-identity-verified";
+import PayoutProcessedEmail from "@/lib/email/templates/payout-processed";
 import { DonationSource } from "@prisma/client";
 
 const HANDLED_TYPES = [
   "payment_intent.succeeded",
   "payment_intent.canceled",
   "charge.refunded",
+  "transfer.created",
   "identity.verification_session.verified",
   "identity.verification_session.requires_input",
 ] as const;
@@ -129,6 +131,29 @@ export async function POST(request: NextRequest) {
         // Refund processed (full or partial)
         const charge = event.data.object as { id: string };
         void charge;
+        break;
+      }
+      case "transfer.created": {
+        const transfer = event.data.object as { id: string; amount: number; destination?: string };
+        const destination = transfer.destination;
+        if (destination && transfer.amount > 0) {
+          try {
+            const profile = await prisma.providerProfile.findFirst({
+              where: { stripeConnectAccountId: destination },
+              include: { user: { select: { email: true } } },
+            });
+            if (profile?.user?.email) {
+              const amountEur = (transfer.amount / 100).toFixed(2);
+              await sendEmail({
+                to: profile.user.email,
+                subject: `Your payout of EUR ${amountEur} has been sent`,
+                react: PayoutProcessedEmail({ amountEur }),
+              });
+            }
+          } catch (e) {
+            console.error("Stripe webhook: payout email failed", e);
+          }
+        }
         break;
       }
       case "identity.verification_session.verified": {

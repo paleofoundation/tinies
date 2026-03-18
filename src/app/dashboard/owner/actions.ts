@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getStripeServer } from "@/lib/stripe";
 import { sendEmail } from "@/lib/email";
 import ReviewReceivedEmail from "@/lib/email/templates/review-received";
+import OwnerCancelledEmail from "@/lib/email/templates/owner-cancelled";
 import { validatePetFormData, MAX_PHOTOS } from "@/lib/validations/pet";
 import { reviewFormSchema, MAX_PHOTOS as MAX_REVIEW_PHOTOS } from "@/lib/validations/review";
 import type { CancellationPolicy } from "@prisma/client";
@@ -516,6 +517,14 @@ export async function cancelBooking(bookingId: string): Promise<{ error?: string
   }
 
   try {
+    const ownerName = (user.user_metadata?.name as string) ?? "A pet owner";
+    const dateStr = new Date(booking.startDatetime).toLocaleDateString("en-GB", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+
     if (booking.status === "pending") {
       if (booking.stripePaymentIntentId) {
         try {
@@ -533,6 +542,25 @@ export async function cancelBooking(bookingId: string): Promise<{ error?: string
           cancelledBy: user.id,
         },
       });
+      try {
+        const providerUser = await prisma.user.findUnique({
+          where: { id: booking.providerId },
+          select: { email: true },
+        });
+        if (providerUser?.email) {
+          await sendEmail({
+            to: providerUser.email,
+            subject: `${ownerName} cancelled the booking for ${dateStr}`,
+            react: OwnerCancelledEmail({
+              ownerName,
+              date: dateStr,
+              refundNote: "No charge was made.",
+            }),
+          });
+        }
+      } catch (emailErr) {
+        console.error("cancelBooking: owner-cancelled email failed", emailErr);
+      }
     } else {
       const policy =
         booking.provider.providerProfile?.cancellationPolicy ?? "flexible";
@@ -567,6 +595,29 @@ export async function cancelBooking(bookingId: string): Promise<{ error?: string
             cancelledBy: user.id,
           },
         });
+      }
+      const refundNote =
+        refundCents > 0
+          ? `Refund of EUR ${(refundCents / 100).toFixed(2)} has been initiated.`
+          : "No refund applies under the cancellation policy.";
+      try {
+        const providerUser = await prisma.user.findUnique({
+          where: { id: booking.providerId },
+          select: { email: true },
+        });
+        if (providerUser?.email) {
+          await sendEmail({
+            to: providerUser.email,
+            subject: `${ownerName} cancelled the booking for ${dateStr}`,
+            react: OwnerCancelledEmail({
+              ownerName,
+              date: dateStr,
+              refundNote,
+            }),
+          });
+        }
+      } catch (emailErr) {
+        console.error("cancelBooking: owner-cancelled email failed", emailErr);
       }
     }
     revalidatePath("/dashboard/owner");

@@ -4,6 +4,42 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { PlacementStatus } from "@prisma/client";
+import { sendEmail } from "@/lib/email";
+import AdoptionStatusUpdateEmail from "@/lib/email/templates/adoption-status-update";
+import PostAdoptionCheckinEmail from "@/lib/email/templates/post-adoption-checkin";
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+
+const PLACEMENT_STATUS_LABELS: Record<PlacementStatus, string> = {
+  preparing: "Preparation in progress",
+  vet_complete: "Vet prep complete",
+  transport_booked: "Transport booked",
+  in_transit: "In transit",
+  delivered: "Delivered",
+  follow_up: "Follow-up",
+};
+
+/** Send post-adoption check-in email to adopter. Call from cron when timeframe (1 week, 1 month, 3 months) is reached after arrival. Does not throw. */
+export async function sendPostAdoptionCheckinEmail(params: {
+  to: string;
+  animalName: string;
+  timeframe: string;
+}): Promise<void> {
+  try {
+    const shareUpdateUrl = `${APP_URL}/dashboard/adopter`;
+    await sendEmail({
+      to: params.to,
+      subject: `It's been ${params.timeframe} since ${params.animalName} arrived!`,
+      react: PostAdoptionCheckinEmail({
+        animalName: params.animalName,
+        timeframe: params.timeframe,
+        shareUpdateUrl,
+      }),
+    });
+  } catch (e) {
+    console.error("sendPostAdoptionCheckinEmail failed", e);
+  }
+}
 
 export type PlacementRow = {
   id: string;
@@ -179,6 +215,28 @@ export async function advancePlacementStatus(id: string, nextStatus: PlacementSt
       where: { id },
       data: { status: nextStatus },
     });
+    try {
+      const placement = await prisma.adoptionPlacement.findUnique({
+        where: { id },
+        include: {
+          listing: { select: { name: true } },
+          adopter: { select: { email: true } },
+        },
+      });
+      if (placement?.adopter?.email && placement.listing?.name) {
+        const statusMessage = PLACEMENT_STATUS_LABELS[nextStatus] ?? nextStatus;
+        await sendEmail({
+          to: placement.adopter.email,
+          subject: `Update on ${placement.listing.name}`,
+          react: AdoptionStatusUpdateEmail({
+            animalName: placement.listing.name,
+            statusMessage,
+          }),
+        });
+      }
+    } catch (emailErr) {
+      console.error("advancePlacementStatus: adoption status/milestone email failed", emailErr);
+    }
     revalidatePath("/dashboard/admin");
     revalidatePath(`/dashboard/admin/adoptions/placements/${id}`);
     return {};
