@@ -53,6 +53,16 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
           Manage adoption listings and platform settings.
         </p>
 
+        <div className="mt-6 flex flex-wrap gap-4">
+          <Link
+            href="/dashboard/admin/invite-charity"
+            className="inline-flex h-12 items-center justify-center rounded-[var(--radius-pill)] border-2 px-6 font-semibold transition-opacity hover:opacity-90"
+            style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", borderColor: "var(--color-primary)", color: "var(--color-primary)" }}
+          >
+            Invite Charity
+          </Link>
+        </div>
+
         {/* Adoption Listings tab */}
         <section className="mt-8 rounded-[var(--radius-lg)] border p-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

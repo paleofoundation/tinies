@@ -181,6 +181,7 @@ model User {
   meetAndGreetsAsOwner MeetAndGreet[]       @relation("MeetAndGreetOwner")
   meetAndGreetsAsProvider MeetAndGreet[]    @relation("MeetAndGreetProvider")
   givingDistributionsApproved GivingFundDistribution[]
+  charity Charity?
 
   @@index([email])
   @@index([role])
@@ -555,9 +556,12 @@ model Charity {
   annualUpdateDate    DateTime? @map("annual_update_date")
   slug                String    @unique
   active              Boolean   @default(true)
+  userId              String?   @unique @map("user_id")
+  inviteToken         String?   @unique @map("invite_token")
   createdAt           DateTime  @default(now()) @map("created_at")
   updatedAt           DateTime  @updatedAt @map("updated_at")
 
+  user                User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
   donations           Donation[]
   guardianSubscriptions GuardianSubscription[]
   userGivingPreferences UserGivingPreference[]
@@ -566,6 +570,7 @@ model Charity {
   @@index([featured])
   @@index([slug])
   @@index([active])
+  @@index([userId])
   @@map("charities")
 }
 

@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import { MessageCircle } from "lucide-react";
 import { getUnreadMessageCount } from "@/app/dashboard/messages/actions";
+import { getLinkedCharity } from "@/lib/charity/actions";
 
 const NAV_LINKS = [
   { href: "/services", label: "Services" },
@@ -30,6 +31,7 @@ export function Header() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [linkedCharity, setLinkedCharity] = useState<{ slug: string; name: string } | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -48,8 +50,10 @@ export function Header() {
   useEffect(() => {
     if (!user) {
       setUnreadCount(0);
+      setLinkedCharity(null);
       return;
     }
+    getLinkedCharity().then((c) => setLinkedCharity(c));
     getUnreadMessageCount().then(({ count }) => setUnreadCount(count));
     const interval = setInterval(() => {
       getUnreadMessageCount().then(({ count }) => setUnreadCount(count));
@@ -104,6 +108,15 @@ export function Header() {
           {!loading && (
             user ? (
               <div className="flex items-center gap-3">
+                {linkedCharity && (
+                  <Link
+                    href="/dashboard/charity"
+                    className="text-sm font-medium transition-colors hover:opacity-80"
+                    style={{ color: "var(--color-primary)" }}
+                  >
+                    Charity Dashboard
+                  </Link>
+                )}
                 <Link
                   href="/dashboard/messages"
                   className="relative flex items-center rounded-[var(--radius-lg)] p-1.5 transition-opacity hover:opacity-80"
