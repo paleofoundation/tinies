@@ -79,6 +79,7 @@ export function ReviewForm({
           return;
         }
         toast.success("Review updated.");
+        onSuccess();
       } else {
         const formData = new FormData();
         formData.set("bookingId", bookingId);
@@ -93,8 +94,6 @@ export function ReviewForm({
         }
         toast.success("Thank you for your review!");
         onSuccess(result.reviewId);
-      } else {
-        onSuccess();
       }
       router.refresh();
       onClose();

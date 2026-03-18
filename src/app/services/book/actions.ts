@@ -13,6 +13,7 @@ import {
   computeBookingTotalCents,
   computeRoundUpCents,
 } from "@/lib/booking-utils";
+import { getServiceConfig } from "@/lib/utils/booking-helpers";
 
 const SERVICE_TYPE_LABELS: Record<string, string> = {
   walking: "Dog walking",
@@ -150,14 +151,6 @@ export async function getProviderReviewsBySlug(
     providerResponse: r.providerResponse,
     responseAt: r.responseAt,
   }));
-}
-
-/** Get service config for a given service type from provider's offers. */
-export function getServiceConfig(
-  provider: ProviderForBooking,
-  serviceType: string
-): ServiceOffer | undefined {
-  return provider.services.find((s) => s.type === serviceType);
 }
 
 export type CreateBookingWithPaymentIntentInput = {

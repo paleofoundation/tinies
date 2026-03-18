@@ -165,15 +165,17 @@ export function OwnerGivingSettings({ data }: Props) {
             )}
           </div>
         ) : (
-          <p className="mt-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>
-            Give monthly to animal rescue. Choose your tier and charity.
-          </p>
-          <Link
-            href="/giving/become-a-guardian"
-            className="mt-3 inline-flex h-10 items-center rounded-[var(--radius-lg)] bg-[var(--color-primary)] px-4 text-sm font-semibold text-white hover:opacity-90"
-          >
-            Become a Guardian
-          </Link>
+          <>
+            <p className="mt-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+              Give monthly to animal rescue. Choose your tier and charity.
+            </p>
+            <Link
+              href="/giving/become-a-guardian"
+              className="mt-3 inline-flex h-10 items-center rounded-[var(--radius-lg)] bg-[var(--color-primary)] px-4 text-sm font-semibold text-white hover:opacity-90"
+            >
+              Become a Guardian
+            </Link>
+          </>
         )}
       </section>
     </div>

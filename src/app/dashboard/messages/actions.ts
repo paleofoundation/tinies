@@ -5,16 +5,13 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email";
 import NewMessageNotificationEmail from "@/lib/email/templates/new-message-notification";
+import { getConversationId } from "@/lib/utils/conversation";
 
 const PREVIEW_LENGTH = 80;
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 const NEW_MESSAGE_EMAIL_WINDOW_MS = 24 * 60 * 60 * 1000;
 
-/** Deterministic conversation id from two user ids (sorted). */
-export function getConversationId(userId1: string, userId2: string): string {
-  const [a, b] = [userId1, userId2].sort();
-  return `conv_${a}_${b}`;
-}
+export { getConversationId };
 
 export type ConversationSummary = {
   conversationId: string;
