@@ -2,10 +2,20 @@ import type { Metadata } from "next";
 import { Heart, MapPin, Filter } from "lucide-react";
 import Link from "next/link";
 
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+
 export const metadata: Metadata = {
   title: "Adopt a Tiny | Rescue Animals in Cyprus",
   description:
     "Every tiny deserves a home. Rescue organisations post their own adoption listings on Tinies. Browse dogs and cats, apply through the platform, and connect with rescues and transport providers.",
+  openGraph: {
+    title: "Adopt a Tiny | Rescue Animals in Cyprus",
+    description: "Every tiny deserves a home. Browse rescue animals in Cyprus and apply to adopt through Tinies.",
+    url: `${BASE_URL}/adopt`,
+    siteName: "Tinies",
+    type: "website",
+  },
+  twitter: { card: "summary_large_image", title: "Adopt a Tiny | Rescue Animals in Cyprus", description: "Every tiny deserves a home. Browse rescue animals in Cyprus and apply to adopt through Tinies." },
 };
 
 const DISTRICTS = [

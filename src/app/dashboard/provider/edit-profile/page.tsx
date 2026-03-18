@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { ServiceType, CancellationPolicy } from "@/lib/constants";
 import { ServiceAreaPicker, type ServiceAreaValue } from "@/components/maps";
 import { VerifyIdentityButton } from "../VerifyIdentityButton";
-import { getProviderHomeDetailsForEdit, updateProviderHomeDetails } from "../actions";
+import { getProviderHomeDetailsForEdit, updateProviderHomeDetails, getProviderHolidaysForEdit, updateProviderHolidays, HOLIDAY_OPTIONS } from "../actions";
 
 const DISTRICTS = ["Nicosia", "Limassol", "Larnaca", "Paphos", "Famagusta"] as const;
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
@@ -67,6 +67,8 @@ export default function ProviderEditProfilePage() {
   const [typicalDay, setTypicalDay] = useState("");
   const [infoWantedAboutPet, setInfoWantedAboutPet] = useState("");
   const [homeDetailsLoaded, setHomeDetailsLoaded] = useState(false);
+  const [confirmedHolidays, setConfirmedHolidays] = useState<string[]>([]);
+  const [holidaysLoaded, setHolidaysLoaded] = useState(false);
 
   const bioLength = bio.length;
   const bioValid = bioLength >= 200 && bioLength <= 1000;
@@ -119,6 +121,15 @@ export default function ProviderEditProfilePage() {
     });
     return () => { cancelled = true; };
   }, []);
+  useEffect(() => {
+    let cancelled = false;
+    getProviderHolidaysForEdit().then((data) => {
+      if (cancelled || !data) return;
+      setConfirmedHolidays(data.confirmedHolidays);
+      setHolidaysLoaded(true);
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -127,20 +138,24 @@ export default function ProviderEditProfilePage() {
       return;
     }
     setSubmitting(true);
-    const homeErr = await updateProviderHomeDetails({
-      homeType: homeType || null,
-      hasYard: hasYard === "" ? null : hasYard,
-      yardFenced: yardFenced === "" ? null : yardFenced,
-      smokingHome: smokingHome === "" ? null : smokingHome,
-      petsInHome: petsInHome || null,
-      childrenInHome: childrenInHome || null,
-      dogsOnFurniture: dogsOnFurniture === "" ? null : dogsOnFurniture,
-      pottyBreakFrequency: pottyBreakFrequency || null,
-      typicalDay: typicalDay || null,
-      infoWantedAboutPet: infoWantedAboutPet || null,
-    });
+    const [homeErr, holidaysErr] = await Promise.all([
+      updateProviderHomeDetails({
+        homeType: homeType || null,
+        hasYard: hasYard === "" ? null : hasYard,
+        yardFenced: yardFenced === "" ? null : yardFenced,
+        smokingHome: smokingHome === "" ? null : smokingHome,
+        petsInHome: petsInHome || null,
+        childrenInHome: childrenInHome || null,
+        dogsOnFurniture: dogsOnFurniture === "" ? null : dogsOnFurniture,
+        pottyBreakFrequency: pottyBreakFrequency || null,
+        typicalDay: typicalDay || null,
+        infoWantedAboutPet: infoWantedAboutPet || null,
+      }),
+      updateProviderHolidays(confirmedHolidays),
+    ]);
     setSubmitting(false);
     if (homeErr.error) toast.error(homeErr.error);
+    else if (holidaysErr.error) toast.error(holidaysErr.error);
     else toast.success("Profile saved successfully.");
   }
 
@@ -482,6 +497,28 @@ export default function ProviderEditProfilePage() {
               className="mt-4 w-full rounded-[var(--radius-lg)] border border-[var(--color-border)]  px-4 py-3  focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
               placeholder="Feeding schedule, any anxieties, how they get on with other dogs..."
             />
+          </section>
+
+          {/* Holiday Availability */}
+          <section id="holidays" className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-8 shadow-[var(--shadow-md)] sm:p-8">
+            <h2 className="font-normal " style={{ fontFamily: "var(--font-heading), serif" }}>Holiday Availability</h2>
+            <p className="mt-1 text-sm ">Select periods when you&apos;re available. Owners can filter search by these.</p>
+            {!holidaysLoaded && <p className="mt-2 text-sm " style={{ color: "var(--color-text-secondary)" }}>Loading…</p>}
+            {holidaysLoaded && (
+              <div className="mt-4 flex flex-wrap gap-3">
+                {HOLIDAY_OPTIONS.map((opt) => (
+                  <label key={opt.id} className="flex cursor-pointer items-center gap-2 rounded-[var(--radius-lg)] border px-4 py-2.5 transition-colors hover:border-[var(--color-primary)]/40" style={{ borderColor: "var(--color-border)" }}>
+                    <input
+                      type="checkbox"
+                      checked={confirmedHolidays.includes(opt.id)}
+                      onChange={() => setConfirmedHolidays((prev) => prev.includes(opt.id) ? prev.filter((id) => id !== opt.id) : [...prev, opt.id])}
+                      className="h-4 w-4 rounded border-[var(--color-primary)]/30 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
+                    />
+                    <span>{opt.label}</span>
+                  </label>
+                ))}
+              </div>
+            )}
           </section>
 
           {/* Verification */}

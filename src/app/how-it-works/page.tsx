@@ -12,10 +12,20 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+
 export const metadata: Metadata = {
   title: "How It Works | Tinies Pet Care & Adoption",
   description:
     "Tinies is a marketplace connecting pet owners with independent providers, and adopters with rescues and transport. We don't provide services ourselves — we give you the platform, payments, and tools.",
+  openGraph: {
+    title: "How It Works | Tinies Pet Care & Adoption",
+    description: "Tinies connects pet owners with verified providers and adopters with rescues. Book care or adopt through one platform.",
+    url: `${BASE_URL}/how-it-works`,
+    siteName: "Tinies",
+    type: "website",
+  },
+  twitter: { card: "summary_large_image", title: "How It Works | Tinies Pet Care & Adoption", description: "Tinies connects pet owners with verified providers and adopters with rescues." },
 };
 
 const OWNER_STEPS = [

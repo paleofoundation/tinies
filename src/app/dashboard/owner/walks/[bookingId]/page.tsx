@@ -14,6 +14,7 @@ export default async function OwnerWatchLiveWalkPage({ params }: Props) {
     <WatchLiveWalkClient
       bookingId={bookingId}
       initialRoute={data.walkRoute}
+      initialWalkActivities={data.walkActivities}
       initialStartedAt={data.walkStartedAt}
       initialEndedAt={data.walkEndedAt}
       initialStatus={data.status}

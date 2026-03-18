@@ -5,10 +5,24 @@ import { getGivingPageData, getCommunityOfGivers, getRecentDonationsForTicker } 
 import { DonationTicker } from "@/components/giving/DonationTicker";
 import { CommunityOfGivers } from "@/components/giving/CommunityOfGivers";
 
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+
 export const metadata: Metadata = {
   title: "Tinies Giving | Transparency & Impact",
   description:
     "Every booking helps. 10% of our commission goes to animal rescue. Round up at checkout, become a Tinies Guardian, or support featured charities. See how we give.",
+  openGraph: {
+    title: "Tinies Giving | Transparency & Impact",
+    description: "Every booking helps. 10% of our commission goes to animal rescue. Round up at checkout, become a Tinies Guardian, or support featured charities.",
+    url: `${BASE_URL}/giving`,
+    siteName: "Tinies",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Tinies Giving | Transparency & Impact",
+    description: "Every booking helps. 10% of our commission goes to animal rescue.",
+  },
 };
 
 const GUARDIAN_TIERS = [
@@ -33,8 +47,23 @@ export default async function GivingPage() {
     getRecentDonationsForTicker(20),
   ]);
 
+  const donateActionJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "DonateAction",
+    name: "Donate to Tinies Giving",
+    target: {
+      "@type": "EntryPoint",
+      url: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app"}/giving`,
+    },
+    description: "10% of Tinies proceeds go to animal rescue. Round up at checkout, become a Guardian, or support featured charities.",
+  };
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(donateActionJsonLd) }}
+      />
       {/* Hero */}
       <section className="relative overflow-hidden px-4 pt-10 pb-14 sm:px-6 sm:pt-14 sm:pb-20 lg:px-8">
         <div className="absolute inset-0 rounded-b-[3rem] sm:rounded-b-[4rem]" style={{ backgroundColor: "rgba(10, 110, 92, 0.05)" }} />

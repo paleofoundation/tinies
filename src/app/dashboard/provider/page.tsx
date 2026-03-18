@@ -2,6 +2,7 @@ import {
   getProviderStripeStatus,
   getProviderBookings,
   getProviderReviews,
+  getProviderEarnings,
   expireStaleBookings,
   getProviderProfileCompleteness,
   getProviderAreaPriceGuidance,
@@ -12,7 +13,7 @@ import { ProviderDashboardClient } from "./ProviderDashboardClient";
 import { ProviderOnboardingWizard } from "./ProviderOnboardingWizard";
 
 export default async function ProviderDashboardPage() {
-  const [completeness, stripeStatus, bookingsResult, reviews, meetAndGreets, disputesResult, claimsResult] = await Promise.all([
+  const [completeness, stripeStatus, bookingsResult, reviews, earningsResult, meetAndGreets, disputesResult, claimsResult] = await Promise.all([
     getProviderProfileCompleteness(),
     getProviderStripeStatus(),
     (async () => {
@@ -20,6 +21,7 @@ export default async function ProviderDashboardPage() {
       return getProviderBookings();
     })(),
     getProviderReviews(),
+    getProviderEarnings(),
     getProviderMeetAndGreets(),
     getDisputesForUser().then((r) => (r.error ? { disputes: [] } : r)),
     getClaimsForUser().then((r) => (r.error ? { claims: [] } : r)),
@@ -36,6 +38,7 @@ export default async function ProviderDashboardPage() {
   }
 
   const { bookings } = bookingsResult;
+  const earnings = earningsResult.earnings ?? null;
   const { disputes: disputesList = [] } = disputesResult;
   const { claims: claimsList = [] } = claimsResult;
   const { requested = [], confirmed = [], completed = [] } = meetAndGreets.error ? {} : meetAndGreets;
@@ -45,6 +48,7 @@ export default async function ProviderDashboardPage() {
       stripeStatus={stripeStatus}
       initialBookings={bookings}
       initialReviews={reviews}
+      initialEarnings={earnings}
       initialMeetAndGreets={{ requested, confirmed, completed }}
       initialDisputes={disputesList}
       initialClaims={claimsList}

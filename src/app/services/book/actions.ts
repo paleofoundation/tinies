@@ -40,6 +40,7 @@ export type ProviderForBooking = {
   cancellationPolicy: string;
   avgRating: number | null;
   reviewCount: number;
+  repeatClientCount: number;
   serviceAreaLat: number | null;
   serviceAreaLng: number | null;
   serviceAreaRadiusKm: number | null;
@@ -54,6 +55,7 @@ export type ProviderForBooking = {
   pottyBreakFrequency: string | null;
   typicalDay: string | null;
   infoWantedAboutPet: string | null;
+  confirmedHolidays: string[];
 };
 
 /** Get provider by slug for the booking page. Returns null if not found. */
@@ -83,6 +85,7 @@ export async function getProviderBySlug(
     cancellationPolicy: profile.cancellationPolicy,
     avgRating: profile.avgRating,
     reviewCount: profile.reviewCount,
+    repeatClientCount: profile.repeatClientCount,
     serviceAreaLat: profile.serviceAreaLat,
     serviceAreaLng: profile.serviceAreaLng,
     serviceAreaRadiusKm: profile.serviceAreaRadiusKm,
@@ -97,6 +100,7 @@ export async function getProviderBySlug(
     pottyBreakFrequency: profile.pottyBreakFrequency,
     typicalDay: profile.typicalDay,
     infoWantedAboutPet: profile.infoWantedAboutPet,
+    confirmedHolidays: profile.confirmedHolidays,
   };
 }
 

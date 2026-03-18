@@ -22,6 +22,7 @@ export default async function ServicesSearchPage({ searchParams }: Props) {
   const homeType = typeof params.homeType === "string" ? params.homeType : "";
   const hasYardParam = typeof params.hasYard === "string" ? params.hasYard : "";
   const hasYard = hasYardParam === "true" ? true : undefined;
+  const holiday = typeof params.holiday === "string" ? params.holiday : "";
 
   const filters = {
     serviceType: serviceType || undefined,
@@ -32,6 +33,7 @@ export default async function ServicesSearchPage({ searchParams }: Props) {
     cancellationPolicy: cancellationPolicy || undefined,
     homeType: homeType || undefined,
     hasYard,
+    holiday: holiday || undefined,
     lat: Number.isFinite(lat) ? lat : undefined,
     lng: Number.isFinite(lng) ? lng : undefined,
     sort: sort as "distance" | "rating" | "price_low" | "price_high" | "review_count" | undefined,
@@ -53,6 +55,7 @@ export default async function ServicesSearchPage({ searchParams }: Props) {
       initialCancellationPolicy={cancellationPolicy || undefined}
       initialHomeType={homeType || undefined}
       initialHasYard={hasYard}
+      initialHoliday={holiday || undefined}
     />
   );
 }

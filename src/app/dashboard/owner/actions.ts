@@ -351,8 +351,18 @@ export type OwnerBookingCard = {
   walkDistanceKm: number | null;
   walkDurationMinutes: number | null;
   walkSummaryMapUrl: string | null;
+  serviceReport: {
+    arrivalTime?: string;
+    departureTime?: string;
+    notes?: string;
+    photos?: string[];
+    activities?: string[];
+    submittedAt?: string;
+  } | null;
   hasDispute: boolean;
   hasGuaranteeClaim: boolean;
+  /** Tip amount in cents if owner already tipped. */
+  tipAmount: number | null;
 };
 
 /** Get current user's bookings as owner, with provider and pet names. */
@@ -410,8 +420,10 @@ export async function getOwnerBookings(): Promise<{
         walkDistanceKm: b.walkDistanceKm,
         walkDurationMinutes: b.walkDurationMinutes,
         walkSummaryMapUrl: b.walkSummaryMapUrl,
+        serviceReport: b.serviceReport as OwnerBookingCard["serviceReport"],
         hasDispute: b.hasDispute,
         hasGuaranteeClaim: b.hasGuaranteeClaim,
+        tipAmount: b.tipAmount,
       };
     });
     return { bookings };
@@ -421,8 +433,44 @@ export async function getOwnerBookings(): Promise<{
   }
 }
 
+/** Create a Stripe PaymentIntent for tipping a provider on a completed booking. 100% goes to provider. Returns clientSecret for Stripe Elements. */
+export async function createTipPaymentIntent(bookingId: string, amountCents: number): Promise<{ clientSecret: string | null; error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { clientSecret: null, error: "You must be signed in to tip." };
+  if (amountCents < 100) return { clientSecret: null, error: "Minimum tip is €1." };
+  if (amountCents > 10000) return { clientSecret: null, error: "Maximum tip is €100." };
+  const booking = await prisma.booking.findFirst({
+    where: { id: bookingId, ownerId: user.id, status: "completed" },
+    select: { id: true, tipAmount: true, tipStripePaymentIntentId: true, providerId: true },
+  });
+  if (!booking) return { clientSecret: null, error: "Booking not found or not completed." };
+  if (booking.tipAmount != null || booking.tipStripePaymentIntentId) return { clientSecret: null, error: "You have already tipped for this booking." };
+  const profile = await prisma.providerProfile.findUnique({
+    where: { userId: booking.providerId },
+    select: { stripeConnectAccountId: true },
+  });
+  if (!profile?.stripeConnectAccountId) return { clientSecret: null, error: "This provider cannot receive tips yet." };
+  try {
+    const stripe = getStripeServer();
+    const pi = await stripe.paymentIntents.create({
+      amount: amountCents,
+      currency: "eur",
+      transfer_data: { destination: profile.stripeConnectAccountId },
+      application_fee_amount: 0,
+      metadata: { type: "booking_tip", bookingId: booking.id },
+      automatic_payment_methods: { enabled: true },
+    });
+    return { clientSecret: pi.client_secret };
+  } catch (e) {
+    console.error("createTipPaymentIntent", e);
+    return { clientSecret: null, error: e instanceof Error ? e.message : "Failed to create tip payment." };
+  }
+}
+
 export type WalkRouteData = {
   walkRoute: { lat: number; lng: number; timestamp: number }[];
+  walkActivities: { type: string; lat: number; lng: number; timestamp: number }[];
   walkStartedAt: Date | null;
   walkEndedAt: Date | null;
   status: string;
@@ -443,6 +491,7 @@ export async function getWalkRoute(bookingId: string): Promise<{ data: WalkRoute
     },
     select: {
       walkRoute: true,
+      walkActivities: true,
       walkStartedAt: true,
       walkEndedAt: true,
       status: true,
@@ -450,9 +499,11 @@ export async function getWalkRoute(bookingId: string): Promise<{ data: WalkRoute
   });
   if (!booking) return { data: null, error: "Booking not found." };
   const route = (booking.walkRoute ?? []) as { lat: number; lng: number; timestamp: number }[];
+  const activities = (booking.walkActivities ?? []) as { type: string; lat: number; lng: number; timestamp: number }[];
   return {
     data: {
       walkRoute: route,
+      walkActivities: activities,
       walkStartedAt: booking.walkStartedAt,
       walkEndedAt: booking.walkEndedAt,
       status: booking.status,

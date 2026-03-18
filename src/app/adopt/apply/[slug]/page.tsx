@@ -41,11 +41,29 @@ export default async function AdoptApplyPage({ params }: Props) {
   const listing = await getListingBySlug(slug);
   if (!listing) notFound();
 
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: listing.name,
+    description: [listing.temperament, listing.medicalHistory, listing.specialNeeds].filter(Boolean).join(" ") || `${listing.species} available for adoption`,
+    image: listing.photos[0] ?? undefined,
+    offers: {
+      "@type": "Offer",
+      url: `${BASE_URL}/adopt/apply/${slug}`,
+      priceCurrency: "EUR",
+      availability: "https://schema.org/InStock",
+    },
+  };
+
   return (
     <div
       className="min-h-screen"
       style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}
     >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
       <main
         className="mx-auto px-4 py-12 sm:px-6 sm:py-16"
         style={{ maxWidth: "var(--max-width)" }}

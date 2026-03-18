@@ -4,6 +4,14 @@ import { useEffect, useRef, useMemo } from "react";
 import { APIProvider, Map, useMap } from "@vis.gl/react-google-maps";
 
 type WalkPoint = { lat: number; lng: number; timestamp: number };
+type WalkActivity = { type: string; lat: number; lng: number; timestamp: number };
+
+const ACTIVITY_COLORS: Record<string, string> = {
+  pee: "#EAB308",
+  poo: "#78350f",
+  food: "#16a34a",
+  water: "#0ea5e9",
+};
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
@@ -29,13 +37,16 @@ function totalDistanceKm(route: WalkPoint[]): number {
 function RouteAndMarker({
   route,
   currentPosition,
+  walkActivities = [],
 }: {
   route: WalkPoint[];
   currentPosition: { lat: number; lng: number } | null;
+  walkActivities?: WalkActivity[];
 }) {
   const map = useMap();
   const polylineRef = useRef<google.maps.Polyline | null>(null);
   const markerRef = useRef<google.maps.Marker | null>(null);
+  const activityMarkersRef = useRef<google.maps.Marker[]>([]);
 
   useEffect(() => {
     if (!map || typeof google === "undefined") return;
@@ -75,6 +86,32 @@ function RouteAndMarker({
     };
   }, [map, pos?.lat, pos?.lng]);
 
+  useEffect(() => {
+    if (!map || typeof google === "undefined") return;
+    activityMarkersRef.current.forEach((m) => m.setMap(null));
+    activityMarkersRef.current = [];
+    walkActivities.forEach((a) => {
+      const marker = new google.maps.Marker({
+        position: { lat: a.lat, lng: a.lng },
+        map,
+        title: a.type,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 8,
+          fillColor: ACTIVITY_COLORS[a.type] ?? "#6B7280",
+          fillOpacity: 1,
+          strokeColor: "#fff",
+          strokeWeight: 2,
+        },
+      });
+      activityMarkersRef.current.push(marker);
+    });
+    return () => {
+      activityMarkersRef.current.forEach((m) => m.setMap(null));
+      activityMarkersRef.current = [];
+    };
+  }, [map, walkActivities]);
+
   return null;
 }
 
@@ -82,13 +119,31 @@ export type WalkTrackerProps = {
   route: WalkPoint[];
   currentPosition?: { lat: number; lng: number } | null;
   startedAt: Date | null;
+  walkActivities?: WalkActivity[];
+  activitySummary?: string;
   className?: string;
 };
+
+export function walkActivitySummary(activities: WalkActivity[]): string {
+  if (activities.length === 0) return "";
+  const counts = { pee: 0, poo: 0, food: 0, water: 0 };
+  activities.forEach((a) => {
+    if (a.type in counts) (counts as Record<string, number>)[a.type]++;
+  });
+  const parts: string[] = [];
+  if (counts.pee) parts.push(`${counts.pee} pee break${counts.pee > 1 ? "s" : ""}`);
+  if (counts.poo) parts.push(`${counts.poo} poo`);
+  if (counts.food) parts.push("food provided");
+  if (counts.water) parts.push("water provided");
+  return parts.length ? `During this walk: ${parts.join(", ")}.` : "";
+}
 
 export function WalkTracker({
   route,
   currentPosition = null,
   startedAt,
+  walkActivities = [],
+  activitySummary: activitySummaryProp,
   className = "",
 }: WalkTrackerProps) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -104,6 +159,7 @@ export function WalkTracker({
   const elapsedMinutes = startedAt
     ? Math.floor((Date.now() - new Date(startedAt).getTime()) / (60 * 1000))
     : 0;
+  const activitySummary = activitySummaryProp ?? walkActivitySummary(walkActivities);
 
   if (!apiKey) {
     return (
@@ -117,6 +173,7 @@ export function WalkTracker({
         <p className="text-sm font-medium" style={{ color: "var(--color-text)" }}>
           Distance: {distanceKm.toFixed(2)} km · Time: {elapsedMinutes} min
         </p>
+        {activitySummary && <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>{activitySummary}</p>}
       </div>
     );
   }
@@ -131,6 +188,7 @@ export function WalkTracker({
           Elapsed: {elapsedMinutes} min
         </span>
       </div>
+      {activitySummary && <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>{activitySummary}</p>}
       <div
         className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)]"
         style={{ minHeight: "280px" }}
@@ -142,7 +200,7 @@ export function WalkTracker({
             style={{ width: "100%", height: "100%", minHeight: "280px" }}
             gestureHandling="cooperative"
           >
-            <RouteAndMarker route={route} currentPosition={currentPosition} />
+            <RouteAndMarker route={route} currentPosition={currentPosition} walkActivities={walkActivities} />
           </Map>
         </APIProvider>
       </div>

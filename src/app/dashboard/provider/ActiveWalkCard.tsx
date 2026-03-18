@@ -12,6 +12,7 @@ const TRACK_INTERVAL_MS = 30 * 1000;
 const API_URL = typeof window !== "undefined" ? window.location.origin : "";
 
 type WalkPoint = { lat: number; lng: number; timestamp: number };
+type WalkActivity = { type: string; lat: number; lng: number; timestamp: number };
 
 export function ActiveWalkCard({ booking }: { booking: ProviderBookingCard }) {
   const router = useRouter();
@@ -20,6 +21,7 @@ export function ActiveWalkCard({ booking }: { booking: ProviderBookingCard }) {
   const [tracking, setTracking] = useState(false);
   const [route, setRoute] = useState<WalkPoint[]>([]);
   const [currentPosition, setCurrentPosition] = useState<{ lat: number; lng: number } | null>(null);
+  const [activities, setActivities] = useState<WalkActivity[]>([]);
   const [ending, setEnding] = useState(false);
   const watchIdRef = useRef<number | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -64,6 +66,7 @@ export function ActiveWalkCard({ booking }: { booking: ProviderBookingCard }) {
       startedAtRef.current = new Date();
       setRoute([]);
       setCurrentPosition(null);
+      setActivities([]);
       setTracking(true);
       setStarting(false);
       router.refresh();
@@ -151,9 +154,34 @@ export function ActiveWalkCard({ booking }: { booking: ProviderBookingCard }) {
 
   if (booking.serviceType !== "walking") return null;
 
+  const recordActivity = async (type: string) => {
+      const pos = currentPosition ?? (route.length > 0 ? { lat: route[route.length - 1].lat, lng: route[route.length - 1].lng } : null);
+      if (!pos) {
+        toast.error("Waiting for GPS…");
+        return;
+      }
+      const ts = Date.now();
+      try {
+        const res = await fetch(`${API_URL}/api/walks/activity`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bookingId: booking.id, type, lat: pos.lat, lng: pos.lng, timestamp: ts }),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          toast.error(data.error ?? "Failed to record");
+          return;
+        }
+        setActivities((prev) => [...prev, { type, lat: pos.lat, lng: pos.lng, timestamp: ts }]);
+      } catch (e) {
+        toast.error("Failed to record activity");
+      }
+    };
+
   if (tracking || (isActive && !booking.walkEndedAt)) {
     const startedAt = startedAtRef.current ?? (booking.walkStartedAt ? new Date(booking.walkStartedAt) : null);
     const displayRoute = route.length > 0 ? route : (booking.walkRoute ?? []);
+    const displayActivities = activities.length > 0 ? activities : (booking.walkActivities ?? []);
     return (
       <li
         className="rounded-[var(--radius-lg)] border p-4"
@@ -178,7 +206,15 @@ export function ActiveWalkCard({ booking }: { booking: ProviderBookingCard }) {
             route={displayRoute}
             currentPosition={currentPosition}
             startedAt={startedAt}
+            walkActivities={displayActivities}
           />
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <span className="text-xs font-medium" style={{ color: "var(--color-text-secondary)" }}>Tap to log:</span>
+          <button type="button" onClick={() => recordActivity("pee")} className="rounded-[var(--radius-lg)] border px-3 py-1.5 text-sm hover:bg-[var(--color-background)]" style={{ borderColor: "var(--color-border)" }} title="Pee break">🐾 Pee</button>
+          <button type="button" onClick={() => recordActivity("poo")} className="rounded-[var(--radius-lg)] border px-3 py-1.5 text-sm hover:bg-[var(--color-background)]" style={{ borderColor: "var(--color-border)" }} title="Poo">💩 Poo</button>
+          <button type="button" onClick={() => recordActivity("food")} className="rounded-[var(--radius-lg)] border px-3 py-1.5 text-sm hover:bg-[var(--color-background)]" style={{ borderColor: "var(--color-border)" }} title="Food">🍽️ Food</button>
+          <button type="button" onClick={() => recordActivity("water")} className="rounded-[var(--radius-lg)] border px-3 py-1.5 text-sm hover:bg-[var(--color-background)]" style={{ borderColor: "var(--color-border)" }} title="Water">💧 Water</button>
         </div>
       </li>
     );

@@ -126,6 +126,15 @@ export type ProviderBookingCard = {
   walkDistanceKm: number | null;
   walkDurationMinutes: number | null;
   walkSummaryMapUrl: string | null;
+  walkActivities: { type: string; lat: number; lng: number; timestamp: number }[] | null;
+  serviceReport: {
+    arrivalTime?: string;
+    departureTime?: string;
+    notes?: string;
+    photos?: string[];
+    activities?: string[];
+    submittedAt?: string;
+  } | null;
   hasDispute: boolean;
   hasGuaranteeClaim: boolean;
 };
@@ -159,6 +168,7 @@ export async function getProviderBookings(): Promise<{
     const petNameById = new Map(pets.map((p) => [p.id, p.name]));
     const bookings: ProviderBookingCard[] = rows.map((b) => {
       const route = b.walkRoute as { lat: number; lng: number; timestamp: number }[] | null;
+      const activities = b.walkActivities as { type: string; lat: number; lng: number; timestamp: number }[] | null;
       return {
         id: b.id,
         ownerName: b.owner.name,
@@ -177,6 +187,8 @@ export async function getProviderBookings(): Promise<{
         walkDistanceKm: b.walkDistanceKm,
         walkDurationMinutes: b.walkDurationMinutes,
         walkSummaryMapUrl: b.walkSummaryMapUrl,
+        walkActivities: activities,
+        serviceReport: b.serviceReport as ProviderBookingCard["serviceReport"],
         hasDispute: b.hasDispute,
         hasGuaranteeClaim: b.hasGuaranteeClaim,
       };
@@ -185,6 +197,36 @@ export async function getProviderBookings(): Promise<{
   } catch (e) {
     console.error("getProviderBookings", e);
     return { bookings: [], error: "Failed to load bookings." };
+  }
+}
+
+export type ProviderEarnings = {
+  totalEarnedCents: number;
+  tipsTotalCents: number;
+  completedBookingsCount: number;
+};
+
+export async function getProviderEarnings(): Promise<{ earnings: ProviderEarnings | null; error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { earnings: null, error: "Not signed in." };
+  try {
+    const completed = await prisma.booking.findMany({
+      where: { providerId: user.id, status: "completed" },
+      select: { totalPrice: true, commissionAmount: true, tipAmount: true },
+    });
+    const totalEarnedCents = completed.reduce((sum, b) => sum + (b.totalPrice - b.commissionAmount) + (b.tipAmount ?? 0), 0);
+    const tipsTotalCents = completed.reduce((sum, b) => sum + (b.tipAmount ?? 0), 0);
+    return {
+      earnings: {
+        totalEarnedCents,
+        tipsTotalCents,
+        completedBookingsCount: completed.length,
+      },
+    };
+  } catch (e) {
+    console.error("getProviderEarnings", e);
+    return { earnings: null, error: "Failed to load earnings." };
   }
 }
 
@@ -525,6 +567,7 @@ export async function startWalk(bookingId: string): Promise<{ error?: string }> 
         status: "active",
         walkStartedAt: new Date(),
         walkRoute: [],
+        walkActivities: [],
       },
     });
     revalidatePath("/dashboard/provider");
@@ -584,6 +627,7 @@ export async function endWalk(bookingId: string): Promise<{ error?: string }> {
       id: true,
       walkStartedAt: true,
       walkRoute: true,
+      walkActivities: true,
     },
   });
   if (!booking || !booking.walkStartedAt)
@@ -617,14 +661,109 @@ export async function endWalk(bookingId: string): Promise<{ error?: string }> {
         walkDistanceKm: Math.round(distanceKm * 1000) / 1000,
         walkDurationMinutes: durationMinutes,
         walkSummaryMapUrl,
+        walkActivities: booking.walkActivities ?? undefined,
       },
     });
+    await updateProviderRepeatClientCount(booking.providerId);
     revalidatePath("/dashboard/provider");
     revalidatePath("/dashboard/owner");
     return {};
   } catch (e) {
     console.error("endWalk", e);
     return { error: e instanceof Error ? e.message : "Failed to end walk." };
+  }
+}
+
+/** Count unique owners with 2+ completed bookings for this provider; set repeatClientCount on ProviderProfile. */
+export async function updateProviderRepeatClientCount(providerId: string): Promise<void> {
+  const completed = await prisma.booking.findMany({
+    where: { providerId, status: "completed" },
+    select: { ownerId: true },
+  });
+  const ownerCounts = new Map<string, number>();
+  for (const b of completed) {
+    ownerCounts.set(b.ownerId, (ownerCounts.get(b.ownerId) ?? 0) + 1);
+  }
+  const repeatCount = [...ownerCounts.values()].filter((c) => c >= 2).length;
+  const profile = await prisma.providerProfile.findUnique({
+    where: { userId: providerId },
+    select: { id: true },
+  });
+  if (profile) {
+    await prisma.providerProfile.update({
+      where: { id: profile.id },
+      data: { repeatClientCount: repeatCount },
+    });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Service Report (6.6b)
+// ---------------------------------------------------------------------------
+
+const SERVICE_REPORTS_PREFIX = "service-reports";
+
+export async function uploadServiceReportPhoto(
+  bookingId: string,
+  file: File
+): Promise<{ url?: string; error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+  const booking = await prisma.booking.findFirst({
+    where: { id: bookingId, providerId: user.id, status: "completed" },
+    select: { id: true },
+  });
+  if (!booking) return { error: "Booking not found or not completed." };
+  const ext = file.name.split(".").pop() ?? "jpg";
+  const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_").slice(0, 60);
+  const path = `${SERVICE_REPORTS_PREFIX}/${bookingId}/${Date.now()}-${safeName}.${ext}`;
+  try {
+    const { error } = await supabase.storage.from("providers").upload(path, file, { cacheControl: "3600", upsert: false });
+    if (error) return { error: error.message };
+    const { data } = supabase.storage.from("providers").getPublicUrl(path);
+    return { url: data.publicUrl };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Upload failed." };
+  }
+}
+
+export type SubmitServiceReportInput = {
+  arrivalTime?: string;
+  departureTime?: string;
+  notes?: string;
+  photos?: string[];
+  activities?: string[];
+};
+
+export async function submitServiceReport(bookingId: string, input: SubmitServiceReportInput): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+  const booking = await prisma.booking.findFirst({
+    where: { id: bookingId, providerId: user.id, status: "completed" },
+    select: { id: true },
+  });
+  if (!booking) return { error: "Booking not found or not completed." };
+  const report = {
+    arrivalTime: input.arrivalTime ?? undefined,
+    departureTime: input.departureTime ?? undefined,
+    notes: input.notes ?? undefined,
+    photos: input.photos ?? [],
+    activities: input.activities ?? [],
+    submittedAt: new Date().toISOString(),
+  };
+  try {
+    await prisma.booking.update({
+      where: { id: bookingId },
+      data: { serviceReport: report },
+    });
+    revalidatePath("/dashboard/provider");
+    revalidatePath("/dashboard/owner");
+    return {};
+  } catch (e) {
+    console.error("submitServiceReport", e);
+    return { error: e instanceof Error ? e.message : "Failed to save report." };
   }
 }
 
@@ -1066,6 +1205,47 @@ export async function updateProviderHomeDetails(input: UpdateProviderHomeDetails
         typicalDay: input.typicalDay ?? undefined,
         infoWantedAboutPet: input.infoWantedAboutPet ?? undefined,
       },
+    });
+    revalidatePath("/dashboard/provider");
+    revalidatePath("/dashboard/provider/edit-profile");
+    return {};
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Failed to save." };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Holiday availability (6.6e)
+// ---------------------------------------------------------------------------
+
+export const HOLIDAY_OPTIONS: { id: string; label: string }[] = [
+  { id: "christmas-2026", label: "Christmas 2026" },
+  { id: "new-year-2027", label: "New Year 2027" },
+  { id: "easter-2027", label: "Easter 2027" },
+  { id: "summer-2027", label: "Summer 2027" },
+];
+
+export async function getProviderHolidaysForEdit(): Promise<{ confirmedHolidays: string[] } | null> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+  const profile = await prisma.providerProfile.findUnique({
+    where: { userId: user.id },
+    select: { confirmedHolidays: true },
+  });
+  return profile ? { confirmedHolidays: profile.confirmedHolidays } : null;
+}
+
+export async function updateProviderHolidays(confirmedHolidays: string[]): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+  const valid = HOLIDAY_OPTIONS.map((o) => o.id);
+  const filtered = confirmedHolidays.filter((id) => valid.includes(id));
+  try {
+    await prisma.providerProfile.update({
+      where: { userId: user.id },
+      data: { confirmedHolidays: filtered },
     });
     revalidatePath("/dashboard/provider");
     revalidatePath("/dashboard/provider/edit-profile");

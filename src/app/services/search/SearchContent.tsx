@@ -7,6 +7,7 @@ import Image from "next/image";
 import { MapPin, List, Map, Star, Loader2 } from "lucide-react";
 import { SearchMap } from "@/components/maps";
 import { geocodeSearchLocation, type SearchProviderCard, type SortOption } from "./actions";
+import { HOLIDAY_LABELS, HOLIDAY_IDS } from "@/lib/constants/holidays";
 
 const SERVICE_TYPES = [
   { value: "", label: "All services" },
@@ -91,6 +92,7 @@ export function SearchContent({
   initialCancellationPolicy = undefined,
   initialHomeType = undefined,
   initialHasYard = undefined,
+  initialHoliday = undefined,
 }: {
   initialProviders: SearchProviderCard[];
   initialServiceType?: string;
@@ -104,6 +106,7 @@ export function SearchContent({
   initialCancellationPolicy?: string;
   initialHomeType?: string;
   initialHasYard?: boolean;
+  initialHoliday?: string;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -115,6 +118,7 @@ export function SearchContent({
   const [cancellationPolicy, setCancellationPolicy] = useState(initialCancellationPolicy ?? "");
   const [homeType, setHomeType] = useState(initialHomeType ?? "");
   const [hasYard, setHasYard] = useState(initialHasYard ?? false);
+  const [holiday, setHoliday] = useState(initialHoliday ?? "");
   const [sort, setSort] = useState<SortOption>(initialSort ?? (initialLat != null && initialLng != null ? "distance" : "rating"));
   const [locationQuery, setLocationQuery] = useState("");
   const [geocodeLoading, setGeocodeLoading] = useState(false);
@@ -134,6 +138,7 @@ export function SearchContent({
     setCancellationPolicy(searchParams.get("cancellationPolicy") ?? "");
     setHomeType(searchParams.get("homeType") ?? "");
     setHasYard(searchParams.get("hasYard") === "true");
+    setHoliday(searchParams.get("holiday") ?? "");
     const s = searchParams.get("sort");
     setSort((s as SortOption) || (searchParams.get("lat") && searchParams.get("lng") ? "distance" : "rating"));
   }, [searchParams]);
@@ -148,6 +153,7 @@ export function SearchContent({
     if (cancellationPolicy) params.set("cancellationPolicy", cancellationPolicy);
     if (homeType) params.set("homeType", homeType);
     if (hasYard) params.set("hasYard", "true");
+    if (holiday) params.set("holiday", holiday);
     if (sort) params.set("sort", sort);
     const lat = searchParams.get("lat");
     const lng = searchParams.get("lng");
@@ -155,7 +161,7 @@ export function SearchContent({
     if (lng) params.set("lng", lng);
     const q = params.toString();
     return q ? `/services/search?${q}` : "/services/search";
-  }, [serviceType, district, priceMin, priceMax, minRating, cancellationPolicy, homeType, hasYard, sort, searchParams]);
+  }, [serviceType, district, priceMin, priceMax, minRating, cancellationPolicy, homeType, hasYard, holiday, sort, searchParams]);
 
   const applyFilters = useCallback(() => {
     router.push(buildUrl());
@@ -405,6 +411,23 @@ export function SearchContent({
                   />
                   <span className="text-sm" style={{ color: "var(--color-text)" }}>Has yard (e.g. fenced)</span>
                 </label>
+                <div>
+                  <label className="block text-sm font-medium" style={{ color: "var(--color-text)" }}>
+                    Holiday availability
+                  </label>
+                  <select
+                    value={holiday}
+                    onChange={(e) => setHoliday(e.target.value)}
+                    onBlur={applyFilters}
+                    className="mt-2 w-full rounded-[var(--radius-lg)] border px-4 py-2.5 text-sm focus:outline-none focus:ring-2"
+                    style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-background)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
+                  >
+                    <option value="">Any</option>
+                    {HOLIDAY_IDS.map((id) => (
+                      <option key={id} value={id}>Available for {HOLIDAY_LABELS[id]}</option>
+                    ))}
+                  </select>
+                </div>
                 <button
                   type="button"
                   onClick={applyFilters}
@@ -505,6 +528,9 @@ export function SearchContent({
                           </span>
                           <span className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
                             ({provider.reviewCount} reviews)
+                            {provider.repeatClientCount > 0 && (
+                              <> · {provider.repeatClientCount} repeat client{provider.repeatClientCount !== 1 ? "s" : ""}</>
+                            )}
                           </span>
                         </div>
                         <p className="mt-1 flex items-center gap-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
@@ -517,6 +543,15 @@ export function SearchContent({
                         <p className="mt-0.5 text-xs" style={{ color: "var(--color-text-muted)" }}>
                           {getAvailabilityFreshness(provider.updatedAt)} · Cancellation: {capitalize(provider.cancellationPolicy)}
                         </p>
+                        {provider.confirmedHolidays.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-1.5">
+                            {provider.confirmedHolidays.map((id) => (
+                              <span key={id} className="rounded-full border px-2 py-0.5 text-xs font-medium" style={{ borderColor: "var(--color-primary-200)", backgroundColor: "var(--color-primary-50)", color: "var(--color-primary)" }}>
+                                Available for {HOLIDAY_LABELS[id] ?? id}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                         <div className="mt-2 flex flex-wrap gap-1.5">
                           {provider.services.map((s) => (
                             <span

@@ -25,7 +25,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
-import type { ProviderStripeStatus, ProviderBookingCard, ProviderReviewForDashboard } from "./actions";
+import type { ProviderStripeStatus, ProviderBookingCard, ProviderReviewForDashboard, ProviderEarnings } from "./actions";
 import type { ProviderMeetAndGreetCard } from "@/lib/meet-and-greet/actions";
 import {
   getProviderMeetAndGreets,
@@ -41,6 +41,8 @@ import {
   respondToReview,
 } from "./actions";
 import { ActiveWalkCard } from "./ActiveWalkCard";
+import { ServiceReportForm } from "./ServiceReportForm";
+import { walkActivitySummary } from "@/components/maps/WalkTracker";
 
 type TabId = "profile" | "bookings" | "meetgreet" | "disputes" | "earnings" | "reviews" | "messages";
 
@@ -129,6 +131,7 @@ export function ProviderDashboardClient({
   stripeStatus,
   initialBookings,
   initialReviews = [],
+  initialEarnings = null,
   initialMeetAndGreets = { requested: [], confirmed: [], completed: [] },
   initialDisputes = [],
   initialClaims = [],
@@ -137,6 +140,7 @@ export function ProviderDashboardClient({
   stripeStatus: ProviderStripeStatus;
   initialBookings: ProviderBookingCard[];
   initialReviews?: ProviderReviewForDashboard[];
+  initialEarnings?: ProviderEarnings | null;
   initialMeetAndGreets?: {
     requested: ProviderMeetAndGreetCard[];
     confirmed: ProviderMeetAndGreetCard[];
@@ -606,6 +610,9 @@ export function ProviderDashboardClient({
                       {b.serviceType === "walking" && (b.walkSummaryMapUrl ?? b.walkDistanceKm != null) && (
                         <div className="mt-4 w-full rounded-[var(--radius-lg)] border p-3" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}>
                           <p className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>Walk summary</p>
+                          {b.walkActivities && b.walkActivities.length > 0 && (
+                            <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>{walkActivitySummary(b.walkActivities)}</p>
+                          )}
                           {b.walkSummaryMapUrl && (
                             <img src={b.walkSummaryMapUrl} alt="Walk route" className="mt-2 h-40 w-full rounded-[var(--radius-lg)] object-cover object-center" />
                           )}
@@ -615,6 +622,38 @@ export function ProviderDashboardClient({
                             {b.walkStartedAt && <span>Started {formatDateTime(b.walkStartedAt)}</span>}
                             {b.walkEndedAt && <span>Ended {formatDateTime(b.walkEndedAt)}</span>}
                           </div>
+                        </div>
+                      )}
+                      {!b.serviceReport ? (
+                        <div className="mt-4 w-full">
+                          <ServiceReportForm booking={b} />
+                        </div>
+                      ) : (
+                        <div className="mt-4 w-full rounded-[var(--radius-lg)] border p-3" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}>
+                          <p className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>Service report</p>
+                          {(b.serviceReport.arrivalTime || b.serviceReport.departureTime) && (
+                            <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                              {b.serviceReport.arrivalTime && `Arrived ${b.serviceReport.arrivalTime}`}
+                              {b.serviceReport.arrivalTime && b.serviceReport.departureTime && " · "}
+                              {b.serviceReport.departureTime && `Left ${b.serviceReport.departureTime}`}
+                            </p>
+                          )}
+                          {b.serviceReport.notes && <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>{b.serviceReport.notes}</p>}
+                          {b.serviceReport.activities && b.serviceReport.activities.length > 0 && (
+                            <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>Activities: {b.serviceReport.activities.join(", ")}</p>
+                          )}
+                          {b.serviceReport.photos && b.serviceReport.photos.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {b.serviceReport.photos.map((url, i) => (
+                                <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block">
+                                  <img src={url} alt="" className="h-16 w-16 rounded-lg object-cover" />
+                                </a>
+                              ))}
+                            </div>
+                          )}
+                          {b.serviceReport.submittedAt && (
+                            <p className="mt-2 text-xs" style={{ color: "var(--color-text-muted)" }}>Submitted {formatDateTime(b.serviceReport.submittedAt)}</p>
+                          )}
                         </div>
                       )}
                     </li>
@@ -929,7 +968,12 @@ export function ProviderDashboardClient({
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
                 <div className="rounded-[var(--radius-lg)] border p-4" style={{ backgroundColor: "var(--color-background)", borderColor: "var(--color-border)" }}>
                   <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Total earned</p>
-                  <p className="mt-1 text-2xl font-bold" style={{ color: "var(--color-secondary)" }}>€0.00</p>
+                  <p className="mt-1 text-2xl font-bold" style={{ color: "var(--color-secondary)" }}>
+                    {initialEarnings ? formatEur(initialEarnings.totalEarnedCents) : "€0.00"}
+                  </p>
+                  {initialEarnings && initialEarnings.tipsTotalCents > 0 && (
+                    <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>Includes {formatEur(initialEarnings.tipsTotalCents)} in tips</p>
+                  )}
                 </div>
                 <div className="rounded-[var(--radius-lg)] border p-4" style={{ backgroundColor: "var(--color-background)", borderColor: "var(--color-border)" }}>
                   <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Pending payout</p>

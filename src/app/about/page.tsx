@@ -2,10 +2,20 @@ import type { Metadata } from "next";
 import { Heart, Leaf } from "lucide-react";
 import Link from "next/link";
 
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+
 export const metadata: Metadata = {
   title: "About Tinies | The Real Story",
   description:
     "Gardens of St Gertrude has 92 cats in Parekklisia, Cyprus. Funded 100% out of pocket — until now. Tinies is a marketplace built to feed them. 90% of every commission goes to rescue animal care.",
+  openGraph: {
+    title: "About Tinies | The Real Story",
+    description: "Tinies is a marketplace built to fund animal rescue in Cyprus. Every booking helps a tiny.",
+    url: `${BASE_URL}/about`,
+    siteName: "Tinies",
+    type: "website",
+  },
+  twitter: { card: "summary_large_image", title: "About Tinies | The Real Story", description: "Tinies is a marketplace built to fund animal rescue in Cyprus." },
 };
 
 export default function AboutPage() {

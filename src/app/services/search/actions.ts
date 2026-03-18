@@ -33,6 +33,7 @@ export type SearchProviderCard = {
   initials: string;
   rating: number | null;
   reviewCount: number;
+  repeatClientCount: number;
   district: string | null;
   services: string[];
   /** Price in EUR cents for the selected service (or first service). */
@@ -46,6 +47,7 @@ export type SearchProviderCard = {
   cancellationPolicy: string;
   /** ISO date string for availability freshness. */
   updatedAt: string;
+  confirmedHolidays: string[];
 };
 
 export type SortOption =
@@ -64,6 +66,8 @@ export type SearchFilters = {
   cancellationPolicy?: string;
   homeType?: string;
   hasYard?: boolean;
+  /** Filter to providers who confirmed availability for this holiday id (e.g. christmas-2026). */
+  holiday?: string;
   lat?: number;
   lng?: number;
   sort?: SortOption;
@@ -85,6 +89,7 @@ export async function getSearchProviders(
       verified: true,
       ...(filters.homeType ? { homeType: filters.homeType } : {}),
       ...(filters.hasYard === true ? { hasYard: true } : {}),
+      ...(filters.holiday ? { confirmedHolidays: { has: filters.holiday } } : {}),
     },
     include: {
       user: { select: { name: true, avatarUrl: true, district: true } },
@@ -142,6 +147,7 @@ export async function getSearchProviders(
       initials,
       rating: p.avgRating,
       reviewCount: p.reviewCount,
+      repeatClientCount: p.repeatClientCount,
       district: p.user.district,
       services: services.map((s) => s.type).filter(Boolean),
       priceFrom: priceCents,
@@ -152,6 +158,7 @@ export async function getSearchProviders(
       distanceKm,
       cancellationPolicy: p.cancellationPolicy,
       updatedAt: p.updatedAt.toISOString(),
+      confirmedHolidays: p.confirmedHolidays,
     };
   });
 

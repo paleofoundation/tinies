@@ -248,6 +248,8 @@ model ProviderProfile {
   pottyBreakFrequency String?   @map("potty_break_frequency")
   typicalDay          String?   @map("typical_day")
   infoWantedAboutPet  String?   @map("info_wanted_about_pet")
+  repeatClientCount   Int      @default(0) @map("repeat_client_count")
+  confirmedHolidays   String[] @default([]) @map("confirmed_holidays")
   createdAt            DateTime  @default(now()) @map("created_at")
   updatedAt            DateTime  @updatedAt @map("updated_at")
 
@@ -294,6 +296,10 @@ model Booking {
   walkDistanceKm          Float?          @map("walk_distance_km")
   walkDurationMinutes    Int?            @map("walk_duration_minutes")
   walkSummaryMapUrl       String?         @map("walk_summary_map_url")
+  walkActivities         Json?           @map("walk_activities") // [{ type: "pee"|"poo"|"food"|"water", lat, lng, timestamp }]
+  serviceReport         Json?           @map("service_report")   // { arrivalTime, departureTime, notes, photos[], activities[], submittedAt }
+  tipAmount             Int?            @map("tip_amount")      // cents
+  tipStripePaymentIntentId String?       @map("tip_stripe_payment_intent_id")
   createdAt               DateTime        @default(now()) @map("created_at")
   updatedAt               DateTime        @updatedAt @map("updated_at")
 

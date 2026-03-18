@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { getProviderBySlug, getProviderReviewsBySlug } from "@/app/services/book/actions";
 import { ProviderLocationMap } from "@/components/maps";
+import { HOLIDAY_LABELS } from "@/lib/constants/holidays";
 import { GivingTierBadge } from "@/components/giving/GivingTierBadge";
 import { MeetAndGreetRequestModal } from "./MeetAndGreetRequestModal";
 
@@ -18,10 +19,17 @@ type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const name = slugToName(slug);
+  const provider = await getProviderBySlug(slug);
+  const name = provider?.providerName ?? slugToName(slug);
+  const title = `${name} | Pet Care Provider | Tinies`;
+  const description = `View ${name}'s profile, services, availability, and reviews. Book trusted pet care in Cyprus.`;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+  const url = `${baseUrl}/services/provider/${slug}`;
   return {
-    title: `${name} | Pet Care Provider | Tinies`,
-    description: `View ${name}'s profile, services, availability, and reviews. Book trusted pet care in Cyprus.`,
+    title,
+    description,
+    openGraph: { title, description, url, siteName: "Tinies", type: "profile" },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 
@@ -73,8 +81,34 @@ export default async function ProviderProfilePage({ params }: Props) {
   const avgRating = provider?.avgRating ?? null;
   const reviewCount = provider?.reviewCount ?? 0;
 
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+  const profileUrl = `${baseUrl}/services/provider/${slug}`;
+  const localBusinessJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: name,
+    url: profileUrl,
+    address: { "@type": "PostalAddress", addressLocality: "Cyprus" },
+    ...(avgRating != null &&
+      reviewCount > 0 && {
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: avgRating.toFixed(1),
+          reviewCount,
+          bestRating: 5,
+        },
+      }),
+    ...(provider?.services?.length && {
+      priceRange: "€",
+    }),
+  };
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
+      />
       {/* Hero */}
       <section className="border-b bg-white" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}>
         <div className="mx-auto px-4 py-12 sm:px-6 sm:py-14" style={{ maxWidth: "var(--max-width)" }}>
@@ -103,7 +137,22 @@ export default async function ProviderProfilePage({ params }: Props) {
                   <Calendar className="h-4 w-4 shrink-0" />
                   Member since 2024
                 </span>
+                {provider && provider.repeatClientCount > 0 && (
+                  <span className="flex items-center gap-1">
+                    <Heart className="h-4 w-4 shrink-0" />
+                    {provider.repeatClientCount} repeat client{provider.repeatClientCount !== 1 ? "s" : ""}
+                  </span>
+                )}
               </div>
+              {provider && provider.confirmedHolidays.length > 0 && (
+                <div className="mt-3 flex flex-wrap justify-center gap-2 sm:justify-start">
+                  {provider.confirmedHolidays.map((id) => (
+                    <span key={id} className="rounded-full border px-2.5 py-0.5 text-xs font-medium" style={{ borderColor: "var(--color-primary-200)", backgroundColor: "var(--color-primary-50)", color: "var(--color-primary)" }}>
+                      Available for {HOLIDAY_LABELS[id] ?? id}
+                    </span>
+                  ))}
+                </div>
+              )}
               <div className="mt-6 flex flex-wrap items-center justify-center gap-3 sm:justify-start">
                 <Link
                   href={messageHref}

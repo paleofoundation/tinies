@@ -9,6 +9,24 @@ import {
 import Link from "next/link";
 import { HomeSearchBar } from "@/components/layout/HomeSearchBar";
 
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Tinies",
+  url: BASE_URL,
+  description: "Trusted pet care and rescue adoption in Cyprus. No matter the size.",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: `${BASE_URL}/services/search?type={search_term_string}`,
+    },
+    "query-input": "required name=search_term_string",
+  },
+};
+
 const ADOPTABLES = [
   { emoji: "🐕", name: "Max", age: "3 years", id: "max" },
   { emoji: "🐈", name: "Luna", age: "2 years", id: "luna" },
@@ -19,6 +37,10 @@ const ADOPTABLES = [
 export default function Home() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
       {/* Hero */}
       <header className="relative overflow-hidden px-4 pt-10 pb-16 sm:px-6 sm:pt-16 sm:pb-24 lg:px-8">
         <div className="absolute inset-0 rounded-b-[3rem] sm:rounded-b-[4rem]" style={{ backgroundColor: "rgba(10, 110, 92, 0.05)" }} />

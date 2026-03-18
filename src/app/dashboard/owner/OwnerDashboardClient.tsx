@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import {
   PawPrint,
@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { deletePet, cancelBooking } from "./actions";
 import type { OwnerBookingCard } from "./actions";
 import { ReviewForm } from "./ReviewForm";
+import { TipForm } from "./TipForm";
 import { getOwnerMeetAndGreets, acceptMeetAndGreetSuggestion } from "@/lib/meet-and-greet/actions";
 import type { OwnerMeetAndGreetCard } from "@/lib/meet-and-greet/actions";
 import { ReportProblemModal } from "@/components/disputes/ReportProblemModal";
@@ -105,6 +106,8 @@ function BookingCard({
   onReviewSuccess,
   onReportProblem,
   reportProblemBookingId,
+  onOpenTip,
+  openTipBookingId,
 }: {
   booking: OwnerBookingCard;
   onCancel: (id: string) => void;
@@ -115,6 +118,8 @@ function BookingCard({
   onReviewSuccess: (bookingId: string, newReviewId?: string) => void;
   onReportProblem: (bookingId: string) => void;
   reportProblemBookingId: string | null;
+  onOpenTip: (bookingId: string) => void;
+  openTipBookingId: string | null;
 }) {
   const initials = booking.providerName
     .split(" ")
@@ -215,6 +220,18 @@ function BookingCard({
               Report a Problem
             </button>
           )}
+          {booking.status === "completed" && booking.tipAmount == null && (
+            <button
+              type="button"
+              onClick={() => onOpenTip(booking.id)}
+              className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] bg-[var(--color-accent)]/90 px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90"
+            >
+              Tip {booking.providerName}
+            </button>
+          )}
+          {booking.status === "completed" && booking.tipAmount != null && (
+            <span className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Tipped {formatEur(booking.tipAmount)}</span>
+          )}
         </div>
       </div>
       {booking.serviceType === "walking" && (booking.walkSummaryMapUrl ?? booking.walkDistanceKm != null) && (
@@ -229,6 +246,31 @@ function BookingCard({
             {booking.walkStartedAt && <span>Started {formatDateTime(booking.walkStartedAt)}</span>}
             {booking.walkEndedAt && <span>Ended {formatDateTime(booking.walkEndedAt)}</span>}
           </div>
+        </div>
+      )}
+      {booking.serviceReport && (
+        <div className="mt-4 rounded-[var(--radius-lg)] border p-3" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}>
+          <p className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>Service report from {booking.providerName}</p>
+          {(booking.serviceReport.arrivalTime || booking.serviceReport.departureTime) && (
+            <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+              {booking.serviceReport.arrivalTime && `Arrived ${booking.serviceReport.arrivalTime}`}
+              {booking.serviceReport.arrivalTime && booking.serviceReport.departureTime && " · "}
+              {booking.serviceReport.departureTime && `Left ${booking.serviceReport.departureTime}`}
+            </p>
+          )}
+          {booking.serviceReport.notes && <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>{booking.serviceReport.notes}</p>}
+          {booking.serviceReport.activities && booking.serviceReport.activities.length > 0 && (
+            <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>Activities: {booking.serviceReport.activities.join(", ")}</p>
+          )}
+          {booking.serviceReport.photos && booking.serviceReport.photos.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {booking.serviceReport.photos.map((url, i) => (
+                <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block">
+                  <img src={url} alt="" className="h-16 w-16 rounded-lg object-cover" />
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       )}
       {showLeaveReview && openReviewBookingId === booking.id && (
@@ -274,6 +316,17 @@ export function OwnerDashboardClient({
   const [claimResponseText, setClaimResponseText] = useState<Record<string, string>>({});
   const [respondingDisputeId, setRespondingDisputeId] = useState<string | null>(null);
   const [respondingClaimId, setRespondingClaimId] = useState<string | null>(null);
+  const [openTipBookingId, setOpenTipBookingId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("tip") === "success") {
+      toast.success("Tip sent! Thank you.");
+      router.replace("/dashboard/owner");
+      router.refresh();
+      setOpenTipBookingId(null);
+    }
+  }, [searchParams, router]);
 
   useEffect(() => {
     setBookings(initialBookings ?? []);
@@ -588,6 +641,8 @@ export function OwnerDashboardClient({
                           onReviewSuccess={() => {}}
                           onReportProblem={setReportProblemBookingId}
                           reportProblemBookingId={reportProblemBookingId}
+                          onOpenTip={setOpenTipBookingId}
+                          openTipBookingId={openTipBookingId}
                         />
                       ))}
                     </ul>
@@ -613,6 +668,8 @@ export function OwnerDashboardClient({
                           onReviewSuccess={() => {}}
                           onReportProblem={setReportProblemBookingId}
                           reportProblemBookingId={reportProblemBookingId}
+                          onOpenTip={setOpenTipBookingId}
+                          openTipBookingId={openTipBookingId}
                         />
                       ))}
                     </ul>
@@ -645,6 +702,8 @@ export function OwnerDashboardClient({
                           }}
                           onReportProblem={setReportProblemBookingId}
                           reportProblemBookingId={reportProblemBookingId}
+                          onOpenTip={setOpenTipBookingId}
+                          openTipBookingId={openTipBookingId}
                         />
                       ))}
                     </ul>
@@ -668,6 +727,8 @@ export function OwnerDashboardClient({
                           onReviewSuccess={() => {}}
                           onReportProblem={setReportProblemBookingId}
                           reportProblemBookingId={reportProblemBookingId}
+                          onOpenTip={setOpenTipBookingId}
+                          openTipBookingId={openTipBookingId}
                         />
                       ))}
                     </ul>
@@ -780,6 +841,28 @@ export function OwnerDashboardClient({
             onSuccess={() => setReportProblemBookingId(null)}
           />
         )}
+
+        {openTipBookingId && (() => {
+          const booking = bookings.find((b) => b.id === openTipBookingId);
+          if (!booking) return null;
+          return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setOpenTipBookingId(null)}>
+              <div className="max-h-[90vh] w-full max-w-md overflow-auto rounded-[var(--radius-lg)] border bg-[var(--color-surface)] shadow-lg" style={{ borderColor: "var(--color-border)" }} onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-end border-b p-2" style={{ borderColor: "var(--color-border)" }}>
+                  <button type="button" onClick={() => setOpenTipBookingId(null)} className="rounded p-1 hover:bg-[var(--color-neutral-200)]" aria-label="Close">
+                    <X className="h-5 w-5" style={{ color: "var(--color-text-secondary)" }} />
+                  </button>
+                </div>
+                <TipForm
+                  bookingId={booking.id}
+                  providerName={booking.providerName}
+                  onSuccess={() => { router.refresh(); setOpenTipBookingId(null); }}
+                  onClose={() => setOpenTipBookingId(null)}
+                />
+              </div>
+            </div>
+          );
+        })()}
 
         {tab === "disputes" && (
           <section className="rounded-[var(--radius-lg)] border p-8 sm:p-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>

@@ -4,6 +4,7 @@ import { constructWebhookEvent } from "@/lib/stripe";
 import { sendEmail } from "@/lib/email";
 import ProviderIdentityVerifiedEmail from "@/lib/email/templates/provider-identity-verified";
 import PayoutProcessedEmail from "@/lib/email/templates/payout-processed";
+import TipReceivedEmail from "@/lib/email/templates/tip-received";
 import { DonationSource } from "@prisma/client";
 
 const HANDLED_TYPES = [
@@ -70,7 +71,8 @@ export async function POST(request: NextRequest) {
       case "payment_intent.succeeded": {
         const pi = event.data.object as {
           id: string;
-          metadata?: { type?: string; userId?: string; charityId?: string; amountCents?: string; showOnLeaderboard?: string };
+          amount: number;
+          metadata?: { type?: string; userId?: string; charityId?: string; amountCents?: string; showOnLeaderboard?: string; bookingId?: string };
         };
         const type = pi.metadata?.type;
         const showOnLeaderboard = pi.metadata?.showOnLeaderboard === "1";
@@ -114,6 +116,28 @@ export async function POST(request: NextRequest) {
                 where: { userId },
                 create: { userId, showOnLeaderboard },
                 update: { showOnLeaderboard },
+              });
+            }
+          }
+        }
+        if (type === "booking_tip") {
+          const bookingId = pi.metadata?.bookingId;
+          const amountCents = pi.amount;
+          if (bookingId && amountCents > 0) {
+            await prisma.booking.update({
+              where: { id: bookingId },
+              data: { tipAmount: amountCents, tipStripePaymentIntentId: pi.id },
+            });
+            const booking = await prisma.booking.findUnique({
+              where: { id: bookingId },
+              include: { provider: { select: { email: true } } },
+            });
+            if (booking?.provider?.email) {
+              const amountEur = (amountCents / 100).toFixed(2);
+              await sendEmail({
+                to: booking.provider.email,
+                subject: `You received a €${amountEur} tip!`,
+                react: TipReceivedEmail({ amountEur }),
               });
             }
           }
