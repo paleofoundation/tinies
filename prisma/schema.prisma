@@ -227,6 +227,7 @@ model ProviderProfile {
   petTypesAccepted    String?   @map("pet_types_accepted")
   availability        Json?     @map("availability") // weekly schedule
   idDocumentUrl        String?   @map("id_document_url")
+  stripeVerificationSessionId String? @map("stripe_verification_session_id")
   verified             Boolean   @default(false)
   verifiedAt           DateTime? @map("verified_at")
   responseRate         Float?    @map("response_rate")

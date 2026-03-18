@@ -479,15 +479,18 @@ Steps: Profile Photo → Bio → Services & Pricing (show area averages) → Pho
 Profile completeness score displayed on dashboard (percentage)
 Profiles below 80% show a prompt. 100% shows a "Complete Profile" badge visible to owners.
 
-6.2 Admin Provider Verification
-What: Admin reviews uploaded ID documents and approves providers.
-Build on: Admin dashboard.
+6.2 Admin Provider Verification (with Stripe Identity)
+What: Automated ID verification via Stripe Identity — providers verified in minutes, not days. Manual admin queue as fallback for edge cases.
+Build on: Admin dashboard, provider onboarding wizard, Stripe integration.
 Spec:
 
-Verification queue: list of providers with uploaded ID documents awaiting review
-Click to view: ID document image, provider profile summary
-Approve (sets verified=true, verifiedAt=now) or reject (with message to provider)
-Unverified providers hidden from search results (already in spec — enforce in search query)
+Primary flow: Stripe Identity VerificationSession (document + selfie). Provider uploads ID and takes selfie through Stripe-hosted modal. Stripe verifies document is real, extracts info, compares selfie to ID photo. Result in ~60 seconds.
+Webhook handles identity.verification_session.verified (auto-approve) and identity.verification_session.requires_input (flag for manual review)
+Fallback: Admin verification queue for providers where Stripe Identity failed or wasn't used
+Verification queue: list of providers awaiting review with ID document image and profile summary
+Approve/reject buttons with email notifications
+Unverified providers hidden from search results
+Schema addition: stripeVerificationSessionId on ProviderProfile
 
 6.3 Home Details on Provider Profile
 What: Structured fields for housing info critical for boarding/daycare decisions.
@@ -531,6 +534,72 @@ Test Stripe webhook handling in staging with Stripe CLI
 Verify all environment variables are set in Vercel
 Deploy to production
 
+6.6 Rover-Inspired Feature Additions
+What: Five high-impact features identified from the Rover competitive audit that address common user complaints and improve the experience. These are the features Rover users actively request but don't have, or that Rover does well and we should match.
+Build on: Existing walk tracking (Phase 5.2), review system (Phase 2.2), provider profiles, booking flow.
+6.6a — Walk Activity Icons (Pee/Poo/Food/Water Tracking)
+The single most requested "nice touch" by pet owners on Rover. Four simple tap-buttons during walks and drop-in visits.
+
+Update the ActiveWalkCard.tsx (provider walk UI): Add four icon buttons below the map during an active walk: 🐾 Pee, 💩 Poo, 🍽️ Food, 💧 Water
+Each tap records an activity event with timestamp and current GPS coordinates
+Store as a JSON array on the booking: walkActivities: [{ type: "pee"|"poo"|"food"|"water", lat, lng, timestamp }]
+Show activity icons on the WalkTracker map (small markers at the locations where each event occurred)
+Include activity summary in the walk summary after the walk ends: "During this walk: 2 pee breaks, 1 poo, water provided"
+Owner sees the activity icons on their live walk view AND in the completed walk summary
+Schema addition: walkActivities Json? @map("walk_activities") on Booking model
+
+6.6b — Post-Service Report Cards (All Service Types)
+Rover requires these for recurring walks. Tinies should have them for every service type — not just walks.
+
+After ANY booking is marked as completed (not just walking), prompt the provider to submit a "Service Report"
+Report form on the provider dashboard (completed booking cards): arrival time, departure time, notes about the visit/stay, up to 5 photos, activity checkboxes (fed, watered, walked, played, medication given — relevant ones shown based on service type)
+Create a new model or JSON field for service reports: serviceReport Json? @map("service_report") on Booking
+Report structure: { arrivalTime, departureTime, notes, photos[], activities: string[], submittedAt }
+Owner sees the service report on their booking card and in booking history
+For walk bookings: the walk tracking data IS the report (already built). The report card adds notes and photos on top.
+For boarding/sitting/daycare/drop-in: this is the primary accountability mechanism
+
+6.6c — Tipping
+Rover allows tipping and providers keep 100%. Simple, increases provider satisfaction and retention.
+
+On completed booking cards in the owner dashboard, add a "Tip [Provider Name]" button
+Tip form: preset amounts (EUR 2, EUR 5, EUR 10) + custom amount
+Process via Stripe PaymentIntent as a separate charge (not linked to the original booking payment)
+100% goes to the provider — Tinies takes zero cut from tips
+Record as a separate field on the booking: tipAmount Int? @map("tip_amount") and tipStripePaymentIntentId String? @map("tip_stripe_payment_intent_id")
+Provider sees tips in their earnings dashboard
+Show a "Thank you for the tip!" notification to provider via email
+Schema additions: tipAmount Int? and tipStripePaymentIntentId String? on Booking
+
+6.6d — Repeat Client Count on Profiles
+Cheap trust signal. Shows social proof that owners come back.
+
+Calculate for each provider: number of unique owners who have booked more than once
+Display on provider profile page: "{X} repeat clients" near the rating/review count
+Display on provider cards in search results
+Computed from bookings table (COUNT DISTINCT ownerId WHERE status = completed, GROUP BY ownerId HAVING COUNT > 1)
+Can be a computed field updated when bookings complete, or calculated on the fly
+Add to ProviderProfile: repeatClientCount Int @default(0) @map("repeat_client_count")
+
+6.6e — Holiday Availability Confirmation
+Rover lets sitters confirm they're available for specific holidays, which shows a badge. Useful for peak-demand periods.
+
+Provider edit profile: new section "Holiday Availability" with checkboxes for upcoming holidays (Christmas, New Year, Easter, Summer — configurable list)
+When a provider confirms availability for a holiday, their profile shows a small badge: "Available for Christmas 2026"
+Search results: owners can filter for providers with confirmed holiday availability
+Simple implementation: confirmedHolidays String[] @map("confirmed_holidays") on ProviderProfile (array of holiday identifiers like "christmas-2026", "easter-2027")
+Display as tags/badges on profile and search cards
+
+Schema additions for 6.6:
+prisma// Add to Booking:
+walkActivities              Json?    @map("walk_activities")
+serviceReport               Json?    @map("service_report")
+tipAmount                   Int?     @map("tip_amount")
+tipStripePaymentIntentId    String?  @map("tip_stripe_payment_intent_id")
+
+// Add to ProviderProfile:
+repeatClientCount           Int      @default(0) @map("repeat_client_count")
+confirmedHolidays           String[] @map("confirmed_holidays")
 
 Schema Changes Summary
 These changes need to be applied to prisma/schema.prisma before or during the relevant phase:
@@ -560,6 +629,19 @@ dogsOnFurniture        Boolean? @map("dogs_on_furniture")
 pottyBreakFrequency    String?  @map("potty_break_frequency")
 typicalDay             String?  @map("typical_day")
 infoWantedAboutPet     String?  @map("info_wanted_about_pet")
+
+// Phase 6.2 — Add to ProviderProfile (Stripe Identity):
+stripeVerificationSessionId String? @map("stripe_verification_session_id")
+
+// Phase 6.6 — Add to Booking (walk activities, service reports, tipping):
+walkActivities              Json?    @map("walk_activities")
+serviceReport               Json?    @map("service_report")
+tipAmount                   Int?     @map("tip_amount")
+tipStripePaymentIntentId    String?  @map("tip_stripe_payment_intent_id")
+
+// Phase 6.6 — Add to ProviderProfile (repeat clients, holidays):
+repeatClientCount           Int      @default(0) @map("repeat_client_count")
+confirmedHolidays           String[] @map("confirmed_holidays")
 After any schema change, run:
 bashnpx prisma migrate dev --name description_of_change
 npx prisma generate

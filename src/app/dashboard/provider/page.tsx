@@ -3,13 +3,17 @@ import {
   getProviderBookings,
   getProviderReviews,
   expireStaleBookings,
+  getProviderProfileCompleteness,
+  getProviderAreaPriceGuidance,
 } from "./actions";
 import { getProviderMeetAndGreets } from "@/lib/meet-and-greet/actions";
 import { getDisputesForUser, getClaimsForUser } from "@/lib/disputes/actions";
 import { ProviderDashboardClient } from "./ProviderDashboardClient";
+import { ProviderOnboardingWizard } from "./ProviderOnboardingWizard";
 
 export default async function ProviderDashboardPage() {
-  const [stripeStatus, { bookings }, { reviews }, meetAndGreets, { disputes: disputesList = [] }, { claims: claimsList = [] }] = await Promise.all([
+  const [completeness, stripeStatus, bookingsResult, reviews, meetAndGreets, disputesResult, claimsResult] = await Promise.all([
+    getProviderProfileCompleteness(),
     getProviderStripeStatus(),
     (async () => {
       await expireStaleBookings();
@@ -20,7 +24,22 @@ export default async function ProviderDashboardPage() {
     getDisputesForUser().then((r) => (r.error ? { disputes: [] } : r)),
     getClaimsForUser().then((r) => (r.error ? { claims: [] } : r)),
   ]);
+
+  if (completeness.showWizard && completeness.profile) {
+    const areaPriceGuidance = await getProviderAreaPriceGuidance(completeness.profile.district);
+    return (
+      <ProviderOnboardingWizard
+        initialProfile={completeness.profile}
+        areaPriceGuidance={areaPriceGuidance}
+      />
+    );
+  }
+
+  const { bookings } = bookingsResult;
+  const { disputes: disputesList = [] } = disputesResult;
+  const { claims: claimsList = [] } = claimsResult;
   const { requested = [], confirmed = [], completed = [] } = meetAndGreets.error ? {} : meetAndGreets;
+
   return (
     <ProviderDashboardClient
       stripeStatus={stripeStatus}
@@ -29,6 +48,7 @@ export default async function ProviderDashboardPage() {
       initialMeetAndGreets={{ requested, confirmed, completed }}
       initialDisputes={disputesList}
       initialClaims={claimsList}
+      profileCompletenessPercentage={completeness.percentage}
     />
   );
 }

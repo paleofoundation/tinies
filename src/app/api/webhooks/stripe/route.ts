@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { constructWebhookEvent } from "@/lib/stripe";
+import { sendEmail } from "@/lib/email";
+import ProviderIdentityVerifiedEmail from "@/lib/email/templates/provider-identity-verified";
 import { DonationSource } from "@prisma/client";
 
 const HANDLED_TYPES = [
   "payment_intent.succeeded",
   "payment_intent.canceled",
   "charge.refunded",
+  "identity.verification_session.verified",
+  "identity.verification_session.requires_input",
 ] as const;
 
 export async function POST(request: NextRequest) {
@@ -125,6 +129,36 @@ export async function POST(request: NextRequest) {
         // Refund processed (full or partial)
         const charge = event.data.object as { id: string };
         void charge;
+        break;
+      }
+      case "identity.verification_session.verified": {
+        const session = event.data.object as { id: string; metadata?: { provider_profile_id?: string } };
+        const profileId = session.metadata?.provider_profile_id;
+        if (profileId) {
+          const profile = await prisma.providerProfile.findUnique({
+            where: { id: profileId },
+            include: { user: { select: { email: true, name: true } } },
+          });
+          if (profile) {
+            await prisma.providerProfile.update({
+              where: { id: profileId },
+              data: { verified: true, verifiedAt: new Date() },
+            });
+            if (profile.user?.email) {
+              await sendEmail({
+                to: profile.user.email,
+                subject: "Your identity has been verified!",
+                react: ProviderIdentityVerifiedEmail({
+                  providerName: profile.user.name || "there",
+                }),
+              });
+            }
+          }
+        }
+        break;
+      }
+      case "identity.verification_session.requires_input": {
+        // Verification failed or needs more info — leave verified=false so provider appears in admin queue for manual review
         break;
       }
       default:

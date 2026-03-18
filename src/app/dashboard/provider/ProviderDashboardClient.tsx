@@ -132,6 +132,7 @@ export function ProviderDashboardClient({
   initialMeetAndGreets = { requested: [], confirmed: [], completed: [] },
   initialDisputes = [],
   initialClaims = [],
+  profileCompletenessPercentage,
 }: {
   stripeStatus: ProviderStripeStatus;
   initialBookings: ProviderBookingCard[];
@@ -143,6 +144,7 @@ export function ProviderDashboardClient({
   };
   initialDisputes?: DisputeCard[];
   initialClaims?: ClaimCard[];
+  profileCompletenessPercentage?: number;
 }) {
   const router = useRouter();
   const [tab, setTab] = useState<TabId>("profile");
@@ -164,7 +166,7 @@ export function ProviderDashboardClient({
   const [claimResponseText, setClaimResponseText] = useState<Record<string, string>>({});
   const [respondingDisputeId, setRespondingDisputeId] = useState<string | null>(null);
   const [respondingClaimId, setRespondingClaimId] = useState<string | null>(null);
-  const score = getCompletenessScore();
+  const score = profileCompletenessPercentage ?? getCompletenessScore();
 
   useEffect(() => {
     setBookings(initialBookings);
@@ -362,6 +364,11 @@ export function ProviderDashboardClient({
                 />
               </div>
               <span className="text-sm font-semibold tabular-nums" style={{ color: "var(--color-text)" }}>{score}%</span>
+              {score === 100 && (
+                <span className="rounded-full border px-2.5 py-0.5 text-xs font-semibold" style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}>
+                  Complete Profile
+                </span>
+              )}
             </div>
           </div>
           {score < 100 && (

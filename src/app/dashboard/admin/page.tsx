@@ -6,6 +6,8 @@ import { AdoptionPipelineSection } from "./AdoptionPipelineSection";
 import { getOpenDisputesForAdmin, getOpenClaimsForAdmin } from "@/lib/disputes/actions";
 import { DisputesClaimsSection } from "./DisputesClaimsSection";
 import { AdminQRCodeSection } from "./AdminQRCodeSection";
+import { getProvidersPendingVerification, getRecentlyVerifiedProviders } from "./provider-verification/actions";
+import { ProviderVerificationSection } from "./provider-verification/ProviderVerificationSection";
 
 // TODO: enforce admin role – redirect or 403 if user is not admin (e.g. check session user role or app_metadata)
 
@@ -20,7 +22,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   const { disputes: openDisputes = [] } = await getOpenDisputesForAdmin().then((r) => (r.error ? { disputes: [] } : r));
   const { claims: openClaims = [] } = await getOpenClaimsForAdmin().then((r) => (r.error ? { claims: [] } : r));
 
-  const [listings, charitiesForQr] = await Promise.all([
+  const [listings, charitiesForQr, pendingVerification, recentlyVerified] = await Promise.all([
     prisma.adoptionListing.findMany({
     orderBy: { createdAt: "desc" },
     select: {
@@ -38,6 +40,8 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
       orderBy: { name: "asc" },
       select: { id: true, name: true, slug: true },
     }),
+    getProvidersPendingVerification(),
+    getRecentlyVerifiedProviders(10),
   ]);
 
   const statusLabel: Record<string, string> = {
@@ -151,6 +155,8 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
         </Suspense>
 
         <DisputesClaimsSection initialDisputes={openDisputes} initialClaims={openClaims} />
+
+        <ProviderVerificationSection pending={pendingVerification} recentlyVerified={recentlyVerified} />
 
         <AdminQRCodeSection charities={charitiesForQr} />
 

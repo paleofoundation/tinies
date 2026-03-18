@@ -5,6 +5,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { ServiceType, CancellationPolicy } from "@/lib/constants";
 import { ServiceAreaPicker, type ServiceAreaValue } from "@/components/maps";
+import { VerifyIdentityButton } from "../VerifyIdentityButton";
 
 const DISTRICTS = ["Nicosia", "Limassol", "Larnaca", "Paphos", "Famagusta"] as const;
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
@@ -321,14 +322,20 @@ export default function ProviderEditProfilePage() {
             </div>
           </section>
 
-          {/* Verification placeholder */}
+          {/* Verification */}
           <section id="verification" className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-8 shadow-[var(--shadow-md)] sm:p-8">
             <h2 className="font-normal " style={{ fontFamily: "var(--font-heading), serif" }}>Identity verification</h2>
-            <p className="mt-1 text-sm ">Upload a government ID. We review within 24–48 hours. Required to appear in search.</p>
-            <label className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-[var(--radius-lg)] border-2 border-dashed border-[var(--color-border)]  py-6 transition-colors hover:border-[var(--color-primary)]/40">
-              <input type="file" accept="image/*,.pdf" className="hidden" />
-              <span className="text-sm font-semibold text-[var(--color-primary)]">Upload ID document</span>
-            </label>
+            <p className="mt-1 text-sm ">Verify with Stripe (ID + selfie) for instant verification, or upload a document for manual review within 24–48 hours. Required to appear in search.</p>
+            <div className="mt-4 space-y-3">
+              <VerifyIdentityButton
+                className="rounded-[var(--radius-lg)] border-2 border-[var(--color-primary)] bg-transparent px-4 py-2.5 text-sm font-semibold text-[var(--color-primary)] transition-colors hover:opacity-90 disabled:opacity-70"
+              />
+              <p className="text-center text-sm " style={{ color: "var(--color-text-secondary)" }}>or upload ID for manual review</p>
+              <label className="flex cursor-pointer flex-col items-center justify-center rounded-[var(--radius-lg)] border-2 border-dashed border-[var(--color-border)] py-6 transition-colors hover:border-[var(--color-primary)]/40">
+                <input type="file" accept="image/*,.pdf" className="hidden" />
+                <span className="text-sm font-semibold text-[var(--color-primary)]">Upload ID document</span>
+              </label>
+            </div>
           </section>
 
           {/* Cancellation policy */}

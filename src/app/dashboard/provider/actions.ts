@@ -14,6 +14,7 @@ import BookingDeclinedEmail from "@/lib/email/templates/booking-declined";
 import BookingExpiredEmail from "@/lib/email/templates/booking-expired";
 import { sendSMS, buildBookingAcceptedSMS } from "@/lib/sms";
 import { DonationSource } from "@prisma/client";
+import slugify from "slugify";
 
 const PENDING_RESPONSE_HOURS = 4;
 /** 10% of commission goes to Giving Fund (platform_commission donation). */
@@ -596,5 +597,421 @@ export async function endWalk(bookingId: string): Promise<{ error?: string }> {
   } catch (e) {
     console.error("endWalk", e);
     return { error: e instanceof Error ? e.message : "Failed to end walk." };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Provider Onboarding Wizard (Phase 6.1)
+// ---------------------------------------------------------------------------
+
+const PROVIDERS_BUCKET = "providers";
+const WIZARD_WEIGHTS = {
+  profilePhoto: 12.5,
+  bio: 12.5,
+  services: 12.5,
+  photos: 12.5,
+  availability: 12.5,
+  petPrefs: 12.5,
+  idVerification: 12.5,
+  cancellationPolicy: 12.5,
+} as const;
+const COMPLETENESS_THRESHOLD = 80;
+
+export type ProviderWizardProfile = {
+  profileId: string;
+  userId: string;
+  slug: string;
+  district: string | null;
+  avatarUrl: string | null;
+  bio: string | null;
+  servicesOffered: { type: string; base_price?: number; additional_pet_price?: number; price_unit?: string; max_pets?: number }[];
+  photos: string[];
+  availability: Record<string, boolean> | null;
+  petTypesAccepted: string | null;
+  maxPets: number | null;
+  idDocumentUrl: string | null;
+  cancellationPolicy: string;
+};
+
+export type ProviderCompletenessResult = {
+  percentage: number;
+  showWizard: boolean;
+  profile: ProviderWizardProfile | null;
+  incompleteSteps: ("profilePhoto" | "bio" | "services" | "photos" | "availability" | "petPrefs" | "idVerification" | "cancellationPolicy")[];
+  error?: string;
+};
+
+/** Ensure Prisma User exists for current Supabase user (e.g. first dashboard visit). */
+async function ensureProviderUser(userId: string, email: string, name: string): Promise<void> {
+  await prisma.user.upsert({
+    where: { id: userId },
+    create: {
+      id: userId,
+      email: email || `${userId}@provider.placeholder`,
+      name: name || "Provider",
+      passwordHash: "supabase-auth-placeholder",
+      role: "provider",
+    },
+    update: {},
+  });
+}
+
+/** Get or create provider profile; then compute completeness. */
+export async function getProviderProfileCompleteness(): Promise<ProviderCompletenessResult> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { percentage: 0, showWizard: true, profile: null, incompleteSteps: [], error: "Not signed in." };
+
+  await ensureProviderUser(
+    user.id,
+    user.email ?? "",
+    (user.user_metadata?.name as string) ?? user.email ?? "Provider"
+  );
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { id: true, name: true, avatarUrl: true, district: true },
+  });
+  if (!dbUser) return { percentage: 0, showWizard: true, profile: null, incompleteSteps: [], error: "User not found." };
+
+  let profile = await prisma.providerProfile.findUnique({
+    where: { userId: user.id },
+    select: {
+      id: true,
+      userId: true,
+      slug: true,
+      bio: true,
+      servicesOffered: true,
+      photos: true,
+      availability: true,
+      petTypesAccepted: true,
+      maxPets: true,
+      idDocumentUrl: true,
+      stripeVerificationSessionId: true,
+      cancellationPolicy: true,
+    },
+  });
+
+  if (!profile) {
+    const baseSlug = slugify(dbUser.name || "provider", { lower: true, strict: true }) || "provider";
+    const existing = await prisma.providerProfile.findMany({ where: { slug: { startsWith: baseSlug } }, select: { slug: true } });
+    const used = new Set(existing.map((r) => r.slug));
+    let slug = baseSlug;
+    let n = 0;
+    while (used.has(slug)) slug = `${baseSlug}-${++n}`;
+    profile = await prisma.providerProfile.create({
+      data: {
+        userId: user.id,
+        slug,
+        servicesOffered: [],
+        availability: defaultAvailability(),
+      },
+      select: {
+        id: true,
+        userId: true,
+        slug: true,
+        bio: true,
+        servicesOffered: true,
+        photos: true,
+        availability: true,
+        petTypesAccepted: true,
+        maxPets: true,
+        idDocumentUrl: true,
+        stripeVerificationSessionId: true,
+        cancellationPolicy: true,
+      },
+    });
+  }
+
+  const services = (profile.servicesOffered as { type?: string; base_price?: number }[] | null) ?? [];
+  const hasServices = services.length > 0 && services.some((s) => s.base_price != null && s.base_price > 0);
+  const availability = profile.availability as Record<string, boolean> | null;
+  const hasAvailability = availability && Object.values(availability).some(Boolean);
+  const hasBio = (profile.bio?.trim().length ?? 0) >= 200;
+  const hasProfilePhoto = Boolean(dbUser.avatarUrl?.trim());
+  const hasPhotos = (profile.photos?.length ?? 0) >= 3;
+  const hasPetPrefs = (profile.petTypesAccepted?.trim().length ?? 0) > 0 && (profile.maxPets ?? 0) > 0;
+  const hasIdDoc = Boolean(profile.idDocumentUrl?.trim() || profile.stripeVerificationSessionId?.trim());
+  const hasCancellation = Boolean(profile.cancellationPolicy);
+
+  const incompleteSteps: ProviderCompletenessResult["incompleteSteps"] = [];
+  if (!hasProfilePhoto) incompleteSteps.push("profilePhoto");
+  if (!hasBio) incompleteSteps.push("bio");
+  if (!hasServices) incompleteSteps.push("services");
+  if (!hasPhotos) incompleteSteps.push("photos");
+  if (!hasAvailability) incompleteSteps.push("availability");
+  if (!hasPetPrefs) incompleteSteps.push("petPrefs");
+  if (!hasIdDoc) incompleteSteps.push("idVerification");
+  if (!hasCancellation) incompleteSteps.push("cancellationPolicy");
+
+  let percentage = 0;
+  if (hasProfilePhoto) percentage += WIZARD_WEIGHTS.profilePhoto;
+  if (hasBio) percentage += WIZARD_WEIGHTS.bio;
+  if (hasServices) percentage += WIZARD_WEIGHTS.services;
+  if (hasPhotos) percentage += WIZARD_WEIGHTS.photos;
+  if (hasAvailability) percentage += WIZARD_WEIGHTS.availability;
+  if (hasPetPrefs) percentage += WIZARD_WEIGHTS.petPrefs;
+  if (hasIdDoc) percentage += WIZARD_WEIGHTS.idVerification;
+  if (hasCancellation) percentage += WIZARD_WEIGHTS.cancellationPolicy;
+  percentage = Math.round(percentage);
+
+  const wizardProfile: ProviderWizardProfile = {
+    profileId: profile.id,
+    userId: profile.userId,
+    slug: profile.slug,
+    district: dbUser.district ?? null,
+    avatarUrl: dbUser.avatarUrl,
+    bio: profile.bio,
+    servicesOffered: services as ProviderWizardProfile["servicesOffered"],
+    photos: profile.photos ?? [],
+    availability: availability ?? null,
+    petTypesAccepted: profile.petTypesAccepted,
+    maxPets: profile.maxPets,
+    idDocumentUrl: profile.idDocumentUrl,
+    cancellationPolicy: profile.cancellationPolicy,
+  };
+
+  return {
+    percentage,
+    showWizard: percentage < COMPLETENESS_THRESHOLD,
+    profile: wizardProfile,
+    incompleteSteps,
+  };
+}
+
+function defaultAvailability(): Record<string, boolean> {
+  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const slots = ["Morning", "Afternoon", "Evening"];
+  const out: Record<string, boolean> = {};
+  days.forEach((d) => slots.forEach((s) => { out[`${d}-${s}`] = d !== "Sat" && d !== "Sun" && (s === "Morning" || s === "Afternoon"); }));
+  return out;
+}
+
+/** Area price guidance: min/max base_price by service type in same district or all. */
+export async function getProviderAreaPriceGuidance(district?: string | null): Promise<Record<string, { min: number; max: number }>> {
+  const profiles = await prisma.providerProfile.findMany({
+    where: { verified: true },
+    include: { user: { select: { district: true } } },
+  });
+  const byDistrict = district ? profiles.filter((p) => p.user.district === district) : profiles;
+  const services = byDistrict.flatMap((p) => {
+    const raw = p.servicesOffered as { type?: string; base_price?: number }[] | null;
+    return Array.isArray(raw) ? raw.filter((s) => s.type && s.base_price != null) : [];
+  });
+  const byType: Record<string, number[]> = {};
+  services.forEach((s) => {
+    const t = String(s.type ?? "");
+    if (!byType[t]) byType[t] = [];
+    byType[t].push(Number(s.base_price));
+  });
+  const result: Record<string, { min: number; max: number }> = {};
+  Object.entries(byType).forEach(([type, prices]) => {
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    result[type] = { min, max };
+  });
+  return result;
+}
+
+/** Upload provider wizard file (avatar, gallery, or ID). Returns public URL. */
+export async function uploadProviderWizardFile(formData: FormData): Promise<{ url: string; error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { url: "", error: "Not signed in." };
+  const type = formData.get("type") as string | null;
+  const file = formData.get("file") as File | null;
+  if (!type || !file?.size) return { url: "", error: "Missing file or type." };
+  const allowed = ["avatar", "gallery", "id"];
+  if (!allowed.includes(type)) return { url: "", error: "Invalid type." };
+  const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_").slice(0, 60);
+  const path = type === "avatar" ? `${user.id}/avatar.${ext}` : type === "id" ? `${user.id}/id.${ext}` : `${user.id}/gallery/${Date.now()}-${safeName}`;
+  const { error } = await supabase.storage.from(PROVIDERS_BUCKET).upload(path, file, { cacheControl: "3600", upsert: true });
+  if (error) return { url: "", error: error.message };
+  const { data } = supabase.storage.from(PROVIDERS_BUCKET).getPublicUrl(path);
+  return { url: data.publicUrl };
+}
+
+export async function updateProviderWizardPhoto(avatarUrl: string): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+  try {
+    await prisma.user.update({ where: { id: user.id }, data: { avatarUrl } });
+    revalidatePath("/dashboard/provider");
+    return {};
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Failed to save." };
+  }
+}
+
+export async function updateProviderWizardBio(bio: string): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+  if ((bio?.trim().length ?? 0) < 200) return { error: "Bio must be at least 200 characters." };
+  if ((bio?.trim().length ?? 0) > 1000) return { error: "Bio must be at most 1000 characters." };
+  try {
+    await prisma.providerProfile.update({
+      where: { userId: user.id },
+      data: { bio: bio.trim() },
+    });
+    revalidatePath("/dashboard/provider");
+    return {};
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Failed to save." };
+  }
+}
+
+export type ServiceOfferInput = { type: string; base_price: number; additional_pet_price: number; price_unit: string; max_pets: number };
+
+export async function updateProviderWizardServices(servicesOffered: ServiceOfferInput[]): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+  if (!servicesOffered?.length) return { error: "Select at least one service with a base price." };
+  try {
+    await prisma.providerProfile.update({
+      where: { userId: user.id },
+      data: { servicesOffered: servicesOffered as unknown as object[] },
+    });
+    revalidatePath("/dashboard/provider");
+    return {};
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Failed to save." };
+  }
+}
+
+export async function updateProviderWizardPhotos(photos: string[]): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+  if ((photos?.length ?? 0) < 3) return { error: "Upload at least 3 photos." };
+  try {
+    await prisma.providerProfile.update({
+      where: { userId: user.id },
+      data: { photos: photos.slice(0, 15) },
+    });
+    revalidatePath("/dashboard/provider");
+    return {};
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Failed to save." };
+  }
+}
+
+export async function updateProviderWizardAvailability(availability: Record<string, boolean>): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+  try {
+    await prisma.providerProfile.update({
+      where: { userId: user.id },
+      data: { availability: availability as unknown as object },
+    });
+    revalidatePath("/dashboard/provider");
+    return {};
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Failed to save." };
+  }
+}
+
+export async function updateProviderWizardPetPrefs(petTypesAccepted: string, maxPets: number): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+  if (!petTypesAccepted?.trim()) return { error: "Select at least one pet type." };
+  if (maxPets < 1) return { error: "Max pets must be at least 1." };
+  try {
+    await prisma.providerProfile.update({
+      where: { userId: user.id },
+      data: { petTypesAccepted: petTypesAccepted.trim(), maxPets },
+    });
+    revalidatePath("/dashboard/provider");
+    return {};
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Failed to save." };
+  }
+}
+
+export async function updateProviderWizardIdDocument(idDocumentUrl: string): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+  try {
+    await prisma.providerProfile.update({
+      where: { userId: user.id },
+      data: { idDocumentUrl },
+    });
+    revalidatePath("/dashboard/provider");
+    return {};
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Failed to save." };
+  }
+}
+
+export async function updateProviderWizardCancellationPolicy(policy: string): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+  const valid = ["flexible", "moderate", "strict"].includes(policy);
+  if (!valid) return { error: "Invalid policy." };
+  try {
+    await prisma.providerProfile.update({
+      where: { userId: user.id },
+      data: { cancellationPolicy: policy as "flexible" | "moderate" | "strict" },
+    });
+    revalidatePath("/dashboard/provider");
+    return {};
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Failed to save." };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Stripe Identity verification (Phase 6.2)
+// ---------------------------------------------------------------------------
+
+/** Create a Stripe Identity VerificationSession (document + selfie). Returns client_secret for Stripe.js verifyIdentity(). */
+export async function createVerificationSession(): Promise<{ clientSecret: string | null; error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { clientSecret: null, error: "Not signed in." };
+
+  const profile = await prisma.providerProfile.findUnique({
+    where: { userId: user.id },
+    select: { id: true },
+  });
+  if (!profile) return { clientSecret: null, error: "Provider profile not found." };
+
+  try {
+    const stripe = getStripeServer();
+    const identity = (stripe as unknown as { identity: { verificationSessions: { create: (opts: {
+      type: string;
+      metadata?: Record<string, string>;
+      options?: { document?: { require_matching_selfie?: boolean } };
+    }) => Promise<{ id: string; client_secret: string | null }> } } }).identity;
+    if (!identity?.verificationSessions?.create) {
+      return { clientSecret: null, error: "Stripe Identity not available." };
+    }
+
+    const session = await identity.verificationSessions.create({
+      type: "document",
+      metadata: { provider_profile_id: profile.id },
+      options: { document: { require_matching_selfie: true } },
+    });
+
+    await prisma.providerProfile.update({
+      where: { id: profile.id },
+      data: { stripeVerificationSessionId: session.id },
+    });
+
+    revalidatePath("/dashboard/provider");
+    return { clientSecret: session.client_secret };
+  } catch (e) {
+    console.error("createVerificationSession", e);
+    return {
+      clientSecret: null,
+      error: e instanceof Error ? e.message : "Failed to create verification session.",
+    };
   }
 }
