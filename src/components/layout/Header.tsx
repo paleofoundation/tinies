@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
+import { MessageCircle } from "lucide-react";
+import { getUnreadMessageCount } from "@/app/dashboard/messages/actions";
 
 const NAV_LINKS = [
   { href: "/services", label: "Services" },
@@ -27,6 +29,7 @@ export function Header() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const supabase = createClient();
@@ -41,6 +44,18 @@ export function Header() {
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!user) {
+      setUnreadCount(0);
+      return;
+    }
+    getUnreadMessageCount().then(({ count }) => setUnreadCount(count));
+    const interval = setInterval(() => {
+      getUnreadMessageCount().then(({ count }) => setUnreadCount(count));
+    }, 15_000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   async function handleSignOut() {
     const supabase = createClient();
@@ -89,6 +104,22 @@ export function Header() {
           {!loading && (
             user ? (
               <div className="flex items-center gap-3">
+                <Link
+                  href="/dashboard/messages"
+                  className="relative flex items-center rounded-[var(--radius-lg)] p-1.5 transition-opacity hover:opacity-80"
+                  style={{ color: "var(--color-text)" }}
+                  aria-label={unreadCount > 0 ? `${unreadCount} unread messages` : "Messages"}
+                >
+                  <MessageCircle className="h-5 w-5" />
+                  {unreadCount > 0 && (
+                    <span
+                      className="absolute -right-0.5 -top-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white"
+                      style={{ backgroundColor: "var(--color-primary)" }}
+                    >
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
+                </Link>
                 <span
                   className="truncate text-sm max-w-[120px] sm:max-w-[180px]"
                   style={{

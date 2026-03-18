@@ -1,0 +1,77 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
+import { getWalkRoute } from "../../actions";
+import { WalkTracker } from "@/components/maps/WalkTracker";
+import type { WalkRouteData } from "../../actions";
+
+const POLL_INTERVAL_MS = 15 * 1000;
+
+export function WatchLiveWalkClient({
+  bookingId,
+  initialRoute,
+  initialStartedAt,
+  initialEndedAt,
+  initialStatus,
+}: {
+  bookingId: string;
+  initialRoute: { lat: number; lng: number; timestamp: number }[];
+  initialStartedAt: Date | null;
+  initialEndedAt: Date | null;
+  initialStatus: string;
+}) {
+  const [route, setRoute] = useState(initialRoute);
+  const [startedAt, setStartedAt] = useState<Date | null>(initialStartedAt ? new Date(initialStartedAt) : null);
+  const [endedAt, setEndedAt] = useState<Date | null>(initialEndedAt ? new Date(initialEndedAt) : null);
+  const [status, setStatus] = useState(initialStatus);
+
+  const fetchRoute = useCallback(async () => {
+    const { data } = await getWalkRoute(bookingId);
+    if (data) {
+      setRoute(data.walkRoute);
+      setStartedAt(data.walkStartedAt ? new Date(data.walkStartedAt) : null);
+      setEndedAt(data.walkEndedAt ? new Date(data.walkEndedAt) : null);
+      setStatus(data.status);
+    }
+  }, [bookingId]);
+
+  useEffect(() => {
+    if (status === "active" && !endedAt) {
+      const interval = setInterval(fetchRoute, POLL_INTERVAL_MS);
+      return () => clearInterval(interval);
+    }
+  }, [status, endedAt, fetchRoute]);
+
+  const isLive = status === "active" && !endedAt;
+
+  return (
+    <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
+      <main className="mx-auto max-w-2xl px-4 py-8">
+        <div className="mb-4 flex items-center justify-between">
+          <Link
+            href="/dashboard/owner?tab=bookings"
+            className="text-sm font-medium hover:underline"
+            style={{ color: "var(--color-primary)" }}
+          >
+            ← Back to bookings
+          </Link>
+          {isLive && (
+            <span className="rounded-full bg-[var(--color-secondary)]/20 px-2.5 py-0.5 text-xs font-semibold" style={{ color: "var(--color-secondary)" }}>
+              Live
+            </span>
+          )}
+        </div>
+        <h1 className="font-normal" style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-xl)", color: "var(--color-text)" }}>
+          {isLive ? "Watch live walk" : "Walk summary"}
+        </h1>
+        <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+          {isLive ? "Route updates every 15 seconds." : "This walk has ended."}
+        </p>
+        <div className="mt-6">
+          <WalkTracker route={route} startedAt={startedAt} />
+        </div>
+      </main>
+    </div>
+  );
+}

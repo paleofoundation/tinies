@@ -181,7 +181,7 @@ export default function AdoptPage() {
                     {animal.location}
                   </p>
                   <Link
-                    href={`/adopt/${animal.id}`}
+                    href={`/adopt/apply/${animal.id}`}
                     className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] px-4 font-semibold text-white transition-opacity hover:opacity-90"
                     style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-secondary)" }}
                   >

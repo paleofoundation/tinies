@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Leaf, Coins, Heart, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { getGivingPageData, getCommunityOfGivers, getRecentDonationsForTicker } from "@/lib/giving/actions";
+import { DonationTicker } from "@/components/giving/DonationTicker";
+import { CommunityOfGivers } from "@/components/giving/CommunityOfGivers";
 
 export const metadata: Metadata = {
   title: "Tinies Giving | Transparency & Impact",
@@ -8,19 +11,28 @@ export const metadata: Metadata = {
     "Every booking helps. 10% of our commission goes to animal rescue. Round up at checkout, become a Tinies Guardian, or support featured charities. See how we give.",
 };
 
-const FEATURED_CHARITIES = [
-  { name: "Gardens of St Gertrude", mission: "Cat sanctuary in Parekklisia — 92 cats and counting.", slug: "gardens-of-st-gertrude" },
-  { name: "Cyprus Dog Rescue", mission: "Rehoming stray and abandoned dogs across Cyprus.", slug: "cyprus-dog-rescue" },
-  { name: "Paws & Claws Cyprus", mission: "Vet care and adoption for cats and dogs in need.", slug: "paws-and-claws-cyprus" },
-] as const;
-
 const GUARDIAN_TIERS = [
   { name: "Friend", amount: "€3", perMonth: "/month", description: "Support rescue every month. Badge on your profile." },
   { name: "Guardian", amount: "€5", perMonth: "/month", description: "Our most popular. Monthly impact email + early access to new adoptions." },
   { name: "Champion", amount: "€10", perMonth: "/month", description: "Maximum impact. Everything in Guardian, plus featured in our community." },
 ] as const;
 
-export default function GivingPage() {
+const SOURCE_LABELS: Record<string, string> = {
+  roundup: "Round-up",
+  signup: "Signup",
+  guardian: "Guardian",
+  platform_commission: "Platform 10%",
+};
+
+const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+export default async function GivingPage() {
+  const [stats, givers, tickerItems] = await Promise.all([
+    getGivingPageData(),
+    getCommunityOfGivers(),
+    getRecentDonationsForTicker(20),
+  ]);
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
       {/* Hero */}
@@ -39,13 +51,13 @@ export default function GivingPage() {
         </div>
       </section>
 
-      {/* Counters */}
+      {/* Counters - live data */}
       <section className="-mt-4 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
             <div className="rounded-[var(--radius-lg)] border px-8 py-10 text-center" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
               <p className="tabular-nums text-3xl font-bold sm:text-4xl" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-secondary)" }}>
-                €0
+                €{(stats.totalDonatedCents / 100).toLocaleString("en-GB", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </p>
               <p className="mt-2 text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
                 donated to date
@@ -53,15 +65,15 @@ export default function GivingPage() {
             </div>
             <div className="rounded-[var(--radius-lg)] border px-8 py-10 text-center" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
               <p className="tabular-nums text-3xl font-bold sm:text-4xl" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-secondary)" }}>
-                0
+                {stats.charitiesFundedCount}
               </p>
               <p className="mt-2 text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-                charities supported
+                charities funded
               </p>
             </div>
             <div className="rounded-[var(--radius-lg)] border px-8 py-10 text-center" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
               <p className="tabular-nums text-3xl font-bold sm:text-4xl" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-secondary)" }}>
-                0
+                {stats.activeGuardiansCount}
               </p>
               <p className="mt-2 text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
                 Tinies Guardians
@@ -71,7 +83,39 @@ export default function GivingPage() {
         </div>
       </section>
 
-      {/* Three giving mechanisms */}
+      {/* Recent activity ticker */}
+      <DonationTicker items={tickerItems} />
+
+      {/* Monthly breakdown - last 12 months */}
+      {stats.monthlyBreakdown.length > 0 && (
+        <section className="mt-12 px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto rounded-[var(--radius-lg)] border p-6" style={{ maxWidth: "var(--max-width)", backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}>
+            <h2 className="text-lg font-semibold" style={{ color: "var(--color-text)" }}>Monthly breakdown (last 12 months)</h2>
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full min-w-[320px] text-sm">
+                <thead>
+                  <tr className="border-b" style={{ borderColor: "var(--color-border)" }}>
+                    <th className="pb-2 text-left font-medium" style={{ color: "var(--color-text-secondary)" }}>Month</th>
+                    <th className="pb-2 text-left font-medium" style={{ color: "var(--color-text-secondary)" }}>Source</th>
+                    <th className="pb-2 text-right font-medium" style={{ color: "var(--color-text-secondary)" }}>Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stats.monthlyBreakdown.map((row, i) => (
+                    <tr key={`${row.year}-${row.month}-${row.source}-${i}`} className="border-b last:border-0" style={{ borderColor: "var(--color-border)" }}>
+                      <td className="py-2" style={{ color: "var(--color-text)" }}>{MONTH_NAMES[row.month - 1]} {row.year}</td>
+                      <td className="py-2" style={{ color: "var(--color-text)" }}>{SOURCE_LABELS[row.source] ?? row.source}</td>
+                      <td className="py-2 text-right tabular-nums" style={{ color: "var(--color-text)" }}>€{(row.totalCents / 100).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* How we give */}
       <section className="px-4 py-20 sm:px-6 lg:px-8" style={{ paddingTop: "var(--space-section)", paddingBottom: "var(--space-section)" }}>
         <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
           <h2
@@ -124,8 +168,8 @@ export default function GivingPage() {
         </div>
       </section>
 
-      {/* Featured charities */}
-      <section className="rounded-t-[2rem] bg-white px-4 py-20 sm:px-6 lg:px-8" style={{ paddingTop: "var(--space-section)", paddingBottom: "var(--space-section)" }}>
+      {/* Featured charities - live */}
+      <section className="rounded-t-[2rem] px-4 py-20 sm:px-6 lg:px-8" style={{ backgroundColor: "var(--color-surface)", paddingTop: "var(--space-section)", paddingBottom: "var(--space-section)" }}>
         <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
           <h2
             className="font-normal"
@@ -137,27 +181,109 @@ export default function GivingPage() {
             Verified rescues and sanctuaries we support.
           </p>
           <div className="mt-10 grid gap-8 sm:grid-cols-3">
-            {FEATURED_CHARITIES.map((charity) => (
-              <div
-                key={charity.slug}
-                className="rounded-[var(--radius-lg)] border p-8 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]"
-                style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)", padding: "var(--space-card)" }}
-              >
-                <h3 className="font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>{charity.name}</h3>
-                <p className="mt-3 text-sm leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-                  {charity.mission}
-                </p>
-                <Link
-                  href={`/giving/${charity.slug}`}
-                  className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] border-2 bg-transparent px-4 font-semibold transition-opacity hover:opacity-90"
-                  style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", borderColor: "var(--color-primary)", color: "var(--color-primary)" }}
+            {stats.featuredCharities.length > 0 ? (
+              stats.featuredCharities.map((charity) => (
+                <div
+                  key={charity.id}
+                  className="rounded-[var(--radius-lg)] border p-8 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]"
+                  style={{ backgroundColor: "var(--color-background)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)", padding: "var(--space-card)" }}
                 >
-                  Support this charity
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
+                  {charity.logoUrl && (
+                    <img src={charity.logoUrl} alt="" className="mb-4 h-16 w-16 rounded-[var(--radius-lg)] object-cover" />
+                  )}
+                  <h3 className="font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>{charity.name}</h3>
+                  {charity.mission && (
+                    <p className="mt-3 text-sm leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>{charity.mission}</p>
+                  )}
+                  <Link
+                    href={`/giving/${charity.slug}`}
+                    className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] border-2 bg-transparent px-4 font-semibold transition-opacity hover:opacity-90"
+                    style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", borderColor: "var(--color-primary)", color: "var(--color-primary)" }}
+                  >
+                    Support this charity
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              ))
+            ) : (
+              <p className="col-span-3 text-sm" style={{ color: "var(--color-text-secondary)" }}>No featured charities yet.</p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Our Community of Givers */}
+      <section className="px-4 py-16 sm:px-6 lg:px-8" style={{ backgroundColor: "var(--color-background)" }}>
+        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
+          <h2
+            className="font-normal"
+            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
+          >
+            Our Community of Givers
+          </h2>
+          <p className="mt-2 text-lg" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+            Together, <strong style={{ color: "var(--color-text)" }}>{stats.supporterCount}</strong> supporters have donated{" "}
+            <strong style={{ color: "var(--color-text)" }}>EUR {(stats.totalDonatedCents / 100).toLocaleString("en-GB", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</strong> to{" "}
+            <strong style={{ color: "var(--color-text)" }}>{stats.charitiesFundedCount}</strong> sanctuaries.
+          </p>
+          <div className="mt-8">
+            <CommunityOfGivers givers={givers} />
+          </div>
+          <p className="mt-8 text-center">
+            <Link
+              href="/giving/become-a-guardian"
+              className="inline-flex h-12 items-center rounded-[var(--radius-pill)] border-2 px-6 font-semibold transition-opacity hover:opacity-90"
+              style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}
+            >
+              Join {stats.supporterCount} supporters
+            </Link>
+          </p>
+        </div>
+      </section>
+
+      {/* All charities grid */}
+      <section className="px-4 py-12 sm:px-6 lg:px-8" style={{ paddingBottom: "var(--space-section)" }}>
+        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
+          <h2
+            className="font-normal"
+            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-2xl)", color: "var(--color-text)" }}
+          >
+            All charities
+          </h2>
+          <p className="mt-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+            Every active charity on Tinies Giving.
+          </p>
+          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {stats.allCharities.map((charity) => (
+              <div
+                key={charity.id}
+                className="rounded-[var(--radius-lg)] border p-6 transition-shadow hover:shadow-md"
+                style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}
+              >
+                <div className="flex items-start gap-4">
+                  {charity.logoUrl && (
+                    <img src={charity.logoUrl} alt="" className="h-12 w-12 shrink-0 rounded-[var(--radius-lg)] object-cover" />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-semibold" style={{ color: "var(--color-text)" }}>{charity.name}</h3>
+                    {charity.mission && (
+                      <p className="mt-1 line-clamp-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>{charity.mission}</p>
+                    )}
+                    <Link
+                      href={`/giving/${charity.slug}`}
+                      className="mt-3 inline-flex items-center gap-1 text-sm font-medium hover:underline"
+                      style={{ color: "var(--color-primary)" }}
+                    >
+                      View profile <ArrowRight className="h-3 w-3" />
+                    </Link>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
+          {stats.allCharities.length === 0 && (
+            <p className="mt-4 text-sm" style={{ color: "var(--color-text-secondary)" }}>No charities listed yet.</p>
+          )}
         </div>
       </section>
 

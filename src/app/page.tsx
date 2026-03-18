@@ -5,17 +5,9 @@ import {
   PawPrint,
   Heart,
   Leaf,
-  ChevronDown,
 } from "lucide-react";
 import Link from "next/link";
-
-const SERVICE_OPTIONS = [
-  "Dog Walking",
-  "Pet Sitting",
-  "Overnight Boarding",
-  "Drop-In Visits",
-  "Daycare",
-] as const;
+import { HomeSearchBar } from "@/components/layout/HomeSearchBar";
 
 const ADOPTABLES = [
   { emoji: "🐕", name: "Max", age: "3 years", id: "max" },
@@ -44,35 +36,8 @@ export default function Home() {
             Every booking helps a tiny.
           </p>
 
-          {/* Search area */}
-          <div className="mt-8 flex flex-col gap-3 sm:mx-auto sm:max-w-xl sm:flex-row sm:items-stretch sm:justify-center sm:gap-0 sm:overflow-hidden sm:rounded-[var(--radius-lg)] sm:border sm:shadow-[var(--shadow-md)]" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}>
-            <div className="relative flex-1">
-              <ChevronDown className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 pointer-events-none" style={{ color: "var(--color-text-muted)" }} />
-              <select
-                className="w-full appearance-none rounded-[var(--radius-lg)] border py-3.5 pl-11 pr-4 focus:outline-none focus:ring-2 sm:rounded-none sm:border-0 sm:border-r"
-                style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
-                defaultValue=""
-                aria-label="Service type"
-              >
-                <option value="" disabled>
-                  Choose a service
-                </option>
-                {SERVICE_OPTIONS.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <Link
-              href="/services/search"
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-[var(--radius-pill)] px-6 font-semibold text-white transition-opacity hover:opacity-90 sm:rounded-none sm:rounded-r-[var(--radius-lg)]"
-              style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-primary)" }}
-            >
-              <Search className="h-5 w-5" />
-              Find Care
-            </Link>
-          </div>
+          {/* Search area: geocodes location and redirects to /services/search?lat=&lng=&type= */}
+          <HomeSearchBar />
         </div>
       </header>
 

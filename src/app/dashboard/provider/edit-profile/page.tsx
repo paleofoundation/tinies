@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { ServiceType, CancellationPolicy } from "@/lib/constants";
+import { ServiceAreaPicker, type ServiceAreaValue } from "@/components/maps";
 
 const DISTRICTS = ["Nicosia", "Limassol", "Larnaca", "Paphos", "Famagusta"] as const;
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
@@ -33,6 +34,11 @@ export default function ProviderEditProfilePage() {
   const [bio, setBio] = useState("");
   const [district, setDistrict] = useState("");
   const [radiusKm, setRadiusKm] = useState(10);
+  const [serviceArea, setServiceArea] = useState<ServiceAreaValue>({
+    lat: null,
+    lng: null,
+    radiusKm: 10,
+  });
   const [services, setServices] = useState<Record<string, boolean>>({
     [ServiceType.walking]: false,
     [ServiceType.sitting]: false,
@@ -217,10 +223,14 @@ export default function ProviderEditProfilePage() {
           {/* Service area */}
           <section id="area" className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-8 shadow-[var(--shadow-md)] sm:p-8">
             <h2 className="font-normal " style={{ fontFamily: "var(--font-heading), serif" }}>Service area</h2>
-            <p className="mt-1 text-sm ">Where you're willing to provide care.</p>
+            <p className="mt-1 text-sm ">Where you&apos;re willing to provide care. Click the map to set your center, then set your radius (1–50 km).</p>
             <div className="mt-4 space-y-4">
+              <ServiceAreaPicker
+                value={serviceArea}
+                onChange={setServiceArea}
+              />
               <div>
-                <label className="block text-sm font-medium ">District</label>
+                <label className="block text-sm font-medium ">District (for search)</label>
                 <select
                   value={district}
                   onChange={(e) => setDistrict(e.target.value)}
@@ -231,17 +241,6 @@ export default function ProviderEditProfilePage() {
                     <option key={d} value={d}>{d}</option>
                   ))}
                 </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium ">Radius: {radiusKm} km</label>
-                <input
-                  type="range"
-                  min={1}
-                  max={25}
-                  value={radiusKm}
-                  onChange={(e) => setRadiusKm(Number(e.target.value))}
-                  className="mt-2 w-full accent-[var(--color-primary)]"
-                />
               </div>
             </div>
           </section>

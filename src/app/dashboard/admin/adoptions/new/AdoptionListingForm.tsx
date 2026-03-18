@@ -37,9 +37,13 @@ const emptyForm: CreateListingInput = {
 type Props = {
   initial?: Partial<CreateListingInput>;
   listingId?: string;
+  /** When provided, used instead of default admin create/update and redirect (e.g. rescue dashboard). */
+  onCreate?: (input: CreateListingInput) => Promise<{ error?: string }>;
+  onUpdate?: (id: string, input: CreateListingInput) => Promise<{ error?: string }>;
+  successRedirect?: string;
 };
 
-export function AdoptionListingForm({ initial, listingId }: Props) {
+export function AdoptionListingForm({ initial, listingId, onCreate, onUpdate, successRedirect }: Props) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<CreateListingInput>({ ...emptyForm, ...initial });
@@ -72,15 +76,15 @@ export function AdoptionListingForm({ initial, listingId }: Props) {
     setSubmitting(true);
     const isEdit = !!listingId;
     const result = isEdit
-      ? await (await import("../../actions")).updateAdoptionListing(listingId, form)
-      : await createAdoptionListing(form);
+      ? (onUpdate ? await onUpdate(listingId, form) : await (await import("../../actions")).updateAdoptionListing(listingId, form))
+      : (onCreate ? await onCreate(form) : await createAdoptionListing(form));
     setSubmitting(false);
     if (result.error) {
       toast.error(result.error);
       return;
     }
     toast.success(isEdit ? "Listing updated." : "Listing created.");
-    router.push("/dashboard/admin");
+    router.push(successRedirect ?? "/dashboard/admin");
     router.refresh();
   }
 

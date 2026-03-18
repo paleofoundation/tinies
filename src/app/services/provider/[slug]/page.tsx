@@ -9,6 +9,10 @@ import {
   Share2,
   Heart,
 } from "lucide-react";
+import { getProviderBySlug, getProviderReviewsBySlug } from "@/app/services/book/actions";
+import { ProviderLocationMap } from "@/components/maps";
+import { GivingTierBadge } from "@/components/giving/GivingTierBadge";
+import { MeetAndGreetRequestModal } from "./MeetAndGreetRequestModal";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -44,23 +48,30 @@ const AVAILABILITY_GRID = [
   { day: "Sun", morning: false, afternoon: true, evening: true },
 ] as const;
 
-const PLACEHOLDER_REVIEWS = [
-  { reviewer: "Sarah M.", date: "Mar 2025", rating: 5, text: "Maria was wonderful with our dog. She sent photos every day and left the house spotless. Will book again!", response: "Thank you, Sarah! Bella is always welcome." },
-  { reviewer: "James K.", date: "Feb 2025", rating: 5, text: "Professional and caring. Our cat can be shy but warmed up to Maria quickly. Highly recommend.", response: "So glad Luna felt comfortable. She's a sweetheart." },
-  { reviewer: "Elena T.", date: "Jan 2025", rating: 4, text: "Great experience. The only reason not 5 stars was a small delay on the first day—otherwise perfect.", response: "Thanks for the feedback. Sorry again about the traffic that day!" },
-] as const;
+function formatReviewDate(d: Date): string {
+  return new Date(d).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+}
 
 const GALLERY_COLORS = ["#0A6E5C", "#0A6E5C", "#F45D48", "#0A6E5C", "#0A6E5C", "#F45D48"] as const;
 
 export default async function ProviderProfilePage({ params }: Props) {
   const { slug } = await params;
-  const name = slugToName(slug);
-  const initials = slug
-    .split("-")
+  const [provider, reviews] = await Promise.all([
+    getProviderBySlug(slug),
+    getProviderReviewsBySlug(slug),
+  ]);
+  const name = provider?.providerName ?? slugToName(slug);
+  const initials = name
+    .split(" ")
     .map((s) => s.charAt(0))
     .join("")
     .toUpperCase()
     .slice(0, 2);
+  const messageHref = provider
+    ? `/dashboard/messages/with/${provider.providerId}`
+    : "/dashboard/messages";
+  const avgRating = provider?.avgRating ?? null;
+  const reviewCount = provider?.reviewCount ?? 0;
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
@@ -82,7 +93,7 @@ export default async function ProviderProfilePage({ params }: Props) {
               <div className="mt-2 flex flex-wrap items-center justify-center gap-4 text-sm sm:justify-start" style={{ color: "var(--color-text-secondary)" }}>
                 <span className="flex items-center gap-1">
                   <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                  4.9 (24 reviews)
+                  {avgRating != null ? `${Number(avgRating.toFixed(1))} (${reviewCount} reviews)` : reviewCount > 0 ? `${reviewCount} reviews` : "No reviews yet"}
                 </span>
                 <span className="flex items-center gap-1">
                   <MapPin className="h-4 w-4 shrink-0" />
@@ -95,27 +106,23 @@ export default async function ProviderProfilePage({ params }: Props) {
               </div>
               <div className="mt-6 flex flex-wrap items-center justify-center gap-3 sm:justify-start">
                 <Link
-                  href={`/services/book/${slug}`}
+                  href={messageHref}
                   className="inline-flex h-12 items-center justify-center gap-2 rounded-[var(--radius-pill)] px-6 font-semibold text-white transition-opacity hover:opacity-90"
                   style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-primary)" }}
                 >
-                  Book Now
+                  <MessageCircle className="h-4 w-4" />
+                  Message {name}
                 </Link>
                 <Link
-                  href={`/services/book/${slug}?meet=true`}
+                  href={`/services/book/${slug}`}
                   className="inline-flex h-12 items-center justify-center gap-2 rounded-[var(--radius-pill)] border-2 bg-transparent px-6 font-semibold transition-opacity hover:opacity-90"
                   style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", borderColor: "var(--color-primary)", color: "var(--color-primary)" }}
                 >
-                  Request Meet & Greet
+                  Book Now
                 </Link>
-                <Link
-                  href="/dashboard/owner"
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-[var(--radius-pill)] border bg-white px-6 font-semibold transition-opacity hover:opacity-90"
-                  style={{ fontFamily: "var(--font-body), sans-serif", borderColor: "var(--color-border)", color: "var(--color-text)" }}
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  Message
-                </Link>
+                {provider && (
+                  <MeetAndGreetRequestModal providerSlug={slug} providerName={name} />
+                )}
                 <button
                   type="button"
                   className="inline-flex h-12 items-center justify-center gap-2 rounded-[var(--radius-pill)] border bg-white px-6 font-semibold transition-opacity hover:opacity-90"
@@ -220,40 +227,73 @@ export default async function ProviderProfilePage({ params }: Props) {
           </div>
         </section>
 
+        {/* Location / Service area */}
+        {provider?.serviceAreaLat != null && provider?.serviceAreaLng != null && provider?.serviceAreaRadiusKm != null && (
+          <section className="mb-12">
+            <h2 className="text-lg font-normal" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>Location</h2>
+            <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>Approximate service area</p>
+            <div className="mt-4">
+              <ProviderLocationMap
+                lat={provider.serviceAreaLat}
+                lng={provider.serviceAreaLng}
+                radiusKm={provider.serviceAreaRadiusKm}
+                className="min-h-[280px]"
+              />
+            </div>
+          </section>
+        )}
+
         {/* Reviews */}
         <section className="mb-12">
           <h2 className="text-lg font-normal" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>Reviews</h2>
-          <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>24 reviews · 4.9 average</p>
-          <ul className="mt-6 space-y-6">
-            {PLACEHOLDER_REVIEWS.map((review, i) => (
-              <li
-                key={i}
-                className="rounded-[var(--radius-lg)] border p-5 shadow-sm"
-                style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}
-              >
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-medium" style={{ color: "var(--color-text)" }}>{review.reviewer}</span>
-                  <span className="text-sm" style={{ color: "var(--color-text-secondary)" }}>{review.date}</span>
-                  <span className="flex items-center gap-0.5 text-amber-500">
-                    {Array.from({ length: 5 }).map((_, j) => (
-                      <Star
-                        key={j}
-                        className={`h-4 w-4 ${j < review.rating ? "fill-current" : ""}`}
-                        style={j >= review.rating ? { color: "var(--color-text-muted)" } : undefined}
-                      />
-                    ))}
-                  </span>
-                </div>
-                <p className="mt-2 leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>{review.text}</p>
-                {review.response && (
-                  <div className="mt-4 rounded-[var(--radius-lg)] border-l-4 pl-4 py-2" style={{ borderColor: "var(--color-primary)", backgroundColor: "var(--color-background)" }}>
-                    <p className="text-sm font-medium" style={{ color: "var(--color-text)" }}>Response from provider</p>
-                    <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>{review.response}</p>
+          <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+            {reviewCount} {reviewCount === 1 ? "review" : "reviews"}
+            {avgRating != null ? ` · ${Number(avgRating.toFixed(1))} average` : ""}
+          </p>
+          {reviews.length === 0 ? (
+            <p className="mt-4 text-sm" style={{ color: "var(--color-text-secondary)" }}>No reviews yet.</p>
+          ) : (
+            <ul className="mt-6 space-y-6">
+              {reviews.map((review) => (
+                <li
+                  key={review.id}
+                  className="rounded-[var(--radius-lg)] border p-5 shadow-sm"
+                  style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-medium" style={{ color: "var(--color-text)" }}>{review.reviewerName}</span>
+                    {review.reviewerGivingTier ? <GivingTierBadge tier={review.reviewerGivingTier} size="sm" /> : null}
+                    <span className="text-sm" style={{ color: "var(--color-text-secondary)" }}>{formatReviewDate(review.createdAt)}</span>
+                    <span className="flex items-center gap-0.5 text-amber-500">
+                      {Array.from({ length: 5 }).map((_, j) => (
+                        <Star
+                          key={j}
+                          className={`h-4 w-4 ${j < review.rating ? "fill-current" : ""}`}
+                          style={j >= review.rating ? { color: "var(--color-text-muted)" } : undefined}
+                        />
+                      ))}
+                    </span>
                   </div>
-                )}
-              </li>
-            ))}
-          </ul>
+                  <p className="mt-2 leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>{review.text}</p>
+                  {review.photos.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {review.photos.map((url, i) => (
+                        <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block">
+                          <img src={url} alt="" className="h-20 w-20 rounded-lg object-cover" />
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                  {review.providerResponse && (
+                    <div className="mt-4 rounded-[var(--radius-lg)] border-l-4 pl-4 py-2" style={{ borderColor: "var(--color-primary)", backgroundColor: "var(--color-background)" }}>
+                      <p className="text-sm font-medium" style={{ color: "var(--color-text)" }}>Response from provider</p>
+                      <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>{review.providerResponse}</p>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
         {/* CTA */}
@@ -262,20 +302,23 @@ export default async function ProviderProfilePage({ params }: Props) {
           <p className="mt-2 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "rgba(255,255,255,0.9)" }}>Send a request and {name} will respond within a few hours.</p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Link
-              href={`/services/book/${slug}`}
+              href={messageHref}
               className="inline-flex h-12 items-center justify-center gap-2 rounded-[var(--radius-pill)] bg-white px-6 font-semibold transition-opacity hover:opacity-90"
               style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", color: "var(--color-primary)" }}
             >
-              Book Now
+              <MessageCircle className="h-4 w-4" />
+              Message {name}
             </Link>
             <Link
-              href={`/services/book/${slug}?meet=true`}
+              href={`/services/book/${slug}`}
               className="inline-flex h-12 items-center justify-center gap-2 rounded-[var(--radius-pill)] border-2 border-white/50 bg-transparent px-6 font-semibold text-white transition-opacity hover:opacity-90"
               style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)" }}
             >
-              <Heart className="h-4 w-4" />
-              Request Meet & Greet
+              Book Now
             </Link>
+            {provider && (
+              <MeetAndGreetRequestModal providerSlug={slug} providerName={name} variant="light" />
+            )}
           </div>
         </section>
 

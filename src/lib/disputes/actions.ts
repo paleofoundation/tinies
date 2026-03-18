@@ -1,0 +1,581 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
+import { getStripeServer } from "@/lib/stripe";
+import { sendEmail } from "@/lib/email";
+import DisputeReportedEmail from "@/lib/email/templates/dispute-reported";
+import ClaimReportedEmail from "@/lib/email/templates/claim-reported";
+import type { DisputeType, DisputeRuling } from "@prisma/client";
+import type { ClaimType } from "@prisma/client";
+
+const EVIDENCE_BUCKET = "evidence";
+const MIN_DESCRIPTION_LENGTH = 100;
+const MAX_PHOTOS = 5;
+const RESPONSE_WINDOW_HOURS = 48;
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+
+function getPhotoFiles(formData: FormData, fieldPrefix = "photos"): File[] {
+  const files: File[] = [];
+  for (const [key, value] of formData.entries()) {
+    if (
+      (value instanceof File && value.size > 0 && value.type.startsWith("image/")) &&
+      (key === fieldPrefix || key.startsWith(`${fieldPrefix}[`))
+    ) {
+      files.push(value);
+    }
+  }
+  return files.slice(0, MAX_PHOTOS);
+}
+
+async function uploadEvidence(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  folder: string,
+  formData: FormData,
+  fieldPrefix = "photos"
+): Promise<string[]> {
+  const files = getPhotoFiles(formData, fieldPrefix);
+  const urls: string[] = [];
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_").slice(0, 80);
+    const path = `${folder}/${Date.now()}-${i}-${safeName}`;
+    const { error } = await supabase.storage.from(EVIDENCE_BUCKET).upload(path, file, {
+      cacheControl: "3600",
+      upsert: true,
+    });
+    if (error) throw new Error(`Upload failed: ${error.message}`);
+    const { data } = supabase.storage.from(EVIDENCE_BUCKET).getPublicUrl(path);
+    urls.push(data.publicUrl);
+  }
+  return urls;
+}
+
+export type ReportProblemInput = {
+  bookingId: string;
+  issueType: "dispute" | "claim";
+  disputeType?: DisputeType;
+  claimType?: ClaimType;
+  description: string;
+};
+
+export async function reportProblem(
+  input: ReportProblemInput,
+  formData: FormData
+): Promise<{ disputeId?: string; claimId?: string; error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "You must be signed in to report a problem." };
+
+  const description = input.description?.trim() ?? "";
+  if (description.length < MIN_DESCRIPTION_LENGTH)
+    return { error: `Description must be at least ${MIN_DESCRIPTION_LENGTH} characters.` };
+
+  const booking = await prisma.booking.findFirst({
+    where: {
+      id: input.bookingId,
+      status: "completed",
+      OR: [{ ownerId: user.id }, { providerId: user.id }],
+    },
+    include: {
+      owner: { select: { id: true, name: true, email: true } },
+      provider: { select: { id: true, name: true, email: true } },
+    },
+  });
+  if (!booking) return { error: "Booking not found or not completed." };
+
+  const isOwner = booking.ownerId === user.id;
+  const respondent = isOwner ? booking.provider : booking.owner;
+  const respondentId = respondent.id;
+
+  if (input.issueType === "dispute") {
+    if (booking.hasDispute) return { error: "A dispute already exists for this booking." };
+    if (!input.disputeType) return { error: "Please select a dispute type." };
+    const existing = await prisma.dispute.findFirst({
+      where: { bookingId: input.bookingId },
+    });
+    if (existing) return { error: "A dispute already exists for this booking." };
+
+    const photos = await uploadEvidence(supabase, `disputes/${input.bookingId}`, formData);
+    const dispute = await prisma.dispute.create({
+      data: {
+        bookingId: input.bookingId,
+        openedBy: user.id,
+        disputeType: input.disputeType,
+        description,
+        evidencePhotos: photos,
+        respondentId,
+        status: "awaiting_response",
+      },
+    });
+    await prisma.booking.update({
+      where: { id: input.bookingId },
+      data: { hasDispute: true },
+    });
+
+    const reporterName = (user.user_metadata?.name as string) ?? user.email ?? "A user";
+    const deadline = new Date(Date.now() + RESPONSE_WINDOW_HOURS * 60 * 60 * 1000);
+    const dashboardUrl = `${APP_URL}/dashboard/${isOwner ? "provider" : "owner"}`;
+    if (respondent.email) {
+      await sendEmail({
+        to: respondent.email,
+        subject: `Dispute reported – response needed within 48 hours`,
+        react: DisputeReportedEmail({
+          reporterName,
+          bookingId: input.bookingId,
+          disputeType: input.disputeType,
+          description: description.slice(0, 200),
+          responseDeadline: deadline.toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }),
+          dashboardUrl,
+        }),
+      });
+    }
+    revalidatePath("/dashboard/owner");
+    revalidatePath("/dashboard/provider");
+    return { disputeId: dispute.id };
+  } else {
+    if (booking.hasGuaranteeClaim) return { error: "A guarantee claim already exists for this booking." };
+    if (!input.claimType) return { error: "Please select a claim type." };
+    const existing = await prisma.guaranteeClaim.findFirst({
+      where: { bookingId: input.bookingId },
+    });
+    if (existing) return { error: "A guarantee claim already exists for this booking." };
+
+    const photos = await uploadEvidence(supabase, `claims/${input.bookingId}`, formData);
+    const claim = await prisma.guaranteeClaim.create({
+      data: {
+        bookingId: input.bookingId,
+        reporterId: user.id,
+        claimType: input.claimType,
+        description,
+        photos,
+        status: "awaiting_response",
+      },
+    });
+    await prisma.booking.update({
+      where: { id: input.bookingId },
+      data: { hasGuaranteeClaim: true },
+    });
+
+    const reporterName = (user.user_metadata?.name as string) ?? user.email ?? "A user";
+    const deadline = new Date(Date.now() + RESPONSE_WINDOW_HOURS * 60 * 60 * 1000);
+    const dashboardUrl = `${APP_URL}/dashboard/${isOwner ? "provider" : "owner"}`;
+    if (respondent.email) {
+      await sendEmail({
+        to: respondent.email,
+        subject: `Guarantee claim filed – response needed within 48 hours`,
+        react: ClaimReportedEmail({
+          reporterName,
+          bookingId: input.bookingId,
+          claimType: input.claimType,
+          description: description.slice(0, 200),
+          responseDeadline: deadline.toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }),
+          dashboardUrl,
+        }),
+      });
+    }
+    revalidatePath("/dashboard/owner");
+    revalidatePath("/dashboard/provider");
+    return { claimId: claim.id };
+  }
+}
+
+export async function respondToDispute(
+  disputeId: string,
+  formData: FormData
+): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+
+  const dispute = await prisma.dispute.findFirst({
+    where: { id: disputeId, respondentId: user.id, status: "awaiting_response" },
+  });
+  if (!dispute) return { error: "Dispute not found or already responded." };
+
+  const responseText = (formData.get("response") as string)?.trim();
+  if (!responseText || responseText.length < 20)
+    return { error: "Please provide a response (at least 20 characters)." };
+
+  const photos = await uploadEvidence(supabase, `disputes/${dispute.id}/response`, formData, "responsePhotos");
+  await prisma.dispute.update({
+    where: { id: disputeId },
+    data: {
+      respondentResponse: responseText,
+      respondentPhotos: photos,
+      status: "under_review",
+    },
+  });
+  revalidatePath("/dashboard/owner");
+  revalidatePath("/dashboard/provider");
+  return {};
+}
+
+export async function respondToClaim(
+  claimId: string,
+  formData: FormData
+): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+
+  const claim = await prisma.guaranteeClaim.findFirst({
+    where: { id: claimId, booking: { OR: [{ ownerId: user.id }, { providerId: user.id }] } },
+    include: { booking: true },
+  });
+  if (!claim) return { error: "Claim not found." };
+  const isRespondent = claim.booking.ownerId === user.id || claim.booking.providerId === user.id;
+  const isReporter = claim.reporterId === user.id;
+  if (isReporter || !isRespondent) return { error: "You are not the other party to this claim." };
+  if (claim.status !== "awaiting_response") return { error: "Response already submitted." };
+
+  const responseText = (formData.get("response") as string)?.trim();
+  if (!responseText || responseText.length < 20)
+    return { error: "Please provide a response (at least 20 characters)." };
+
+  const photos = await uploadEvidence(supabase, `claims/${claim.id}/response`, formData, "responsePhotos");
+  await prisma.guaranteeClaim.update({
+    where: { id: claimId },
+    data: {
+      otherPartyResponse: responseText,
+      otherPartyPhotos: photos,
+      status: "under_review",
+    },
+  });
+  revalidatePath("/dashboard/owner");
+  revalidatePath("/dashboard/provider");
+  return {};
+}
+
+export type DisputeCard = {
+  id: string;
+  bookingId: string;
+  disputeType: string;
+  description: string;
+  evidencePhotos: string[];
+  status: string;
+  respondentResponse: string | null;
+  respondentPhotos: string[];
+  createdAt: Date;
+  openedByName: string;
+  respondentName: string;
+  isReporter: boolean;
+  bookingSummary: string;
+};
+
+export type ClaimCard = {
+  id: string;
+  bookingId: string;
+  claimType: string;
+  description: string;
+  photos: string[];
+  status: string;
+  otherPartyResponse: string | null;
+  otherPartyPhotos: string[];
+  createdAt: Date;
+  reporterName: string;
+  isReporter: boolean;
+  bookingSummary: string;
+};
+
+export async function getDisputesForUser(): Promise<{ disputes: DisputeCard[]; error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { disputes: [], error: "Not signed in." };
+
+  const rows = await prisma.dispute.findMany({
+    where: { OR: [{ openedBy: user.id }, { respondentId: user.id }] },
+    orderBy: { createdAt: "desc" },
+    include: {
+      booking: { include: { owner: { select: { name: true } }, provider: { select: { name: true } } } },
+      openedByUser: { select: { name: true } },
+      respondent: { select: { name: true } },
+    },
+  });
+  const disputes: DisputeCard[] = rows.map((d) => ({
+    id: d.id,
+    bookingId: d.bookingId,
+    disputeType: d.disputeType,
+    description: d.description,
+    evidencePhotos: d.evidencePhotos,
+    status: d.status,
+    respondentResponse: d.respondentResponse,
+    respondentPhotos: d.respondentPhotos,
+    createdAt: d.createdAt,
+    openedByName: d.openedByUser.name,
+    respondentName: d.respondent.name,
+    isReporter: d.openedBy === user.id,
+    bookingSummary: `${d.booking.owner.name} · ${d.booking.provider.name} · ${new Date(d.booking.startDatetime).toLocaleDateString("en-GB")}`,
+  }));
+  return { disputes };
+}
+
+export async function getClaimsForUser(): Promise<{ claims: ClaimCard[]; error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { claims: [], error: "Not signed in." };
+
+  const rows = await prisma.guaranteeClaim.findMany({
+    where: {
+      OR: [
+        { reporterId: user.id },
+        { booking: { ownerId: user.id } },
+        { booking: { providerId: user.id } },
+      ],
+    },
+    orderBy: { createdAt: "desc" },
+    include: {
+      booking: { include: { owner: { select: { name: true } }, provider: { select: { name: true } } } },
+      reporter: { select: { name: true } },
+    },
+  });
+  const claims: ClaimCard[] = rows.map((c) => ({
+    id: c.id,
+    bookingId: c.bookingId,
+    claimType: c.claimType,
+    description: c.description,
+    photos: c.photos,
+    status: c.status,
+    otherPartyResponse: c.otherPartyResponse,
+    otherPartyPhotos: c.otherPartyPhotos,
+    createdAt: c.createdAt,
+    reporterName: c.reporter.name,
+    isReporter: c.reporterId === user.id,
+    bookingSummary: `${c.booking.owner.name} · ${c.booking.provider.name} · ${new Date(c.booking.startDatetime).toLocaleDateString("en-GB")}`,
+  }));
+  return { claims };
+}
+
+export type AdminDisputeRow = {
+  id: string;
+  bookingId: string;
+  disputeType: string;
+  description: string;
+  evidencePhotos: string[];
+  respondentResponse: string | null;
+  respondentPhotos: string[];
+  status: string;
+  ruling: DisputeRuling | null;
+  refundAmount: number | null;
+  openedByName: string;
+  respondentName: string;
+  bookingTotalCents: number;
+  stripePaymentIntentId: string | null;
+  createdAt: Date;
+};
+
+export type AdminClaimRow = {
+  id: string;
+  bookingId: string;
+  claimType: string;
+  description: string;
+  photos: string[];
+  otherPartyResponse: string | null;
+  otherPartyPhotos: string[];
+  status: string;
+  ruling: string | null;
+  payoutAmount: number | null;
+  payoutRecipientName: string | null;
+  reporterName: string;
+  createdAt: Date;
+};
+
+export async function getOpenDisputesForAdmin(): Promise<{ disputes: AdminDisputeRow[]; error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { disputes: [], error: "Not signed in." };
+  const rows = await prisma.dispute.findMany({
+    where: { status: { notIn: ["resolved"] } },
+    orderBy: { createdAt: "desc" },
+    include: {
+      booking: { select: { totalPrice: true, stripePaymentIntentId: true } },
+      openedByUser: { select: { name: true } },
+      respondent: { select: { name: true } },
+    },
+  });
+  const disputes: AdminDisputeRow[] = rows.map((d) => ({
+    id: d.id,
+    bookingId: d.bookingId,
+    disputeType: d.disputeType,
+    description: d.description,
+    evidencePhotos: d.evidencePhotos,
+    respondentResponse: d.respondentResponse,
+    respondentPhotos: d.respondentPhotos,
+    status: d.status,
+    ruling: d.ruling,
+    refundAmount: d.refundAmount,
+    openedByName: d.openedByUser.name,
+    respondentName: d.respondent.name,
+    bookingTotalCents: d.booking.totalPrice,
+    stripePaymentIntentId: d.booking.stripePaymentIntentId,
+    createdAt: d.createdAt,
+  }));
+  return { disputes };
+}
+
+export async function getOpenClaimsForAdmin(): Promise<{ claims: AdminClaimRow[]; error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { claims: [], error: "Not signed in." };
+  const rows = await prisma.guaranteeClaim.findMany({
+    where: { status: { notIn: ["resolved", "appeal_resolved"] } },
+    orderBy: { createdAt: "desc" },
+    include: {
+      reporter: { select: { name: true } },
+      payoutRecipient: { select: { name: true } },
+    },
+  });
+  const claims: AdminClaimRow[] = rows.map((c) => ({
+    id: c.id,
+    bookingId: c.bookingId,
+    claimType: c.claimType,
+    description: c.description,
+    photos: c.photos,
+    otherPartyResponse: c.otherPartyResponse,
+    otherPartyPhotos: c.otherPartyPhotos,
+    status: c.status,
+    ruling: c.ruling,
+    payoutAmount: c.payoutAmount,
+    payoutRecipientName: c.payoutRecipient?.name ?? null,
+    reporterName: c.reporter.name,
+    createdAt: c.createdAt,
+  }));
+  return { claims };
+}
+
+export type AdminResolveDisputeInput = {
+  ruling: DisputeRuling;
+  refundAmountCents?: number | null;
+  rulingNotes?: string | null;
+};
+
+export async function adminResolveDispute(
+  disputeId: string,
+  input: AdminResolveDisputeInput
+): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+  const u = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  });
+  if (u?.role !== "admin") return { error: "Admin only." };
+
+  const dispute = await prisma.dispute.findUnique({
+    where: { id: disputeId },
+    include: { booking: true },
+  });
+  if (!dispute) return { error: "Dispute not found." };
+  if (dispute.status === "resolved") return { error: "Dispute already resolved." };
+
+  const needsRefund =
+    input.ruling === "partial_refund" || input.ruling === "full_refund";
+  let refundAmount: number | null = null;
+  if (needsRefund && dispute.booking.stripePaymentIntentId) {
+    refundAmount =
+      input.refundAmountCents ??
+      (input.ruling === "full_refund" ? dispute.booking.totalPrice : null);
+    if (refundAmount == null || refundAmount <= 0)
+      return { error: "Enter refund amount (cents) for this ruling." };
+    const stripe = getStripeServer();
+    await stripe.refunds.create({
+      payment_intent: dispute.booking.stripePaymentIntentId,
+      amount: refundAmount,
+    });
+    await prisma.booking.update({
+      where: { id: dispute.bookingId },
+      data: {
+        refundAmount: refundAmount,
+        refundStatus: "succeeded",
+      },
+    });
+  }
+
+  await prisma.dispute.update({
+    where: { id: disputeId },
+    data: {
+      status: "resolved",
+      adminId: user.id,
+      ruling: input.ruling,
+      rulingNotes: input.rulingNotes?.trim() || null,
+      refundAmount: refundAmount ?? undefined,
+      resolvedAt: new Date(),
+    },
+  });
+  revalidatePath("/dashboard/admin");
+  return {};
+}
+
+export type AdminResolveClaimInput = {
+  ruling: "approved_full" | "approved_partial" | "denied";
+  payoutAmountCents?: number | null;
+  payoutRecipientId?: string | null;
+  rulingNotes?: string | null;
+};
+
+export async function adminResolveClaim(
+  claimId: string,
+  input: AdminResolveClaimInput
+): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+  const u = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  });
+  if (u?.role !== "admin") return { error: "Admin only." };
+
+  const claim = await prisma.guaranteeClaim.findUnique({
+    where: { id: claimId },
+  });
+  if (!claim) return { error: "Claim not found." };
+  if (claim.status === "resolved") return { error: "Claim already resolved." };
+
+  const needsPayout =
+    input.ruling === "approved_full" || input.ruling === "approved_partial";
+  let payoutAmount: number | null = null;
+  let payoutRecipientId: string | null = null;
+  if (needsPayout) {
+    payoutAmount = input.payoutAmountCents ?? null;
+    payoutRecipientId = input.payoutRecipientId ?? null;
+    if (!payoutAmount || payoutAmount <= 0)
+      return { error: "Enter payout amount (cents)." };
+    if (!payoutRecipientId)
+      return { error: "Select payout recipient." };
+  }
+
+  await prisma.guaranteeClaim.update({
+    where: { id: claimId },
+    data: {
+      status: "resolved",
+      adminId: user.id,
+      ruling: input.ruling,
+      rulingNotes: input.rulingNotes?.trim() || null,
+      payoutAmount: payoutAmount ?? undefined,
+      payoutRecipientId: payoutRecipientId ?? undefined,
+    },
+  });
+  revalidatePath("/dashboard/admin");
+  return {};
+}

@@ -1,9 +1,20 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
+import { getAllPlacements } from "./adoptions/actions";
+import { AdoptionPipelineSection } from "./AdoptionPipelineSection";
 
 // TODO: enforce admin role – redirect or 403 if user is not admin (e.g. check session user role or app_metadata)
 
-export default async function AdminDashboardPage() {
+type Props = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default async function AdminDashboardPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const placementStatus = typeof params.placementStatus === "string" ? params.placementStatus : undefined;
+  const { placements } = await getAllPlacements(placementStatus);
+
   const listings = await prisma.adoptionListing.findMany({
     orderBy: { createdAt: "desc" },
     select: {
@@ -111,6 +122,11 @@ export default async function AdminDashboardPage() {
             </table>
           </div>
         </section>
+
+        {/* Adoption Pipeline */}
+        <Suspense fallback={<div className="mt-8 rounded-[var(--radius-lg)] border p-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}>Loading pipeline…</div>}>
+          <AdoptionPipelineSection placements={placements} />
+        </Suspense>
 
         <p className="mt-8">
           <Link

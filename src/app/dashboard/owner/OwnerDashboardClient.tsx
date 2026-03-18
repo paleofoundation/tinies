@@ -1,0 +1,724 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import {
+  PawPrint,
+  Calendar,
+  MessageSquare,
+  Plus,
+  Pencil,
+  Trash2,
+  Star,
+  X,
+  MapPin,
+  Heart,
+  CalendarClock,
+} from "lucide-react";
+import { toast } from "sonner";
+import { deletePet, cancelBooking } from "./actions";
+import type { OwnerBookingCard } from "./actions";
+import { ReviewForm } from "./ReviewForm";
+import { getOwnerMeetAndGreets, acceptMeetAndGreetSuggestion } from "@/lib/meet-and-greet/actions";
+import type { OwnerMeetAndGreetCard } from "@/lib/meet-and-greet/actions";
+
+type PetCard = {
+  id: string;
+  name: string;
+  species: string;
+  breed: string | null;
+  ageYears: number | null;
+  photos: string[];
+};
+
+type TabId = "pets" | "bookings" | "meetgreet" | "messages";
+
+const SERVICE_LABELS: Record<string, string> = {
+  walking: "Dog walking",
+  sitting: "Pet sitting",
+  boarding: "Overnight boarding",
+  drop_in: "Drop-in visit",
+  daycare: "Daycare",
+};
+
+function formatEur(cents: number): string {
+  return `€${(cents / 100).toFixed(2)}`;
+}
+
+function formatDateTime(d: Date | string): string {
+  const date = new Date(d);
+  return date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+const TABS: { id: TabId; label: string; icon: typeof PawPrint }[] = [
+  { id: "pets", label: "My Pets", icon: PawPrint },
+  { id: "bookings", label: "My Bookings", icon: Calendar },
+  { id: "meetgreet", label: "Meet & Greets", icon: Heart },
+  { id: "messages", label: "Messages", icon: MessageSquare },
+];
+
+function formatAge(ageYears: number | null): string {
+  if (ageYears == null) return "—";
+  if (ageYears < 1) return "Under 1 year";
+  if (ageYears === 1) return "1 year";
+  return `${Math.round(ageYears)} years`;
+}
+
+function getStatusBadgeStyle(status: string): { bg: string; text: string } {
+  switch (status) {
+    case "pending":
+      return { bg: "bg-amber-100", text: "text-amber-800" };
+    case "accepted":
+      return { bg: "bg-[var(--color-primary)]/15", text: "text-[var(--color-primary)]" };
+    case "active":
+      return { bg: "bg-[var(--color-secondary)]/20", text: "text-[var(--color-secondary)]" };
+    case "completed":
+      return { bg: "bg-[var(--color-neutral-200)]", text: "text-[var(--color-text-secondary)]" };
+    case "cancelled":
+    case "declined":
+      return { bg: "bg-red-100", text: "text-red-800" };
+    default:
+      return { bg: "bg-[var(--color-neutral-200)]", text: "text-[var(--color-text-secondary)]" };
+  }
+}
+
+function BookingCard({
+  booking,
+  onCancel,
+  cancellingId,
+  showLeaveReview,
+  openReviewBookingId,
+  onOpenReview,
+  onReviewSuccess,
+}: {
+  booking: OwnerBookingCard;
+  onCancel: (id: string) => void;
+  cancellingId: string | null;
+  showLeaveReview: boolean;
+  openReviewBookingId: string | null;
+  onOpenReview: (bookingId: string) => void;
+  onReviewSuccess: (bookingId: string, newReviewId?: string) => void;
+}) {
+  const initials = booking.providerName
+    .split(" ")
+    .map((s) => s.charAt(0))
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+  const badge = getStatusBadgeStyle(booking.status);
+  const canCancel = booking.status === "pending" || booking.status === "accepted";
+
+  return (
+    <li
+      className="rounded-[var(--radius-lg)] border p-4"
+      style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}
+    >
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex gap-3">
+          <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-[var(--color-primary)]/20 flex items-center justify-center text-sm font-semibold" style={{ color: "var(--color-primary)" }}>
+            {booking.providerAvatarUrl ? (
+              <Image
+                src={booking.providerAvatarUrl}
+                alt={booking.providerName}
+                fill
+                className="object-cover"
+                sizes="48px"
+                unoptimized={booking.providerAvatarUrl.includes("supabase")}
+              />
+            ) : (
+              <span>{initials}</span>
+            )}
+          </div>
+          <div>
+            <p className="font-semibold" style={{ color: "var(--color-text)" }}>
+              {booking.providerName}
+            </p>
+            <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
+              {SERVICE_LABELS[booking.serviceType] ?? booking.serviceType} · {booking.petNames.join(", ")}
+            </p>
+            <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
+              {formatDateTime(booking.startDatetime)} – {formatDateTime(booking.endDatetime)}
+            </p>
+            {booking.status === "pending" && (
+              <p className="mt-1 text-sm italic" style={{ color: "var(--color-text-secondary)" }}>
+                Waiting for {booking.providerName} to accept…
+              </p>
+            )}
+            {booking.specialInstructions && (booking.status === "accepted" || booking.status === "active") && (
+              <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                Instructions: {booking.specialInstructions}
+              </p>
+            )}
+          </div>
+        </div>
+        <div className="flex flex-col items-end gap-2 sm:shrink-0">
+          <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.bg} ${badge.text}`}>
+            {booking.status}
+          </span>
+          <p className="font-semibold" style={{ color: "var(--color-text)" }}>
+            {formatEur(booking.totalPriceCents)}
+          </p>
+          {booking.serviceType === "walking" && booking.status === "active" && booking.walkStartedAt && (
+            <Link
+              href={`/dashboard/owner/walks/${booking.id}`}
+              className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] bg-[var(--color-secondary)] px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90"
+            >
+              <MapPin className="h-3.5 w-3.5" />
+              Watch Live Walk
+            </Link>
+          )}
+          {canCancel && (
+            <button
+              type="button"
+              onClick={() => onCancel(booking.id)}
+              disabled={cancellingId === booking.id}
+              className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] border border-[var(--color-error)]/50 px-3 py-1.5 text-sm font-medium text-[var(--color-error)] hover:bg-[var(--color-error)]/10 disabled:opacity-70"
+            >
+              <X className="h-3.5 w-3.5" />
+              {cancellingId === booking.id ? "Cancelling…" : "Cancel"}
+            </button>
+          )}
+          {showLeaveReview && openReviewBookingId !== booking.id && (!booking.existingReview || booking.existingReview.canEdit) && (
+            <button
+              type="button"
+              onClick={() => onOpenReview(booking.id)}
+              className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] bg-[var(--color-primary)] px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90"
+            >
+              <Star className="h-3.5 w-3.5" />
+              {booking.existingReview ? "Edit review" : "Leave a Review"}
+            </button>
+          )}
+        </div>
+      </div>
+      {booking.serviceType === "walking" && (booking.walkSummaryMapUrl ?? booking.walkDistanceKm != null) && (
+        <div className="mt-4 rounded-[var(--radius-lg)] border p-3" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}>
+          <p className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>Walk summary</p>
+          {booking.walkSummaryMapUrl && (
+            <img src={booking.walkSummaryMapUrl} alt="Walk route" className="mt-2 h-40 w-full rounded-[var(--radius-lg)] object-cover object-center" />
+          )}
+          <div className="mt-2 flex flex-wrap gap-4 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+            {booking.walkDistanceKm != null && <span>{booking.walkDistanceKm.toFixed(2)} km</span>}
+            {booking.walkDurationMinutes != null && <span>{booking.walkDurationMinutes} min</span>}
+            {booking.walkStartedAt && <span>Started {formatDateTime(booking.walkStartedAt)}</span>}
+            {booking.walkEndedAt && <span>Ended {formatDateTime(booking.walkEndedAt)}</span>}
+          </div>
+        </div>
+      )}
+      {showLeaveReview && openReviewBookingId === booking.id && (
+        <ReviewForm
+          bookingId={booking.id}
+          providerId={booking.providerId}
+          providerName={booking.providerName}
+          existingReview={booking.existingReview ?? undefined}
+          onClose={() => onOpenReview("")}
+          onSuccess={(newReviewId) => onReviewSuccess(booking.id, newReviewId)}
+        />
+      )}
+    </li>
+  );
+}
+
+export function OwnerDashboardClient({
+  initialPets,
+  initialBookings = [],
+  initialMeetAndGreets = [],
+}: {
+  initialPets: PetCard[];
+  initialBookings?: OwnerBookingCard[];
+  initialMeetAndGreets?: OwnerMeetAndGreetCard[];
+}) {
+  const router = useRouter();
+  const [tab, setTab] = useState<TabId>("pets");
+  const [pets, setPets] = useState<PetCard[]>(initialPets);
+  const [bookings, setBookings] = useState<OwnerBookingCard[]>(initialBookings);
+  const [meetAndGreets, setMeetAndGreets] = useState<OwnerMeetAndGreetCard[]>(initialMeetAndGreets);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [openReviewBookingId, setOpenReviewBookingId] = useState<string | null>(null);
+  const [acceptingSuggestionId, setAcceptingSuggestionId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setBookings(initialBookings ?? []);
+  }, [initialBookings]);
+  useEffect(() => {
+    setMeetAndGreets(initialMeetAndGreets ?? []);
+  }, [initialMeetAndGreets]);
+
+  const upcomingBookings = bookings.filter((b) =>
+    ["pending", "accepted"].includes(b.status)
+  );
+  const activeBookings = bookings.filter((b) => b.status === "active");
+  const completedBookings = bookings.filter((b) => b.status === "completed");
+  const cancelledBookings = bookings.filter((b) => b.status === "cancelled");
+
+  async function handleAcceptMeetAndGreetSuggestion(meetAndGreetId: string) {
+    if (acceptingSuggestionId) return;
+    setAcceptingSuggestionId(meetAndGreetId);
+    const result = await acceptMeetAndGreetSuggestion(meetAndGreetId);
+    setAcceptingSuggestionId(null);
+    if (result.error) {
+      toast.error(result.error);
+      return;
+    }
+    const next = await getOwnerMeetAndGreets();
+    if (!next.error) setMeetAndGreets(next.meetAndGreets);
+    router.refresh();
+    toast.success("Meet & Greet confirmed for the suggested time.");
+  }
+
+  async function handleCancelBooking(bookingId: string) {
+    if (cancellingId) return;
+    setCancellingId(bookingId);
+    const result = await cancelBooking(bookingId);
+    setCancellingId(null);
+    if (result.error) {
+      toast.error(result.error);
+      return;
+    }
+    setBookings((prev) =>
+      prev.map((b) => (b.id === bookingId ? { ...b, status: "cancelled" } : b))
+    );
+    router.refresh();
+    toast.success("Booking cancelled.");
+  }
+
+  async function handleDelete(petId: string) {
+    if (deletingId) return;
+    setDeletingId(petId);
+    const result = await deletePet(petId);
+    setDeletingId(null);
+    if (result.error) {
+      toast.error(result.error);
+      return;
+    }
+    setPets((prev) => prev.filter((p) => p.id !== petId));
+    router.refresh();
+    toast.success("Pet removed.");
+  }
+
+  return (
+    <>
+      <div className="mt-8 border-b border-[var(--color-border)]">
+        <nav className="flex gap-1 overflow-x-auto" aria-label="Dashboard sections">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setTab(t.id)}
+              className={`flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-semibold transition-colors ${
+                tab === t.id ? "border-[var(--color-primary)]" : "border-transparent"
+              }`}
+              style={{
+                fontFamily: "var(--font-body), sans-serif",
+                color: tab === t.id ? "var(--color-primary)" : "var(--color-text-secondary)",
+              }}
+            >
+              <t.icon className="h-4 w-4" />
+              {t.label}
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      <div className="mt-6">
+        {tab === "pets" && (
+          <section
+            className="rounded-[var(--radius-lg)] border p-8 sm:p-8"
+            style={{
+              backgroundColor: "var(--color-surface)",
+              borderColor: "var(--color-border)",
+              boxShadow: "var(--shadow-md)",
+            }}
+          >
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2
+                  className="font-normal"
+                  style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}
+                >
+                  My Pets
+                </h2>
+                <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                  Add pets to book services. Providers will see these profiles.
+                </p>
+              </div>
+              <Link
+                href="/dashboard/owner/pets/new"
+                className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              >
+                <Plus className="h-4 w-4" />
+                Add Pet
+              </Link>
+            </div>
+
+            {pets.length === 0 ? (
+              <div
+                className="mt-8 flex flex-col items-center justify-center rounded-[var(--radius-lg)] border border-dashed py-12 text-center"
+                style={{
+                  borderColor: "var(--color-border)",
+                  backgroundColor: "var(--color-background)",
+                }}
+              >
+                <PawPrint className="h-12 w-12" style={{ color: "var(--color-text-muted)" }} />
+                <p className="mt-3 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                  No pets yet.
+                </p>
+                <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                  Add your first pet to get started with bookings.
+                </p>
+                <Link
+                  href="/dashboard/owner/pets/new"
+                  className="mt-4 inline-flex items-center gap-2 rounded-[var(--radius-pill)] bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Pet
+                </Link>
+              </div>
+            ) : (
+              <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {pets.map((pet) => (
+                  <li
+                    key={pet.id}
+                    className="overflow-hidden rounded-[var(--radius-lg)] border bg-white shadow-sm transition-shadow hover:shadow-md"
+                    style={{ borderColor: "var(--color-border)" }}
+                  >
+                    <div className="relative aspect-[4/3] bg-[var(--color-background)]">
+                      {pet.photos[0] ? (
+                        <Image
+                          src={pet.photos[0]}
+                          alt={pet.name}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          unoptimized={pet.photos[0]?.includes("supabase")}
+                        />
+                      ) : (
+                        <div
+                          className="flex h-full items-center justify-center"
+                          style={{ color: "var(--color-text-muted)" }}
+                        >
+                          <PawPrint className="h-12 w-12" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-semibold" style={{ color: "var(--color-text)" }}>
+                        {pet.name}
+                      </h3>
+                      <p className="mt-0.5 text-sm capitalize" style={{ color: "var(--color-text-secondary)" }}>
+                        {pet.species}
+                        {pet.breed ? ` · ${pet.breed}` : ""}
+                      </p>
+                      <p className="mt-0.5 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                        {formatAge(pet.ageYears)}
+                      </p>
+                      <div className="mt-3 flex gap-2">
+                        <Link
+                          href={`/dashboard/owner/pets/${pet.id}/edit`}
+                          className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] border px-3 py-1.5 text-sm font-medium transition-colors hover:bg-[var(--color-primary)]/10"
+                          style={{
+                            borderColor: "var(--color-border)",
+                            color: "var(--color-primary)",
+                          }}
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                          Edit
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(pet.id)}
+                          disabled={deletingId === pet.id}
+                          className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] border border-[var(--color-error)]/30 px-3 py-1.5 text-sm font-medium text-[var(--color-error)] transition-colors hover:bg-[var(--color-error)]/10 disabled:opacity-50"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          {deletingId === pet.id ? "Deleting…" : "Delete"}
+                        </button>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
+
+        {tab === "bookings" && (
+          <section
+            className="rounded-[var(--radius-lg)] border p-8 sm:p-8"
+            style={{
+              backgroundColor: "var(--color-surface)",
+              borderColor: "var(--color-border)",
+              boxShadow: "var(--shadow-md)",
+            }}
+          >
+            <h2
+              className="font-normal"
+              style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}
+            >
+              My Bookings
+            </h2>
+            <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+              Upcoming, active, and past bookings.
+            </p>
+
+            {bookings.length === 0 ? (
+              <div
+                className="mt-6 flex flex-col items-center justify-center rounded-[var(--radius-lg)] border border-dashed py-12 text-center"
+                style={{
+                  borderColor: "var(--color-border)",
+                  backgroundColor: "var(--color-background)",
+                }}
+              >
+                <Calendar className="h-12 w-12" style={{ color: "var(--color-text-muted)" }} />
+                <p className="mt-3 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                  No bookings yet.
+                </p>
+                <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                  Find a provider and book a service to see them here.
+                </p>
+              </div>
+            ) : (
+              <div className="mt-6 space-y-8">
+                {/* Upcoming: pending + accepted */}
+                <div>
+                  <h3 className="font-medium" style={{ color: "var(--color-text)" }}>Upcoming</h3>
+                  {upcomingBookings.length === 0 ? (
+                    <p className="mt-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>None.</p>
+                  ) : (
+                    <ul className="mt-4 space-y-4">
+                      {upcomingBookings.map((b) => (
+                        <BookingCard
+                          key={b.id}
+                          booking={b}
+                          onCancel={handleCancelBooking}
+                          cancellingId={cancellingId}
+                          showLeaveReview={false}
+                          openReviewBookingId={openReviewBookingId}
+                          onOpenReview={setOpenReviewBookingId}
+                          onReviewSuccess={() => {}}
+                        />
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                {/* Active */}
+                <div>
+                  <h3 className="font-medium" style={{ color: "var(--color-text)" }}>Active</h3>
+                  {activeBookings.length === 0 ? (
+                    <p className="mt-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>None.</p>
+                  ) : (
+                    <ul className="mt-4 space-y-4">
+                      {activeBookings.map((b) => (
+                        <BookingCard
+                          key={b.id}
+                          booking={b}
+                          onCancel={handleCancelBooking}
+                          cancellingId={cancellingId}
+                          showLeaveReview={false}
+                          openReviewBookingId={openReviewBookingId}
+                          onOpenReview={setOpenReviewBookingId}
+                          onReviewSuccess={() => {}}
+                        />
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                {/* Completed */}
+                <div>
+                  <h3 className="font-medium" style={{ color: "var(--color-text)" }}>Completed</h3>
+                  {completedBookings.length === 0 ? (
+                    <p className="mt-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>None.</p>
+                  ) : (
+                    <ul className="mt-4 space-y-4">
+                      {completedBookings.map((b) => (
+                        <BookingCard
+                          key={b.id}
+                          booking={b}
+                          onCancel={handleCancelBooking}
+                          cancellingId={cancellingId}
+                          showLeaveReview
+                          openReviewBookingId={openReviewBookingId}
+                          onOpenReview={setOpenReviewBookingId}
+                          onReviewSuccess={(bid, newReviewId) => {
+                            if (bid && newReviewId)
+                              setBookings((prev) =>
+                                prev.map((x) =>
+                                  x.id === bid ? { ...x, existingReview: { id: newReviewId, canEdit: true } } : x
+                                )
+                              );
+                          }}
+                        />
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                {/* Cancelled */}
+                {cancelledBookings.length > 0 && (
+                  <div>
+                    <h3 className="font-medium" style={{ color: "var(--color-text-secondary)" }}>Cancelled</h3>
+                    <ul className="mt-4 space-y-4">
+                      {cancelledBookings.map((b) => (
+                        <BookingCard
+                          key={b.id}
+                          booking={b}
+                          onCancel={handleCancelBooking}
+                          cancellingId={cancellingId}
+                          showLeaveReview={false}
+                          openReviewBookingId={openReviewBookingId}
+                          onOpenReview={setOpenReviewBookingId}
+                          onReviewSuccess={() => {}}
+                        />
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
+        )}
+
+        {tab === "meetgreet" && (
+          <section
+            className="rounded-[var(--radius-lg)] border p-8 sm:p-8"
+            style={{
+              backgroundColor: "var(--color-surface)",
+              borderColor: "var(--color-border)",
+              boxShadow: "var(--shadow-md)",
+            }}
+          >
+            <h2
+              className="font-normal"
+              style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}
+            >
+              Meet & Greets
+            </h2>
+            <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+              Requests you sent to providers. After the meeting, book when you&apos;re ready.
+            </p>
+            {meetAndGreets.length === 0 ? (
+              <div
+                className="mt-6 flex flex-col items-center justify-center rounded-[var(--radius-lg)] border border-dashed py-12 text-center"
+                style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}
+              >
+                <Heart className="h-12 w-12" style={{ color: "var(--color-text-muted)" }} />
+                <p className="mt-3 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                  No meet & greets yet.
+                </p>
+                <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                  Use &quot;Request Meet & Greet&quot; on a provider&apos;s profile to get started.
+                </p>
+              </div>
+            ) : (
+              <ul className="mt-6 space-y-4">
+                {meetAndGreets.map((m) => {
+                  const meetTime = m.confirmedDatetime ?? m.requestedDatetime;
+                  const isPast = new Date(meetTime).getTime() < Date.now();
+                  const hasSuggestion = m.status === "requested" && m.providerSuggestedDatetime;
+                  return (
+                    <li
+                      key={m.id}
+                      className="rounded-[var(--radius-lg)] border p-4"
+                      style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <p className="font-semibold" style={{ color: "var(--color-text)" }}>{m.providerName}</p>
+                          <p className="mt-0.5 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                            Pets: {m.petNames.join(", ")} · {m.locationType}
+                          </p>
+                          <p className="mt-0.5 text-sm flex items-center gap-1" style={{ color: "var(--color-text-secondary)" }}>
+                            <CalendarClock className="h-4 w-4" />
+                            {formatDateTime(meetTime)}
+                          </p>
+                          <span className={`mt-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeStyle(m.status).bg} ${getStatusBadgeStyle(m.status).text}`}>
+                            {m.status}
+                          </span>
+                          {hasSuggestion && (
+                            <div className="mt-3 rounded-[var(--radius-lg)] border-l-4 pl-3 py-2" style={{ borderColor: "var(--color-primary)", backgroundColor: "var(--color-surface)" }}>
+                              <p className="text-sm font-medium" style={{ color: "var(--color-text)" }}>
+                                Provider suggested: {formatDateTime(m.providerSuggestedDatetime!)}
+                              </p>
+                              {m.providerMessage && <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>{m.providerMessage}</p>}
+                              <button
+                                type="button"
+                                onClick={() => handleAcceptMeetAndGreetSuggestion(m.id)}
+                                disabled={acceptingSuggestionId === m.id}
+                                className="mt-2 rounded-[var(--radius-lg)] bg-[var(--color-primary)] px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-70"
+                              >
+                                {acceptingSuggestionId === m.id ? "Accepting…" : "Accept this time"}
+                              </button>
+                            </div>
+                          )}
+                          {(m.status === "confirmed" || m.status === "completed") && isPast && (
+                            <p className="mt-3 text-sm font-medium" style={{ color: "var(--color-primary)" }}>
+                              How did it go?{" "}
+                              <Link href={m.providerSlug ? `/services/book/${m.providerSlug}` : "/services/search"} className="underline hover:no-underline">
+                                Ready to book?
+                              </Link>
+                            </p>
+                          )}
+                          {m.ledToBooking && m.bookingId && (
+                            <p className="mt-2 text-sm" style={{ color: "var(--color-success)" }}>
+                              Led to a booking. <Link href="/dashboard/owner" className="underline">View bookings</Link>
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
+        )}
+
+        {tab === "messages" && (
+          <section
+            className="rounded-[var(--radius-lg)] border p-8 sm:p-8"
+            style={{
+              backgroundColor: "var(--color-surface)",
+              borderColor: "var(--color-border)",
+              boxShadow: "var(--shadow-md)",
+            }}
+          >
+            <h2
+              className="font-normal"
+              style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}
+            >
+              Messages
+            </h2>
+            <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+              Conversations with providers.
+            </p>
+            <div
+              className="mt-6 flex flex-col items-center justify-center rounded-[var(--radius-lg)] border border-dashed py-12 text-center"
+              style={{
+                borderColor: "var(--color-border)",
+                backgroundColor: "var(--color-background)",
+              }}
+            >
+              <MessageSquare className="h-12 w-12" style={{ color: "var(--color-text-muted)" }} />
+              <p className="mt-3 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                No messages yet.
+              </p>
+              <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                When you contact providers, conversations will appear here.
+              </p>
+            </div>
+          </section>
+        )}
+      </div>
+    </>
+  );
+}
