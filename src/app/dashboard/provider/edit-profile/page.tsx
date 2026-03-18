@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { ServiceType, CancellationPolicy } from "@/lib/constants";
 import { ServiceAreaPicker, type ServiceAreaValue } from "@/components/maps";
 import { VerifyIdentityButton } from "../VerifyIdentityButton";
+import { getProviderHomeDetailsForEdit, updateProviderHomeDetails } from "../actions";
 
 const DISTRICTS = ["Nicosia", "Limassol", "Larnaca", "Paphos", "Famagusta"] as const;
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
@@ -54,6 +55,19 @@ export default function ProviderEditProfilePage() {
   const [cancellationPolicy, setCancellationPolicy] = useState<string>(CancellationPolicy.flexible);
   const [submitting, setSubmitting] = useState(false);
 
+  // Home details (Phase 6.3)
+  const [homeType, setHomeType] = useState("");
+  const [hasYard, setHasYard] = useState<boolean | "">("");
+  const [yardFenced, setYardFenced] = useState<boolean | "">("");
+  const [smokingHome, setSmokingHome] = useState<boolean | "">("");
+  const [petsInHome, setPetsInHome] = useState("");
+  const [childrenInHome, setChildrenInHome] = useState("");
+  const [dogsOnFurniture, setDogsOnFurniture] = useState<boolean | "">("");
+  const [pottyBreakFrequency, setPottyBreakFrequency] = useState("");
+  const [typicalDay, setTypicalDay] = useState("");
+  const [infoWantedAboutPet, setInfoWantedAboutPet] = useState("");
+  const [homeDetailsLoaded, setHomeDetailsLoaded] = useState(false);
+
   const bioLength = bio.length;
   const bioValid = bioLength >= 200 && bioLength <= 1000;
 
@@ -87,17 +101,47 @@ export default function ProviderEditProfilePage() {
     setAvailability((a) => ({ ...a, [key]: !a[key] }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  useEffect(() => {
+    let cancelled = false;
+    getProviderHomeDetailsForEdit().then((data) => {
+      if (cancelled || !data) return;
+      setHomeType(data.homeType ?? "");
+      setHasYard(data.hasYard ?? "");
+      setYardFenced(data.yardFenced ?? "");
+      setSmokingHome(data.smokingHome ?? "");
+      setPetsInHome(data.petsInHome ?? "");
+      setChildrenInHome(data.childrenInHome ?? "");
+      setDogsOnFurniture(data.dogsOnFurniture ?? "");
+      setPottyBreakFrequency(data.pottyBreakFrequency ?? "");
+      setTypicalDay(data.typicalDay ?? "");
+      setInfoWantedAboutPet(data.infoWantedAboutPet ?? "");
+      setHomeDetailsLoaded(true);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!bioValid) {
       toast.error("Bio must be between 200 and 1000 characters.");
       return;
     }
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
-      toast.success("Profile saved successfully.");
-    }, 600);
+    const homeErr = await updateProviderHomeDetails({
+      homeType: homeType || null,
+      hasYard: hasYard === "" ? null : hasYard,
+      yardFenced: yardFenced === "" ? null : yardFenced,
+      smokingHome: smokingHome === "" ? null : smokingHome,
+      petsInHome: petsInHome || null,
+      childrenInHome: childrenInHome || null,
+      dogsOnFurniture: dogsOnFurniture === "" ? null : dogsOnFurniture,
+      pottyBreakFrequency: pottyBreakFrequency || null,
+      typicalDay: typicalDay || null,
+      infoWantedAboutPet: infoWantedAboutPet || null,
+    });
+    setSubmitting(false);
+    if (homeErr.error) toast.error(homeErr.error);
+    else toast.success("Profile saved successfully.");
   }
 
   return (
@@ -320,6 +364,124 @@ export default function ProviderEditProfilePage() {
                 ))}
               </select>
             </div>
+          </section>
+
+          {/* Home & Environment */}
+          <section id="home" className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-8 shadow-[var(--shadow-md)] sm:p-8">
+            <h2 className="font-normal " style={{ fontFamily: "var(--font-heading), serif" }}>Home & Environment</h2>
+            <p className="mt-1 text-sm ">Details that help owners decide for boarding and daycare.</p>
+            {!homeDetailsLoaded && <p className="mt-2 text-sm " style={{ color: "var(--color-text-secondary)" }}>Loading…</p>}
+            {homeDetailsLoaded && (
+              <div className="mt-6 space-y-6">
+                <div>
+                  <label className="block text-sm font-medium ">Home type</label>
+                  <select
+                    value={homeType}
+                    onChange={(e) => setHomeType(e.target.value)}
+                    className="mt-1.5 w-full rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white px-3 py-2  focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
+                  >
+                    <option value="">Select</option>
+                    <option value="house">House</option>
+                    <option value="apartment">Apartment</option>
+                  </select>
+                </div>
+                <div className="flex flex-wrap gap-6">
+                  <label className="flex cursor-pointer items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={hasYard === true}
+                      onChange={() => setHasYard(hasYard === true ? false : true)}
+                      className="h-4 w-4 rounded border-[var(--color-primary)]/30 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
+                    />
+                    <span>Has yard</span>
+                  </label>
+                  <label className="flex cursor-pointer items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={yardFenced === true}
+                      onChange={() => setYardFenced(yardFenced === true ? false : true)}
+                      disabled={hasYard !== true}
+                      className="h-4 w-4 rounded border-[var(--color-primary)]/30 text-[var(--color-primary)] focus:ring-[var(--color-primary)] disabled:opacity-50"
+                    />
+                    <span>Yard is fenced</span>
+                  </label>
+                  <label className="flex cursor-pointer items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={smokingHome === true}
+                      onChange={() => setSmokingHome(smokingHome === true ? false : true)}
+                      className="h-4 w-4 rounded border-[var(--color-primary)]/30 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
+                    />
+                    <span>Smoking home</span>
+                  </label>
+                  <label className="flex cursor-pointer items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={dogsOnFurniture === true}
+                      onChange={() => setDogsOnFurniture(dogsOnFurniture === true ? false : true)}
+                      className="h-4 w-4 rounded border-[var(--color-primary)]/30 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
+                    />
+                    <span>Dogs allowed on furniture</span>
+                  </label>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium ">Pets in home</label>
+                  <input
+                    type="text"
+                    value={petsInHome}
+                    onChange={(e) => setPetsInHome(e.target.value)}
+                    placeholder="e.g. One small dog, two cats"
+                    className="mt-1.5 w-full rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white px-3 py-2  focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium ">Children in home</label>
+                  <input
+                    type="text"
+                    value={childrenInHome}
+                    onChange={(e) => setChildrenInHome(e.target.value)}
+                    placeholder="e.g. Two kids, 5 and 8"
+                    className="mt-1.5 w-full rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white px-3 py-2  focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium ">Potty break frequency</label>
+                  <input
+                    type="text"
+                    value={pottyBreakFrequency}
+                    onChange={(e) => setPottyBreakFrequency(e.target.value)}
+                    placeholder="e.g. Every 4–6 hours, or as needed"
+                    className="mt-1.5 w-full rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white px-3 py-2  focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
+                  />
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* A Typical Day */}
+          <section id="typical-day" className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-8 shadow-[var(--shadow-md)] sm:p-8">
+            <h2 className="font-normal " style={{ fontFamily: "var(--font-heading), serif" }}>A Typical Day</h2>
+            <p className="mt-1 text-sm ">Describe a typical day with you so owners know what to expect.</p>
+            <textarea
+              value={typicalDay}
+              onChange={(e) => setTypicalDay(e.target.value)}
+              rows={5}
+              className="mt-4 w-full rounded-[var(--radius-lg)] border border-[var(--color-border)]  px-4 py-3  focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              placeholder="Morning walk, breakfast together, playtime in the garden..."
+            />
+          </section>
+
+          {/* What I'd Like to Know About Your Pet */}
+          <section id="info-wanted" className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-8 shadow-[var(--shadow-md)] sm:p-8">
+            <h2 className="font-normal " style={{ fontFamily: "var(--font-heading), serif" }}>What I&apos;d Like to Know About Your Pet</h2>
+            <p className="mt-1 text-sm ">Tell owners what details you&apos;d like before a stay (routine, diet, temperament, etc.).</p>
+            <textarea
+              value={infoWantedAboutPet}
+              onChange={(e) => setInfoWantedAboutPet(e.target.value)}
+              rows={4}
+              className="mt-4 w-full rounded-[var(--radius-lg)] border border-[var(--color-border)]  px-4 py-3  focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              placeholder="Feeding schedule, any anxieties, how they get on with other dogs..."
+            />
           </section>
 
           {/* Verification */}

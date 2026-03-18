@@ -19,6 +19,9 @@ export default async function ServicesSearchPage({ searchParams }: Props) {
   const lng = lngParam ? parseFloat(lngParam) : undefined;
   const sort = (typeof params.sort === "string" ? params.sort : "") || undefined;
   const cancellationPolicy = typeof params.cancellationPolicy === "string" ? params.cancellationPolicy : "";
+  const homeType = typeof params.homeType === "string" ? params.homeType : "";
+  const hasYardParam = typeof params.hasYard === "string" ? params.hasYard : "";
+  const hasYard = hasYardParam === "true" ? true : undefined;
 
   const filters = {
     serviceType: serviceType || undefined,
@@ -27,6 +30,8 @@ export default async function ServicesSearchPage({ searchParams }: Props) {
     priceMax: priceMax ? parseFloat(priceMax) : undefined,
     minRating: Number.isFinite(minRating) ? minRating! : undefined,
     cancellationPolicy: cancellationPolicy || undefined,
+    homeType: homeType || undefined,
+    hasYard,
     lat: Number.isFinite(lat) ? lat : undefined,
     lng: Number.isFinite(lng) ? lng : undefined,
     sort: sort as "distance" | "rating" | "price_low" | "price_high" | "review_count" | undefined,
@@ -46,6 +51,8 @@ export default async function ServicesSearchPage({ searchParams }: Props) {
       initialLng={Number.isFinite(lng) ? lng : null}
       initialSort={sort || undefined}
       initialCancellationPolicy={cancellationPolicy || undefined}
+      initialHomeType={homeType || undefined}
+      initialHasYard={hasYard}
     />
   );
 }

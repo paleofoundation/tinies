@@ -142,12 +142,76 @@ export default async function ProviderProfilePage({ params }: Props) {
         <section className="mb-12">
           <h2 className="text-lg font-normal" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>About</h2>
           <p className="mt-3 leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
-            I&apos;ve been caring for dogs and cats for over 5 years. I work from home and have a
-            fenced garden, so your pet will have plenty of space and attention. I only take a
-            few bookings at a time so everyone gets the best care. I&apos;m happy to send photo
-            updates and can administer medication if needed.
+            {provider?.bio ?? "I've been caring for dogs and cats for over 5 years. I work from home and have a fenced garden, so your pet will have plenty of space and attention. I only take a few bookings at a time so everyone gets the best care. I'm happy to send photo updates and can administer medication if needed."}
           </p>
         </section>
+
+        {/* Home & Environment */}
+        {(provider?.homeType || provider?.hasYard != null || provider?.yardFenced != null || provider?.smokingHome != null || provider?.petsInHome || provider?.childrenInHome || provider?.dogsOnFurniture != null || provider?.pottyBreakFrequency) && (
+          <section className="mb-12">
+            <h2 className="text-lg font-normal" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>Home & Environment</h2>
+            <div className="mt-4 space-y-3 rounded-[var(--radius-lg)] border p-5" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}>
+              {provider?.homeType && (
+                <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                  <span className="font-medium" style={{ color: "var(--color-text)" }}>Home type:</span>{" "}
+                  {provider.homeType === "house" ? "House" : provider.homeType === "apartment" ? "Apartment" : provider.homeType}
+                </p>
+              )}
+              {provider?.hasYard != null && (
+                <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                  <span className="font-medium" style={{ color: "var(--color-text)" }}>Yard:</span>{" "}
+                  {provider.hasYard ? (provider.yardFenced ? "Yes, fenced" : "Yes") : "No"}
+                </p>
+              )}
+              {provider?.smokingHome != null && (
+                <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                  <span className="font-medium" style={{ color: "var(--color-text)" }}>Smoking home:</span>{" "}
+                  {provider.smokingHome ? "Yes" : "No"}
+                </p>
+              )}
+              {provider?.dogsOnFurniture != null && (
+                <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                  <span className="font-medium" style={{ color: "var(--color-text)" }}>Dogs on furniture:</span>{" "}
+                  {provider.dogsOnFurniture ? "Yes" : "No"}
+                </p>
+              )}
+              {provider?.petsInHome && (
+                <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                  <span className="font-medium" style={{ color: "var(--color-text)" }}>Pets in home:</span>{" "}
+                  {provider.petsInHome}
+                </p>
+              )}
+              {provider?.childrenInHome && (
+                <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                  <span className="font-medium" style={{ color: "var(--color-text)" }}>Children in home:</span>{" "}
+                  {provider.childrenInHome}
+                </p>
+              )}
+              {provider?.pottyBreakFrequency && (
+                <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                  <span className="font-medium" style={{ color: "var(--color-text)" }}>Potty breaks:</span>{" "}
+                  {provider.pottyBreakFrequency}
+                </p>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* A Typical Day */}
+        {provider?.typicalDay && (
+          <section className="mb-12">
+            <h2 className="text-lg font-normal" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>A Typical Day</h2>
+            <p className="mt-3 leading-relaxed whitespace-pre-wrap" style={{ color: "var(--color-text-secondary)" }}>{provider.typicalDay}</p>
+          </section>
+        )}
+
+        {/* What I'd Like to Know About Your Pet */}
+        {provider?.infoWantedAboutPet && (
+          <section className="mb-12">
+            <h2 className="text-lg font-normal" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>What I&apos;d Like to Know About Your Pet</h2>
+            <p className="mt-3 leading-relaxed whitespace-pre-wrap" style={{ color: "var(--color-text-secondary)" }}>{provider.infoWantedAboutPet}</p>
+          </section>
+        )}
 
         {/* Services & pricing */}
         <section className="mb-12">

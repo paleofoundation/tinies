@@ -238,6 +238,16 @@ model ProviderProfile {
   photos              String[]
   stripeConnectAccountId String? @map("stripe_connect_account_id")
   slug                String    @unique
+  homeType            String?   @map("home_type")       // house | apartment
+  hasYard             Boolean?  @map("has_yard")
+  yardFenced          Boolean?  @map("yard_fenced")
+  smokingHome         Boolean?  @map("smoking_home")
+  petsInHome          String?   @map("pets_in_home")
+  childrenInHome      String?   @map("children_in_home")
+  dogsOnFurniture     Boolean?  @map("dogs_on_furniture")
+  pottyBreakFrequency String?   @map("potty_break_frequency")
+  typicalDay          String?   @map("typical_day")
+  infoWantedAboutPet  String?   @map("info_wanted_about_pet")
   createdAt            DateTime  @default(now()) @map("created_at")
   updatedAt            DateTime  @updatedAt @map("updated_at")
 

@@ -968,6 +968,86 @@ export async function updateProviderWizardCancellationPolicy(policy: string): Pr
 }
 
 // ---------------------------------------------------------------------------
+// Home details (Phase 6.3)
+// ---------------------------------------------------------------------------
+
+export type ProviderHomeDetails = {
+  homeType: string | null;
+  hasYard: boolean | null;
+  yardFenced: boolean | null;
+  smokingHome: boolean | null;
+  petsInHome: string | null;
+  childrenInHome: string | null;
+  dogsOnFurniture: boolean | null;
+  pottyBreakFrequency: string | null;
+  typicalDay: string | null;
+  infoWantedAboutPet: string | null;
+};
+
+export async function getProviderHomeDetailsForEdit(): Promise<ProviderHomeDetails | null> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+  const profile = await prisma.providerProfile.findUnique({
+    where: { userId: user.id },
+    select: {
+      homeType: true,
+      hasYard: true,
+      yardFenced: true,
+      smokingHome: true,
+      petsInHome: true,
+      childrenInHome: true,
+      dogsOnFurniture: true,
+      pottyBreakFrequency: true,
+      typicalDay: true,
+      infoWantedAboutPet: true,
+    },
+  });
+  return profile;
+}
+
+export type UpdateProviderHomeDetailsInput = {
+  homeType?: string | null;
+  hasYard?: boolean | null;
+  yardFenced?: boolean | null;
+  smokingHome?: boolean | null;
+  petsInHome?: string | null;
+  childrenInHome?: string | null;
+  dogsOnFurniture?: boolean | null;
+  pottyBreakFrequency?: string | null;
+  typicalDay?: string | null;
+  infoWantedAboutPet?: string | null;
+};
+
+export async function updateProviderHomeDetails(input: UpdateProviderHomeDetailsInput): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+  try {
+    await prisma.providerProfile.update({
+      where: { userId: user.id },
+      data: {
+        homeType: input.homeType ?? undefined,
+        hasYard: input.hasYard ?? undefined,
+        yardFenced: input.yardFenced ?? undefined,
+        smokingHome: input.smokingHome ?? undefined,
+        petsInHome: input.petsInHome ?? undefined,
+        childrenInHome: input.childrenInHome ?? undefined,
+        dogsOnFurniture: input.dogsOnFurniture ?? undefined,
+        pottyBreakFrequency: input.pottyBreakFrequency ?? undefined,
+        typicalDay: input.typicalDay ?? undefined,
+        infoWantedAboutPet: input.infoWantedAboutPet ?? undefined,
+      },
+    });
+    revalidatePath("/dashboard/provider");
+    revalidatePath("/dashboard/provider/edit-profile");
+    return {};
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Failed to save." };
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Stripe Identity verification (Phase 6.2)
 // ---------------------------------------------------------------------------
 

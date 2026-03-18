@@ -89,6 +89,8 @@ export function SearchContent({
   initialLng = null,
   initialSort = undefined,
   initialCancellationPolicy = undefined,
+  initialHomeType = undefined,
+  initialHasYard = undefined,
 }: {
   initialProviders: SearchProviderCard[];
   initialServiceType?: string;
@@ -100,6 +102,8 @@ export function SearchContent({
   initialLng?: number | null;
   initialSort?: SortOption;
   initialCancellationPolicy?: string;
+  initialHomeType?: string;
+  initialHasYard?: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -109,6 +113,8 @@ export function SearchContent({
   const [priceMax, setPriceMax] = useState(initialPriceMax);
   const [minRating, setMinRating] = useState<number | null>(initialMinRating ?? null);
   const [cancellationPolicy, setCancellationPolicy] = useState(initialCancellationPolicy ?? "");
+  const [homeType, setHomeType] = useState(initialHomeType ?? "");
+  const [hasYard, setHasYard] = useState(initialHasYard ?? false);
   const [sort, setSort] = useState<SortOption>(initialSort ?? (initialLat != null && initialLng != null ? "distance" : "rating"));
   const [locationQuery, setLocationQuery] = useState("");
   const [geocodeLoading, setGeocodeLoading] = useState(false);
@@ -126,6 +132,8 @@ export function SearchContent({
     const num = r ? parseInt(r, 10) : NaN;
     setMinRating(Number.isFinite(num) ? num : null);
     setCancellationPolicy(searchParams.get("cancellationPolicy") ?? "");
+    setHomeType(searchParams.get("homeType") ?? "");
+    setHasYard(searchParams.get("hasYard") === "true");
     const s = searchParams.get("sort");
     setSort((s as SortOption) || (searchParams.get("lat") && searchParams.get("lng") ? "distance" : "rating"));
   }, [searchParams]);
@@ -138,6 +146,8 @@ export function SearchContent({
     if (priceMax) params.set("priceMax", priceMax);
     if (minRating != null) params.set("minRating", String(minRating));
     if (cancellationPolicy) params.set("cancellationPolicy", cancellationPolicy);
+    if (homeType) params.set("homeType", homeType);
+    if (hasYard) params.set("hasYard", "true");
     if (sort) params.set("sort", sort);
     const lat = searchParams.get("lat");
     const lng = searchParams.get("lng");
@@ -145,7 +155,7 @@ export function SearchContent({
     if (lng) params.set("lng", lng);
     const q = params.toString();
     return q ? `/services/search?${q}` : "/services/search";
-  }, [serviceType, district, priceMin, priceMax, minRating, cancellationPolicy, sort, searchParams]);
+  }, [serviceType, district, priceMin, priceMax, minRating, cancellationPolicy, homeType, hasYard, sort, searchParams]);
 
   const applyFilters = useCallback(() => {
     router.push(buildUrl());
@@ -364,6 +374,37 @@ export function SearchContent({
                     ))}
                   </select>
                 </div>
+                <div>
+                  <label className="block text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+                    Home type
+                  </label>
+                  <select
+                    value={homeType}
+                    onChange={(e) => setHomeType(e.target.value)}
+                    onBlur={applyFilters}
+                    className="mt-2 w-full rounded-[var(--radius-lg)] border px-4 py-2.5 text-sm focus:outline-none focus:ring-2"
+                    style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-background)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
+                  >
+                    <option value="">Any</option>
+                    <option value="house">House</option>
+                    <option value="apartment">Apartment</option>
+                  </select>
+                </div>
+                <label className="flex cursor-pointer items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={hasYard}
+                    onChange={(e) => {
+                      setHasYard(e.target.checked);
+                      const params = new URLSearchParams(searchParams.toString());
+                      if (e.target.checked) params.set("hasYard", "true");
+                      else params.delete("hasYard");
+                      router.push(params.toString() ? `/services/search?${params}` : "/services/search");
+                    }}
+                    className="h-4 w-4 rounded border-[var(--color-primary)]/30 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
+                  />
+                  <span className="text-sm" style={{ color: "var(--color-text)" }}>Has yard (e.g. fenced)</span>
+                </label>
                 <button
                   type="button"
                   onClick={applyFilters}

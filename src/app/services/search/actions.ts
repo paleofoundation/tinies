@@ -62,6 +62,8 @@ export type SearchFilters = {
   priceMax?: number;
   minRating?: number;
   cancellationPolicy?: string;
+  homeType?: string;
+  hasYard?: boolean;
   lat?: number;
   lng?: number;
   sort?: SortOption;
@@ -79,7 +81,11 @@ export async function getSearchProviders(
   filters: SearchFilters = {}
 ): Promise<SearchProviderCard[]> {
   const profiles = await prisma.providerProfile.findMany({
-    where: { verified: true },
+    where: {
+      verified: true,
+      ...(filters.homeType ? { homeType: filters.homeType } : {}),
+      ...(filters.hasYard === true ? { hasYard: true } : {}),
+    },
     include: {
       user: { select: { name: true, avatarUrl: true, district: true } },
       reviews: {

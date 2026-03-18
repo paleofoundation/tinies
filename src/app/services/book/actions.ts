@@ -43,6 +43,17 @@ export type ProviderForBooking = {
   serviceAreaLat: number | null;
   serviceAreaLng: number | null;
   serviceAreaRadiusKm: number | null;
+  bio: string | null;
+  homeType: string | null;
+  hasYard: boolean | null;
+  yardFenced: boolean | null;
+  smokingHome: boolean | null;
+  petsInHome: string | null;
+  childrenInHome: string | null;
+  dogsOnFurniture: boolean | null;
+  pottyBreakFrequency: string | null;
+  typicalDay: string | null;
+  infoWantedAboutPet: string | null;
 };
 
 /** Get provider by slug for the booking page. Returns null if not found. */
@@ -75,6 +86,17 @@ export async function getProviderBySlug(
     serviceAreaLat: profile.serviceAreaLat,
     serviceAreaLng: profile.serviceAreaLng,
     serviceAreaRadiusKm: profile.serviceAreaRadiusKm,
+    bio: profile.bio,
+    homeType: profile.homeType,
+    hasYard: profile.hasYard,
+    yardFenced: profile.yardFenced,
+    smokingHome: profile.smokingHome,
+    petsInHome: profile.petsInHome,
+    childrenInHome: profile.childrenInHome,
+    dogsOnFurniture: profile.dogsOnFurniture,
+    pottyBreakFrequency: profile.pottyBreakFrequency,
+    typicalDay: profile.typicalDay,
+    infoWantedAboutPet: profile.infoWantedAboutPet,
   };
 }
 
