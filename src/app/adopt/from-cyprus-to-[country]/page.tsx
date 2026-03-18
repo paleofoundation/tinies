@@ -4,6 +4,8 @@ import { Heart, ArrowRight, CheckCircle } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { COUNTRY_SLUGS, COUNTRY_SLUG_TO_NAME, COUNTRY_SLUG_TO_DESTINATION } from "@/lib/constants/seo-landings";
 
+export const dynamic = "force-dynamic";
+
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
 type Props = {

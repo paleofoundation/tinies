@@ -7,6 +7,8 @@ import {
 } from "@/lib/constants/seo-landings";
 import { blogPosts } from "@/lib/constants/blog-posts";
 
+export const dynamic = "force-dynamic";
+
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

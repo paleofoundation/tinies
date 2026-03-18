@@ -11,6 +11,8 @@ import {
   SERVICE_TYPE_TO_LABEL,
 } from "@/lib/constants/seo-landings";
 
+export const dynamic = "force-dynamic";
+
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
 type Props = {
