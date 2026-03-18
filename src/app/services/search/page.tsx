@@ -41,7 +41,13 @@ export default async function ServicesSearchPage({ searchParams }: Props) {
     sort: sort as "distance" | "rating" | "price_low" | "price_high" | "review_count" | undefined,
   };
 
-  const providers = await getSearchProviders(filters);
+  let providers: Awaited<ReturnType<typeof getSearchProviders>>;
+  try {
+    providers = await getSearchProviders(filters);
+  } catch (e) {
+    console.error("getSearchProviders", e);
+    providers = [];
+  }
 
   return (
     <SearchContent

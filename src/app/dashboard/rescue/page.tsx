@@ -10,6 +10,8 @@ import {
 } from "./actions";
 import { RescueDashboardClient } from "./RescueDashboardClient";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Rescue Dashboard | Tinies",
   description: "Manage your adoption listings and inquiries.",
@@ -24,17 +26,31 @@ export default async function RescueDashboardPage() {
     redirect("/login?next=/dashboard/rescue");
   }
 
-  const [
-    { org, error: orgError },
-    { listings, error: listError },
-    { applications, error: appError },
-    { placements = [] },
-  ] = await Promise.all([
-    getRescueOrgDashboard(),
-    getOrgListings(),
-    getOrgApplications(),
-    getOrgPlacements(),
-  ]);
+  let org: Awaited<ReturnType<typeof getRescueOrgDashboard>>["org"] = null;
+  let orgError: string | undefined;
+  let listings: Awaited<ReturnType<typeof getOrgListings>>["listings"] = [];
+  let listError: string | undefined;
+  let applications: Awaited<ReturnType<typeof getOrgApplications>>["applications"] = [];
+  let appError: string | undefined;
+  let placements: Awaited<ReturnType<typeof getOrgPlacements>>["placements"] = [];
+  try {
+    const [dashboardResult, listingsResult, applicationsResult, placementsResult] = await Promise.all([
+      getRescueOrgDashboard(),
+      getOrgListings(),
+      getOrgApplications(),
+      getOrgPlacements(),
+    ]);
+    org = dashboardResult.org;
+    orgError = dashboardResult.error;
+    listings = listingsResult.listings;
+    listError = listingsResult.error;
+    applications = applicationsResult.applications;
+    appError = applicationsResult.error;
+    placements = placementsResult.placements ?? [];
+  } catch (e) {
+    console.error("RescueDashboardPage data fetch", e);
+    orgError = "Failed to load dashboard.";
+  }
 
   if (orgError) {
     return (

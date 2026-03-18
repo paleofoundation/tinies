@@ -13,19 +13,30 @@ export const metadata: Metadata = {
 };
 
 export default async function OwnerDashboardPage() {
-  const [
-    { pets, error },
-    { bookings },
-    { meetAndGreets = [] },
-    { disputes: disputesList = [] },
-    { claims: claimsList = [] },
-  ] = await Promise.all([
-    getOwnerPets(),
-    getOwnerBookings(),
-    getOwnerMeetAndGreets().then((r) => (r.error ? { meetAndGreets: [] } : r)),
-    getDisputesForUser().then((r) => (r.error ? { disputes: [] } : r)),
-    getClaimsForUser().then((r) => (r.error ? { claims: [] } : r)),
-  ]);
+  let pets: Awaited<ReturnType<typeof getOwnerPets>>["pets"] = [];
+  let error: string | undefined;
+  let bookings: Awaited<ReturnType<typeof getOwnerBookings>>["bookings"] = [];
+  let meetAndGreets: Awaited<ReturnType<typeof getOwnerMeetAndGreets>>["meetAndGreets"] = [];
+  let disputesList: Awaited<ReturnType<typeof getDisputesForUser>>["disputes"] = [];
+  let claimsList: Awaited<ReturnType<typeof getClaimsForUser>>["claims"] = [];
+  try {
+    const [petsResult, bookingsResult, meetResult, disputesResult, claimsResult] = await Promise.all([
+      getOwnerPets(),
+      getOwnerBookings(),
+      getOwnerMeetAndGreets().then((r) => (r.error ? { meetAndGreets: [] } : r)),
+      getDisputesForUser().then((r) => (r.error ? { disputes: [] } : r)),
+      getClaimsForUser().then((r) => (r.error ? { claims: [] } : r)),
+    ]);
+    pets = petsResult.pets;
+    error = petsResult.error;
+    bookings = bookingsResult.bookings;
+    meetAndGreets = meetResult.meetAndGreets ?? [];
+    disputesList = disputesResult.disputes ?? [];
+    claimsList = claimsResult.claims ?? [];
+  } catch (e) {
+    console.error("OwnerDashboardPage data fetch", e);
+    error = "Failed to load dashboard.";
+  }
 
   return (
     <div

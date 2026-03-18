@@ -4,13 +4,24 @@ import { Heart } from "lucide-react";
 import { getAdopterApplications } from "./actions";
 import { AdopterDashboardClient } from "./AdopterDashboardClient";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Adopter Dashboard | Tinies",
   description: "Your adoption applications and status.",
 };
 
 export default async function AdopterDashboardPage() {
-  const { applications, error } = await getAdopterApplications();
+  let applications: Awaited<ReturnType<typeof getAdopterApplications>>["applications"] = [];
+  let error: string | undefined;
+  try {
+    const result = await getAdopterApplications();
+    applications = result.applications;
+    error = result.error;
+  } catch (e) {
+    console.error("AdopterDashboardPage getAdopterApplications", e);
+    error = "Failed to load applications.";
+  }
 
   return (
     <div

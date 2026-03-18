@@ -5,11 +5,18 @@ import { getCharityBySlug } from "@/lib/giving/actions";
 import { CharityDonateForm } from "./CharityDonateForm";
 import { SetPreferredCharityButton } from "./SetPreferredCharityButton";
 
+export const dynamic = "force-dynamic";
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const charity = await getCharityBySlug(slug);
+  let charity: Awaited<ReturnType<typeof getCharityBySlug>> = null;
+  try {
+    charity = await getCharityBySlug(slug);
+  } catch (e) {
+    console.error("getCharityBySlug (metadata)", e);
+  }
   if (!charity) return { title: "Charity | Tinies Giving" };
   return {
     title: `${charity.name} | Tinies Giving`,
@@ -19,7 +26,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CharityProfilePage({ params }: Props) {
   const { slug } = await params;
-  const charity = await getCharityBySlug(slug);
+  let charity: Awaited<ReturnType<typeof getCharityBySlug>> = null;
+  try {
+    charity = await getCharityBySlug(slug);
+  } catch (e) {
+    console.error("getCharityBySlug", e);
+  }
   if (!charity) notFound();
 
   return (

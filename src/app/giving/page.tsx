@@ -42,12 +42,29 @@ const SOURCE_LABELS: Record<string, string> = {
 
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
+const DEFAULT_STATS = {
+  totalDonatedCents: 0,
+  charitiesFundedCount: 0,
+  activeGuardiansCount: 0,
+  supporterCount: 0,
+  monthlyBreakdown: [] as { year: number; month: number; source: string; totalCents: number }[],
+  featuredCharities: [] as { id: string; name: string; mission: string | null; logoUrl: string | null; slug: string }[],
+  allCharities: [] as { id: string; name: string; mission: string | null; logoUrl: string | null; slug: string }[],
+};
+
 export default async function GivingPage() {
-  const [stats, givers, tickerItems] = await Promise.all([
-    getGivingPageData(),
-    getCommunityOfGivers(),
-    getRecentDonationsForTicker(20),
-  ]);
+  let stats = DEFAULT_STATS;
+  let givers: Awaited<ReturnType<typeof getCommunityOfGivers>> = [];
+  let tickerItems: Awaited<ReturnType<typeof getRecentDonationsForTicker>> = [];
+  try {
+    [stats, givers, tickerItems] = await Promise.all([
+      getGivingPageData(),
+      getCommunityOfGivers(),
+      getRecentDonationsForTicker(20),
+    ]);
+  } catch (e) {
+    console.error("GivingPage data fetch", e);
+  }
 
   const donateActionJsonLd = {
     "@context": "https://schema.org",

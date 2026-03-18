@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getCharitiesForGuardian } from "@/lib/giving/actions";
 import { GuardianCheckoutForm } from "./GuardianCheckoutForm";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Become a Tinies Guardian | Monthly Giving",
   description: "Give monthly to animal rescue. Choose your tier (€3–€10/month), pick a charity or the Giving Fund, and get a Guardian badge.",
@@ -15,7 +17,13 @@ export default async function BecomeAGuardianPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/giving/become-a-guardian");
 
-  const charities = await getCharitiesForGuardian();
+  let charities: Awaited<ReturnType<typeof getCharitiesForGuardian>>;
+  try {
+    charities = await getCharitiesForGuardian();
+  } catch (e) {
+    console.error("getCharitiesForGuardian", e);
+    charities = [];
+  }
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>

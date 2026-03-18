@@ -11,6 +11,8 @@ import { ProviderVerificationSection } from "./provider-verification/ProviderVer
 
 // TODO: enforce admin role – redirect or 403 if user is not admin (e.g. check session user role or app_metadata)
 
+export const dynamic = "force-dynamic";
+
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
@@ -18,31 +20,53 @@ type Props = {
 export default async function AdminDashboardPage({ searchParams }: Props) {
   const params = await searchParams;
   const placementStatus = typeof params.placementStatus === "string" ? params.placementStatus : undefined;
-  const { placements } = await getAllPlacements(placementStatus);
-  const { disputes: openDisputes = [] } = await getOpenDisputesForAdmin().then((r) => (r.error ? { disputes: [] } : r));
-  const { claims: openClaims = [] } = await getOpenClaimsForAdmin().then((r) => (r.error ? { claims: [] } : r));
 
-  const [listings, charitiesForQr, pendingVerification, recentlyVerified] = await Promise.all([
-    prisma.adoptionListing.findMany({
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      name: true,
-      species: true,
-      breed: true,
-      estimatedAge: true,
-      status: true,
-      createdAt: true,
-    },
-  }),
-    prisma.charity.findMany({
-      where: { active: true },
-      orderBy: { name: "asc" },
-      select: { id: true, name: true, slug: true },
-    }),
-    getProvidersPendingVerification(),
-    getRecentlyVerifiedProviders(10),
-  ]);
+  let placements: Awaited<ReturnType<typeof getAllPlacements>>["placements"] = [];
+  let openDisputes: Awaited<ReturnType<typeof getOpenDisputesForAdmin>>["disputes"] = [];
+  let openClaims: Awaited<ReturnType<typeof getOpenClaimsForAdmin>>["claims"] = [];
+  let listings: Awaited<ReturnType<typeof prisma.adoptionListing.findMany>> = [];
+  let charitiesForQr: Awaited<ReturnType<typeof prisma.charity.findMany>> = [];
+  let pendingVerification: Awaited<ReturnType<typeof getProvidersPendingVerification>> = [];
+  let recentlyVerified: Awaited<ReturnType<typeof getRecentlyVerifiedProviders>> = [];
+
+  try {
+    const [placementsResult, disputesResult, claimsResult] = await Promise.all([
+      getAllPlacements(placementStatus),
+      getOpenDisputesForAdmin().then((r) => (r.error ? { disputes: [] } : r)),
+      getOpenClaimsForAdmin().then((r) => (r.error ? { claims: [] } : r)),
+    ]);
+    placements = placementsResult.placements;
+    openDisputes = disputesResult.disputes ?? [];
+    openClaims = claimsResult.claims ?? [];
+  } catch (e) {
+    console.error("AdminDashboardPage placements/disputes/claims", e);
+  }
+
+  try {
+    [listings, charitiesForQr, pendingVerification, recentlyVerified] = await Promise.all([
+      prisma.adoptionListing.findMany({
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          name: true,
+          species: true,
+          breed: true,
+          estimatedAge: true,
+          status: true,
+          createdAt: true,
+        },
+      }),
+      prisma.charity.findMany({
+        where: { active: true },
+        orderBy: { name: "asc" },
+        select: { id: true, name: true, slug: true },
+      }),
+      getProvidersPendingVerification(),
+      getRecentlyVerifiedProviders(10),
+    ]);
+  } catch (e) {
+    console.error("AdminDashboardPage listings/charities/providers", e);
+  }
 
   const statusLabel: Record<string, string> = {
     available: "Available",

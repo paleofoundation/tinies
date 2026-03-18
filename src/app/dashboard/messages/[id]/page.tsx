@@ -3,13 +3,22 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getConversationMessages } from "../actions";
 import { computeGivingTier } from "@/lib/giving/actions";
+import type { GivingTier } from "@/lib/utils/giving-helpers";
 import { ConversationView } from "./ConversationView";
+
+export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const { otherParty } = await getConversationMessages(id);
+  let otherParty: Awaited<ReturnType<typeof getConversationMessages>>["otherParty"] = null;
+  try {
+    const result = await getConversationMessages(id);
+    otherParty = result.otherParty;
+  } catch (e) {
+    console.error("getConversationMessages (metadata)", e);
+  }
   const name = otherParty?.name ?? "Conversation";
   return {
     title: `${name} | Messages | Tinies`,
@@ -19,10 +28,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ConversationPage({ params }: Props) {
   const { id } = await params;
-  const { messages, otherParty, error } = await getConversationMessages(id);
+  let messages: Awaited<ReturnType<typeof getConversationMessages>>["messages"] = [];
+  let otherParty: Awaited<ReturnType<typeof getConversationMessages>>["otherParty"] = null;
+  let error: string | undefined;
+  try {
+    const result = await getConversationMessages(id);
+    messages = result.messages;
+    otherParty = result.otherParty;
+    error = result.error;
+  } catch (e) {
+    console.error("getConversationMessages", e);
+    notFound();
+  }
   if (error) notFound();
   if (!otherParty) notFound();
-  const recipientGivingTier = await computeGivingTier(otherParty.id);
+  let recipientGivingTier: GivingTier = null;
+  try {
+    recipientGivingTier = await computeGivingTier(otherParty.id);
+  } catch (e) {
+    console.error("computeGivingTier", e);
+  }
 
   return (
     <div

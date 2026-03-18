@@ -11,7 +11,16 @@ export const metadata: Metadata = {
 };
 
 export default async function MessagesPage() {
-  const { conversations, error } = await getConversations();
+  let conversations: Awaited<ReturnType<typeof getConversations>>["conversations"] = [];
+  let error: string | undefined;
+  try {
+    const result = await getConversations();
+    conversations = result.conversations;
+    error = result.error;
+  } catch (e) {
+    console.error("MessagesPage getConversations", e);
+    error = "Failed to load conversations.";
+  }
 
   return (
     <div

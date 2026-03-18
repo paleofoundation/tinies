@@ -8,13 +8,20 @@ import { AdoptionApplicationForm } from "./AdoptionApplicationForm";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
+export const dynamic = "force-dynamic";
+
 type Props = {
   params: Promise<{ slug: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const listing = await getListingBySlug(slug);
+  let listing: Awaited<ReturnType<typeof getListingBySlug>> = null;
+  try {
+    listing = await getListingBySlug(slug);
+  } catch (e) {
+    console.error("getListingBySlug (metadata)", e);
+  }
   if (!listing) return { title: "Adopt | Tinies" };
   const title = `Apply to adopt ${listing.name} | Tinies`;
   const description = `Apply to adopt ${listing.name}, a ${listing.species}${listing.breed ? ` (${listing.breed})` : ""} in Cyprus.`;
@@ -38,7 +45,12 @@ export default async function AdoptApplyPage({ params }: Props) {
     redirect(`/login?next=${encodeURIComponent(`/adopt/apply/${slug}`)}`);
   }
 
-  const listing = await getListingBySlug(slug);
+  let listing: Awaited<ReturnType<typeof getListingBySlug>> = null;
+  try {
+    listing = await getListingBySlug(slug);
+  } catch (e) {
+    console.error("getListingBySlug", e);
+  }
   if (!listing) notFound();
 
   const productJsonLd = {

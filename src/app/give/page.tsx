@@ -11,7 +11,13 @@ export const metadata: Metadata = {
 };
 
 export default async function GivePage() {
-  const charities = await getFeaturedCharitiesForQuickDonate();
+  let charities: Awaited<ReturnType<typeof getFeaturedCharitiesForQuickDonate>>;
+  try {
+    charities = await getFeaturedCharitiesForQuickDonate();
+  } catch (e) {
+    console.error("getFeaturedCharitiesForQuickDonate", e);
+    charities = [];
+  }
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
       <main className="mx-auto max-w-lg px-4 py-8 sm:px-6 sm:py-10">

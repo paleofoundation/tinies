@@ -15,11 +15,18 @@ import { HOLIDAY_LABELS } from "@/lib/constants/holidays";
 import { GivingTierBadge } from "@/components/giving/GivingTierBadge";
 import { MeetAndGreetRequestModal } from "./MeetAndGreetRequestModal";
 
+export const dynamic = "force-dynamic";
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const provider = await getProviderBySlug(slug);
+  let provider: Awaited<ReturnType<typeof getProviderBySlug>> = null;
+  try {
+    provider = await getProviderBySlug(slug);
+  } catch (e) {
+    console.error("getProviderBySlug (metadata)", e);
+  }
   const name = provider?.providerName ?? slugToName(slug);
   const title = `${name} | Pet Care Provider | Tinies`;
   const description = `View ${name}'s profile, services, availability, and reviews. Book trusted pet care in Cyprus.`;
@@ -64,10 +71,16 @@ const GALLERY_COLORS = ["#0A6E5C", "#0A6E5C", "#F45D48", "#0A6E5C", "#0A6E5C", "
 
 export default async function ProviderProfilePage({ params }: Props) {
   const { slug } = await params;
-  const [provider, reviews] = await Promise.all([
-    getProviderBySlug(slug),
-    getProviderReviewsBySlug(slug),
-  ]);
+  let provider: Awaited<ReturnType<typeof getProviderBySlug>> = null;
+  let reviews: Awaited<ReturnType<typeof getProviderReviewsBySlug>> = [];
+  try {
+    [provider, reviews] = await Promise.all([
+      getProviderBySlug(slug),
+      getProviderReviewsBySlug(slug),
+    ]);
+  } catch (e) {
+    console.error("ProviderProfilePage data fetch", e);
+  }
   const name = provider?.providerName ?? slugToName(slug);
   const initials = name
     .split(" ")
