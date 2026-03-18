@@ -3,6 +3,8 @@ import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { getAllPlacements } from "./adoptions/actions";
 import { AdoptionPipelineSection } from "./AdoptionPipelineSection";
+import { getOpenDisputesForAdmin, getOpenClaimsForAdmin } from "@/lib/disputes/actions";
+import { DisputesClaimsSection } from "./DisputesClaimsSection";
 
 // TODO: enforce admin role – redirect or 403 if user is not admin (e.g. check session user role or app_metadata)
 
@@ -14,6 +16,8 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   const params = await searchParams;
   const placementStatus = typeof params.placementStatus === "string" ? params.placementStatus : undefined;
   const { placements } = await getAllPlacements(placementStatus);
+  const { disputes: openDisputes = [] } = await getOpenDisputesForAdmin().then((r) => (r.error ? { disputes: [] } : r));
+  const { claims: openClaims = [] } = await getOpenClaimsForAdmin().then((r) => (r.error ? { claims: [] } : r));
 
   const listings = await prisma.adoptionListing.findMany({
     orderBy: { createdAt: "desc" },
@@ -127,6 +131,8 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
         <Suspense fallback={<div className="mt-8 rounded-[var(--radius-lg)] border p-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}>Loading pipeline…</div>}>
           <AdoptionPipelineSection placements={placements} />
         </Suspense>
+
+        <DisputesClaimsSection initialDisputes={openDisputes} initialClaims={openClaims} />
 
         <p className="mt-8">
           <Link

@@ -22,6 +22,7 @@ import {
   Star,
   Heart,
   CalendarClock,
+  AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { ProviderStripeStatus, ProviderBookingCard, ProviderReviewForDashboard } from "./actions";
@@ -30,6 +31,9 @@ import {
   getProviderMeetAndGreets,
   respondToMeetAndGreet,
 } from "@/lib/meet-and-greet/actions";
+import { ReportProblemModal } from "@/components/disputes/ReportProblemModal";
+import { getDisputesForUser, getClaimsForUser, respondToDispute, respondToClaim } from "@/lib/disputes/actions";
+import type { DisputeCard, ClaimCard } from "@/lib/disputes/actions";
 import {
   createStripeConnectOnboardingLink,
   acceptBooking,
@@ -38,7 +42,7 @@ import {
 } from "./actions";
 import { ActiveWalkCard } from "./ActiveWalkCard";
 
-type TabId = "profile" | "bookings" | "meetgreet" | "earnings" | "reviews" | "messages";
+type TabId = "profile" | "bookings" | "meetgreet" | "disputes" | "earnings" | "reviews" | "messages";
 
 const SERVICE_LABELS: Record<string, string> = {
   walking: "Dog walking",
@@ -115,6 +119,7 @@ const TABS: { id: TabId; label: string; icon: typeof User }[] = [
   { id: "profile", label: "My Profile", icon: User },
   { id: "bookings", label: "My Bookings", icon: Calendar },
   { id: "meetgreet", label: "Meet & Greets", icon: Heart },
+  { id: "disputes", label: "Disputes & Claims", icon: AlertCircle },
   { id: "earnings", label: "Earnings", icon: Wallet },
   { id: "reviews", label: "Reviews", icon: Star },
   { id: "messages", label: "Messages", icon: MessageSquare },
@@ -125,6 +130,8 @@ export function ProviderDashboardClient({
   initialBookings,
   initialReviews = [],
   initialMeetAndGreets = { requested: [], confirmed: [], completed: [] },
+  initialDisputes = [],
+  initialClaims = [],
 }: {
   stripeStatus: ProviderStripeStatus;
   initialBookings: ProviderBookingCard[];
@@ -134,6 +141,8 @@ export function ProviderDashboardClient({
     confirmed: ProviderMeetAndGreetCard[];
     completed: ProviderMeetAndGreetCard[];
   };
+  initialDisputes?: DisputeCard[];
+  initialClaims?: ClaimCard[];
 }) {
   const router = useRouter();
   const [tab, setTab] = useState<TabId>("profile");
@@ -148,6 +157,13 @@ export function ProviderDashboardClient({
   const [mngRespondingId, setMngRespondingId] = useState<string | null>(null);
   const [mngSuggestDatetime, setMngSuggestDatetime] = useState<Record<string, string>>({});
   const [mngMessage, setMngMessage] = useState<Record<string, string>>({});
+  const [reportProblemBookingId, setReportProblemBookingId] = useState<string | null>(null);
+  const [disputes, setDisputes] = useState<DisputeCard[]>(initialDisputes);
+  const [claims, setClaims] = useState<ClaimCard[]>(initialClaims);
+  const [disputeResponseText, setDisputeResponseText] = useState<Record<string, string>>({});
+  const [claimResponseText, setClaimResponseText] = useState<Record<string, string>>({});
+  const [respondingDisputeId, setRespondingDisputeId] = useState<string | null>(null);
+  const [respondingClaimId, setRespondingClaimId] = useState<string | null>(null);
   const score = getCompletenessScore();
 
   useEffect(() => {
@@ -156,6 +172,10 @@ export function ProviderDashboardClient({
   useEffect(() => {
     setMeetAndGreets(initialMeetAndGreets);
   }, [initialMeetAndGreets]);
+  useEffect(() => {
+    setDisputes(initialDisputes);
+    setClaims(initialClaims);
+  }, [initialDisputes, initialClaims]);
 
   const pendingBookings = bookings.filter((b) => b.status === "pending");
   const activeBookings = bookings.filter((b) =>
@@ -257,6 +277,54 @@ export function ProviderDashboardClient({
     );
   }
 
+  async function handleRespondToDispute(disputeId: string, response: string, responsePhotoFiles: File[] = []) {
+    if (respondingDisputeId) return;
+    const trimmed = response?.trim();
+    if (!trimmed || trimmed.length < 20) {
+      toast.error("Please enter a response (at least 20 characters).");
+      return;
+    }
+    setRespondingDisputeId(disputeId);
+    const formData = new FormData();
+    formData.set("response", trimmed);
+    responsePhotoFiles.forEach((f, i) => formData.append(`responsePhotos[${i}]`, f));
+    const result = await respondToDispute(disputeId, formData);
+    setRespondingDisputeId(null);
+    if (result.error) {
+      toast.error(result.error);
+      return;
+    }
+    const next = await getDisputesForUser();
+    if (!next.error) setDisputes(next.disputes);
+    setDisputeResponseText((prev) => ({ ...prev, [disputeId]: "" }));
+    router.refresh();
+    toast.success("Response submitted.");
+  }
+
+  async function handleRespondToClaim(claimId: string, response: string, responsePhotoFiles: File[] = []) {
+    if (respondingClaimId) return;
+    const trimmed = response?.trim();
+    if (!trimmed || trimmed.length < 20) {
+      toast.error("Please enter a response (at least 20 characters).");
+      return;
+    }
+    setRespondingClaimId(claimId);
+    const formData = new FormData();
+    formData.set("response", trimmed);
+    responsePhotoFiles.forEach((f, i) => formData.append(`responsePhotos[${i}]`, f));
+    const result = await respondToClaim(claimId, formData);
+    setRespondingClaimId(null);
+    if (result.error) {
+      toast.error(result.error);
+      return;
+    }
+    const next = await getClaimsForUser();
+    if (!next.error) setClaims(next.claims);
+    setClaimResponseText((prev) => ({ ...prev, [claimId]: "" }));
+    router.refresh();
+    toast.success("Response submitted.");
+  }
+
   async function handleSetUpPayouts() {
     if (!stripeStatus.hasProfile) return;
     setPayoutsLoading(true);
@@ -346,6 +414,14 @@ export function ProviderDashboardClient({
 
         {/* Tab content */}
         <div className="mt-6">
+        {reportProblemBookingId && (
+          <ReportProblemModal
+            bookingId={reportProblemBookingId}
+            onClose={() => setReportProblemBookingId(null)}
+            onSuccess={() => setReportProblemBookingId(null)}
+          />
+        )}
+
           {tab === "profile" && (
             <section className="rounded-[var(--radius-lg)] border p-8 sm:p-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
               <h2 className="font-normal" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>My Profile</h2>
@@ -510,6 +586,16 @@ export function ProviderDashboardClient({
                         completed
                       </span>
                       <span className="font-semibold" style={{ color: "var(--color-text)" }}>{formatEur(b.totalPriceCents)}</span>
+                      {!b.hasDispute && !b.hasGuaranteeClaim && (
+                        <button
+                          type="button"
+                          onClick={() => setReportProblemBookingId(b.id)}
+                          className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] border border-[var(--color-error)]/50 px-3 py-1.5 text-sm font-medium text-[var(--color-error)] hover:bg-[var(--color-error)]/10"
+                        >
+                          <AlertCircle className="h-3.5 w-3.5" />
+                          Report a Problem
+                        </button>
+                      )}
                       {b.serviceType === "walking" && (b.walkSummaryMapUrl ?? b.walkDistanceKm != null) && (
                         <div className="mt-4 w-full rounded-[var(--radius-lg)] border p-3" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}>
                           <p className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>Walk summary</p>
@@ -528,6 +614,131 @@ export function ProviderDashboardClient({
                   ))}
                 </ul>
               )}
+            </section>
+          )}
+
+          {tab === "disputes" && (
+            <section className="rounded-[var(--radius-lg)] border p-8 sm:p-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
+              <h2 className="font-normal" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>Disputes & Claims</h2>
+              <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>Respond to reports or view your own.</p>
+              {(() => {
+                const disputesNeedingResponse = disputes.filter((d) => !d.isReporter && d.status === "awaiting_response");
+                const claimsNeedingResponse = claims.filter((c) => !c.isReporter && c.status === "awaiting_response");
+                const myDisputes = disputes.filter((d) => d.isReporter || d.status !== "awaiting_response");
+                const myClaims = claims.filter((c) => c.isReporter || c.status !== "awaiting_response");
+                return (
+                  <>
+                    {(disputesNeedingResponse.length > 0 || claimsNeedingResponse.length > 0) && (
+                      <div className="mt-8">
+                        <h3 className="font-medium" style={{ color: "var(--color-text)" }}>Need your response (48-hour window)</h3>
+                        {disputesNeedingResponse.map((d) => (
+                          <div key={d.id} className="mt-4 rounded-[var(--radius-lg)] border p-4" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}>
+                            <p className="font-medium" style={{ color: "var(--color-text)" }}>Dispute: {d.disputeType} · {d.bookingSummary}</p>
+                            <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>{d.description.slice(0, 200)}{d.description.length > 200 ? "…" : ""}</p>
+                            {d.evidencePhotos.length > 0 && (
+                              <div className="mt-2 flex gap-2">
+                                {d.evidencePhotos.map((url, i) => (
+                                  <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block">
+                                    <img src={url} alt="" className="h-16 w-16 rounded object-cover" />
+                                  </a>
+                                ))}
+                              </div>
+                            )}
+                            <form
+                              data-dispute-id={d.id}
+                              onSubmit={(e) => {
+                                e.preventDefault();
+                                const form = e.currentTarget;
+                                const id = form.getAttribute("data-dispute-id")!;
+                                const text = (form.querySelector("textarea") as HTMLTextAreaElement)?.value ?? "";
+                                const input = form.querySelector('input[type="file"]') as HTMLInputElement;
+                                const files = input?.files ? Array.from(input.files) : [];
+                                handleRespondToDispute(id, text, files);
+                              }}
+                              className="mt-4 space-y-2"
+                            >
+                              <label className="block text-sm font-medium" style={{ color: "var(--color-text)" }}>Your response (min 20 characters)</label>
+                              <textarea
+                                value={disputeResponseText[d.id] ?? ""}
+                                onChange={(e) => setDisputeResponseText((prev) => ({ ...prev, [d.id]: e.target.value }))}
+                                rows={3}
+                                className="w-full rounded-[var(--radius-lg)] border px-3 py-2 text-sm"
+                                style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)", color: "var(--color-text)" }}
+                              />
+                              <input type="file" accept="image/*" multiple className="block text-sm" style={{ color: "var(--color-text)" }} />
+                              <button type="submit" disabled={respondingDisputeId === d.id} className="rounded-[var(--radius-lg)] bg-[var(--color-primary)] px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-70">
+                                {respondingDisputeId === d.id ? "Submitting…" : "Submit response"}
+                              </button>
+                            </form>
+                          </div>
+                        ))}
+                        {claimsNeedingResponse.map((c) => (
+                          <div key={c.id} className="mt-4 rounded-[var(--radius-lg)] border p-4" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}>
+                            <p className="font-medium" style={{ color: "var(--color-text)" }}>Claim: {c.claimType} · {c.bookingSummary}</p>
+                            <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>{c.description.slice(0, 200)}{c.description.length > 200 ? "…" : ""}</p>
+                            {c.photos.length > 0 && (
+                              <div className="mt-2 flex gap-2">
+                                {c.photos.map((url, i) => (
+                                  <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block">
+                                    <img src={url} alt="" className="h-16 w-16 rounded object-cover" />
+                                  </a>
+                                ))}
+                              </div>
+                            )}
+                            <form
+                              data-claim-id={c.id}
+                              onSubmit={(e) => {
+                                e.preventDefault();
+                                const form = e.currentTarget;
+                                const id = form.getAttribute("data-claim-id")!;
+                                const text = (form.querySelector("textarea") as HTMLTextAreaElement)?.value ?? "";
+                                const input = form.querySelector('input[type="file"]') as HTMLInputElement;
+                                const files = input?.files ? Array.from(input.files) : [];
+                                handleRespondToClaim(id, text, files);
+                              }}
+                              className="mt-4 space-y-2"
+                            >
+                              <label className="block text-sm font-medium" style={{ color: "var(--color-text)" }}>Your response (min 20 characters)</label>
+                              <textarea
+                                value={claimResponseText[c.id] ?? ""}
+                                onChange={(e) => setClaimResponseText((prev) => ({ ...prev, [c.id]: e.target.value }))}
+                                rows={3}
+                                className="w-full rounded-[var(--radius-lg)] border px-3 py-2 text-sm"
+                                style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)", color: "var(--color-text)" }}
+                              />
+                              <input type="file" accept="image/*" multiple className="block text-sm" style={{ color: "var(--color-text)" }} />
+                              <button type="submit" disabled={respondingClaimId === c.id} className="rounded-[var(--radius-lg)] bg-[var(--color-primary)] px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-70">
+                                {respondingClaimId === c.id ? "Submitting…" : "Submit response"}
+                              </button>
+                            </form>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <div className="mt-8">
+                      <h3 className="font-medium" style={{ color: "var(--color-text)" }}>Your reports</h3>
+                      {myDisputes.length === 0 && myClaims.length === 0 && disputesNeedingResponse.length === 0 && claimsNeedingResponse.length === 0 ? (
+                        <p className="mt-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>No disputes or claims.</p>
+                      ) : (myDisputes.length > 0 || myClaims.length > 0) ? (
+                        <ul className="mt-4 space-y-3">
+                          {myDisputes.map((d) => (
+                            <li key={d.id} className="rounded-[var(--radius-lg)] border p-3" style={{ borderColor: "var(--color-border)" }}>
+                              <p className="font-medium" style={{ color: "var(--color-text)" }}>Dispute ({d.disputeType}) · {d.bookingSummary}</p>
+                              <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Status: {d.status}</p>
+                            </li>
+                          ))}
+                          {myClaims.map((c) => (
+                            <li key={c.id} className="rounded-[var(--radius-lg)] border p-3" style={{ borderColor: "var(--color-border)" }}>
+                              <p className="font-medium" style={{ color: "var(--color-text)" }}>Claim ({c.claimType}) · {c.bookingSummary}</p>
+                              <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Status: {c.status}</p>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </div>
+                  </>
+                );
+              })()}
             </section>
           )}
 

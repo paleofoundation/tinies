@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getOwnerPets, getOwnerBookings } from "./actions";
 import { getOwnerMeetAndGreets } from "@/lib/meet-and-greet/actions";
+import { getDisputesForUser, getClaimsForUser } from "@/lib/disputes/actions";
 import { OwnerDashboardClient } from "./OwnerDashboardClient";
 
 export const metadata: Metadata = {
@@ -10,10 +11,18 @@ export const metadata: Metadata = {
 };
 
 export default async function OwnerDashboardPage() {
-  const [{ pets, error }, { bookings }, { meetAndGreets = [] }] = await Promise.all([
+  const [
+    { pets, error },
+    { bookings },
+    { meetAndGreets = [] },
+    { disputes: disputesList = [] },
+    { claims: claimsList = [] },
+  ] = await Promise.all([
     getOwnerPets(),
     getOwnerBookings(),
     getOwnerMeetAndGreets().then((r) => (r.error ? { meetAndGreets: [] } : r)),
+    getDisputesForUser().then((r) => (r.error ? { disputes: [] } : r)),
+    getClaimsForUser().then((r) => (r.error ? { claims: [] } : r)),
   ]);
 
   return (
@@ -45,7 +54,7 @@ export default async function OwnerDashboardPage() {
           </p>
         )}
 
-        <OwnerDashboardClient initialPets={pets} initialBookings={bookings} initialMeetAndGreets={meetAndGreets} />
+        <OwnerDashboardClient initialPets={pets} initialBookings={bookings} initialMeetAndGreets={meetAndGreets} initialDisputes={disputesList} initialClaims={claimsList} />
 
         <p className="mt-8 flex flex-wrap gap-4">
           <Link

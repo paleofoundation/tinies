@@ -10,6 +10,7 @@ import ClaimReportedEmail from "@/lib/email/templates/claim-reported";
 import type { DisputeType, DisputeRuling } from "@prisma/client";
 import type { ClaimType } from "@prisma/client";
 
+/** Create a bucket named "evidence" in Supabase Storage for dispute/claim photos. */
 const EVIDENCE_BUCKET = "evidence";
 const MIN_DESCRIPTION_LENGTH = 100;
 const MAX_PHOTOS = 5;
@@ -52,16 +53,7 @@ async function uploadEvidence(
   return urls;
 }
 
-export type ReportProblemInput = {
-  bookingId: string;
-  issueType: "dispute" | "claim";
-  disputeType?: DisputeType;
-  claimType?: ClaimType;
-  description: string;
-};
-
 export async function reportProblem(
-  input: ReportProblemInput,
   formData: FormData
 ): Promise<{ disputeId?: string; claimId?: string; error?: string }> {
   const supabase = await createClient();
@@ -70,13 +62,21 @@ export async function reportProblem(
   } = await supabase.auth.getUser();
   if (!user) return { error: "You must be signed in to report a problem." };
 
-  const description = input.description?.trim() ?? "";
+  const bookingId = (formData.get("bookingId") as string)?.trim();
+  const issueType = formData.get("issueType") as "dispute" | "claim" | null;
+  const disputeType = (formData.get("disputeType") as DisputeType) || undefined;
+  const claimType = (formData.get("claimType") as ClaimType) || undefined;
+  const description = (formData.get("description") as string)?.trim() ?? "";
+
+  if (!bookingId) return { error: "Missing booking." };
+  if (!issueType || (issueType !== "dispute" && issueType !== "claim"))
+    return { error: "Please select issue type (Dispute or Guarantee Claim)." };
   if (description.length < MIN_DESCRIPTION_LENGTH)
     return { error: `Description must be at least ${MIN_DESCRIPTION_LENGTH} characters.` };
 
   const booking = await prisma.booking.findFirst({
     where: {
-      id: input.bookingId,
+      id: bookingId,
       status: "completed",
       OR: [{ ownerId: user.id }, { providerId: user.id }],
     },
@@ -91,20 +91,20 @@ export async function reportProblem(
   const respondent = isOwner ? booking.provider : booking.owner;
   const respondentId = respondent.id;
 
-  if (input.issueType === "dispute") {
+  if (issueType === "dispute") {
     if (booking.hasDispute) return { error: "A dispute already exists for this booking." };
-    if (!input.disputeType) return { error: "Please select a dispute type." };
+    if (!disputeType) return { error: "Please select a dispute type." };
     const existing = await prisma.dispute.findFirst({
-      where: { bookingId: input.bookingId },
+      where: { bookingId },
     });
     if (existing) return { error: "A dispute already exists for this booking." };
 
-    const photos = await uploadEvidence(supabase, `disputes/${input.bookingId}`, formData);
+    const photos = await uploadEvidence(supabase, `disputes/${bookingId}`, formData);
     const dispute = await prisma.dispute.create({
       data: {
-        bookingId: input.bookingId,
+        bookingId,
         openedBy: user.id,
-        disputeType: input.disputeType,
+        disputeType,
         description,
         evidencePhotos: photos,
         respondentId,
@@ -112,7 +112,7 @@ export async function reportProblem(
       },
     });
     await prisma.booking.update({
-      where: { id: input.bookingId },
+      where: { id: bookingId },
       data: { hasDispute: true },
     });
 
@@ -125,8 +125,8 @@ export async function reportProblem(
         subject: `Dispute reported – response needed within 48 hours`,
         react: DisputeReportedEmail({
           reporterName,
-          bookingId: input.bookingId,
-          disputeType: input.disputeType,
+          bookingId,
+          disputeType,
           description: description.slice(0, 200),
           responseDeadline: deadline.toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }),
           dashboardUrl,
@@ -138,25 +138,25 @@ export async function reportProblem(
     return { disputeId: dispute.id };
   } else {
     if (booking.hasGuaranteeClaim) return { error: "A guarantee claim already exists for this booking." };
-    if (!input.claimType) return { error: "Please select a claim type." };
+    if (!claimType) return { error: "Please select a claim type." };
     const existing = await prisma.guaranteeClaim.findFirst({
-      where: { bookingId: input.bookingId },
+      where: { bookingId },
     });
     if (existing) return { error: "A guarantee claim already exists for this booking." };
 
-    const photos = await uploadEvidence(supabase, `claims/${input.bookingId}`, formData);
+    const photos = await uploadEvidence(supabase, `claims/${bookingId}`, formData);
     const claim = await prisma.guaranteeClaim.create({
       data: {
-        bookingId: input.bookingId,
+        bookingId,
         reporterId: user.id,
-        claimType: input.claimType,
+        claimType,
         description,
         photos,
         status: "awaiting_response",
       },
     });
     await prisma.booking.update({
-      where: { id: input.bookingId },
+      where: { id: bookingId },
       data: { hasGuaranteeClaim: true },
     });
 
@@ -169,8 +169,8 @@ export async function reportProblem(
         subject: `Guarantee claim filed – response needed within 48 hours`,
         react: ClaimReportedEmail({
           reporterName,
-          bookingId: input.bookingId,
-          claimType: input.claimType,
+          bookingId,
+          claimType,
           description: description.slice(0, 200),
           responseDeadline: deadline.toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }),
           dashboardUrl,
@@ -389,6 +389,10 @@ export type AdminClaimRow = {
   payoutRecipientName: string | null;
   reporterName: string;
   createdAt: Date;
+  ownerId: string;
+  ownerName: string;
+  providerId: string;
+  providerName: string;
 };
 
 export async function getOpenDisputesForAdmin(): Promise<{ disputes: AdminDisputeRow[]; error?: string }> {
@@ -436,6 +440,7 @@ export async function getOpenClaimsForAdmin(): Promise<{ claims: AdminClaimRow[]
     where: { status: { notIn: ["resolved", "appeal_resolved"] } },
     orderBy: { createdAt: "desc" },
     include: {
+      booking: { include: { owner: { select: { id: true, name: true } }, provider: { select: { id: true, name: true } } } },
       reporter: { select: { name: true } },
       payoutRecipient: { select: { name: true } },
     },
@@ -454,6 +459,10 @@ export async function getOpenClaimsForAdmin(): Promise<{ claims: AdminClaimRow[]
     payoutRecipientName: c.payoutRecipient?.name ?? null,
     reporterName: c.reporter.name,
     createdAt: c.createdAt,
+    ownerId: c.booking.owner.id,
+    ownerName: c.booking.owner.name,
+    providerId: c.booking.provider.id,
+    providerName: c.booking.provider.name,
   }));
   return { claims };
 }
@@ -496,7 +505,7 @@ export async function adminResolveDispute(
     if (refundAmount == null || refundAmount <= 0)
       return { error: "Enter refund amount (cents) for this ruling." };
     const stripe = getStripeServer();
-    await stripe.refunds.create({
+    const refund = await stripe.refunds.create({
       payment_intent: dispute.booking.stripePaymentIntentId,
       amount: refundAmount,
     });
@@ -504,7 +513,8 @@ export async function adminResolveDispute(
       where: { id: dispute.bookingId },
       data: {
         refundAmount: refundAmount,
-        refundStatus: "succeeded",
+        refundStripeId: refund.id,
+        refundStatus: refund.status,
       },
     });
   }
