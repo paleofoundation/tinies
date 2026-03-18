@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { geocodeAddress } from "@/lib/utils/geocoding";
+import type { SearchProviderCard, SearchFilters } from "@/lib/utils/search-helpers";
 
 const FEATURED_SNIPPET_LENGTH = 80;
 const EARTH_RADIUS_KM = 6371;
@@ -26,53 +27,6 @@ function haversineKm(
   return EARTH_RADIUS_KM * c;
 }
 
-export type SearchProviderCard = {
-  slug: string;
-  name: string;
-  avatarUrl: string | null;
-  initials: string;
-  rating: number | null;
-  reviewCount: number;
-  repeatClientCount: number;
-  district: string | null;
-  services: string[];
-  /** Price in EUR cents for the selected service (or first service). */
-  priceFrom: number | null;
-  bio: string | null;
-  featuredReviewSnippet: string | null;
-  lat: number | null;
-  lng: number | null;
-  /** Distance in km from search location; only set when lat/lng provided. */
-  distanceKm: number | null;
-  cancellationPolicy: string;
-  /** ISO date string for availability freshness. */
-  updatedAt: string;
-  confirmedHolidays: string[];
-};
-
-export type SortOption =
-  | "distance"
-  | "rating"
-  | "price_low"
-  | "price_high"
-  | "review_count";
-
-export type SearchFilters = {
-  serviceType?: string;
-  district?: string;
-  priceMin?: number;
-  priceMax?: number;
-  minRating?: number;
-  cancellationPolicy?: string;
-  homeType?: string;
-  hasYard?: boolean;
-  /** Filter to providers who confirmed availability for this holiday id (e.g. christmas-2026). */
-  holiday?: string;
-  lat?: number;
-  lng?: number;
-  sort?: SortOption;
-};
-
 /** Geocode an address for search; returns lat/lng or null. */
 export async function geocodeSearchLocation(
   address: string
@@ -84,6 +38,7 @@ export async function geocodeSearchLocation(
 export async function getSearchProviders(
   filters: SearchFilters = {}
 ): Promise<SearchProviderCard[]> {
+  try {
   const profiles = await prisma.providerProfile.findMany({
     where: {
       verified: true,
@@ -224,4 +179,8 @@ export async function getSearchProviders(
   });
 
   return result;
+  } catch (e) {
+    console.error("getSearchProviders", e);
+    return [];
+  }
 }

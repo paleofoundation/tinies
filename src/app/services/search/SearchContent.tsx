@@ -6,7 +6,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { MapPin, List, Map, Star, Loader2 } from "lucide-react";
 import { SearchMap } from "@/components/maps";
-import { geocodeSearchLocation, type SearchProviderCard, type SortOption } from "./actions";
+import { geocodeSearchLocation } from "./actions";
+import type { SearchProviderCard, SortOption } from "@/lib/utils/search-helpers";
 import { HOLIDAY_LABELS, HOLIDAY_IDS } from "@/lib/constants/holidays";
 
 const SERVICE_TYPES = [

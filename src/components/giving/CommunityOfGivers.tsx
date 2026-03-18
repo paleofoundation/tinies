@@ -1,5 +1,5 @@
 import { GivingTierBadge } from "./GivingTierBadge";
-import type { CommunityGiverCard } from "@/lib/giving/actions";
+import type { CommunityGiverCard } from "@/lib/utils/giving-helpers";
 
 type Props = {
   givers: CommunityGiverCard[];

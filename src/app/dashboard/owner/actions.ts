@@ -10,6 +10,7 @@ import OwnerCancelledEmail from "@/lib/email/templates/owner-cancelled";
 import { validatePetFormData, MAX_PHOTOS } from "@/lib/validations/pet";
 import { reviewFormSchema, MAX_PHOTOS as MAX_REVIEW_PHOTOS } from "@/lib/validations/review";
 import type { CancellationPolicy } from "@prisma/client";
+import type { CreatePetResult, UpdatePetResult, DeletePetResult, OwnerBookingCard, WalkRouteData } from "@/lib/utils/owner-helpers";
 
 /** Create a bucket named "pets" in Supabase Storage (Dashboard → Storage) and allow public read if you want public image URLs. */
 const PETS_BUCKET = "pets";
@@ -115,8 +116,6 @@ async function uploadPetPhoto(
   return data.publicUrl;
 }
 
-export type CreatePetResult = { error?: string; petId?: string };
-
 export async function createPet(formData: FormData): Promise<CreatePetResult> {
   const supabase = await createClient();
   const {
@@ -180,8 +179,6 @@ export async function createPet(formData: FormData): Promise<CreatePetResult> {
     return { error: e instanceof Error ? e.message : "Failed to add pet." };
   }
 }
-
-export type UpdatePetResult = { error?: string };
 
 export async function updatePet(petId: string, formData: FormData): Promise<UpdatePetResult> {
   const supabase = await createClient();
@@ -303,8 +300,6 @@ export async function getOwnerPets(): Promise<{ pets: { id: string; name: string
   }
 }
 
-export type DeletePetResult = { error?: string };
-
 export async function deletePet(petId: string): Promise<DeletePetResult> {
   const supabase = await createClient();
   const {
@@ -331,39 +326,6 @@ export async function deletePet(petId: string): Promise<DeletePetResult> {
 // ---------------------------------------------------------------------------
 // Owner booking dashboard (Phase 1.5)
 // ---------------------------------------------------------------------------
-
-export type OwnerBookingCard = {
-  id: string;
-  providerId: string;
-  providerName: string;
-  providerAvatarUrl: string | null;
-  serviceType: string;
-  startDatetime: Date;
-  endDatetime: Date;
-  petNames: string[];
-  totalPriceCents: number;
-  status: string;
-  specialInstructions: string | null;
-  /** If the owner already left a review for this booking. */
-  existingReview: { id: string; canEdit: boolean } | null;
-  walkStartedAt: Date | null;
-  walkEndedAt: Date | null;
-  walkDistanceKm: number | null;
-  walkDurationMinutes: number | null;
-  walkSummaryMapUrl: string | null;
-  serviceReport: {
-    arrivalTime?: string;
-    departureTime?: string;
-    notes?: string;
-    photos?: string[];
-    activities?: string[];
-    submittedAt?: string;
-  } | null;
-  hasDispute: boolean;
-  hasGuaranteeClaim: boolean;
-  /** Tip amount in cents if owner already tipped. */
-  tipAmount: number | null;
-};
 
 /** Get current user's bookings as owner, with provider and pet names. */
 export async function getOwnerBookings(): Promise<{
@@ -467,14 +429,6 @@ export async function createTipPaymentIntent(bookingId: string, amountCents: num
     return { clientSecret: null, error: e instanceof Error ? e.message : "Failed to create tip payment." };
   }
 }
-
-export type WalkRouteData = {
-  walkRoute: { lat: number; lng: number; timestamp: number }[];
-  walkActivities: { type: string; lat: number; lng: number; timestamp: number }[];
-  walkStartedAt: Date | null;
-  walkEndedAt: Date | null;
-  status: string;
-};
 
 /** Get walk route for a booking (owner or provider only). Used for live walk view and polling. */
 export async function getWalkRoute(bookingId: string): Promise<{ data: WalkRouteData | null; error?: string }> {

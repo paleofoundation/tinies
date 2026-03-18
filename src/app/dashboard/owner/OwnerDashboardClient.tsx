@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { deletePet, cancelBooking } from "./actions";
-import type { OwnerBookingCard } from "./actions";
+import type { OwnerBookingCard } from "@/lib/utils/owner-helpers";
 import { ReviewForm } from "./ReviewForm";
 import { TipForm } from "./TipForm";
 import { getOwnerMeetAndGreets, acceptMeetAndGreetSuggestion } from "@/lib/meet-and-greet/actions";

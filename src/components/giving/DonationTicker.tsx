@@ -1,6 +1,6 @@
 "use client";
 
-import type { TickerItem } from "@/lib/giving/actions";
+import type { TickerItem } from "@/lib/utils/giving-helpers";
 
 type Props = {
   items: TickerItem[];

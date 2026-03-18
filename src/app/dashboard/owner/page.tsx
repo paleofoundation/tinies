@@ -5,6 +5,8 @@ import { getOwnerMeetAndGreets } from "@/lib/meet-and-greet/actions";
 import { getDisputesForUser, getClaimsForUser } from "@/lib/disputes/actions";
 import { OwnerDashboardClient } from "./OwnerDashboardClient";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Owner Dashboard | Tinies",
   description: "Your pet care bookings and pets.",

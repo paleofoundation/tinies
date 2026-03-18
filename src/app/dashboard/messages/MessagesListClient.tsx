@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import type { ConversationSummary } from "./actions";
+import type { ConversationSummary } from "@/lib/utils/messages-helpers";
 
 function formatMessageTime(d: Date | string): string {
   const date = new Date(d);

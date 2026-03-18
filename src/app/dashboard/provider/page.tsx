@@ -12,6 +12,8 @@ import { getDisputesForUser, getClaimsForUser } from "@/lib/disputes/actions";
 import { ProviderDashboardClient } from "./ProviderDashboardClient";
 import { ProviderOnboardingWizard } from "./ProviderOnboardingWizard";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProviderDashboardPage() {
   const [completeness, stripeStatus, bookingsResult, reviews, earningsResult, meetAndGreets, disputesResult, claimsResult] = await Promise.all([
     getProviderProfileCompleteness(),

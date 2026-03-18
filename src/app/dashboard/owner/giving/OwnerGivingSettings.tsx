@@ -9,8 +9,8 @@ import {
   updateRoundupEnabled,
   pauseGuardianSubscription,
   cancelGuardianSubscription,
-  type OwnerGivingData,
 } from "@/lib/giving/actions";
+import type { OwnerGivingData } from "@/lib/utils/giving-helpers";
 
 type Props = { data: OwnerGivingData };
 

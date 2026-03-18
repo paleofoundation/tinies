@@ -7,6 +7,8 @@ import { CommunityOfGivers } from "@/components/giving/CommunityOfGivers";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Tinies Giving | Transparency & Impact",
   description:

@@ -3,6 +3,8 @@ import Link from "next/link";
 import { getConversations } from "./actions";
 import { MessagesListClient } from "./MessagesListClient";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Messages | Tinies",
   description: "Your conversations with providers and owners.",

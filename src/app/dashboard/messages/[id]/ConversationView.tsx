@@ -5,9 +5,9 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { sendMessage } from "../actions";
-import type { MessageRow } from "../actions";
+import type { MessageRow } from "@/lib/utils/messages-helpers";
 import { GivingTierBadge } from "@/components/giving/GivingTierBadge";
-import type { GivingTier } from "@/lib/giving/actions";
+import type { GivingTier } from "@/lib/utils/giving-helpers";
 
 const POLL_INTERVAL_MS = 10_000;
 

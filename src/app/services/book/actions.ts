@@ -8,7 +8,7 @@ import BookingRequestEmail from "@/lib/email/templates/booking-request";
 import { sendSMS, buildBookingRequestSMS } from "@/lib/sms";
 import type { ServiceType } from "@prisma/client";
 import { DonationSource } from "@prisma/client";
-import type { GivingTier } from "@/lib/giving/actions";
+import type { GivingTier } from "@/lib/utils/giving-helpers";
 import {
   computeBookingTotalCents,
   computeRoundUpCents,

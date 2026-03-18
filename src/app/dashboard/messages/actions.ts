@@ -6,19 +6,11 @@ import { createClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email";
 import NewMessageNotificationEmail from "@/lib/email/templates/new-message-notification";
 import { getConversationId } from "@/lib/utils/conversation";
+import type { ConversationSummary, MessageRow, SendMessageInput } from "@/lib/utils/messages-helpers";
 
 const PREVIEW_LENGTH = 80;
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 const NEW_MESSAGE_EMAIL_WINDOW_MS = 24 * 60 * 60 * 1000;
-
-export { getConversationId };
-
-export type ConversationSummary = {
-  conversationId: string;
-  otherParty: { id: string; name: string; avatarUrl: string | null };
-  lastMessage: { contentPreview: string; createdAt: Date };
-  unreadCount: number;
-};
 
 export async function getConversations(): Promise<{
   conversations: ConversationSummary[];
@@ -95,16 +87,6 @@ export async function getConversations(): Promise<{
   }
 }
 
-export type MessageRow = {
-  id: string;
-  senderId: string;
-  senderName: string;
-  content: string;
-  photos: string[];
-  createdAt: Date;
-  readAt: Date | null;
-};
-
 export async function getConversationMessages(
   conversationId: string
 ): Promise<{ messages: MessageRow[]; otherParty: { id: string; name: string; avatarUrl: string | null } | null; error?: string }> {
@@ -167,14 +149,6 @@ export async function getConversationMessages(
     return { messages: [], otherParty: null, error: "Failed to load messages." };
   }
 }
-
-export type SendMessageInput = {
-  conversationId?: string;
-  recipientId: string;
-  content: string;
-  bookingId?: string;
-  photos?: string[];
-};
 
 export async function sendMessage(
   input: SendMessageInput

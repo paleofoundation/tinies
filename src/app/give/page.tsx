@@ -3,6 +3,8 @@ import { Suspense } from "react";
 import { getFeaturedCharitiesForQuickDonate } from "@/lib/giving/actions";
 import { QuickDonateClient } from "./QuickDonateClient";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Give | Help rescue animals in Cyprus | Tinies",
   description: "Donate once or give monthly. Apple Pay, Google Pay, card. 15 seconds to support animal rescue.",

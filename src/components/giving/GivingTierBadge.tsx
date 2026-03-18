@@ -1,5 +1,5 @@
 import { Heart } from "lucide-react";
-import type { GivingTier } from "@/lib/giving/actions";
+import type { GivingTier } from "@/lib/utils/giving-helpers";
 
 type Props = {
   tier: GivingTier;

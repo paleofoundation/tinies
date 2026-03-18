@@ -1,6 +1,8 @@
 import { getSearchProviders } from "./actions";
 import { SearchContent } from "./SearchContent";
 
+export const dynamic = "force-dynamic";
+
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };

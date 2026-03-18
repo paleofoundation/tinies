@@ -8,6 +8,16 @@ import { revalidatePath } from "next/cache";
 import { sendEmail } from "@/lib/email";
 import MonthlyGivingReceiptEmail from "@/lib/email/templates/monthly-giving-receipt";
 import CharityPayoutNotificationEmail from "@/lib/email/templates/charity-payout-notification";
+import type {
+  GivingPageStats,
+  CharityProfile,
+  OwnerGivingData,
+  GivingTier,
+  CommunityGiverCard,
+  TickerItem,
+  CreateQuickDonationInput,
+  CreateQuickGuardianSubscriptionInput,
+} from "@/lib/utils/giving-helpers";
 
 const GUARDIAN_PRODUCT_ID = process.env.STRIPE_GUARDIAN_PRODUCT_ID;
 
@@ -215,18 +225,19 @@ export async function getCharitiesForGuardian(): Promise<
   ];
 }
 
-export type GivingPageStats = {
-  totalDonatedCents: number;
-  charitiesFundedCount: number;
-  activeGuardiansCount: number;
-  supporterCount: number;
-  monthlyBreakdown: { year: number; month: number; source: string; totalCents: number }[];
-  featuredCharities: { id: string; name: string; mission: string | null; logoUrl: string | null; slug: string }[];
-  allCharities: { id: string; name: string; mission: string | null; logoUrl: string | null; slug: string }[];
+const DEFAULT_GIVING_PAGE_STATS: GivingPageStats = {
+  totalDonatedCents: 0,
+  charitiesFundedCount: 0,
+  activeGuardiansCount: 0,
+  supporterCount: 0,
+  monthlyBreakdown: [],
+  featuredCharities: [],
+  allCharities: [],
 };
 
 /** Data for public giving page. */
 export async function getGivingPageData(): Promise<GivingPageStats> {
+  try {
   const now = new Date();
   const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
 
@@ -286,22 +297,11 @@ export async function getGivingPageData(): Promise<GivingPageStats> {
     featuredCharities,
     allCharities,
   };
+  } catch (e) {
+    console.error("getGivingPageData", e);
+    return DEFAULT_GIVING_PAGE_STATS;
+  }
 }
-
-export type CharityProfile = {
-  id: string;
-  name: string;
-  mission: string | null;
-  logoUrl: string | null;
-  photos: string[];
-  website: string | null;
-  howFundsUsed: string | null;
-  slug: string;
-  totalReceivedCents: number;
-  supporterCount: number;
-  annualUpdateText: string | null;
-  annualUpdateDate: Date | null;
-};
 
 /** Get charity by slug for public profile page. */
 export async function getCharityBySlug(slug: string): Promise<CharityProfile | null> {
@@ -389,24 +389,6 @@ export async function setPreferredCharity(charityId: string | null): Promise<{ e
     return { error: e instanceof Error ? e.message : "Failed to update." };
   }
 }
-
-export type OwnerGivingData = {
-  preferredCharityId: string | null;
-  roundupEnabled: boolean;
-  guardianSubscription: {
-    id: string;
-    amountMonthly: number;
-    tier: string;
-    status: string;
-    charityId: string | null;
-    charityName: string | null;
-    stripeSubscriptionId: string | null;
-  } | null;
-  charitiesForDropdown: { id: string; name: string }[];
-  totalDonatedCents: number;
-  donationsByMonth: { year: number; month: number; totalCents: number }[];
-  donationsByCharity: { charityId: string | null; charityName: string | null; totalCents: number }[];
-};
 
 /** Get current user's giving preferences and history. */
 export async function getOwnerGivingData(): Promise<OwnerGivingData | null> {
@@ -556,8 +538,6 @@ export async function cancelGuardianSubscription(subscriptionId: string): Promis
 // Community of Givers (5.1b)
 // ---------------------------------------------------------------------------
 
-export type GivingTier = "friend" | "guardian" | "champion" | "hero" | null;
-
 /** Compute giving tier from donations + guardian subscriptions. */
 export async function computeGivingTier(userId: string): Promise<GivingTier> {
   const [donations, subs] = await Promise.all([
@@ -584,17 +564,9 @@ export async function computeGivingTier(userId: string): Promise<GivingTier> {
   return null;
 }
 
-export type CommunityGiverCard = {
-  displayName: string;
-  country: string | null;
-  countryFlag: string;
-  tier: GivingTier;
-  charityName: string;
-  isAnonymous: boolean;
-};
-
 /** Get givers who opted in to leaderboard (showOnLeaderboard = true). */
 export async function getCommunityOfGivers(): Promise<CommunityGiverCard[]> {
+  try {
   const prefs = await prisma.userGivingPreference.findMany({
     where: { showOnLeaderboard: true },
     include: {
@@ -629,20 +601,15 @@ export async function getCommunityOfGivers(): Promise<CommunityGiverCard[]> {
     });
   }
   return cards;
+  } catch (e) {
+    console.error("getCommunityOfGivers", e);
+    return [];
+  }
 }
 
 /** Recent activity for ticker: donations + new Guardian subscriptions. */
-export type TickerItem = {
-  id: string;
-  type: "donation" | "guardian_started";
-  displayName: string;
-  isAnonymous: boolean;
-  amountEur?: number;
-  charityName: string;
-  createdAt: Date;
-};
-
 export async function getRecentDonationsForTicker(limit = 20): Promise<TickerItem[]> {
+  try {
   const [donations, newSubs] = await Promise.all([
     prisma.donation.findMany({
       orderBy: { createdAt: "desc" },
@@ -705,6 +672,10 @@ export async function getRecentDonationsForTicker(limit = 20): Promise<TickerIte
   }
   items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   return items.slice(0, limit);
+  } catch (e) {
+    console.error("getRecentDonationsForTicker", e);
+    return [];
+  }
 }
 
 function countryToFlag(country: string | null): string {
@@ -729,14 +700,6 @@ function countryToFlag(country: string | null): string {
 // ---------------------------------------------------------------------------
 // Quick Donate (5.6) — public /give page, no login required
 // ---------------------------------------------------------------------------
-
-export type CreateQuickDonationInput = {
-  amountCents: number;
-  charityId: string | null;
-  donorName?: string | null;
-  donorEmail?: string | null;
-  showOnLeaderboard?: boolean;
-};
 
 /** Create PaymentIntent for one-time quick donate. No login required. Webhook records Donation. */
 export async function createQuickDonation(params: CreateQuickDonationInput): Promise<{ clientSecret: string | null; error?: string }> {
@@ -786,15 +749,6 @@ async function getOrCreateGuestUser(email: string, name: string): Promise<string
   });
   return id;
 }
-
-export type CreateQuickGuardianSubscriptionInput = {
-  amountCents: number;
-  tier: GuardianTier;
-  charityId: string | null;
-  donorEmail: string;
-  donorName?: string | null;
-  showOnLeaderboard?: boolean;
-};
 
 /** Create Guardian subscription for quick donate (guest or logged-in). Returns clientSecret for Payment Element. */
 export async function createQuickGuardianSubscription(params: CreateQuickGuardianSubscriptionInput): Promise<{
@@ -914,12 +868,17 @@ export async function getFeaturedCharitiesForQuickDonate(): Promise<
   { id: string | null; name: string; slug: string | null; logoUrl: string | null }[]
 > {
   const fund = { id: null as string | null, name: "Tinies Giving Fund", slug: null as string | null, logoUrl: null as string | null };
-  const list = await prisma.charity.findMany({
-    where: { featured: true, active: true },
-    orderBy: { featuredSince: "asc" },
-    select: { id: true, name: true, slug: true, logoUrl: true },
-  });
-  return [fund, ...list.map((c) => ({ id: c.id, name: c.name, slug: c.slug, logoUrl: c.logoUrl }))];
+  try {
+    const list = await prisma.charity.findMany({
+      where: { featured: true, active: true },
+      orderBy: { featuredSince: "asc" },
+      select: { id: true, name: true, slug: true, logoUrl: true },
+    });
+    return [fund, ...list.map((c) => ({ id: c.id, name: c.name, slug: c.slug, logoUrl: c.logoUrl }))];
+  } catch (e) {
+    console.error("getFeaturedCharitiesForQuickDonate", e);
+    return [fund];
+  }
 }
 
 /** Update showOnLeaderboard for current user. */
