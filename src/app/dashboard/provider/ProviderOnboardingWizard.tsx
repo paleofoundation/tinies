@@ -80,12 +80,13 @@ export function ProviderOnboardingWizard({ initialProfile, areaPriceGuidance }: 
     });
     return o;
   });
+  /** Form state uses EUR for display; DB stores cents. Convert on load. */
   const [serviceConfig, setServiceConfig] = useState<Record<string, { base_price: number; additional_pet_price: number; price_unit: string; max_pets: number }>>(() => {
     const o: Record<string, { base_price: number; additional_pet_price: number; price_unit: string; max_pets: number }> = {};
     initialProfile.servicesOffered.forEach((s) => {
       o[s.type] = {
-        base_price: s.base_price ?? 0,
-        additional_pet_price: s.additional_pet_price ?? 0,
+        base_price: ((s.base_price ?? 0) / 100),
+        additional_pet_price: ((s.additional_pet_price ?? 0) / 100),
         price_unit: s.price_unit ?? "per_walk",
         max_pets: s.max_pets ?? 2,
       };
@@ -151,10 +152,11 @@ export function ProviderOnboardingWizard({ initialProfile, areaPriceGuidance }: 
         const offers: ServiceOfferInput[] = [];
         (Object.keys(servicesEnabled) as string[]).forEach((type) => {
           if (servicesEnabled[type] && serviceConfig[type]?.base_price > 0) {
+            /** Convert form EUR to cents for DB. */
             offers.push({
               type,
-              base_price: serviceConfig[type].base_price,
-              additional_pet_price: serviceConfig[type].additional_pet_price,
+              base_price: Math.round(serviceConfig[type].base_price * 100),
+              additional_pet_price: Math.round(serviceConfig[type].additional_pet_price * 100),
               price_unit: serviceConfig[type].price_unit,
               max_pets: serviceConfig[type].max_pets,
             });
@@ -342,7 +344,7 @@ export function ProviderOnboardingWizard({ initialProfile, areaPriceGuidance }: 
                     </label>
                     {servicesEnabled[type] && (
                       <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                        {guidance && <p className="sm:col-span-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>Other providers in your area charge €{guidance.min}–€{guidance.max}</p>}
+                        {guidance && <p className="sm:col-span-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>Other providers in your area charge €{(guidance.min / 100).toFixed(0)}–€{(guidance.max / 100).toFixed(0)}</p>}
                         <div>
                           <label className="block text-sm">Base price (€)</label>
                           <input type="number" min="0" step="0.01" value={serviceConfig[type]?.base_price || ""} onChange={(e) => setServiceConfig((c) => ({ ...c, [type]: { ...c[type], base_price: parseFloat(e.target.value) || 0 } }))} className="mt-1 w-full rounded-[var(--radius-lg)] border px-3 py-2" style={{ borderColor: "var(--color-border)" }} placeholder="15" />

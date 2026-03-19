@@ -44,13 +44,17 @@ type ProviderLocationMapProps = {
   className?: string;
 };
 
+const MAP_UNAVAILABLE_MESSAGE = "Map not available.";
+
 export function ProviderLocationMap({
   lat,
   lng,
   radiusKm,
   className = "",
 }: ProviderLocationMapProps) {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const apiKey = typeof process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY === "string"
+    ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.trim()
+    : "";
   const center = useMemo(() => ({ lat, lng }), [lat, lng]);
 
   if (!apiKey) {
@@ -60,7 +64,7 @@ export function ProviderLocationMap({
         style={{ minHeight: "280px" }}
       >
         <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-          Map unavailable (missing API key).
+          {MAP_UNAVAILABLE_MESSAGE}
         </p>
       </div>
     );

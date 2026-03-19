@@ -47,11 +47,18 @@ function slugToName(slug: string) {
     .join(" ");
 }
 
-const SERVICES_PRICING = [
-  { service: "Dog Walking", base: "€15", additional: "€8", maxPets: 3 },
-  { service: "Pet Sitting", base: "€35", additional: "€15", maxPets: 2 },
-  { service: "Drop-in visit", base: "€12", additional: "€6", maxPets: 4 },
-] as const;
+/** Prices in servicesOffered are stored in cents. */
+function formatEur(cents: number): string {
+  return `€${(cents / 100).toFixed(2)}`;
+}
+
+const SERVICE_TYPE_LABELS: Record<string, string> = {
+  walking: "Dog Walking",
+  sitting: "Pet Sitting",
+  boarding: "Overnight Boarding",
+  drop_in: "Drop-in visit",
+  daycare: "Daycare",
+};
 
 const AVAILABILITY_GRID = [
   { day: "Mon", morning: true, afternoon: true, evening: true },
@@ -275,7 +282,7 @@ export default async function ProviderProfilePage({ params }: Props) {
           </section>
         )}
 
-        {/* Services & pricing */}
+        {/* Services & pricing — from provider.services (prices in cents) */}
         <section className="mb-12">
           <h2 className="text-lg font-normal" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>Services & pricing</h2>
           <div className="mt-4 overflow-x-auto rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--color-border)" }}>
@@ -289,14 +296,20 @@ export default async function ProviderProfilePage({ params }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {SERVICES_PRICING.map((row) => (
-                  <tr key={row.service} className="border-b" style={{ borderColor: "var(--color-border)" }}>
-                    <td className="px-4 py-3" style={{ color: "var(--color-text)" }}>{row.service}</td>
-                    <td className="px-4 py-3" style={{ color: "var(--color-text-secondary)" }}>{row.base}</td>
-                    <td className="px-4 py-3" style={{ color: "var(--color-text-secondary)" }}>{row.additional}</td>
-                    <td className="px-4 py-3" style={{ color: "var(--color-text-secondary)" }}>{row.maxPets}</td>
+                {provider?.services?.length ? (
+                  provider.services.map((s) => (
+                    <tr key={s.type} className="border-b" style={{ borderColor: "var(--color-border)" }}>
+                      <td className="px-4 py-3" style={{ color: "var(--color-text)" }}>{SERVICE_TYPE_LABELS[s.type] ?? s.type}</td>
+                      <td className="px-4 py-3" style={{ color: "var(--color-text-secondary)" }}>{formatEur(s.base_price ?? 0)}</td>
+                      <td className="px-4 py-3" style={{ color: "var(--color-text-secondary)" }}>{formatEur(s.additional_pet_price ?? 0)}</td>
+                      <td className="px-4 py-3" style={{ color: "var(--color-text-secondary)" }}>{s.max_pets ?? "—"}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr className="border-b" style={{ borderColor: "var(--color-border)" }}>
+                    <td colSpan={4} className="px-4 py-3" style={{ color: "var(--color-text-secondary)" }}>No services listed.</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>

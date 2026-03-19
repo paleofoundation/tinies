@@ -64,7 +64,9 @@ export function ServiceAreaPicker({
   onChange,
   className = "",
 }: ServiceAreaPickerProps) {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const apiKey = typeof process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY === "string"
+    ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.trim()
+    : "";
   const center =
     value.lat != null && value.lng != null
       ? { lat: value.lat, lng: value.lng }
@@ -107,7 +109,7 @@ export function ServiceAreaPicker({
         style={{ minHeight: "320px" }}
       >
         <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-          Map unavailable (missing API key).
+          Map not available.
         </p>
       </div>
     );

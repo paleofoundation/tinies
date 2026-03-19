@@ -19,13 +19,17 @@ type SearchMapProps = {
   className?: string;
 };
 
+const MAP_UNAVAILABLE_MESSAGE = "Map not available.";
+
 export function SearchMap({
   providers,
   highlightedSlug,
   onMarkerClick,
   className = "",
 }: SearchMapProps) {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const apiKey = typeof process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY === "string"
+    ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.trim()
+    : "";
   const providersWithCoords = useMemo(
     () => providers.filter((p) => p.lat != null && p.lng != null) as { slug: string; lat: number; lng: number }[],
     [providers]
@@ -38,7 +42,7 @@ export function SearchMap({
         style={{ minHeight: "400px" }}
       >
         <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-          Map unavailable (missing API key).
+          {MAP_UNAVAILABLE_MESSAGE}
         </p>
       </div>
     );

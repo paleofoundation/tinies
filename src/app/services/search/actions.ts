@@ -74,8 +74,9 @@ export async function getSearchProviders(
     const forService = selectedType
       ? services.find((s) => s.type.toLowerCase() === selectedType)
       : services[0];
-    const priceCents =
-      forService?.base_price != null ? Math.round(forService.base_price * 100) : null;
+    /** base_price in DB is stored in cents (1200 = EUR 12.00). */
+    const priceFromCents =
+      forService?.base_price != null ? forService.base_price : null;
     const featuredText = p.reviews[0]?.text;
     const snippet =
       featuredText != null && featuredText.length > 0
@@ -105,7 +106,7 @@ export async function getSearchProviders(
       repeatClientCount: p.repeatClientCount,
       district: p.user.district,
       services: services.map((s) => s.type).filter(Boolean),
-      priceFrom: priceCents,
+      priceFrom: priceFromCents,
       bio: p.bio,
       featuredReviewSnippet: snippet,
       lat: plat,

@@ -214,9 +214,10 @@ export async function createBookingWithPaymentIntent(
       error: `This provider accepts up to ${serviceConfig.max_pets} pets for this service.`,
     };
 
+  /** base_price and additional_pet_price from DB are in cents; computeBookingTotalCents expects EUR. */
   let totalCents = computeBookingTotalCents(
-    serviceConfig.base_price,
-    serviceConfig.additional_pet_price,
+    serviceConfig.base_price / 100,
+    serviceConfig.additional_pet_price / 100,
     petCount
   );
   const start = new Date(input.startDatetime);
@@ -245,10 +246,8 @@ export async function createBookingWithPaymentIntent(
         totalPrice: totalCents,
         commissionAmount,
         priceBreakdown: {
-          basePriceCents: Math.round(serviceConfig.base_price * 100),
-          additionalPetPriceCents: Math.round(
-            serviceConfig.additional_pet_price * 100
-          ),
+          basePriceCents: serviceConfig.base_price,
+          additionalPetPriceCents: serviceConfig.additional_pet_price,
           petCount,
         },
       },

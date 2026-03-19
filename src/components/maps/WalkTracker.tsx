@@ -146,7 +146,9 @@ export function WalkTracker({
   activitySummary: activitySummaryProp,
   className = "",
 }: WalkTrackerProps) {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const apiKey = typeof process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY === "string"
+    ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.trim()
+    : "";
   const center = useMemo(() => {
     if (route.length > 0) {
       const last = route[route.length - 1];
@@ -168,7 +170,7 @@ export function WalkTracker({
         style={{ minHeight: "280px" }}
       >
         <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-          Map unavailable (missing API key).
+          Map not available.
         </p>
         <p className="text-sm font-medium" style={{ color: "var(--color-text)" }}>
           Distance: {distanceKm.toFixed(2)} km · Time: {elapsedMinutes} min

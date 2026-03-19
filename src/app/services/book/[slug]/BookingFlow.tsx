@@ -82,9 +82,10 @@ export function BookingFlow({ provider, pets }: BookingFlowProps) {
 
   const totalCents = useMemo(() => {
     if (!serviceConfig || selectedPetIds.length === 0) return 0;
+    /** base_price and additional_pet_price from DB are in cents. */
     let cents = computeBookingTotalCents(
-      serviceConfig.base_price,
-      serviceConfig.additional_pet_price,
+      serviceConfig.base_price / 100,
+      serviceConfig.additional_pet_price / 100,
       selectedPetIds.length
     );
     if (serviceType === "drop_in" && startDate && endDate) {
@@ -174,8 +175,9 @@ export function BookingFlow({ provider, pets }: BookingFlowProps) {
   const petNames = pets.filter((p) => selectedPetIds.includes(p.id)).map((p) => p.name);
   const breakdownLines: string[] = [];
   if (serviceConfig && selectedPetIds.length > 0) {
-    const baseCents = Math.round(serviceConfig.base_price * 100);
-    const addCents = Math.round(serviceConfig.additional_pet_price * 100);
+    /** Prices from DB are already in cents. */
+    const baseCents = serviceConfig.base_price;
+    const addCents = serviceConfig.additional_pet_price;
     const firstPet = petNames[0];
     breakdownLines.push(
       `1× ${SERVICE_LABELS[serviceType] ?? serviceType} (${firstPet}): ${formatEur(baseCents)}`
@@ -192,11 +194,11 @@ export function BookingFlow({ provider, pets }: BookingFlowProps) {
         1,
         Math.ceil((end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000))
       );
-      const subTotal = computeBookingTotalCents(
-        serviceConfig.base_price,
-        serviceConfig.additional_pet_price,
-        selectedPetIds.length
-      );
+    const subTotal = computeBookingTotalCents(
+      serviceConfig.base_price / 100,
+      serviceConfig.additional_pet_price / 100,
+      selectedPetIds.length
+    );
       const multi = numDays * visitsPerDay;
       breakdownLines.push(
         `${numDays} days × ${visitsPerDay} visits/day = ${multi} visits. Subtotal: ${formatEur(subTotal * multi)}`
@@ -295,7 +297,7 @@ export function BookingFlow({ provider, pets }: BookingFlowProps) {
           >
             {provider.services.map((s) => (
               <option key={s.type} value={s.type}>
-                {SERVICE_LABELS[s.type] ?? s.type} — {formatEur(Math.round(s.base_price * 100))} base, {formatEur(Math.round(s.additional_pet_price * 100))} per additional pet (max {s.max_pets} pets)
+                {SERVICE_LABELS[s.type] ?? s.type} — {formatEur(s.base_price)} base, {formatEur(s.additional_pet_price)} per additional pet (max {s.max_pets} pets)
               </option>
             ))}
           </select>
