@@ -1,3 +1,4 @@
+import Image from "next/image";
 import {
   Search,
   CreditCard,
@@ -8,8 +9,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { HomeSearchBar } from "@/components/layout/HomeSearchBar";
+import { getFeaturedAvailableListings } from "@/lib/adoption/featured-for-home";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+
+export const dynamic = "force-dynamic";
 
 const websiteJsonLd = {
   "@context": "https://schema.org",
@@ -27,14 +31,14 @@ const websiteJsonLd = {
   },
 };
 
-const ADOPTABLES = [
-  { emoji: "🐕", name: "Max", age: "3 years", id: "max" },
-  { emoji: "🐈", name: "Luna", age: "2 years", id: "luna" },
-  { emoji: "🐱", name: "Mittens", age: "4 months", id: "mittens" },
-  { emoji: "🐶", name: "Buddy", age: "6 months", id: "buddy" },
-] as const;
+function formatSpecies(species: string): string {
+  if (!species) return "Pet";
+  return species.charAt(0).toUpperCase() + species.slice(1).toLowerCase();
+}
 
-export default function Home() {
+export default async function Home() {
+  const featuredListings = await getFeaturedAvailableListings(4);
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
       <script
@@ -119,31 +123,61 @@ export default function Home() {
           <p className="mt-2 mx-auto max-w-lg text-center" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
             Adopt a rescue animal and give them a forever home.
           </p>
-          <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {ADOPTABLES.map((animal) => (
-              <article
-                key={animal.id}
-                className="rounded-[var(--radius-lg)] border p-8 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]"
-                style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)", padding: "var(--space-card)" }}
-              >
-                <div className="flex h-32 items-center justify-center rounded-[var(--radius-lg)] border text-6xl" style={{ backgroundColor: "var(--color-background)", borderColor: "var(--color-border)" }}>
-                  {animal.emoji}
-                </div>
-                <h3 className="mt-6 font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
-                  {animal.name}
-                </h3>
-                <p className="text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>{animal.age}</p>
-                <Link
-                  href={`/adopt/${animal.id}`}
-                  className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] px-4 font-semibold text-white transition-opacity hover:opacity-90"
-                  style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-secondary)" }}
-                >
-                  <Heart className="h-4 w-4" />
-                  Adopt this Tiny
-                </Link>
-              </article>
-            ))}
-          </div>
+          {featuredListings.length === 0 ? (
+            <p className="mt-12 text-center text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+              New adoptable animals will appear here soon.{" "}
+              <Link href="/adopt" className="font-semibold hover:underline" style={{ color: "var(--color-primary)" }}>
+                Browse all adoptions
+              </Link>
+            </p>
+          ) : (
+            <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              {featuredListings.map((listing) => {
+                const photo = listing.photos[0];
+                return (
+                  <article
+                    key={listing.slug}
+                    className="rounded-[var(--radius-lg)] border p-8 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]"
+                    style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)", padding: "var(--space-card)" }}
+                  >
+                    <div
+                      className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-lg)] border"
+                      style={{ backgroundColor: "var(--color-background)", borderColor: "var(--color-border)" }}
+                    >
+                      {photo ? (
+                        <Image
+                          src={photo}
+                          alt={`${listing.name}, ${formatSpecies(listing.species)} — adoptable`}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-6xl" aria-hidden>
+                          🐾
+                        </div>
+                      )}
+                    </div>
+                    <h3 className="mt-6 font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
+                      {listing.name}
+                    </h3>
+                    <p className="text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+                      {formatSpecies(listing.species)}
+                      {listing.estimatedAge ? ` · ${listing.estimatedAge}` : ""}
+                    </p>
+                    <Link
+                      href={`/adopt/${listing.slug}`}
+                      className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] px-4 font-semibold text-white transition-opacity hover:opacity-90"
+                      style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-secondary)" }}
+                    >
+                      <Heart className="h-4 w-4" />
+                      Adopt this Tiny
+                    </Link>
+                  </article>
+                );
+              })}
+            </div>
+          )}
           <div className="mt-12 text-center">
             <Link
               href="/adopt"

@@ -146,19 +146,86 @@ const CHARITIES = [
 ];
 
 // ---------------------------------------------------------------------------
-// 3. Adoption listings (8) — real-sounding Cyprus rescue animals
+// 3. Gardens of St Gertrude — real cat listings (GitHub-hosted photos)
 // ---------------------------------------------------------------------------
 
-const ADOPTION_LISTINGS = [
-  { slug: "luna-european-shorthair", name: "Luna", species: "cat", breed: "European Shorthair", estimatedAge: "2 years", sex: "female", spayedNeutered: true, temperament: "Shy at first, then very affectionate. Loves quiet homes.", medicalHistory: "FIV negative, vaccinated.", specialNeeds: null, status: "available" as const, internationalEligible: true, destinationCountries: ["uk", "germany"], story: "Luna was found in a Nicosia neighbourhood. She had been fed by a kind neighbour but needed a real home." },
-  { slug: "max-mixed-limassol", name: "Max", species: "dog", breed: "Mixed (medium)", estimatedAge: "4 years", sex: "male", spayedNeutered: true, temperament: "Friendly, good with kids and other dogs. Loves walks.", medicalHistory: "Fully vaccinated, microchipped.", specialNeeds: null, status: "available" as const, internationalEligible: false, destinationCountries: [], story: "Max was rescued from the streets of Limassol. He is house-trained and ready for a family." },
-  { slug: "whiskey-golden-mix", name: "Whiskey", species: "dog", breed: "Golden Retriever mix", estimatedAge: "1.5 years", sex: "male", spayedNeutered: true, temperament: "Energetic, loyal, great with other dogs.", medicalHistory: "Healthy, all vaccinations up to date.", specialNeeds: "Needs a home with garden or active lifestyle.", status: "application_pending" as const, internationalEligible: true, destinationCountries: ["uk", "germany", "netherlands"], story: "Whiskey was surrendered when his family left Cyprus. He loves the beach and long walks." },
-  { slug: "mimi-tabby-paphos", name: "Mimi", species: "cat", breed: "Tabby", estimatedAge: "5 months", sex: "female", spayedNeutered: false, temperament: "Playful, curious, good with other cats.", medicalHistory: "First vaccinations done.", specialNeeds: "Will need spay before adoption (we arrange).", status: "available" as const, internationalEligible: false, destinationCountries: [], story: "Mimi and her siblings were found in Paphos. She is the last of the litter still looking for a home." },
-  { slug: "rusty-village-dog", name: "Rusty", species: "dog", breed: "Village dog", estimatedAge: "3 years", sex: "male", spayedNeutered: true, temperament: "Calm, gentle. Best as only pet or with calm dogs.", medicalHistory: "Vaccinated, treated for tick-borne illness (recovered).", specialNeeds: null, status: "available" as const, internationalEligible: true, destinationCountries: ["uk"], story: "Rusty was rescued from a rural area near Larnaca. He is loyal and low-maintenance." },
-  { slug: "cleo-black-shorthair", name: "Cleo", species: "cat", breed: "Black domestic shorthair", estimatedAge: "4 years", sex: "female", spayedNeutered: true, temperament: "Independent but affectionate. Suits quiet household.", medicalHistory: "Healthy.", specialNeeds: null, status: "matched" as const, internationalEligible: false, destinationCountries: [], story: "Cleo was rescued from a construction site in Limassol. She has been in foster for a year and is ready to adopt." },
-  { slug: "bella-spaniel-mix", name: "Bella", species: "dog", breed: "Spaniel mix", estimatedAge: "2 years", sex: "female", spayedNeutered: true, temperament: "Sweet, loves cuddles and play. Good with cats.", medicalHistory: "Fully vetted.", specialNeeds: null, status: "available" as const, internationalEligible: true, destinationCountries: ["germany", "netherlands"], story: "Bella was found abandoned near Ayia Napa. She is now in foster in Nicosia and ready for her forever home." },
-  { slug: "tiger-orange-tabby", name: "Tiger", species: "cat", breed: "Orange tabby", estimatedAge: "8 months", sex: "male", spayedNeutered: true, temperament: "Very social, loves people and other cats.", medicalHistory: "Vaccinated, neutered.", specialNeeds: null, status: "available" as const, internationalEligible: false, destinationCountries: [], story: "Tiger was rescued as a stray in Paphos. He is healthy, playful, and ready to adopt." },
-];
+const GARDENS_ORG_SLUG = "gardens-of-st-gertrude";
+const GARDENS_DESTINATIONS = ["UK", "Germany", "Netherlands", "Sweden"];
+
+const GARDENS_CATS = [
+  {
+    name: "Charlie",
+    breed: "Domestic Shorthair",
+    sex: "male",
+    estimatedAge: "3 years",
+    temperament: "Friendly, confident, loves attention",
+    medicalHistory: null as string | null,
+    specialNeeds: null as string | null,
+    photo: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/charlie_v2.jpg",
+  },
+  {
+    name: "Mabel",
+    breed: "Domestic Longhair",
+    sex: "female",
+    estimatedAge: "2 years",
+    temperament: "Playful, curious, loves exploring",
+    medicalHistory: null,
+    specialNeeds: null,
+    photo: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/mabel.jpg",
+  },
+  {
+    name: "Oliver",
+    breed: "Domestic Shorthair",
+    sex: "male",
+    estimatedAge: "5 years",
+    temperament: "Resilient, affectionate, recovering from surgery",
+    medicalHistory: "Required orthopaedic surgery, fully recovered",
+    specialNeeds: "Needs a calm home environment",
+    photo: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/oliver_campaign.jpg",
+  },
+  {
+    name: "Ziggy",
+    breed: "Domestic Shorthair",
+    sex: "male",
+    estimatedAge: "1 year",
+    temperament: "Energetic, playful, loves toys",
+    medicalHistory: null,
+    specialNeeds: null,
+    photo: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/profile_ziggy.jpg",
+  },
+  {
+    name: "Splotch",
+    breed: "Domestic Shorthair",
+    sex: "female",
+    estimatedAge: "3 years",
+    temperament: "Sweet, quiet, loves lap time",
+    medicalHistory: null,
+    specialNeeds: null,
+    photo: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/splotch.jpg",
+  },
+  {
+    name: "Toshiba",
+    breed: "Domestic Shorthair",
+    sex: "male",
+    estimatedAge: "4 years",
+    temperament: "Independent, dignified, enjoys sunbathing",
+    medicalHistory: null,
+    specialNeeds: null,
+    photo: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/toshiba.jpg",
+  },
+] as const;
+
+async function ensureUniqueListingSlug(baseSlug: string): Promise<string> {
+  const rows = await prisma.adoptionListing.findMany({
+    where: { slug: { startsWith: baseSlug } },
+    select: { slug: true },
+  });
+  const used = new Set(rows.map((r) => r.slug));
+  if (!used.has(baseSlug)) return baseSlug;
+  let n = 1;
+  while (used.has(`${baseSlug}-${n}`)) n += 1;
+  return `${baseSlug}-${n}`;
+}
 
 // ---------------------------------------------------------------------------
 // 4. Sample reviews (realistic 4–5 star text)
@@ -267,7 +334,19 @@ async function main() {
   }
   console.log("Created 3 charities.");
 
-  // ----- 3. Rescue org + user + adoption listings -----
+  // ----- 3. Remove placeholder Paws listings (empty photos / old seed data) -----
+  const pawsOrg = await prisma.rescueOrg.findUnique({
+    where: { slug: "paws-of-cyprus-rescue" },
+  });
+  if (pawsOrg) {
+    const deleted = await prisma.adoptionListing.deleteMany({
+      where: { orgId: pawsOrg.id },
+    });
+    if (deleted.count > 0) {
+      console.log(`Removed ${deleted.count} placeholder adoption listing(s) from Paws of Cyprus.`);
+    }
+  }
+
   const rescueUser = await prisma.user.upsert({
     where: { email: "rescue@test.tinies.app" },
     create: {
@@ -281,7 +360,7 @@ async function main() {
     update: {},
   });
 
-  const rescueOrg = await prisma.rescueOrg.upsert({
+  await prisma.rescueOrg.upsert({
     where: { userId: rescueUser.id },
     create: {
       userId: rescueUser.id,
@@ -295,36 +374,79 @@ async function main() {
     update: {},
   });
 
-  for (const a of ADOPTION_LISTINGS) {
-    await prisma.adoptionListing.upsert({
-      where: { slug: a.slug },
+  // ----- 3b. Gardens of St Gertrude rescue org + real cat listings -----
+  let gardensOrg = await prisma.rescueOrg.findUnique({
+    where: { slug: GARDENS_ORG_SLUG },
+  });
+  if (!gardensOrg) {
+    const gardensUser = await prisma.user.upsert({
+      where: { email: "gardens-rescue@test.tinies.app" },
       create: {
-        orgId: rescueOrg.id,
-        slug: a.slug,
-        name: a.name,
-        species: a.species,
-        breed: a.breed,
-        estimatedAge: a.estimatedAge,
-        sex: a.sex,
-        spayedNeutered: a.spayedNeutered,
-        temperament: a.temperament,
-        medicalHistory: a.medicalHistory,
-        specialNeeds: a.specialNeeds,
-        internationalEligible: a.internationalEligible,
-        destinationCountries: a.destinationCountries,
-        photos: [],
-        status: a.status,
-        active: true,
+        email: "gardens-rescue@test.tinies.app",
+        name: "Gardens of St Gertrude",
+        passwordHash: TEST_PASSWORD_HASH,
+        role: "rescue",
+        emailVerified: true,
+        district: "Limassol",
       },
-      update: {
-        status: a.status,
-        temperament: a.temperament,
-        internationalEligible: a.internationalEligible,
-        destinationCountries: a.destinationCountries,
+      update: { name: "Gardens of St Gertrude" },
+    });
+    gardensOrg = await prisma.rescueOrg.create({
+      data: {
+        userId: gardensUser.id,
+        name: "Gardens of St Gertrude",
+        mission: "Caring for 92 rescue cats in Parekklisia, Cyprus. Every cat deserves safety, food, and love.",
+        location: "Parekklisia, Cyprus",
+        website: "https://gardensofstgertrude.com",
+        slug: GARDENS_ORG_SLUG,
+        verified: true,
       },
     });
   }
-  console.log("Created 1 rescue org and 8 adoption listings.");
+
+  for (const cat of GARDENS_CATS) {
+    const baseSlug = slugify(cat.name);
+    const slug = await ensureUniqueListingSlug(baseSlug);
+    await prisma.adoptionListing.upsert({
+      where: { slug },
+      create: {
+        orgId: gardensOrg.id,
+        slug,
+        name: cat.name,
+        species: "cat",
+        breed: cat.breed,
+        estimatedAge: cat.estimatedAge,
+        sex: cat.sex,
+        spayedNeutered: true,
+        temperament: cat.temperament,
+        medicalHistory: cat.medicalHistory,
+        specialNeeds: cat.specialNeeds,
+        internationalEligible: true,
+        destinationCountries: [...GARDENS_DESTINATIONS],
+        photos: [cat.photo],
+        status: "available",
+        active: true,
+      },
+      update: {
+        orgId: gardensOrg.id,
+        name: cat.name,
+        species: "cat",
+        breed: cat.breed,
+        estimatedAge: cat.estimatedAge,
+        sex: cat.sex,
+        spayedNeutered: true,
+        temperament: cat.temperament,
+        medicalHistory: cat.medicalHistory,
+        specialNeeds: cat.specialNeeds,
+        internationalEligible: true,
+        destinationCountries: [...GARDENS_DESTINATIONS],
+        photos: [cat.photo],
+        status: "available",
+        active: true,
+      },
+    });
+  }
+  console.log("Ensured Gardens of St Gertrude org and 6 cat adoption listings with photos.");
 
   // ----- 4. Owner user + pets (for bookings and reviews) -----
   const ownerUser = await prisma.user.upsert({
