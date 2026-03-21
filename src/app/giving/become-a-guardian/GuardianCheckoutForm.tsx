@@ -1,69 +1,51 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { Heart, Sparkles, Mail, PawPrint } from "lucide-react";
 import { toast } from "sonner";
 import { createGuardianSubscription } from "@/lib/giving/actions";
 import type { GuardianTier } from "@prisma/client";
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "");
-
-const TIERS: { tier: GuardianTier; eur: number; label: string; description: string }[] = [
-  { tier: "friend", eur: 3, label: "Friend", description: "€3/month — Support rescue every month." },
-  { tier: "guardian", eur: 5, label: "Guardian", description: "€5/month — Our most popular. Impact updates." },
-  { tier: "champion", eur: 10, label: "Champion", description: "€10/month — Maximum impact." },
+const TIERS: {
+  tier: GuardianTier;
+  eur: number;
+  label: string;
+  tagline: string;
+}[] = [
+  {
+    tier: "friend",
+    eur: 3,
+    label: "Friend",
+    tagline: "Feed a rescue cat for a week",
+  },
+  {
+    tier: "guardian",
+    eur: 5,
+    label: "Guardian",
+    tagline: "Cover a vet checkup for one animal",
+  },
+  {
+    tier: "champion",
+    eur: 10,
+    label: "Champion",
+    tagline: "Help fund a rescue operation",
+  },
 ];
 
 type CharityOption = { id: string | null; name: string };
 
 type Props = { charities: CharityOption[] };
 
-function ConfirmPaymentForm({ onSuccess }: { onSuccess: () => void }) {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [loading, setLoading] = useState(false);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!stripe || !elements) return;
-    setLoading(true);
-    const { error } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${typeof window !== "undefined" ? window.location.origin : ""}/dashboard/owner/giving?guardian=success`,
-      },
-    });
-    setLoading(false);
-    if (error) {
-      toast.error(error.message ?? "Payment failed.");
-      return;
-    }
-    onSuccess();
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="mt-6">
-      <PaymentElement options={{ layout: "tabs" }} />
-      <button
-        type="submit"
-        disabled={!stripe || !elements || loading}
-        className="mt-6 w-full rounded-[var(--radius-pill)] h-12 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-70"
-        style={{ backgroundColor: "var(--color-primary)" }}
-      >
-        {loading ? "Processing…" : "Confirm and start subscription"}
-      </button>
-    </form>
-  );
-}
+const BENEFITS = [
+  { icon: Sparkles, text: "Guardian badge on your profile" },
+  { icon: Mail, text: "Monthly impact email" },
+  { icon: PawPrint, text: "Early access to new adoption listings" },
+] as const;
 
 export function GuardianCheckoutForm({ charities }: Props) {
-  const router = useRouter();
   const [selectedTier, setSelectedTier] = useState<GuardianTier>("guardian");
   const [customEur, setCustomEur] = useState("");
   const [charityId, setCharityId] = useState<string | null>(null);
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showOnLeaderboard, setShowOnLeaderboard] = useState(false);
 
@@ -76,14 +58,14 @@ export function GuardianCheckoutForm({ charities }: Props) {
     return t ? t.eur * 100 : 0;
   })();
 
-  async function handleStart() {
+  async function handleSubscribe() {
     if (amountCents < 100) {
       toast.error("Minimum €1/month.");
       return;
     }
     setLoading(true);
     const result = await createGuardianSubscription({
-      amountCents,
+      amountMonthlyCents: amountCents,
       tier: selectedTier,
       charityId,
       showOnLeaderboard,
@@ -93,114 +75,139 @@ export function GuardianCheckoutForm({ charities }: Props) {
       toast.error(result.error);
       return;
     }
-    if (result.clientSecret) {
-      setClientSecret(result.clientSecret);
-    } else {
-      toast.success("Subscription created.");
-      router.push("/dashboard/owner/giving?guardian=success");
-      router.refresh();
+    if (result.checkoutUrl) {
+      window.location.assign(result.checkoutUrl);
+      return;
     }
-  }
-
-  if (clientSecret) {
-    return (
-      <div>
-        <p className="text-sm font-medium" style={{ color: "var(--color-text-secondary)" }}>
-          Confirm your payment to start your Guardian subscription.
-        </p>
-        <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: "stripe" } }}>
-          <ConfirmPaymentForm onSuccess={() => router.push("/dashboard/owner/giving?guardian=success")} />
-        </Elements>
-      </div>
-    );
+    toast.error("Could not start checkout.");
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <p className="mb-3 text-sm font-medium" style={{ color: "var(--color-text-secondary)" }}>Tier</p>
-        <div className="space-y-2">
-          {TIERS.map((t) => (
-            <label
+    <div className="space-y-10">
+      <div className="grid gap-4 sm:grid-cols-3">
+        {TIERS.map((t) => {
+          const selected = selectedTier === t.tier;
+          return (
+            <button
               key={t.tier}
-              className="flex cursor-pointer items-start gap-3 rounded-[var(--radius-lg)] border p-4 has-[:checked]:border-[var(--color-primary)] has-[:checked]:bg-[var(--color-primary-50)]"
-              style={{ borderColor: "var(--color-border)" }}
+              type="button"
+              onClick={() => setSelectedTier(t.tier)}
+              className="flex flex-col rounded-[var(--radius-xl)] border p-6 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]"
+              style={{
+                borderColor: selected ? "var(--color-primary)" : "var(--color-border)",
+                backgroundColor: selected ? "var(--color-primary-50)" : "var(--color-surface)",
+                boxShadow: selected ? "var(--shadow-md)" : "var(--shadow-sm)",
+              }}
             >
-              <input
-                type="radio"
-                name="tier"
-                value={t.tier}
-                checked={selectedTier === t.tier}
-                onChange={() => setSelectedTier(t.tier)}
-                className="mt-1 h-4 w-4"
-              />
-              <div>
-                <span className="font-semibold" style={{ color: "var(--color-text)" }}>{t.label}</span>
-                <p className="mt-0.5 text-sm" style={{ color: "var(--color-text-secondary)" }}>{t.description}</p>
-              </div>
-            </label>
-          ))}
-          <label className="flex cursor-pointer items-center gap-3 rounded-[var(--radius-lg)] border p-4 has-[:checked]:border-[var(--color-primary)] has-[:checked]:bg-[var(--color-primary-50)]" style={{ borderColor: "var(--color-border)" }}>
-            <input
-              type="radio"
-              name="tier"
-              value="custom"
-              checked={selectedTier === "custom"}
-              onChange={() => setSelectedTier("custom")}
-              className="h-4 w-4"
-            />
-            <div className="flex items-center gap-2">
-              <span className="font-semibold" style={{ color: "var(--color-text)" }}>Custom</span>
-              <input
-                type="number"
-                min="1"
-                step="0.01"
-                placeholder="Min €1"
-                value={customEur}
-                onChange={(e) => setCustomEur(e.target.value)}
-                onClick={() => setSelectedTier("custom")}
-                className="w-24 rounded-[var(--radius-lg)] border px-2 py-1 text-sm"
-                style={{ borderColor: "var(--color-border)", color: "var(--color-text)" }}
-              />
-              <span className="text-sm" style={{ color: "var(--color-text-secondary)" }}>/month</span>
-            </div>
-          </label>
+              <span
+                className="text-lg font-semibold"
+                style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}
+              >
+                {t.label}
+              </span>
+              <span className="mt-2 text-2xl font-semibold tabular-nums" style={{ color: "var(--color-primary)" }}>
+                €{t.eur}
+                <span className="text-base font-normal" style={{ color: "var(--color-text-secondary)" }}>
+                  /month
+                </span>
+              </span>
+              <p className="mt-3 text-sm leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+                {t.tagline}
+              </p>
+            </button>
+          );
+        })}
+      </div>
+
+      <div>
+        <p className="text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
+          Custom amount
+        </p>
+        <p className="mt-0.5 text-xs" style={{ color: "var(--color-text-muted)" }}>
+          Minimum €1 per month. Any amount other than €3, €5, or €10 is shown as a custom tier.
+        </p>
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <span className="text-sm" style={{ color: "var(--color-text-secondary)" }}>€</span>
+          <input
+            type="number"
+            min={1}
+            step={0.5}
+            placeholder="e.g. 7"
+            value={customEur}
+            onChange={(e) => {
+              setCustomEur(e.target.value);
+              setSelectedTier("custom");
+            }}
+            className="w-28 rounded-[var(--radius-lg)] border px-3 py-2 text-sm"
+            style={{ borderColor: "var(--color-border)", color: "var(--color-text)" }}
+          />
+          <span className="text-sm" style={{ color: "var(--color-text-secondary)" }}>/month</span>
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium" style={{ color: "var(--color-text-secondary)" }}>Charity</label>
+        <label className="block text-sm font-medium" style={{ color: "var(--color-text)" }}>
+          Where should your gift go?
+        </label>
         <select
           value={charityId ?? ""}
           onChange={(e) => setCharityId(e.target.value || null)}
-          className="mt-1 w-full rounded-[var(--radius-lg)] border px-3 py-2 text-sm"
+          className="mt-2 w-full max-w-md rounded-[var(--radius-lg)] border px-3 py-2.5 text-sm"
           style={{ borderColor: "var(--color-border)", color: "var(--color-text)" }}
         >
           {charities.map((c) => (
-            <option key={c.id ?? "fund"} value={c.id ?? ""}>{c.name}</option>
+            <option key={c.id ?? "fund"} value={c.id ?? ""}>
+              {c.name}
+            </option>
           ))}
         </select>
       </div>
 
-      <label className="flex cursor-pointer items-center gap-2">
+      <label className="flex cursor-pointer items-start gap-3">
         <input
           type="checkbox"
           checked={showOnLeaderboard}
           onChange={(e) => setShowOnLeaderboard(e.target.checked)}
-          className="h-4 w-4 rounded border-[var(--color-border)]"
+          className="mt-0.5 h-4 w-4 rounded border-[var(--color-border)]"
         />
-        <span className="text-sm" style={{ color: "var(--color-text)" }}>Show my name on the Tinies supporters page</span>
+        <span className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
+          Show my name on the Tinies supporters page
+        </span>
       </label>
+
+      <div
+        className="rounded-[var(--radius-lg)] border px-5 py-6"
+        style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-primary-50)" }}
+      >
+        <p
+          className="flex items-center gap-2 text-sm font-semibold"
+          style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}
+        >
+          <Heart className="h-4 w-4 shrink-0" style={{ color: "var(--color-secondary)" }} />
+          Your benefits
+        </p>
+        <ul className="mt-4 space-y-3">
+          {BENEFITS.map((b) => (
+            <li key={b.text} className="flex gap-3 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+              <b.icon className="mt-0.5 h-4 w-4 shrink-0" style={{ color: "var(--color-primary)" }} />
+              {b.text}
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <button
         type="button"
-        onClick={handleStart}
+        onClick={handleSubscribe}
         disabled={loading || amountCents < 100}
-        className="w-full rounded-[var(--radius-pill)] h-12 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-        style={{ backgroundColor: "var(--color-primary)" }}
+        className="w-full rounded-[var(--radius-pill)] py-3.5 text-base font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+        style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-primary)" }}
       >
-        {loading ? "Creating…" : `Start — €${(amountCents / 100).toFixed(2)}/month`}
+        {loading ? "Redirecting to secure checkout…" : `Subscribe — €${(amountCents / 100).toFixed(2)}/month`}
       </button>
+      <p className="text-center text-xs" style={{ color: "var(--color-text-muted)" }}>
+        You&apos;ll complete payment on Stripe. Subscriptions renew monthly until you cancel in Giving settings.
+      </p>
     </div>
   );
 }

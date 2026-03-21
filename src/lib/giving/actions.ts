@@ -18,6 +18,7 @@ import type {
   CreateQuickDonationInput,
   CreateQuickGuardianSubscriptionInput,
 } from "@/lib/utils/giving-helpers";
+import { TINIES_GUARDIAN_CHECKOUT_TYPE } from "./guardian-actions";
 
 const GUARDIAN_PRODUCT_ID = process.env.STRIPE_GUARDIAN_PRODUCT_ID;
 
@@ -112,103 +113,15 @@ async function getOrCreateStripeCustomer(userId: string, email: string, name: st
   return customer.id;
 }
 
-/** Create Guardian subscription. Returns clientSecret for first invoice payment (Stripe PaymentIntent). */
-export async function createGuardianSubscription(params: {
-  amountCents: number;
-  tier: GuardianTier;
-  charityId: string | null;
-  showOnLeaderboard?: boolean;
-}): Promise<{ clientSecret: string | null; subscriptionId: string | null; error?: string }> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { clientSecret: null, subscriptionId: null, error: "You must be signed in." };
-  if (params.amountCents < 100) return { clientSecret: null, subscriptionId: null, error: "Minimum €1/month." };
-  try {
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { email: true, name: true },
-    });
-    if (!dbUser?.email) return { clientSecret: null, subscriptionId: null, error: "User email not found." };
-
-    const stripe = getStripeServer();
-    const customerId = await getOrCreateStripeCustomer(user.id, dbUser.email, dbUser.name);
-
-    let productId = GUARDIAN_PRODUCT_ID;
-    if (!productId) {
-      const products = await stripe.products.list({ active: true });
-      const guardian = products.data.find((p) => p.name === "Tinies Guardian");
-      if (guardian) productId = guardian.id;
-      else {
-        const product = await stripe.products.create({
-          name: "Tinies Guardian",
-          description: "Monthly giving to animal rescue",
-        });
-        productId = product.id;
-      }
-    }
-
-    const price = await stripe.prices.create({
-      unit_amount: params.amountCents,
-      currency: "eur",
-      recurring: { interval: "month" },
-      product: productId,
-    });
-
-    const subscription = await stripe.subscriptions.create({
-      customer: customerId,
-      items: [{ price: price.id }],
-      payment_behavior: "default_incomplete",
-      expand: ["latest_invoice.payment_intent"],
-      metadata: {
-        userId: user.id,
-        charityId: params.charityId ?? "",
-        tier: params.tier,
-      },
-    });
-
-    const invoice = subscription.latest_invoice as { payment_intent?: { client_secret: string } } | null;
-    const clientSecret = invoice?.payment_intent?.client_secret ?? null;
-
-    const guardianSub = await prisma.guardianSubscription.create({
-      data: {
-        userId: user.id,
-        charityId: params.charityId || null,
-        stripeSubscriptionId: subscription.id,
-        amountMonthly: params.amountCents,
-        tier: params.tier,
-        status: "active",
-        startedAt: new Date(),
-      },
-    });
-
-    await prisma.userGivingPreference.upsert({
-      where: { userId: user.id },
-      create: {
-        userId: user.id,
-        preferredCharityId: params.charityId,
-        guardianSubscriptionId: guardianSub.id,
-        showOnLeaderboard: params.showOnLeaderboard ?? false,
-      },
-      update: {
-        preferredCharityId: params.charityId,
-        guardianSubscriptionId: guardianSub.id,
-        showOnLeaderboard: params.showOnLeaderboard ?? false,
-      },
-    });
-
-    revalidatePath("/giving");
-    revalidatePath("/giving/become-a-guardian");
-    revalidatePath("/dashboard/owner/giving");
-    return { clientSecret, subscriptionId: subscription.id };
-  } catch (e) {
-    console.error("createGuardianSubscription", e);
-    return {
-      clientSecret: null,
-      subscriptionId: null,
-      error: e instanceof Error ? e.message : "Failed to create subscription.",
-    };
-  }
-}
+export {
+  createGuardianSubscription,
+  pauseGuardianSubscription,
+  resumeGuardianSubscription,
+  cancelGuardianSubscription,
+  getGuardianSubscription,
+  recordGuardianDonation,
+  guardianTierFromAmountCents,
+} from "./guardian-actions";
 
 /** List verified charities + "Tinies Giving Fund" for dropdowns. */
 export async function getCharitiesForGuardian(): Promise<
@@ -220,7 +133,7 @@ export async function getCharitiesForGuardian(): Promise<
     select: { id: true, name: true },
   });
   return [
-    { id: null, name: "Tinies Giving Fund" },
+    { id: null, name: "Tinies Giving Fund (distributed to all)" },
     ...charities.map((c) => ({ id: c.id, name: c.name })),
   ];
 }
@@ -399,10 +312,11 @@ export async function getOwnerGivingData(): Promise<OwnerGivingData | null> {
     where: { userId: user.id },
     include: {
       charity: { select: { id: true, name: true } },
-      guardianSubscription: {
-        include: { charity: { select: { name: true } } },
-      },
     },
+  });
+  const guardianSubscriptionRow = await prisma.guardianSubscription.findUnique({
+    where: { userId: user.id },
+    include: { charity: { select: { name: true } } },
   });
   const charities = await prisma.charity.findMany({
     where: { verified: true, active: true },
@@ -443,15 +357,15 @@ export async function getOwnerGivingData(): Promise<OwnerGivingData | null> {
   return {
     preferredCharityId: prefs?.preferredCharityId ?? null,
     roundupEnabled: prefs?.roundupEnabled ?? true,
-    guardianSubscription: prefs?.guardianSubscription
+    guardianSubscription: guardianSubscriptionRow
       ? {
-          id: prefs.guardianSubscription.id,
-          amountMonthly: prefs.guardianSubscription.amountMonthly,
-          tier: prefs.guardianSubscription.tier,
-          status: prefs.guardianSubscription.status,
-          charityId: prefs.guardianSubscription.charityId,
-          charityName: prefs.guardianSubscription.charity?.name ?? null,
-          stripeSubscriptionId: prefs.guardianSubscription.stripeSubscriptionId,
+          id: guardianSubscriptionRow.id,
+          amountMonthly: guardianSubscriptionRow.amountMonthly,
+          tier: guardianSubscriptionRow.tier,
+          status: guardianSubscriptionRow.status,
+          charityId: guardianSubscriptionRow.charityId,
+          charityName: guardianSubscriptionRow.charity?.name ?? null,
+          stripeSubscriptionId: guardianSubscriptionRow.stripeSubscriptionId,
         }
       : null,
     charitiesForDropdown: charities,
@@ -477,60 +391,6 @@ export async function updateRoundupEnabled(enabled: boolean): Promise<{ error?: 
   } catch (e) {
     console.error("updateRoundupEnabled", e);
     return { error: e instanceof Error ? e.message : "Failed to update." };
-  }
-}
-
-/** Pause Guardian subscription (Stripe + DB). */
-export async function pauseGuardianSubscription(subscriptionId: string): Promise<{ error?: string }> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "You must be signed in." };
-  const sub = await prisma.guardianSubscription.findFirst({
-    where: { id: subscriptionId, userId: user.id },
-    select: { stripeSubscriptionId: true },
-  });
-  if (!sub?.stripeSubscriptionId) return { error: "Subscription not found." };
-  try {
-    const stripe = getStripeServer();
-    await stripe.subscriptions.update(sub.stripeSubscriptionId, { pause_collection: { behavior: "void" } });
-    await prisma.guardianSubscription.update({
-      where: { id: subscriptionId },
-      data: { status: "paused", pausedAt: new Date() },
-    });
-    revalidatePath("/dashboard/owner/giving");
-    return {};
-  } catch (e) {
-    console.error("pauseGuardianSubscription", e);
-    return { error: e instanceof Error ? e.message : "Failed to pause." };
-  }
-}
-
-/** Cancel Guardian subscription (Stripe + DB). */
-export async function cancelGuardianSubscription(subscriptionId: string): Promise<{ error?: string }> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "You must be signed in." };
-  const sub = await prisma.guardianSubscription.findFirst({
-    where: { id: subscriptionId, userId: user.id },
-    select: { stripeSubscriptionId: true },
-  });
-  if (!sub?.stripeSubscriptionId) return { error: "Subscription not found." };
-  try {
-    const stripe = getStripeServer();
-    await stripe.subscriptions.cancel(sub.stripeSubscriptionId);
-    await prisma.guardianSubscription.update({
-      where: { id: subscriptionId },
-      data: { status: "cancelled", cancelledAt: new Date() },
-    });
-    await prisma.userGivingPreference.update({
-      where: { userId: user.id },
-      data: { guardianSubscriptionId: null },
-    });
-    revalidatePath("/dashboard/owner/giving");
-    return {};
-  } catch (e) {
-    console.error("cancelGuardianSubscription", e);
-    return { error: e instanceof Error ? e.message : "Failed to cancel." };
   }
 }
 
@@ -1219,6 +1079,21 @@ export async function createQuickGuardianSubscription(params: CreateQuickGuardia
     userName = params.donorName?.trim() ?? email;
   }
   try {
+    const existingGuardian = await prisma.guardianSubscription.findUnique({
+      where: { userId },
+      select: { status: true },
+    });
+    if (
+      existingGuardian &&
+      (existingGuardian.status === "active" || existingGuardian.status === "paused")
+    ) {
+      return {
+        clientSecret: null,
+        subscriptionId: null,
+        error: "You already have a Guardian subscription on this account.",
+      };
+    }
+
     const stripe = getStripeServer();
     const customerId = await getOrCreateStripeCustomer(userId, userEmail, userName);
     let productId = GUARDIAN_PRODUCT_ID;
@@ -1249,19 +1124,34 @@ export async function createQuickGuardianSubscription(params: CreateQuickGuardia
         userId,
         charityId: params.charityId ?? "",
         tier: params.tier,
+        checkout_type: TINIES_GUARDIAN_CHECKOUT_TYPE,
+        amountMonthlyCents: String(params.amountCents),
       },
     });
     const invoice = subscription.latest_invoice as { payment_intent?: { client_secret: string } } | null;
     const clientSecret = invoice?.payment_intent?.client_secret ?? null;
-    const guardianSub = await prisma.guardianSubscription.create({
-      data: {
+    const guardianSub = await prisma.guardianSubscription.upsert({
+      where: { userId },
+      create: {
         userId,
         charityId: params.charityId || null,
         stripeSubscriptionId: subscription.id,
+        stripeCustomerId: customerId,
         amountMonthly: params.amountCents,
         tier: params.tier,
         status: "active",
         startedAt: new Date(),
+      },
+      update: {
+        charityId: params.charityId || null,
+        stripeSubscriptionId: subscription.id,
+        stripeCustomerId: customerId,
+        amountMonthly: params.amountCents,
+        tier: params.tier,
+        status: "active",
+        startedAt: new Date(),
+        pausedAt: null,
+        cancelledAt: null,
       },
     });
     await prisma.userGivingPreference.upsert({

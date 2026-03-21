@@ -619,9 +619,10 @@ model Donation {
 
 model GuardianSubscription {
   id                    String         @id @default(uuid())
-  userId                String         @map("user_id")
+  userId                String         @unique @map("user_id")
   charityId             String?       @map("charity_id")
   stripeSubscriptionId  String?       @unique @map("stripe_subscription_id")
+  stripeCustomerId      String?       @map("stripe_customer_id")
   amountMonthly         Int            @map("amount_monthly") // cents
   tier                  GuardianTier
   status                GuardianStatus

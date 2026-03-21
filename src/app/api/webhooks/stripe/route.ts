@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { constructWebhookEvent } from "@/lib/stripe";
+import { constructWebhookEvent, getStripeServer } from "@/lib/stripe";
 import { sendEmail } from "@/lib/email";
 import ProviderIdentityVerifiedEmail from "@/lib/email/templates/provider-identity-verified";
 import PayoutProcessedEmail from "@/lib/email/templates/payout-processed";
 import TipReceivedEmail from "@/lib/email/templates/tip-received";
 import { DonationSource } from "@prisma/client";
 import { recordRoundUpDonation } from "@/lib/giving/actions";
+import {
+  upsertGuardianFromCheckoutSession,
+  recordGuardianDonation,
+  syncGuardianSubscriptionFromStripe,
+  TINIES_GUARDIAN_CHECKOUT_TYPE,
+  guardianTierFromAmountCents,
+} from "@/lib/giving/guardian-actions";
+import type { GuardianTier } from "@prisma/client";
 
 const HANDLED_TYPES = [
   "payment_intent.succeeded",
@@ -15,7 +23,16 @@ const HANDLED_TYPES = [
   "transfer.created",
   "identity.verification_session.verified",
   "identity.verification_session.requires_input",
+  "checkout.session.completed",
+  "invoice.paid",
+  "customer.subscription.updated",
+  "customer.subscription.deleted",
 ] as const;
+
+function parseGuardianTier(v: string | undefined): GuardianTier | null {
+  if (v === "friend" || v === "guardian" || v === "champion" || v === "custom") return v;
+  return null;
+}
 
 export async function POST(request: NextRequest) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -243,6 +260,106 @@ export async function POST(request: NextRequest) {
       }
       case "identity.verification_session.requires_input": {
         // Verification failed or needs more info — leave verified=false so provider appears in admin queue for manual review
+        break;
+      }
+      case "checkout.session.completed": {
+        const session = event.data.object as {
+          mode?: string;
+          metadata?: Record<string, string>;
+          subscription?: string | { id?: string } | null;
+          customer?: string | { id?: string } | null;
+          client_reference_id?: string | null;
+        };
+        if (session.mode !== "subscription") break;
+        const meta = session.metadata ?? {};
+        if (meta.checkout_type !== TINIES_GUARDIAN_CHECKOUT_TYPE) break;
+        const userId = meta.userId || session.client_reference_id || "";
+        if (!userId) break;
+        const subRaw = session.subscription;
+        const stripeSubId =
+          typeof subRaw === "string" ? subRaw : subRaw && typeof subRaw === "object" ? subRaw.id ?? "" : "";
+        if (!stripeSubId) break;
+        const custRaw = session.customer;
+        const customerId =
+          typeof custRaw === "string" ? custRaw : custRaw && typeof custRaw === "object" ? custRaw.id ?? "" : "";
+        if (!customerId) break;
+        const amountMonthlyCents = parseInt(meta.amountMonthlyCents ?? "0", 10);
+        if (amountMonthlyCents < 100) break;
+        const tier =
+          parseGuardianTier(meta.tier) ?? guardianTierFromAmountCents(amountMonthlyCents);
+        const charityId = meta.charityId && meta.charityId.length > 0 ? meta.charityId : null;
+        const showOnLeaderboard = meta.showOnLeaderboard === "1";
+        await upsertGuardianFromCheckoutSession({
+          userId,
+          charityId,
+          stripeSubscriptionId: stripeSubId,
+          stripeCustomerId: customerId,
+          amountMonthlyCents,
+          tier,
+          showOnLeaderboard,
+        });
+        break;
+      }
+      case "invoice.paid": {
+        const invoice = event.data.object as {
+          id: string;
+          amount_paid: number;
+          subscription?: string | { id?: string } | null;
+        };
+        if (!invoice.amount_paid || invoice.amount_paid <= 0) break;
+        const subField = invoice.subscription;
+        const stripeSubId =
+          typeof subField === "string"
+            ? subField
+            : subField && typeof subField === "object"
+              ? subField.id ?? ""
+              : "";
+        if (!stripeSubId) break;
+        const stripe = getStripeServer();
+        const sub = await stripe.subscriptions.retrieve(stripeSubId);
+        const meta = sub.metadata ?? {};
+        const userId = meta.userId;
+        if (!userId) break;
+        if (meta.checkout_type !== TINIES_GUARDIAN_CHECKOUT_TYPE && !parseGuardianTier(meta.tier)) break;
+        const charityId = meta.charityId && meta.charityId.length > 0 ? meta.charityId : null;
+        await recordGuardianDonation({
+          userId,
+          charityId,
+          amountCents: invoice.amount_paid,
+          stripeInvoiceId: invoice.id,
+        });
+        break;
+      }
+      case "customer.subscription.updated": {
+        const sub = event.data.object as {
+          id: string;
+          status: string;
+          pause_collection?: { behavior?: string } | null;
+        };
+        if (sub.status === "canceled" || sub.status === "unpaid" || sub.status === "incomplete_expired") {
+          await syncGuardianSubscriptionFromStripe({
+            stripeSubscriptionId: sub.id,
+            status: "cancelled",
+          });
+        } else if (sub.pause_collection?.behavior) {
+          await syncGuardianSubscriptionFromStripe({
+            stripeSubscriptionId: sub.id,
+            status: "paused",
+          });
+        } else if (sub.status === "active") {
+          await syncGuardianSubscriptionFromStripe({
+            stripeSubscriptionId: sub.id,
+            status: "active",
+          });
+        }
+        break;
+      }
+      case "customer.subscription.deleted": {
+        const sub = event.data.object as { id: string };
+        await syncGuardianSubscriptionFromStripe({
+          stripeSubscriptionId: sub.id,
+          status: "cancelled",
+        });
         break;
       }
       default:

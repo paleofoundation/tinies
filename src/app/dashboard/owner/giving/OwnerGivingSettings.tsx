@@ -9,6 +9,7 @@ import {
   updateRoundupEnabled,
   pauseGuardianSubscription,
   cancelGuardianSubscription,
+  resumeGuardianSubscription,
 } from "@/lib/giving/actions";
 import type { OwnerGivingData } from "@/lib/utils/giving-helpers";
 
@@ -51,7 +52,7 @@ export function OwnerGivingSettings({ data }: Props) {
   async function handlePause() {
     if (!data.guardianSubscription) return;
     setGuardianAction("pause");
-    const result = await pauseGuardianSubscription(data.guardianSubscription.id);
+    const result = await pauseGuardianSubscription();
     setGuardianAction(null);
     if (result.error) toast.error(result.error);
     else {
@@ -60,11 +61,23 @@ export function OwnerGivingSettings({ data }: Props) {
     }
   }
 
+  async function handleResume() {
+    if (!data.guardianSubscription) return;
+    setGuardianAction("resume");
+    const result = await resumeGuardianSubscription();
+    setGuardianAction(null);
+    if (result.error) toast.error(result.error);
+    else {
+      toast.success("Subscription resumed.");
+      router.refresh();
+    }
+  }
+
   async function handleCancel() {
     if (!data.guardianSubscription) return;
     if (!confirm("Cancel your Guardian subscription? You can rejoin anytime.")) return;
     setGuardianAction("cancel");
-    const result = await cancelGuardianSubscription(data.guardianSubscription.id);
+    const result = await cancelGuardianSubscription();
     setGuardianAction(null);
     if (result.error) toast.error(result.error);
     else {
@@ -143,7 +156,7 @@ export function OwnerGivingSettings({ data }: Props) {
               )}
             </p>
             {data.guardianSubscription.status === "active" && (
-              <div className="mt-3 flex gap-2">
+              <div className="mt-3 flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={handlePause}
@@ -162,6 +175,34 @@ export function OwnerGivingSettings({ data }: Props) {
                   {guardianAction === "cancel" ? "…" : "Cancel subscription"}
                 </button>
               </div>
+            )}
+            {data.guardianSubscription.status === "paused" && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={handleResume}
+                  disabled={!!guardianAction}
+                  className="rounded-[var(--radius-lg)] bg-[var(--color-primary)] px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
+                >
+                  {guardianAction === "resume" ? "…" : "Resume"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  disabled={!!guardianAction}
+                  className="rounded-[var(--radius-lg)] px-3 py-1.5 text-sm font-medium text-[var(--color-error)] hover:bg-[var(--color-error)]/10 disabled:opacity-50"
+                >
+                  {guardianAction === "cancel" ? "…" : "Cancel subscription"}
+                </button>
+              </div>
+            )}
+            {data.guardianSubscription.status === "cancelled" && (
+              <p className="mt-3 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                This subscription has ended.{" "}
+                <Link href="/giving/become-a-guardian" className="font-medium underline" style={{ color: "var(--color-primary)" }}>
+                  Start again
+                </Link>
+              </p>
             )}
           </div>
         ) : (
