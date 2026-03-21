@@ -776,6 +776,26 @@ export async function recordPlatformCommissionDonation(
  * Record a booking round-up. If `charityId` is omitted, uses the user’s preferred charity
  * from UserGivingPreference; explicit `null` forces Tinies Giving Fund.
  */
+/** Persist round-up opt-in for checkout (next booking defaults). */
+export async function updateOwnerRoundupEnabled(enabled: boolean): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+  try {
+    await prisma.userGivingPreference.upsert({
+      where: { userId: user.id },
+      create: { userId: user.id, roundupEnabled: enabled },
+      update: { roundupEnabled: enabled },
+    });
+    return {};
+  } catch (e) {
+    console.error("updateOwnerRoundupEnabled", e);
+    return { error: "Could not save preference." };
+  }
+}
+
 export async function recordRoundUpDonation(params: {
   userId: string;
   bookingId: string;
@@ -784,6 +804,11 @@ export async function recordRoundUpDonation(params: {
   stripePaymentIntentId?: string | null;
 }): Promise<void> {
   if (params.roundUpAmountCents <= 0) return;
+  const existing = await prisma.donation.findFirst({
+    where: { bookingId: params.bookingId, source: DonationSource.roundup },
+    select: { id: true },
+  });
+  if (existing) return;
   let charityId: string | null;
   if (params.charityId === undefined) {
     const prefs = await prisma.userGivingPreference.findUnique({

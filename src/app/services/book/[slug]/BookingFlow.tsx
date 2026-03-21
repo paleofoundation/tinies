@@ -12,6 +12,8 @@ import {
   computeRoundUpCents,
 } from "@/lib/booking-utils";
 import { CancellationPolicy } from "@/lib/constants";
+import { RoundUpToggle } from "@/components/giving/RoundUpToggle";
+import { updateOwnerRoundupEnabled } from "@/lib/giving/actions";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? ""
@@ -40,9 +42,15 @@ function formatEur(cents: number): string {
 
 type Pet = { id: string; name: string; species: string; breed: string | null; ageYears: number | null; photos: string[] };
 
+export type BookingRoundupDefaults = {
+  roundupEnabledDefault: boolean;
+  preferredCharityName: string | null;
+};
+
 type BookingFlowProps = {
   provider: ProviderForBooking;
   pets: Pet[];
+  roundupDefaults: BookingRoundupDefaults;
 };
 
 const sectionClass =
@@ -51,7 +59,7 @@ const labelClass = "block text-sm font-medium";
 const inputClass =
   "mt-1 w-full rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40";
 
-export function BookingFlow({ provider, pets }: BookingFlowProps) {
+export function BookingFlow({ provider, pets, roundupDefaults }: BookingFlowProps) {
   const [serviceType, setServiceType] = useState<string>(
     provider.services[0]?.type ?? ""
   );
@@ -63,7 +71,7 @@ export function BookingFlow({ provider, pets }: BookingFlowProps) {
   const [visitsPerDay, setVisitsPerDay] = useState(2);
   const [selectedPetIds, setSelectedPetIds] = useState<string[]>([]);
   const [specialInstructions, setSpecialInstructions] = useState("");
-  const [roundUpEnabled, setRoundUpEnabled] = useState(true);
+  const [roundUpEnabled, setRoundUpEnabled] = useState(roundupDefaults.roundupEnabledDefault);
   const [confirming, setConfirming] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [bookingId, setBookingId] = useState<string | null>(null);
@@ -112,9 +120,11 @@ export function BookingFlow({ provider, pets }: BookingFlowProps) {
     [roundUpEnabled, totalCents]
   );
   const chargeCents = totalCents + roundUpCents;
-  const roundedEur = roundUpEnabled
-    ? (Math.ceil(totalCents / 100) * 100) / 100
-    : totalCents / 100;
+
+  async function persistRoundupPreference(enabled: boolean) {
+    const result = await updateOwnerRoundupEnabled(enabled);
+    if (result.error) toast.error(result.error);
+  }
 
   const maxPets = serviceConfig?.max_pets ?? 99;
   const canSelectMorePets = selectedPetIds.length < maxPets;
@@ -220,13 +230,18 @@ export function BookingFlow({ provider, pets }: BookingFlowProps) {
             Your booking is reserved. Enter card details to authorize payment. The provider will confirm and we&apos;ll capture payment then.
           </p>
           <div className="mt-4 rounded-[var(--radius-lg)] border p-4" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}>
-            <p className="font-semibold" style={{ color: "var(--color-text)" }}>
+            <p className="font-semibold tabular-nums" style={{ color: "var(--color-text)" }}>
               Total: {formatEur(chargeCents)}
             </p>
             {roundUpEnabled && roundUpCents > 0 && (
-              <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
-                Includes {formatEur(roundUpCents)} round-up donation.
-              </p>
+              <>
+                <p className="mt-2 text-sm tabular-nums" style={{ color: "var(--color-text-secondary)" }}>
+                  Includes {formatEur(roundUpCents)} round-up for Tinies Giving (not part of your sitter&apos;s earnings).
+                </p>
+                <p className="mt-2 text-sm" style={{ color: "var(--color-primary)", fontFamily: "var(--font-body), sans-serif" }}>
+                  Thank you for rounding up — rescue animals in Cyprus will benefit.
+                </p>
+              </>
             )}
           </div>
           <div className="mt-6">
@@ -236,11 +251,14 @@ export function BookingFlow({ provider, pets }: BookingFlowProps) {
                 clientSecret,
                 appearance: {
                   theme: "stripe",
-                  variables: { colorPrimary: "#2D6A4F" },
+                  variables: { colorPrimary: "#0A8080" },
                 },
               }}
             >
-              <PaymentForm bookingId={bookingId} />
+              <PaymentForm
+                bookingId={bookingId}
+                roundUpCents={roundUpEnabled ? roundUpCents : 0}
+              />
             </Elements>
           </div>
         </div>
@@ -504,24 +522,21 @@ export function BookingFlow({ provider, pets }: BookingFlowProps) {
           Payment
         </h2>
         <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
-          Total and optional round-up donation.
+          Review your total, optional round-up for rescue, then confirm to pay securely.
         </p>
-        <div className="mt-4 space-y-3">
+        <div className="mt-4 space-y-4">
           <p className="font-semibold" style={{ color: "var(--color-text)" }}>
             Booking total: {formatEur(totalCents)}
           </p>
-          <label className="flex cursor-pointer items-start gap-3">
-            <input
-              type="checkbox"
-              checked={roundUpEnabled}
-              onChange={(e) => setRoundUpEnabled(e.target.checked)}
-              className="mt-1 h-4 w-4 rounded border-[var(--color-primary)]/30 text-[var(--color-primary)]"
-            />
-            <span className="text-sm" style={{ color: "var(--color-text)" }}>
-              Round up to EUR {roundedEur.toFixed(2)} and donate {formatEur(roundUpCents)} to animal rescue?
-            </span>
-          </label>
-          <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
+          <RoundUpToggle
+            bookingTotalCents={totalCents}
+            enabled={roundUpEnabled}
+            onEnabledChange={setRoundUpEnabled}
+            preferredCharityName={roundupDefaults.preferredCharityName}
+            onPersistPreference={persistRoundupPreference}
+            disabled={totalCents <= 0}
+          />
+          <p className="text-sm font-medium tabular-nums" style={{ color: "var(--color-text)" }}>
             Amount to charge: {formatEur(chargeCents)}
           </p>
         </div>
@@ -549,7 +564,13 @@ export function BookingFlow({ provider, pets }: BookingFlowProps) {
   );
 }
 
-function PaymentForm({ bookingId }: { bookingId: string | null }) {
+function PaymentForm({
+  bookingId,
+  roundUpCents,
+}: {
+  bookingId: string | null;
+  roundUpCents: number;
+}) {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -558,10 +579,15 @@ function PaymentForm({ bookingId }: { bookingId: string | null }) {
     e.preventDefault();
     if (!stripe || !elements) return;
     setLoading(true);
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const params = new URLSearchParams();
+    if (bookingId) params.set("booking", bookingId);
+    if (roundUpCents > 0) params.set("roundUp", String(roundUpCents));
+    const qs = params.toString();
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${typeof window !== "undefined" ? window.location.origin : ""}/dashboard/owner?booking=${bookingId ?? ""}`,
+        return_url: `${origin}/dashboard/owner${qs ? `?${qs}` : ""}`,
       },
     });
     setLoading(false);

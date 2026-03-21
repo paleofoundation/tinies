@@ -7,7 +7,6 @@ import { sendEmail } from "@/lib/email";
 import BookingRequestEmail from "@/lib/email/templates/booking-request";
 import { sendSMS, buildBookingRequestSMS } from "@/lib/sms";
 import type { ServiceType } from "@prisma/client";
-import { recordRoundUpDonation } from "@/lib/giving/actions";
 import type { GivingTier } from "@/lib/utils/giving-helpers";
 import {
   computeBookingTotalCents,
@@ -171,6 +170,36 @@ export type CreateBookingWithPaymentIntentResult = {
   error?: string;
 };
 
+/** Defaults for booking checkout round-up (logged-in owner). */
+export async function getBookingRoundupDefaults(): Promise<{
+  roundupEnabledDefault: boolean;
+  preferredCharityName: string | null;
+}> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { roundupEnabledDefault: true, preferredCharityName: null };
+  }
+  try {
+    const prefs = await prisma.userGivingPreference.findUnique({
+      where: { userId: user.id },
+      include: { charity: { select: { name: true } } },
+    });
+    if (!prefs) {
+      return { roundupEnabledDefault: true, preferredCharityName: null };
+    }
+    return {
+      roundupEnabledDefault: prefs.roundupEnabled,
+      preferredCharityName: prefs.charity?.name ?? null,
+    };
+  } catch (e) {
+    console.error("getBookingRoundupDefaults", e);
+    return { roundupEnabledDefault: true, preferredCharityName: null };
+  }
+}
+
 async function ensureOwnerInPrisma(userId: string, email: string, name: string) {
   await prisma.user.upsert({
     where: { id: userId },
@@ -259,8 +288,10 @@ export async function createBookingWithPaymentIntent(
       currency: "eur",
       capture_method: "manual",
       metadata: {
+        type: "booking",
         bookingId: booking.id,
         roundUpCents: String(roundUpCents),
+        ownerId: user.id,
       },
       automatic_payment_methods: { enabled: true },
     });
@@ -284,15 +315,6 @@ export async function createBookingWithPaymentIntent(
       await prisma.meetAndGreet.update({
         where: { id: recentMeet.id },
         data: { ledToBooking: true, bookingId: booking.id },
-      });
-    }
-
-    if (roundUpCents > 0) {
-      await recordRoundUpDonation({
-        userId: user.id,
-        bookingId: booking.id,
-        roundUpAmountCents: roundUpCents,
-        stripePaymentIntentId: paymentIntent.id,
       });
     }
 

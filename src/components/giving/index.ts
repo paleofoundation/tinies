@@ -8,3 +8,4 @@ export { CommunityOfGivers } from "./CommunityOfGivers";
 export { DonationTicker } from "./DonationTicker";
 export { GivingTierBadge } from "./GivingTierBadge";
 export { GivingAnimatedTotal } from "./GivingAnimatedTotal";
+export { RoundUpToggle } from "./RoundUpToggle";

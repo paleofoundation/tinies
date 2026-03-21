@@ -325,6 +325,21 @@ export function OwnerDashboardClient({
       router.replace("/dashboard/owner");
       router.refresh();
       setOpenTipBookingId(null);
+      return;
+    }
+    const roundUpRaw = searchParams.get("roundUp");
+    if (roundUpRaw !== null && roundUpRaw !== "") {
+      const cents = parseInt(roundUpRaw, 10);
+      if (Number.isFinite(cents) && cents > 0) {
+        toast.success(
+          `Your booking also generated a EUR ${(cents / 100).toFixed(2)} donation to animal rescue through Tinies Giving. Thank you!`
+        );
+      }
+      const next = new URLSearchParams(searchParams.toString());
+      next.delete("roundUp");
+      next.delete("booking");
+      const q = next.toString();
+      router.replace(`/dashboard/owner${q ? `?${q}` : ""}`, { scroll: false });
     }
   }, [searchParams, router]);
 

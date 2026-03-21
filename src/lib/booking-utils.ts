@@ -13,9 +13,14 @@ export function computeBookingTotalCents(
   return baseCents + (petCount - 1) * additionalCents;
 }
 
-/** Round up to nearest euro; return round-up amount in cents. */
+/**
+ * Round-up to the next whole euro (charge amount).
+ * - If total is already a whole euro (e.g. EUR 50.00), round-up is EUR 1.00 (100 cents).
+ * - Otherwise round-up is 1–99 cents (next euro).
+ */
 export function computeRoundUpCents(totalCents: number): number {
-  const totalEur = totalCents / 100;
-  const roundedEur = Math.ceil(totalEur);
-  return Math.round(roundedEur * 100) - totalCents;
+  if (totalCents <= 0) return 0;
+  const remainder = totalCents % 100;
+  if (remainder === 0) return 100;
+  return 100 - remainder;
 }

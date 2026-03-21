@@ -6,6 +6,7 @@ import ProviderIdentityVerifiedEmail from "@/lib/email/templates/provider-identi
 import PayoutProcessedEmail from "@/lib/email/templates/payout-processed";
 import TipReceivedEmail from "@/lib/email/templates/tip-received";
 import { DonationSource } from "@prisma/client";
+import { recordRoundUpDonation } from "@/lib/giving/actions";
 
 const HANDLED_TYPES = [
   "payment_intent.succeeded",
@@ -72,7 +73,16 @@ export async function POST(request: NextRequest) {
         const pi = event.data.object as {
           id: string;
           amount: number;
-          metadata?: { type?: string; userId?: string; charityId?: string; amountCents?: string; showOnLeaderboard?: string; bookingId?: string };
+          metadata?: {
+            type?: string;
+            userId?: string;
+            charityId?: string;
+            amountCents?: string;
+            showOnLeaderboard?: string;
+            bookingId?: string;
+            roundUpCents?: string;
+            ownerId?: string;
+          };
         };
         const type = pi.metadata?.type;
         const showOnLeaderboard = pi.metadata?.showOnLeaderboard === "1";
@@ -138,6 +148,31 @@ export async function POST(request: NextRequest) {
                 to: booking.provider.email,
                 subject: `You received a €${amountEur} tip!`,
                 react: TipReceivedEmail({ amountEur }),
+              });
+            }
+          }
+        }
+        {
+          const bookingId = pi.metadata?.bookingId;
+          const roundUpCents = parseInt(String(pi.metadata?.roundUpCents ?? "0"), 10);
+          const isBookingPi =
+            type === "booking" ||
+            (Boolean(bookingId) && pi.metadata?.roundUpCents != null && type !== "booking_tip" && type !== "signup_donation" && type !== "one_time_donation" && type !== "quick_donation");
+          if (isBookingPi && bookingId && roundUpCents > 0) {
+            let ownerId = pi.metadata?.ownerId ?? "";
+            if (!ownerId) {
+              const b = await prisma.booking.findUnique({
+                where: { id: bookingId },
+                select: { ownerId: true },
+              });
+              ownerId = b?.ownerId ?? "";
+            }
+            if (ownerId) {
+              await recordRoundUpDonation({
+                userId: ownerId,
+                bookingId,
+                roundUpAmountCents: roundUpCents,
+                stripePaymentIntentId: pi.id,
               });
             }
           }

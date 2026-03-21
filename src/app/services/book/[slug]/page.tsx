@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { redirect } from "next/navigation";
-import { getProviderBySlug } from "../actions";
+import { getProviderBySlug, getBookingRoundupDefaults } from "../actions";
 import { getOwnerPets } from "@/app/dashboard/owner/actions";
 import { createClient } from "@/lib/supabase/server";
 import { BookingFlow } from "./BookingFlow";
@@ -31,7 +31,8 @@ export default async function BookServicePage({ params }: Props) {
   const provider = await getProviderBySlug(slug);
   if (!provider) notFound();
 
-  const { pets } = await getOwnerPets();
+  const [petsResult, roundupDefaults] = await Promise.all([getOwnerPets(), getBookingRoundupDefaults()]);
+  const { pets } = petsResult;
 
   return (
     <div
@@ -51,7 +52,7 @@ export default async function BookServicePage({ params }: Props) {
         <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
           Choose your service, dates, pets, and complete payment.
         </p>
-        <BookingFlow provider={provider} pets={pets} />
+        <BookingFlow provider={provider} pets={pets} roundupDefaults={roundupDefaults} />
       </main>
     </div>
   );
