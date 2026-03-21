@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { MapPin, List, Map, Star, Loader2 } from "lucide-react";
-import { SearchMap } from "@/components/maps";
+import { SearchMap, AddressAutocomplete } from "@/components/maps";
 import { geocodeSearchLocation } from "./actions";
 import type { SearchProviderCard, SortOption } from "@/lib/utils/search-helpers";
 import { HOLIDAY_LABELS, HOLIDAY_IDS } from "@/lib/constants/holidays";
@@ -188,6 +188,20 @@ export function SearchContent({
     }
   }, [locationQuery, searchParams, router]);
 
+  const handleAddressSelect = useCallback(
+    (address: string, latVal?: number, lngVal?: number) => {
+      setLocationQuery(address);
+      setGeocodeError(null);
+      if (latVal != null && lngVal != null) {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("lat", String(latVal));
+        params.set("lng", String(lngVal));
+        router.push(`/services/search?${params}`);
+      }
+    },
+    [searchParams, router]
+  );
+
   const setSortAndNavigate = useCallback(
     (newSort: SortOption) => {
       setSort(newSort);
@@ -233,15 +247,13 @@ export function SearchContent({
             </label>
             <div className="mt-1 flex rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}>
               <MapPin className="ml-3 h-5 w-5 shrink-0 self-center" style={{ color: "var(--color-text-muted)" }} />
-              <input
+              <AddressAutocomplete
                 id="search-location"
-                type="text"
-                placeholder="Address or area"
                 value={locationQuery}
-                onChange={(e) => setLocationQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleLocationSubmit()}
-                className="min-w-0 flex-1 border-0 bg-transparent py-2.5 pr-3 pl-2 text-sm focus:outline-none focus:ring-0"
-                style={{ color: "var(--color-text)" }}
+                onChange={handleAddressSelect}
+                placeholder="Address or area"
+                defaultCountry="cy"
+                withIcon
               />
             </div>
             {geocodeError && (

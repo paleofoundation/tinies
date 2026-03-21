@@ -1,73 +1,118 @@
-Tinies (tinies.app) - Cursor Project Rules
-What This Is
+# Tinies (tinies.app) - Cursor Project Rules
+
+## What This Is
+
 Tinies is a trust-based pet services marketplace and international animal adoption platform, built for Cyprus and designed for Mediterranean expansion. It combines Rover-style local pet care booking with professional cross-border rescue animal adoption coordination. The tagline is "No matter the size."
-Tech Stack (Do Not Deviate)
 
-Framework: Next.js 14+ with App Router (NOT Pages Router)
-Language: TypeScript (strict mode, no any types)
-Styling: Tailwind CSS (no CSS modules, no styled-components)
-Database: PostgreSQL via Supabase, managed through Prisma ORM
-Auth: Supabase Auth (email/password, Google OAuth, phone OTP via Twilio)
-Payments: Stripe (Checkout for owners/adopters, Connect for provider payouts)
-File Storage: Supabase Storage (photos, ID documents, vet records)
-SMS: Twilio
-Email: Resend with React Email templates
-Search: PostgreSQL full-text search + PostGIS for geospatial queries
-Maps: Google Maps JavaScript API
-Hosting: Vercel
-Monitoring: Sentry for errors
-ORM: Prisma (always use Prisma, never raw SQL unless PostGIS requires it)
+## Tech Stack (Do Not Deviate)
 
-Brand & Design
+- **Framework:** Next.js 14+ with App Router (NOT Pages Router)
+- **Language:** TypeScript (strict mode, no `any` types)
+- **Styling:** Tailwind CSS v4 via `@tailwindcss/postcss` (NO tailwind.config file — config is handled via CSS). No CSS modules, no styled-components.
+- **Database:** PostgreSQL via Supabase, managed through Prisma ORM
+- **Auth:** Supabase Auth (email/password, Google OAuth, phone OTP via Twilio)
+- **Payments:** Stripe (Checkout for owners/adopters, Connect for provider payouts)
+- **File Storage:** Supabase Storage (photos, ID documents, vet records)
+- **SMS:** Twilio
+- **Email:** Resend with React Email templates
+- **Search:** PostgreSQL full-text search + PostGIS for geospatial queries
+- **Maps:** Google Maps JavaScript API
+- **Hosting:** Vercel
+- **Monitoring:** Sentry for errors
+- **ORM:** Prisma (always use Prisma, never raw SQL unless PostGIS requires it)
 
-Primary color: Deep sage green #2D6A4F
-Secondary color: Medium green #40916C
-Background: Warm cream #FFFEF7
-Accent: Terracotta #C45D3E
-Text: Dark charcoal #1A1A1A
-Muted text: #6B7280
-Error: #DC2626
-Success: #16A34A
-Typography: Inter (Google Font) for body, rounded sans-serif feel
-Border radius: Rounded (use rounded-xl for cards, rounded-lg for buttons, rounded-full for avatars)
-Shadows: Subtle, warm (shadow-sm default, shadow-md on hover)
-Tone: Warm, trustworthy, slightly playful but not childish. Never corporate.
-Icons: Lucide React
+## Brand & Design
 
-User Roles
+All brand colors are defined as CSS variables in `src/app/globals.css` and mirrored in `design-tokens/tinies-design-tokens.css`. Always use the CSS variables, never hardcode hex values in components.
+
+### Colors (CSS Variables)
+- **Primary:** `var(--color-primary)` → `#0A8080` (teal)
+- **Secondary:** `var(--color-secondary)` → `#F45D48` (coral)
+- **Accent:** `var(--color-accent)` → `#0A8080` (same as primary)
+- **Background:** `var(--color-background)` → `#FFFFFF` (white)
+- **Surface:** `var(--color-surface)` → `#FFFFFF` (white)
+- **Text:** `var(--color-text)` → `#1C1C1C` (near-black)
+- **Text secondary:** `var(--color-text-secondary)` → `rgba(28, 28, 28, 0.7)`
+- **Text muted:** `var(--color-text-muted)` → `rgba(28, 28, 28, 0.5)`
+- **Border:** `var(--color-border)` → `rgba(10, 128, 128, 0.15)` (teal-tinted)
+- **Error:** `#DC2626`
+- **Success:** `#16A34A`
+
+### Typography
+- **Headings:** Georgia (serif) — warm, editorial feel
+- **Body:** Roboto (sans-serif) — clean, readable
+- Fonts are loaded via CSS variables `var(--font-heading)` and `var(--font-body)`
+
+### Design Tokens
+- **Border radius:** Rounded (`rounded-xl` for cards, `rounded-lg` for buttons, `rounded-full` for avatars)
+- **Shadows:** Subtle, warm (`shadow-sm` default, `shadow-md` on hover)
+- **Tone:** Warm, trustworthy, slightly playful but not childish. Never corporate.
+- **Icons:** Lucide React
+
+### Important: Email Templates
+Some email templates in `src/lib/email/templates/` still use the old sage green `#2D6A4F`. These should be updated to use `#0A8080` (teal) to match the live site. Affected files: `booking-request.tsx`, `booking-completed.tsx`, `provider-cancelled.tsx`, `claim-reported.tsx`.
+
+## Navigation Structure
+
+The site uses a persistent header and footer on every page.
+
+### Header (always visible)
+- **Left:** Tinies logo (links to /)
+- **Center:** Find Care (/services), Become a Provider (/for-providers), Adopt (/adopt)
+- **Right (logged out):** Sign Up button, Sign In button
+- **Right (logged in):** Avatar/initials dropdown menu containing: Dashboard (routes to role-specific dashboard), Messages, Settings, Log Out
+- **Mobile:** Hamburger menu. If logged in, Dashboard is the first item.
+
+### Footer (every page)
+- For Pet Owners: Find Care, How It Works, Adopt
+- For Providers: Become a Provider, How It Works
+- For Rescues: List Your Animals, For Rescues
+- Giving: Tinies Giving, Become a Guardian, Donate
+- Company: About, Blog, Contact
+
+## User Roles
+
 The platform has five user roles. A single user account can hold multiple roles simultaneously.
 
-Pet Owner - Searches for and books local pet care. Creates pet profiles. Leaves reviews. Browses adoptions.
-Service Provider - Offers walking, sitting, boarding, drop-ins, daycare. Gets verified. Receives bookings and payouts.
-Rescue Organization - Posts adoption listings. Manages local and international adoption inquiries. Coordinates with platform on logistics.
-International Adopter - Based outside Cyprus. Browses adoptable animals. Submits applications. Pays adoption coordination fee.
-Admin - Manages verification, disputes, adoptions pipeline, giving fund, content moderation.
+1. **Pet Owner** - Searches for and books local pet care. Creates pet profiles. Leaves reviews. Browses adoptions.
+2. **Service Provider** - Offers walking, sitting, boarding, drop-ins, daycare. Gets verified. Receives bookings and payouts.
+3. **Rescue Organization** - Posts adoption listings. Manages local and international adoption inquiries. Coordinates with platform on logistics.
+4. **International Adopter** - Based outside Cyprus. Browses adoptable animals. Submits applications. Pays adoption coordination fee.
+5. **Admin** - Manages verification, disputes, adoptions pipeline, giving fund, content moderation.
 
-Service Types
-typescriptenum ServiceType {
+## Service Types
+
+```typescript
+enum ServiceType {
   WALKING = "walking",
   SITTING = "sitting",
   BOARDING = "boarding",
   DROP_IN = "drop_in",
   DAYCARE = "daycare",
 }
-Core Business Rules
+```
 
-Commission: 12% of each completed booking, deducted from provider payout
-Tinies Giving: 10% of commission revenue is allocated to the Giving Fund for animal charities
-Round-up donations: Enabled by default at checkout, rounds to nearest euro, user can opt out
-Cancellation policies: Three tiers (Flexible, Moderate, Strict), chosen by provider
-Provider verification: Government ID upload, manual review by admin, must be verified to appear in search
-Booking acceptance window: Provider has 4 hours to accept/decline. Auto-cancel and refund if no response.
-Payment capture: Manual capture on booking creation. Captured when provider accepts. Cancelled if declined/expired.
-Payouts: Weekly via Stripe Connect. Minimum EUR 20.
-Reviews: 1-5 stars + text (min 20 chars). Public, permanent. Provider can respond once. Owner can edit within 48h.
-International adoption fee: EUR 80-150 per placement (covers coordination, not vet/transport which are passed through at cost)
-All prices in EUR. No multi-currency.
+## Core Business Rules
 
-Multi-Pet Pricing
+- **Commission:** 12% of each completed booking, deducted from provider payout
+- **Tinies Giving:** 10% of commission revenue is allocated to the Giving Fund for animal charities
+- **Round-up donations:** Enabled by default at checkout, rounds to nearest euro, user can opt out
+- **Cancellation policies:** Three tiers (Flexible, Moderate, Strict), chosen by provider
+- **Provider verification:** Government ID upload, manual review by admin, must be verified to appear in search
+- **Booking acceptance window:** Provider has 4 hours to accept/decline. Auto-cancel and refund if no response.
+- **Payment capture:** Manual capture on booking creation. Captured when provider accepts. Cancelled if declined/expired.
+- **Payouts:** Weekly via Stripe Connect. Minimum EUR 20.
+- **Reviews:** 1-5 stars + text (min 20 chars). Public, permanent. Provider can respond once. Owner can edit within 48h.
+- **International adoption fee:** EUR 80-150 per placement (covers coordination, not vet/transport which are passed through at cost)
+- **All prices in EUR.** No multi-currency.
+
+## Multi-Pet Pricing
+
 Providers set a base_price and additional_pet_price per service. Booking total = base_price + (additional_pet_count * additional_pet_price). The booking flow must show the price breakdown dynamically as pets are added/removed.
-File & Folder Conventions
+
+## File & Folder Conventions
+
+```
 src/
   app/                    # Next.js App Router pages
     (auth)/               # Auth-related pages (login, signup, verify)
@@ -95,32 +140,38 @@ src/
     migrations/           # Prisma migrations
     seed.ts               # Seed data for development
   types/                  # Shared TypeScript type definitions
+design-tokens/            # Design tokens from Refine Design (tinies-design-tokens.css)
 docs/                     # Business plan and spec documents (not deployed)
 design-reference/         # Competitor screenshots for visual reference (not deployed)
 public/                   # Static assets (logo, favicons, OG images)
-Coding Patterns
+```
 
-Server Components by default. Only use "use client" when the component needs interactivity (forms, toggles, maps, modals).
-Server Actions for mutations. Use Next.js Server Actions for form submissions and data mutations. API routes only for webhooks and external integrations (Stripe, Twilio).
-Zod for all validation. Define schemas in lib/validations/. Use on both client (form validation) and server (API/action input validation).
-Error handling: Try/catch in all server actions and API routes. User-facing errors as toast notifications (use Sonner). Never expose internal errors to the user.
-Loading states: Use Next.js loading.tsx for page-level loading. Use skeleton components for component-level loading. Never show a blank screen.
-Authentication checks: Use Supabase getUser() in server components. Redirect to login if unauthenticated. Check role permissions in every protected route.
-Image handling: All uploaded images go to Supabase Storage. Generate public URLs. Use Next.js <Image> component with Supabase as a configured remote pattern. Compress on upload (max 1MB, resize to max 1200px wide).
-Dates/times: Store all dates in UTC in the database. Display in Europe/Nicosia timezone in the UI. Use date-fns for formatting.
-Currency: Always display as "EUR X.XX" or "€X.XX". Use integers (cents) internally for all money calculations to avoid floating point issues. Display as decimals in the UI.
-Slugs: Auto-generate URL slugs from names (provider name, animal name, charity name). Use slugify library. Ensure uniqueness by appending a short random suffix if duplicate.
+## Coding Patterns
 
-SEO Requirements
+- **Server Components by default.** Only use `"use client"` when the component needs interactivity (forms, toggles, maps, modals).
+- **Server Actions for mutations.** Use Next.js Server Actions for form submissions and data mutations. API routes only for webhooks and external integrations (Stripe, Twilio).
+- **Zod for all validation.** Define schemas in `lib/validations/`. Use on both client (form validation) and server (API/action input validation).
+- **Error handling:** Try/catch in all server actions and API routes. User-facing errors as toast notifications (use Sonner). Never expose internal errors to the user.
+- **Loading states:** Use Next.js `loading.tsx` for page-level loading. Use skeleton components for component-level loading. Never show a blank screen.
+- **Authentication checks:** Use Supabase `getUser()` in server components. Redirect to login if unauthenticated. Check role permissions in every protected route.
+- **Image handling:** All uploaded images go to Supabase Storage. Generate public URLs. Use Next.js `<Image>` component with Supabase as a configured remote pattern. Compress on upload (max 1MB, resize to max 1200px wide).
+- **Dates/times:** Store all dates in UTC in the database. Display in Europe/Nicosia timezone in the UI. Use `date-fns` for formatting.
+- **Currency:** Always display as "EUR X.XX" or "€X.XX". Use integers (cents) internally for all money calculations to avoid floating point issues. Display as decimals in the UI.
+- **Slugs:** Auto-generate URL slugs from names (provider name, animal name, charity name). Use `slugify` library. Ensure uniqueness by appending a short random suffix if duplicate.
+- **Colors:** Always use CSS variables (`var(--color-primary)`, `var(--color-secondary)`, etc.) — never hardcode hex values in components. The source of truth is `src/app/globals.css`.
 
-Every public page must have: unique <title>, <meta name="description">, Open Graph tags (og:title, og:description, og:image), and Twitter Card tags.
-Provider profiles, adoption listings, charity profiles, and district landing pages must include Schema.org structured data (JSON-LD).
-Generate sitemap.xml dynamically from all public page routes.
-All public pages are server-rendered (no client-only rendering for SEO-critical content).
-District landing pages are auto-generated at build time: /dog-walking/limassol, /pet-sitting/nicosia, /boarding/paphos, etc.
-Country adoption pages: /adopt/from-cyprus-to-uk, /adopt/from-cyprus-to-germany, etc.
+## SEO Requirements
 
-Key Pages (Routes)
+- Every public page must have: unique `<title>`, `<meta name="description">`, Open Graph tags (og:title, og:description, og:image), and Twitter Card tags.
+- Provider profiles, adoption listings, charity profiles, and district landing pages must include Schema.org structured data (JSON-LD).
+- Generate `sitemap.xml` dynamically from all public page routes.
+- All public pages are server-rendered (no client-only rendering for SEO-critical content).
+- District landing pages are auto-generated at build time: `/dog-walking/limassol`, `/pet-sitting/nicosia`, `/boarding/paphos`, etc.
+- Country adoption pages: `/adopt/from-cyprus-to-uk`, `/adopt/from-cyprus-to-germany`, etc.
+
+## Key Pages (Routes)
+
+```
 /                                   Homepage (search, featured providers, adoption preview, trust signals)
 /services                           Services landing (category cards)
 /services/search                    Search results (filters, list, map toggle)
@@ -145,19 +196,24 @@ Key Pages (Routes)
 /for-rescues                        Rescue org recruitment
 /blog                               SEO content hub
 /about                              Mission and team
-Stripe Webhook Events to Handle
+```
 
-payment_intent.succeeded - Booking payment captured
-payment_intent.canceled - Booking expired or cancelled
-charge.refunded - Refund processed
-transfer.created - Provider payout initiated
-transfer.failed - Provider payout failed (alert admin)
-invoice.paid - Guardian subscription payment processed
-customer.subscription.updated - Guardian subscription changed
-customer.subscription.deleted - Guardian subscription cancelled
+## Stripe Webhook Events to Handle
 
-All webhook handlers must be idempotent. Maintain a processed_webhook_events table to deduplicate.
-Environment Variables Needed
+- `payment_intent.succeeded` - Booking payment captured
+- `payment_intent.canceled` - Booking expired or cancelled
+- `charge.refunded` - Refund processed
+- `transfer.created` - Provider payout initiated
+- `transfer.failed` - Provider payout failed (alert admin)
+- `invoice.paid` - Guardian subscription payment processed
+- `customer.subscription.updated` - Guardian subscription changed
+- `customer.subscription.deleted` - Guardian subscription cancelled
+
+All webhook handlers must be idempotent. Maintain a `processed_webhook_events` table to deduplicate.
+
+## Environment Variables Needed
+
+```
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
@@ -173,11 +229,14 @@ RESEND_API_KEY=
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
 SENTRY_DSN=
 NEXT_PUBLIC_APP_URL=https://tinies.app
-When In Doubt
+```
 
-Reference the spec docs in /docs for business logic details.
-Reference screenshots in /design-reference for UI patterns.
-Keep it simple. Ship working code. Polish later.
-Every feature should work on mobile first. Desktop is the expanded view.
-Never sacrifice page load speed for visual complexity.
-When choosing between a clever solution and a readable solution, choose readable.
+## When In Doubt
+
+- Reference the spec docs in `/docs` for business logic details.
+- Reference screenshots in `/design-reference` for UI patterns.
+- Keep it simple. Ship working code. Polish later.
+- Every feature should work on mobile first. Desktop is the expanded view.
+- Never sacrifice page load speed for visual complexity.
+- When choosing between a clever solution and a readable solution, choose readable.
+- Always use CSS variables for colors — the source of truth is `src/app/globals.css`.

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Search, ChevronDown, Loader2 } from "lucide-react";
 import { geocodeSearchLocation } from "@/app/services/search/actions";
+import { AddressAutocomplete } from "@/components/maps";
 
 const SERVICE_OPTIONS: { label: string; value: string }[] = [
   { label: "Dog Walking", value: "walking" },
@@ -16,9 +17,17 @@ const SERVICE_OPTIONS: { label: string; value: string }[] = [
 export function HomeSearchBar() {
   const router = useRouter();
   const [location, setLocation] = useState("");
+  const [lat, setLat] = useState<number | null>(null);
+  const [lng, setLng] = useState<number | null>(null);
   const [service, setService] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  function handleAddressChange(address: string, latVal?: number, lngVal?: number) {
+    setLocation(address);
+    setLat(latVal ?? null);
+    setLng(lngVal ?? null);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -29,15 +38,20 @@ export function HomeSearchBar() {
 
     const trimmed = location.trim();
     if (trimmed) {
-      setLoading(true);
-      try {
-        const coords = await geocodeSearchLocation(trimmed);
-        if (coords) {
-          params.set("lat", String(coords.lat));
-          params.set("lng", String(coords.lng));
+      if (lat != null && lng != null) {
+        params.set("lat", String(lat));
+        params.set("lng", String(lng));
+      } else {
+        setLoading(true);
+        try {
+          const coords = await geocodeSearchLocation(trimmed);
+          if (coords) {
+            params.set("lat", String(coords.lat));
+            params.set("lng", String(coords.lng));
+          }
+        } finally {
+          setLoading(false);
         }
-      } finally {
-        setLoading(false);
       }
     }
 
@@ -52,14 +66,12 @@ export function HomeSearchBar() {
     >
       <div className="flex flex-1 flex-col gap-1 sm:flex-row sm:flex-[2] sm:items-stretch">
         <div className="relative flex-1">
-          <input
-            type="text"
-            placeholder="Address or area"
+          <AddressAutocomplete
             value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            className="w-full rounded-[var(--radius-lg)] border py-3.5 pl-4 pr-4 focus:outline-none focus:ring-2 sm:rounded-none sm:rounded-l-[var(--radius-lg)] sm:border-r-0"
-            style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
-            aria-label="Location"
+            onChange={handleAddressChange}
+            placeholder="Address or area"
+            defaultCountry="cy"
+            className="py-3.5 sm:rounded-none sm:rounded-l-[var(--radius-lg)] sm:border-r-0"
           />
         </div>
         <div className="relative flex-1 sm:max-w-[200px]">
