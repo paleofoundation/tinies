@@ -183,6 +183,8 @@ model User {
   meetAndGreetsAsProvider MeetAndGreet[]    @relation("MeetAndGreetProvider")
   givingDistributionsApproved GivingFundDistribution[]
   charity Charity?
+  providerFavoritesAsOwner   ProviderFavorite[] @relation("ProviderFavoriteOwner")
+  providerFavoritesAsTarget  ProviderFavorite[] @relation("ProviderFavoriteProvider")
 
   @@index([email])
   @@index([role])
@@ -263,6 +265,21 @@ model ProviderProfile {
   @@index([slug])
   @@index([serviceAreaLat, serviceAreaLng])
   @@map("provider_profiles")
+}
+
+model ProviderFavorite {
+  id          String   @id @default(uuid())
+  ownerId     String   @map("owner_id")
+  providerId  String   @map("provider_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  owner    User @relation("ProviderFavoriteOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  provider User @relation("ProviderFavoriteProvider", fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@unique([ownerId, providerId])
+  @@index([ownerId])
+  @@index([providerId])
+  @@map("provider_favorites")
 }
 
 // ---------------------------------------------------------------------------

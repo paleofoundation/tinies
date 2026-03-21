@@ -5,6 +5,8 @@
 
 export type SearchProviderCard = {
   slug: string;
+  /** Provider's user id (for favorites, messaging). */
+  providerUserId: string;
   name: string;
   avatarUrl: string | null;
   initials: string;

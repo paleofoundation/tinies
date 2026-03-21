@@ -3,29 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { geocodeAddress } from "@/lib/utils/geocoding";
 import type { SearchProviderCard, SearchFilters } from "@/lib/utils/search-helpers";
-
-const FEATURED_SNIPPET_LENGTH = 80;
-const EARTH_RADIUS_KM = 6371;
-
-/** Haversine distance in km between two points. */
-function haversineKm(
-  lat1: number,
-  lng1: number,
-  lat2: number,
-  lng2: number
-): number {
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLng / 2) *
-      Math.sin(dLng / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return EARTH_RADIUS_KM * c;
-}
+import { mapProfileToSearchProviderCard } from "@/lib/providers/search-provider-card-map";
 
 /** Geocode an address for search; returns lat/lng or null. */
 export async function geocodeSearchLocation(
@@ -62,61 +40,31 @@ export async function getSearchProviders(
   const hasLocation = searchLat != null && searchLng != null;
   const sort = filters.sort ?? (hasLocation ? "distance" : "rating");
 
-  let result: SearchProviderCard[] = profiles.map((p) => {
-    const raw = p.servicesOffered as unknown;
-    const services: { type: string; base_price?: number }[] = Array.isArray(raw)
-      ? raw.map((s: Record<string, unknown>) => ({
-          type: String(s.type ?? ""),
-          base_price: Number(s.base_price) ?? 0,
-        }))
-      : [];
-    const selectedType = filters.serviceType?.toLowerCase();
-    const forService = selectedType
-      ? services.find((s) => s.type.toLowerCase() === selectedType)
-      : services[0];
-    /** base_price in DB is stored in cents (1200 = EUR 12.00). */
-    const priceFromCents =
-      forService?.base_price != null ? forService.base_price : null;
-    const featuredText = p.reviews[0]?.text;
-    const snippet =
-      featuredText != null && featuredText.length > 0
-        ? featuredText.length <= FEATURED_SNIPPET_LENGTH
-          ? featuredText
-          : featuredText.slice(0, FEATURED_SNIPPET_LENGTH).trim() + "…"
-        : null;
-    const initials = p.user.name
-      .split(" ")
-      .map((s) => s.charAt(0))
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-    const plat = p.serviceAreaLat ?? null;
-    const plng = p.serviceAreaLng ?? null;
-    const distanceKm =
-      hasLocation && plat != null && plng != null
-        ? haversineKm(searchLat!, searchLng!, plat, plng)
-        : null;
-    return {
-      slug: p.slug,
-      name: p.user.name,
-      avatarUrl: p.user.avatarUrl,
-      initials,
-      rating: p.avgRating,
-      reviewCount: p.reviewCount,
-      repeatClientCount: p.repeatClientCount,
-      district: p.user.district,
-      services: services.map((s) => s.type).filter(Boolean),
-      priceFrom: priceFromCents,
-      bio: p.bio,
-      featuredReviewSnippet: snippet,
-      lat: plat,
-      lng: plng,
-      distanceKm,
-      cancellationPolicy: p.cancellationPolicy,
-      updatedAt: p.updatedAt.toISOString(),
-      confirmedHolidays: p.confirmedHolidays,
-    };
-  });
+  let result: SearchProviderCard[] = profiles.map((p) =>
+    mapProfileToSearchProviderCard(
+      {
+        slug: p.slug,
+        userId: p.userId,
+        bio: p.bio,
+        servicesOffered: p.servicesOffered,
+        serviceAreaLat: p.serviceAreaLat,
+        serviceAreaLng: p.serviceAreaLng,
+        avgRating: p.avgRating,
+        reviewCount: p.reviewCount,
+        repeatClientCount: p.repeatClientCount,
+        cancellationPolicy: p.cancellationPolicy,
+        updatedAt: p.updatedAt,
+        confirmedHolidays: p.confirmedHolidays,
+        user: p.user,
+        reviews: p.reviews,
+      },
+      {
+        serviceType: filters.serviceType,
+        searchLat,
+        searchLng,
+      }
+    )
+  );
 
   if (filters.serviceType) {
     result = result.filter((r) =>

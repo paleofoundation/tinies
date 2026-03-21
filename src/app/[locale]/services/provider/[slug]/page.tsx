@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import {
   BadgeCheck,
@@ -14,6 +15,8 @@ import { ProviderLocationMap } from "@/components/maps";
 import { HOLIDAY_LABELS } from "@/lib/constants/holidays";
 import { GivingTierBadge } from "@/components/giving/GivingTierBadge";
 import { MeetAndGreetRequestModal } from "./MeetAndGreetRequestModal";
+import { getFavoriteViewerState } from "@/lib/providers/favorite-actions";
+import { ProviderFavoriteButton } from "@/components/providers/ProviderFavoriteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -98,6 +101,12 @@ export default async function ProviderProfilePage({ params }: Props) {
   const messageHref = provider
     ? `/dashboard/messages/with/${provider.providerId}`
     : "/dashboard/messages";
+
+  const favoriteViewer = await getFavoriteViewerState();
+  const favorited =
+    provider != null &&
+    favoriteViewer.kind === "owner" &&
+    favoriteViewer.favoritedProviderUserIds.includes(provider.providerId);
   const avgRating = provider?.avgRating ?? null;
   const reviewCount = provider?.reviewCount ?? 0;
 
@@ -192,6 +201,17 @@ export default async function ProviderProfilePage({ params }: Props) {
                 {provider && (
                   <MeetAndGreetRequestModal providerSlug={slug} providerName={name} />
                 )}
+                {provider ? (
+                  <Suspense fallback={null}>
+                    <ProviderFavoriteButton
+                      providerUserId={provider.providerId}
+                      initialFavorited={favorited}
+                      viewerKind={favoriteViewer.kind}
+                      loginReturnPath={`/services/provider/${slug}`}
+                      size="lg"
+                    />
+                  </Suspense>
+                ) : null}
                 <button
                   type="button"
                   className="inline-flex h-12 items-center justify-center gap-2 rounded-[var(--radius-pill)] border bg-white px-6 font-semibold transition-opacity hover:opacity-90"

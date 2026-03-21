@@ -1,4 +1,5 @@
 import type { SortOption } from "@/lib/utils/search-helpers";
+import { getFavoriteViewerState } from "@/lib/providers/favorite-actions";
 import { getSearchProviders } from "./actions";
 import { SearchContent } from "./SearchContent";
 
@@ -63,6 +64,8 @@ export default async function ServicesSearchPage({ searchParams }: Props) {
     providers = [];
   }
 
+  const favoriteViewer = await getFavoriteViewerState();
+
   return (
     <SearchContent
       initialProviders={providers}
@@ -78,6 +81,8 @@ export default async function ServicesSearchPage({ searchParams }: Props) {
       initialHomeType={homeType || undefined}
       initialHasYard={hasYard}
       initialHoliday={holiday || undefined}
+      favoriteViewerKind={favoriteViewer.kind}
+      favoritedProviderUserIds={favoriteViewer.favoritedProviderUserIds}
     />
   );
 }

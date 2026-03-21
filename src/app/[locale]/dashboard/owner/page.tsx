@@ -4,6 +4,7 @@ import { getOwnerPets, getOwnerBookings } from "./actions";
 import { getOwnerMeetAndGreets } from "@/lib/meet-and-greet/actions";
 import { getDisputesForUser, getClaimsForUser } from "@/lib/disputes/actions";
 import { OwnerDashboardClient } from "./OwnerDashboardClient";
+import { OwnerFavoritesSection } from "./OwnerFavoritesSection";
 
 export const dynamic = "force-dynamic";
 
@@ -66,6 +67,8 @@ export default async function OwnerDashboardPage() {
             {error}
           </p>
         )}
+
+        <OwnerFavoritesSection />
 
         <OwnerDashboardClient initialPets={pets} initialBookings={bookings} initialMeetAndGreets={meetAndGreets} initialDisputes={disputesList} initialClaims={claimsList} />
 
