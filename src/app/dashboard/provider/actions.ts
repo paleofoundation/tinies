@@ -13,7 +13,9 @@ import BookingAcceptedEmail from "@/lib/email/templates/booking-accepted";
 import PaymentReceiptEmail from "@/lib/email/templates/payment-receipt";
 import BookingDeclinedEmail from "@/lib/email/templates/booking-declined";
 import BookingExpiredEmail from "@/lib/email/templates/booking-expired";
-import { sendSMS, buildBookingAcceptedSMS } from "@/lib/sms";
+import ProviderCancelledEmail from "@/lib/email/templates/provider-cancelled";
+import { sendSMS, buildBookingAcceptedSMS, buildBookingExpiredSMS, buildWalkTrackingStartedSMS, buildBookingServiceStartedSMS, buildProviderCancelledOwnerSMS } from "@/lib/sms";
+import { sendBookingCompletedNotifications } from "@/lib/notifications/booking-notifications";
 import slugify from "slugify";
 import type {
   CreateStripeConnectOnboardingResult,
@@ -32,6 +34,14 @@ import { HOLIDAY_OPTIONS } from "@/lib/utils/provider-helpers";
 import { recordPlatformCommissionDonation } from "@/lib/giving/actions";
 
 const PENDING_RESPONSE_HOURS = 4;
+
+const SERVICE_TYPE_LABELS: Record<string, string> = {
+  walking: "Dog walking",
+  sitting: "Pet sitting",
+  boarding: "Overnight boarding",
+  drop_in: "Drop-in visit",
+  daycare: "Daycare",
+};
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 const DASHBOARD_RETURN = `${APP_URL}/dashboard/provider`;
@@ -283,6 +293,7 @@ export async function acceptBooking(bookingId: string): Promise<{ error?: string
           body: buildBookingAcceptedSMS({
             providerName: full.provider.name,
             date: dateStr,
+            petName,
           }),
         });
       }
@@ -368,7 +379,7 @@ export async function expireStaleBookings(): Promise<{ expired: number; error?: 
     select: {
       id: true,
       stripePaymentIntentId: true,
-      owner: { select: { email: true } },
+      owner: { select: { email: true, phone: true, phoneVerified: true } },
       provider: { select: { name: true } },
     },
   });
@@ -397,6 +408,12 @@ export async function expireStaleBookings(): Promise<{ expired: number; error?: 
             to: b.owner.email,
             subject: "Your booking request expired",
             react: BookingExpiredEmail({ providerName: b.provider.name }),
+          });
+        }
+        if (b.owner?.phoneVerified && b.owner?.phone) {
+          await sendSMS({
+            to: b.owner.phone,
+            body: buildBookingExpiredSMS({ providerName: b.provider.name }),
           });
         }
       } catch (emailErr) {
@@ -501,7 +518,12 @@ export async function startWalk(bookingId: string): Promise<{ error?: string }> 
       status: "accepted",
       serviceType: "walking",
     },
-    select: { id: true },
+    select: {
+      id: true,
+      petIds: true,
+      provider: { select: { name: true } },
+      owner: { select: { phone: true, phoneVerified: true } },
+    },
   });
   if (!booking) return { error: "Booking not found or not a walking booking." };
   try {
@@ -514,6 +536,29 @@ export async function startWalk(bookingId: string): Promise<{ error?: string }> 
         walkActivities: [],
       },
     });
+    try {
+      const petIds = booking.petIds ?? [];
+      const pets =
+        petIds.length > 0
+          ? await prisma.pet.findMany({
+              where: { id: { in: petIds } },
+              select: { name: true },
+            })
+          : [];
+      const petName = pets.map((p) => p.name).join(", ") || "your pet";
+      if (booking.owner.phoneVerified && booking.owner.phone) {
+        await sendSMS({
+          to: booking.owner.phone,
+          body: buildWalkTrackingStartedSMS({
+            providerName: booking.provider.name,
+            petName,
+            bookingId,
+          }),
+        });
+      }
+    } catch (smsErr) {
+      console.error("startWalk: SMS failed", smsErr);
+    }
     revalidatePath("/dashboard/provider");
     return {};
   } catch (e) {
@@ -549,7 +594,7 @@ function buildStaticMapUrl(
   const step = Math.max(1, Math.floor(points.length / maxPoints));
   const sampled = points.filter((_, i) => i % step === 0 || i === points.length - 1);
   const pathSegment = sampled.map((p) => `${p.lat},${p.lng}`).join("|");
-  const encoded = encodeURIComponent(`color:0x2D6A4F|weight:5|${pathSegment}`);
+  const encoded = encodeURIComponent(`color:0x0A8080|weight:5|${pathSegment}`);
   return `https://maps.googleapis.com/maps/api/staticmap?size=600x400&path=${encoded}&key=${apiKey}`;
 }
 
@@ -611,12 +656,178 @@ export async function endWalk(bookingId: string): Promise<{ error?: string }> {
     });
     await recordPlatformCommissionDonation(booking.id, booking.commissionAmount);
     await updateProviderRepeatClientCount(user.id);
+    await sendBookingCompletedNotifications(bookingId);
     revalidatePath("/dashboard/provider");
     revalidatePath("/dashboard/owner");
     return {};
   } catch (e) {
     console.error("endWalk", e);
     return { error: e instanceof Error ? e.message : "Failed to end walk." };
+  }
+}
+
+/** Non-walk: mark service started (SMS to owner). */
+export async function startNonWalkService(bookingId: string): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+  const booking = await prisma.booking.findFirst({
+    where: {
+      id: bookingId,
+      providerId: user.id,
+      status: "accepted",
+      serviceType: { not: "walking" },
+    },
+    select: {
+      id: true,
+      petIds: true,
+      serviceType: true,
+      provider: { select: { name: true } },
+      owner: { select: { phone: true, phoneVerified: true } },
+    },
+  });
+  if (!booking) return { error: "Booking not found or not eligible to start." };
+  try {
+    await prisma.booking.update({
+      where: { id: bookingId },
+      data: { status: "active" },
+    });
+    try {
+      const petIds = booking.petIds ?? [];
+      const pets =
+        petIds.length > 0
+          ? await prisma.pet.findMany({ where: { id: { in: petIds } }, select: { name: true } })
+          : [];
+      const petName = pets.map((p) => p.name).join(", ") || "your pet";
+      const serviceLabel = SERVICE_TYPE_LABELS[booking.serviceType] ?? booking.serviceType;
+      if (booking.owner.phoneVerified && booking.owner.phone) {
+        await sendSMS({
+          to: booking.owner.phone,
+          body: buildBookingServiceStartedSMS({
+            providerName: booking.provider.name,
+            serviceType: serviceLabel,
+            petName,
+          }),
+        });
+      }
+    } catch (smsErr) {
+      console.error("startNonWalkService: SMS failed", smsErr);
+    }
+    revalidatePath("/dashboard/provider");
+    revalidatePath("/dashboard/owner");
+    return {};
+  } catch (e) {
+    console.error("startNonWalkService", e);
+    return { error: e instanceof Error ? e.message : "Failed to start service." };
+  }
+}
+
+/** Non-walk: mark completed (commission + completion emails). */
+export async function completeNonWalkBooking(bookingId: string): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+  const booking = await prisma.booking.findFirst({
+    where: {
+      id: bookingId,
+      providerId: user.id,
+      status: { in: ["accepted", "active"] },
+      serviceType: { not: "walking" },
+    },
+    select: { id: true, commissionAmount: true },
+  });
+  if (!booking) return { error: "Booking not found or not eligible to complete." };
+  try {
+    await prisma.booking.update({
+      where: { id: bookingId },
+      data: { status: "completed" },
+    });
+    await recordPlatformCommissionDonation(booking.id, booking.commissionAmount);
+    await updateProviderRepeatClientCount(user.id);
+    await sendBookingCompletedNotifications(bookingId);
+    revalidatePath("/dashboard/provider");
+    revalidatePath("/dashboard/owner");
+    return {};
+  } catch (e) {
+    console.error("completeNonWalkBooking", e);
+    return { error: e instanceof Error ? e.message : "Failed to complete booking." };
+  }
+}
+
+/** Provider cancels an accepted or active booking — full refund, notify owner. */
+export async function cancelAcceptedBookingAsProvider(
+  bookingId: string
+): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+  const booking = await prisma.booking.findFirst({
+    where: {
+      id: bookingId,
+      providerId: user.id,
+      status: { in: ["accepted", "active"] },
+    },
+    include: {
+      owner: { select: { email: true, phone: true, phoneVerified: true } },
+      provider: { select: { name: true } },
+    },
+  });
+  if (!booking) return { error: "Booking not found or cannot be cancelled." };
+  if (!booking.stripePaymentIntentId)
+    return { error: "No payment on file to refund." };
+  const amountEur = (booking.totalPrice / 100).toFixed(2);
+  try {
+    const stripe = getStripeServer();
+    const refund = await stripe.refunds.create({
+      payment_intent: booking.stripePaymentIntentId,
+      amount: booking.totalPrice,
+    });
+    await prisma.booking.update({
+      where: { id: bookingId },
+      data: {
+        status: "cancelled",
+        cancelledAt: new Date(),
+        cancelledBy: user.id,
+        refundAmount: booking.totalPrice,
+        refundStripeId: refund.id,
+        refundStatus: refund.status,
+      },
+    });
+    try {
+      if (booking.owner.email) {
+        await sendEmail({
+          to: booking.owner.email,
+          subject: `${booking.provider.name} cancelled your booking`,
+          react: ProviderCancelledEmail({
+            providerName: booking.provider.name,
+            amountEur,
+          }),
+        });
+      }
+      if (booking.owner.phoneVerified && booking.owner.phone) {
+        await sendSMS({
+          to: booking.owner.phone,
+          body: buildProviderCancelledOwnerSMS({
+            providerName: booking.provider.name,
+            amountEur,
+          }),
+        });
+      }
+    } catch (notifyErr) {
+      console.error("cancelAcceptedBookingAsProvider: notify failed", notifyErr);
+    }
+    revalidatePath("/dashboard/provider");
+    revalidatePath("/dashboard/owner");
+    return {};
+  } catch (e) {
+    console.error("cancelAcceptedBookingAsProvider", e);
+    return { error: e instanceof Error ? e.message : "Failed to cancel booking." };
   }
 }
 

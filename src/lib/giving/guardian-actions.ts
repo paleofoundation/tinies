@@ -5,6 +5,11 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { getStripeServer } from "@/lib/stripe";
 import { DonationSource, GuardianTier, GuardianStatus } from "@prisma/client";
+import {
+  notifyGuardianPaused,
+  notifyGuardianCancelled,
+  getUserGuardianTotalDonatedEur,
+} from "@/lib/notifications/guardian-notifications";
 
 const GUARDIAN_PRODUCT_ID = process.env.STRIPE_GUARDIAN_PRODUCT_ID;
 /** Metadata marker on Checkout Session + Stripe Subscription for Tinies Guardian. */
@@ -356,9 +361,10 @@ export async function syncGuardianSubscriptionFromStripe(params: {
 }): Promise<void> {
   const row = await prisma.guardianSubscription.findFirst({
     where: { stripeSubscriptionId: params.stripeSubscriptionId },
-    select: { id: true, userId: true },
+    select: { id: true, userId: true, status: true },
   });
   if (!row) return;
+  const prevStatus = row.status;
 
   if (params.status === "cancelled") {
     await prisma.guardianSubscription.update({
@@ -378,6 +384,23 @@ export async function syncGuardianSubscriptionFromStripe(params: {
       where: { id: row.id },
       data: { status: "active", pausedAt: null, cancelledAt: null },
     });
+  }
+
+  if (params.status === "paused" && prevStatus === "active") {
+    try {
+      const totalDonatedEur = await getUserGuardianTotalDonatedEur(row.userId);
+      await notifyGuardianPaused({ userId: row.userId, totalDonatedEur });
+    } catch (e) {
+      console.error("syncGuardianSubscriptionFromStripe: paused email failed", e);
+    }
+  }
+  if (params.status === "cancelled" && prevStatus !== "cancelled") {
+    try {
+      const totalDonatedEur = await getUserGuardianTotalDonatedEur(row.userId);
+      await notifyGuardianCancelled({ userId: row.userId, totalDonatedEur });
+    } catch (e) {
+      console.error("syncGuardianSubscriptionFromStripe: cancelled email failed", e);
+    }
   }
 
   revalidatePath("/dashboard/owner/giving");

@@ -1,5 +1,6 @@
 import { Section, Text, Link, Hr } from "@react-email/components";
 import * as React from "react";
+import { BRAND_TEAL } from "@/lib/email/brand";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
@@ -10,7 +11,7 @@ export function EmailFooter() {
       <Section>
         <Text style={{ color: "#6B7280", fontSize: "12px", margin: 0 }}>
           10% of proceeds support animal rescue.{" "}
-          <Link href={`${APP_URL}/giving`} style={{ color: "#2D6A4F" }}>
+          <Link href={`${APP_URL}/giving`} style={{ color: BRAND_TEAL }}>
             tinies.app/giving
           </Link>
         </Text>

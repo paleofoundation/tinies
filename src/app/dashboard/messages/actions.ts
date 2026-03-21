@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email";
 import NewMessageNotificationEmail from "@/lib/email/templates/new-message-notification";
+import { sendSMS, buildNewMessageSMS } from "@/lib/sms";
 import { getConversationId } from "@/lib/utils/conversation";
 import type { ConversationSummary, MessageRow, SendMessageInput } from "@/lib/utils/messages-helpers";
 
@@ -192,7 +193,7 @@ export async function sendMessage(
           }),
           prisma.user.findUnique({
             where: { id: input.recipientId },
-            select: { email: true },
+            select: { email: true, phone: true, phoneVerified: true },
           }),
         ]);
         if (recipient?.email && sender?.name) {
@@ -205,6 +206,12 @@ export async function sendMessage(
               context,
               messagesUrl: `${APP_URL}/dashboard/messages/${conversationId}`,
             }),
+          });
+        }
+        if (recipient?.phoneVerified && recipient?.phone && sender?.name) {
+          await sendSMS({
+            to: recipient.phone,
+            body: buildNewMessageSMS({ senderName: sender.name }),
           });
         }
       }

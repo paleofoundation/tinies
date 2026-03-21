@@ -1,41 +1,35 @@
 import { Section, Text, Link } from "@react-email/components";
 import * as React from "react";
 import { EmailLayout } from "./shared/EmailLayout";
+import { BRAND_TEAL } from "@/lib/email/brand";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
-export type BookingRequestEmailProps = {
-  ownerName: string;
-  serviceType: string;
-  date: string;
-  petName: string;
-  species: string;
+export type CaseResolvedEmailProps = {
+  caseLabel: string;
+  summary: string;
   dashboardUrl?: string;
 };
 
-export default function BookingRequestEmail({
-  ownerName,
-  serviceType,
-  date,
-  petName,
-  species,
-  dashboardUrl = `${APP_URL}/dashboard/provider`,
-}: BookingRequestEmailProps) {
+export default function CaseResolvedEmail({
+  caseLabel,
+  summary,
+  dashboardUrl = `${APP_URL}/dashboard/owner`,
+}: CaseResolvedEmailProps) {
   return (
-    <EmailLayout preview={`New booking request from ${ownerName} for ${serviceType}.`}>
+    <EmailLayout preview={`${caseLabel} resolved`}>
       <Section>
         <Text style={{ fontSize: "16px", lineHeight: "24px", margin: "0 0 16px", color: "#1A1A1A" }}>
-          New booking request from <strong>{ownerName}</strong> for <strong>{serviceType}</strong> on{" "}
-          <strong>{date}</strong>.
+          Your <strong>{caseLabel}</strong> has been resolved.
         </Text>
-        <Text style={{ fontSize: "16px", lineHeight: "24px", margin: "0 0 16px", color: "#1A1A1A" }}>
-          {petName} ({species}). Respond within 4 hours.
+        <Text style={{ fontSize: "16px", lineHeight: "24px", margin: "0 0 16px", color: "#374151" }}>
+          <strong>Ruling / summary:</strong> {summary}
         </Text>
         <Link
           href={dashboardUrl}
           style={{
             display: "inline-block",
-            backgroundColor: "#0A8080",
+            backgroundColor: BRAND_TEAL,
             color: "#fff",
             padding: "12px 24px",
             borderRadius: "8px",
@@ -44,7 +38,7 @@ export default function BookingRequestEmail({
             marginTop: "8px",
           }}
         >
-          View booking
+          View dashboard
         </Link>
       </Section>
     </EmailLayout>

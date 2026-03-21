@@ -39,6 +39,9 @@ import {
   acceptBooking,
   declineBooking,
   respondToReview,
+  startNonWalkService,
+  completeNonWalkBooking,
+  cancelAcceptedBookingAsProvider,
 } from "./actions";
 import { ActiveWalkCard } from "./ActiveWalkCard";
 import { ServiceReportForm } from "./ServiceReportForm";
@@ -170,6 +173,9 @@ export function ProviderDashboardClient({
   const [claimResponseText, setClaimResponseText] = useState<Record<string, string>>({});
   const [respondingDisputeId, setRespondingDisputeId] = useState<string | null>(null);
   const [respondingClaimId, setRespondingClaimId] = useState<string | null>(null);
+  const [startingServiceId, setStartingServiceId] = useState<string | null>(null);
+  const [completingBookingId, setCompletingBookingId] = useState<string | null>(null);
+  const [cancellingBookingId, setCancellingBookingId] = useState<string | null>(null);
   const score = profileCompletenessPercentage ?? getCompletenessScore();
 
   useEffect(() => {
@@ -219,6 +225,60 @@ export function ProviderDashboardClient({
     );
     router.refresh();
     toast.success("Booking declined.");
+  }
+
+  async function handleStartNonWalk(bookingId: string) {
+    if (startingServiceId) return;
+    setStartingServiceId(bookingId);
+    const result = await startNonWalkService(bookingId);
+    setStartingServiceId(null);
+    if (result.error) {
+      toast.error(result.error);
+      return;
+    }
+    setBookings((prev) =>
+      prev.map((b) => (b.id === bookingId ? { ...b, status: "active" } : b))
+    );
+    router.refresh();
+    toast.success("Service started — the owner has been notified.");
+  }
+
+  async function handleCompleteNonWalk(bookingId: string) {
+    if (completingBookingId) return;
+    setCompletingBookingId(bookingId);
+    const result = await completeNonWalkBooking(bookingId);
+    setCompletingBookingId(null);
+    if (result.error) {
+      toast.error(result.error);
+      return;
+    }
+    setBookings((prev) =>
+      prev.map((b) => (b.id === bookingId ? { ...b, status: "completed" } : b))
+    );
+    router.refresh();
+    toast.success("Booking marked complete.");
+  }
+
+  async function handleProviderCancelBooking(bookingId: string) {
+    if (cancellingBookingId) return;
+    if (
+      !confirm(
+        "Cancel this booking? The pet owner receives a full refund and will be notified."
+      )
+    )
+      return;
+    setCancellingBookingId(bookingId);
+    const result = await cancelAcceptedBookingAsProvider(bookingId);
+    setCancellingBookingId(null);
+    if (result.error) {
+      toast.error(result.error);
+      return;
+    }
+    setBookings((prev) =>
+      prev.map((b) => (b.id === bookingId ? { ...b, status: "cancelled" } : b))
+    );
+    router.refresh();
+    toast.success("Booking cancelled. Refund initiated.");
   }
 
   async function handleRespondToReview(reviewId: string) {
@@ -560,17 +620,64 @@ export function ProviderDashboardClient({
                     ) : (
                       <li
                         key={b.id}
-                        className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-lg)] border p-4"
+                        className="flex flex-col gap-3 rounded-[var(--radius-lg)] border p-4"
                         style={{ borderColor: "var(--color-border)" }}
                       >
-                        <div>
-                          <p className="font-medium" style={{ color: "var(--color-text)" }}>{b.ownerName} · {b.petNames.join(", ")} · {SERVICE_LABELS[b.serviceType] ?? b.serviceType}</p>
-                          <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>{formatDateTime(b.startDatetime)} – {formatDateTime(b.endDatetime)}</p>
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div>
+                            <p className="font-medium" style={{ color: "var(--color-text)" }}>{b.ownerName} · {b.petNames.join(", ")} · {SERVICE_LABELS[b.serviceType] ?? b.serviceType}</p>
+                            <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>{formatDateTime(b.startDatetime)} – {formatDateTime(b.endDatetime)}</p>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-[var(--color-primary)]/15" style={{ color: "var(--color-primary)" }}>
+                              {b.status}
+                            </span>
+                            <span className="font-semibold" style={{ color: "var(--color-text)" }}>{formatEur(b.totalPriceCents)}</span>
+                          </div>
                         </div>
-                        <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-[var(--color-primary)]/15" style={{ color: "var(--color-primary)" }}>
-                          {b.status}
-                        </span>
-                        <span className="font-semibold" style={{ color: "var(--color-text)" }}>{formatEur(b.totalPriceCents)}</span>
+                        <div className="flex flex-wrap gap-2">
+                          {b.status === "accepted" && (
+                            <button
+                              type="button"
+                              onClick={() => handleStartNonWalk(b.id)}
+                              disabled={
+                                startingServiceId === b.id ||
+                                completingBookingId === b.id ||
+                                cancellingBookingId === b.id
+                              }
+                              className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] bg-[var(--color-primary)] px-3 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-70"
+                            >
+                              {startingServiceId === b.id ? "Starting…" : "Start service"}
+                            </button>
+                          )}
+                          {(b.status === "active" || b.status === "accepted") && (
+                            <button
+                              type="button"
+                              onClick={() => handleCompleteNonWalk(b.id)}
+                              disabled={
+                                completingBookingId === b.id ||
+                                cancellingBookingId === b.id ||
+                                (b.status === "accepted" && startingServiceId === b.id)
+                              }
+                              className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] border border-[var(--color-border)] px-3 py-2 text-sm font-semibold hover:bg-[var(--color-surface)] disabled:opacity-70"
+                              style={{ color: "var(--color-text)" }}
+                            >
+                              {completingBookingId === b.id ? "Completing…" : "Mark complete"}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleProviderCancelBooking(b.id)}
+                            disabled={
+                              cancellingBookingId === b.id ||
+                              startingServiceId === b.id ||
+                              completingBookingId === b.id
+                            }
+                            className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] border border-[var(--color-error)]/50 px-3 py-2 text-sm font-semibold text-[var(--color-error)] hover:bg-[var(--color-error)]/10 disabled:opacity-70"
+                          >
+                            {cancellingBookingId === b.id ? "Cancelling…" : "Cancel booking"}
+                          </button>
+                        </div>
                       </li>
                     )
                   )}
@@ -652,7 +759,7 @@ export function ProviderDashboardClient({
                             </div>
                           )}
                           {b.serviceReport.submittedAt && (
-                            <p className="mt-2 text-xs" style={{ color: "var(--color-text-muted)" }}>Submitted {formatDateTime(b.serviceReport.submittedAt)}</p>
+                            <p className="mt-2 text-xs" style={{ color: "var(--color-text-muted)" }}>Submitted {formatDateTime(new Date(b.serviceReport.submittedAt))}</p>
                           )}
                         </div>
                       )}

@@ -23,7 +23,7 @@ export default function BookingDeclinedEmail({
           href={dashboardUrl}
           style={{
             display: "inline-block",
-            backgroundColor: "#2D6A4F",
+            backgroundColor: "#0A8080",
             color: "#fff",
             padding: "12px 24px",
             borderRadius: "8px",

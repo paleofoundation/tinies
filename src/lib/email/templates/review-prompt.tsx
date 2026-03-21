@@ -1,29 +1,33 @@
 import { Section, Text, Link } from "@react-email/components";
 import * as React from "react";
 import { EmailLayout } from "./shared/EmailLayout";
+import { BRAND_TEAL } from "@/lib/email/brand";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
-export type TipReceivedEmailProps = {
-  amountEur: string;
-  dashboardUrl?: string;
+export type ReviewPromptEmailProps = {
+  petName: string;
+  providerName: string;
+  reviewUrl?: string;
 };
 
-export default function TipReceivedEmail({
-  amountEur,
-  dashboardUrl = `${APP_URL}/dashboard/provider`,
-}: TipReceivedEmailProps) {
+export default function ReviewPromptEmail({
+  petName,
+  providerName,
+  reviewUrl = `${APP_URL}/dashboard/owner`,
+}: ReviewPromptEmailProps) {
   return (
-    <EmailLayout preview={`You received a €${amountEur} tip!`}>
+    <EmailLayout preview={`How was ${petName}'s experience with ${providerName}?`}>
       <Section>
         <Text style={{ fontSize: "16px", lineHeight: "24px", margin: "0 0 16px", color: "#1A1A1A" }}>
-          A client left you a <strong>€{amountEur} tip</strong>. Thank you for the great care you provide!
+          How was <strong>{petName}</strong>&apos;s experience with <strong>{providerName}</strong>? Leave a quick review to
+          help other pet parents choose with confidence.
         </Text>
         <Link
-          href={dashboardUrl}
+          href={reviewUrl}
           style={{
             display: "inline-block",
-            backgroundColor: "#0A8080",
+            backgroundColor: BRAND_TEAL,
             color: "#fff",
             padding: "12px 24px",
             borderRadius: "8px",
@@ -32,7 +36,7 @@ export default function TipReceivedEmail({
             marginTop: "8px",
           }}
         >
-          View earnings
+          Leave a review
         </Link>
       </Section>
     </EmailLayout>

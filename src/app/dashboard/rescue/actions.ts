@@ -4,8 +4,12 @@ import { revalidatePath } from "next/cache";
 import slugify from "slugify";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
+import { sendEmail } from "@/lib/email";
+import AdoptionStatusUpdateEmail from "@/lib/email/templates/adoption-status-update";
 import { AdoptionListingStatus, ApplicationStatus, PlacementStatus } from "@prisma/client";
 import type { CreateListingInput } from "@/app/dashboard/admin/actions";
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
 const STATUS_MAP: Record<string, AdoptionListingStatus> = {
   available: AdoptionListingStatus.available,
@@ -207,7 +211,10 @@ export async function approveApplication(applicationId: string): Promise<{ error
   if (error || !org) return { error: error ?? "Rescue org not found." };
   const app = await prisma.adoptionApplication.findFirst({
     where: { id: applicationId, listing: { orgId: org.id } },
-    include: { listing: true, applicant: true },
+    include: {
+      listing: { select: { id: true, name: true, slug: true } },
+      applicant: { select: { id: true, email: true, name: true } },
+    },
   });
   if (!app) return { error: "Application not found." };
   if (app.status === ApplicationStatus.approved) return { error: "Already approved." };
@@ -229,6 +236,22 @@ export async function approveApplication(applicationId: string): Promise<{ error
         },
       }),
     ]);
+    try {
+      if (app.applicant.email) {
+        await sendEmail({
+          to: app.applicant.email,
+          subject: `Update on your application for ${app.listing.name}`,
+          react: AdoptionStatusUpdateEmail({
+            animalName: app.listing.name,
+            statusMessage:
+              "Approved — the rescue will begin preparing next steps for adoption.",
+            dashboardUrl: `${APP_URL}/dashboard/adopter`,
+          }),
+        });
+      }
+    } catch (emailErr) {
+      console.error("approveApplication: status email failed", emailErr);
+    }
     revalidatePath("/dashboard/rescue");
     return {};
   } catch (e) {
@@ -242,6 +265,10 @@ export async function declineApplication(applicationId: string): Promise<{ error
   if (error || !org) return { error: error ?? "Rescue org not found." };
   const app = await prisma.adoptionApplication.findFirst({
     where: { id: applicationId, listing: { orgId: org.id } },
+    include: {
+      listing: { select: { name: true } },
+      applicant: { select: { email: true } },
+    },
   });
   if (!app) return { error: "Application not found." };
   try {
@@ -249,6 +276,22 @@ export async function declineApplication(applicationId: string): Promise<{ error
       where: { id: applicationId },
       data: { status: ApplicationStatus.declined },
     });
+    try {
+      if (app.applicant.email) {
+        await sendEmail({
+          to: app.applicant.email,
+          subject: `Update on your application for ${app.listing.name}`,
+          react: AdoptionStatusUpdateEmail({
+            animalName: app.listing.name,
+            statusMessage:
+              "The rescue is unable to proceed with this application. You can browse other animals on Tinies.",
+            dashboardUrl: `${APP_URL}/dashboard/adopter`,
+          }),
+        });
+      }
+    } catch (emailErr) {
+      console.error("declineApplication: status email failed", emailErr);
+    }
     revalidatePath("/dashboard/rescue");
     return {};
   } catch (e) {

@@ -1,32 +1,34 @@
 import { Section, Text, Link } from "@react-email/components";
 import * as React from "react";
 import { EmailLayout } from "./shared/EmailLayout";
+import { BRAND_TEAL } from "@/lib/email/brand";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
-
-export type ProviderIdentityVerifiedEmailProps = {
-  providerName: string;
-  dashboardUrl?: string;
+export type GuardianWelcomeEmailProps = {
+  firstName: string;
+  amountMonthlyEur: string;
+  givingUrl: string;
 };
 
-export default function ProviderIdentityVerifiedEmail({
-  providerName,
-  dashboardUrl = `${APP_URL}/dashboard/provider`,
-}: ProviderIdentityVerifiedEmailProps) {
+export default function GuardianWelcomeEmail({
+  firstName,
+  amountMonthlyEur,
+  givingUrl,
+}: GuardianWelcomeEmailProps) {
   return (
-    <EmailLayout preview="Your identity has been verified!">
+    <EmailLayout preview="Welcome, Tinies Guardian!">
       <Section>
         <Text style={{ fontSize: "16px", lineHeight: "24px", margin: "0 0 16px", color: "#1A1A1A" }}>
-          Hi {providerName},
+          Hi <strong>{firstName}</strong>,
         </Text>
         <Text style={{ fontSize: "16px", lineHeight: "24px", margin: "0 0 16px", color: "#1A1A1A" }}>
-          Your identity has been verified! Your profile is now live and visible to pet owners in search.
+          Welcome, <strong>Tinies Guardian</strong>! Your monthly <strong>EUR {amountMonthlyEur}</strong> starts today.
+          Your Guardian badge is active on your profile where you&apos;ve enabled it.
         </Text>
         <Link
-          href={dashboardUrl}
+          href={givingUrl}
           style={{
             display: "inline-block",
-            backgroundColor: "#0A8080",
+            backgroundColor: BRAND_TEAL,
             color: "#fff",
             padding: "12px 24px",
             borderRadius: "8px",
@@ -35,7 +37,7 @@ export default function ProviderIdentityVerifiedEmail({
             marginTop: "8px",
           }}
         >
-          Go to dashboard
+          Manage Giving
         </Link>
       </Section>
     </EmailLayout>

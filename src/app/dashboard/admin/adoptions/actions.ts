@@ -6,7 +6,10 @@ import { createClient } from "@/lib/supabase/server";
 import { PlacementStatus } from "@prisma/client";
 import { sendEmail } from "@/lib/email";
 import AdoptionStatusUpdateEmail from "@/lib/email/templates/adoption-status-update";
-import PostAdoptionCheckinEmail from "@/lib/email/templates/post-adoption-checkin";
+import AdoptionMilestoneEmail from "@/lib/email/templates/adoption-milestone";
+import PostAdoptionCheckinEmail, {
+  type PostAdoptionPhase,
+} from "@/lib/email/templates/post-adoption-checkin";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
@@ -20,21 +23,46 @@ const PLACEMENT_STATUS_LABELS: Record<PlacementStatus, string> = {
   completed: "Completed",
 };
 
-/** Send post-adoption check-in email to adopter. Call from cron when timeframe (1 week, 1 month, 3 months) is reached after arrival. Does not throw. */
+const MILESTONE_EMAIL_STATUSES: PlacementStatus[] = [
+  "vet_complete",
+  "transport_booked",
+  "in_transit",
+  "delivered",
+];
+
+const ADOPTION_MILESTONE_COPY: Partial<Record<PlacementStatus, string>> = {
+  vet_complete: "Vet preparation is complete (including EU pet passport steps as needed).",
+  transport_booked: "Transport is booked — your tiny has a confirmed route.",
+  in_transit: "Departure confirmed — your tiny is on the way.",
+  delivered: "Arrival confirmed — welcome home!",
+};
+
+function postAdoptionEmailSubject(phase: PostAdoptionPhase, animalName: string): string {
+  switch (phase) {
+    case "1m":
+      return `One month with ${animalName}!`;
+    case "3m":
+      return `Three months with ${animalName}!`;
+    default:
+      return `It's been one week since ${animalName} arrived!`;
+  }
+}
+
+/** Send post-adoption check-in email to adopter. Call from cron when 1w / 1m / 3m after arrival. Does not throw. */
 export async function sendPostAdoptionCheckinEmail(params: {
   to: string;
   animalName: string;
-  timeframe: string;
   placementId: string;
+  phase: PostAdoptionPhase;
 }): Promise<void> {
   try {
     const shareUpdateUrl = `${APP_URL}/adopt/tinies-who-made-it/share?placement=${encodeURIComponent(params.placementId)}`;
     await sendEmail({
       to: params.to,
-      subject: `It's been ${params.timeframe} since ${params.animalName} arrived!`,
+      subject: postAdoptionEmailSubject(params.phase, params.animalName),
       react: PostAdoptionCheckinEmail({
         animalName: params.animalName,
-        timeframe: params.timeframe,
+        phase: params.phase,
         shareUpdateUrl,
       }),
     });
@@ -232,15 +260,30 @@ export async function advancePlacementStatus(id: string, nextStatus: PlacementSt
         },
       });
       if (placement?.adopter?.email && placement.listing?.name) {
-        const statusMessage = PLACEMENT_STATUS_LABELS[nextStatus] ?? nextStatus;
-        await sendEmail({
-          to: placement.adopter.email,
-          subject: `Update on ${placement.listing.name}`,
-          react: AdoptionStatusUpdateEmail({
-            animalName: placement.listing.name,
-            statusMessage,
-          }),
-        });
+        const trackUrl = `${APP_URL}/dashboard/adopter`;
+        if (MILESTONE_EMAIL_STATUSES.includes(nextStatus)) {
+          const milestone =
+            ADOPTION_MILESTONE_COPY[nextStatus] ?? PLACEMENT_STATUS_LABELS[nextStatus] ?? nextStatus;
+          await sendEmail({
+            to: placement.adopter.email,
+            subject: `${placement.listing.name}: ${PLACEMENT_STATUS_LABELS[nextStatus] ?? nextStatus}`,
+            react: AdoptionMilestoneEmail({
+              animalName: placement.listing.name,
+              milestone,
+              trackProgressUrl: trackUrl,
+            }),
+          });
+        } else {
+          const statusMessage = PLACEMENT_STATUS_LABELS[nextStatus] ?? nextStatus;
+          await sendEmail({
+            to: placement.adopter.email,
+            subject: `Update on ${placement.listing.name}`,
+            react: AdoptionStatusUpdateEmail({
+              animalName: placement.listing.name,
+              statusMessage,
+            }),
+          });
+        }
       }
     } catch (emailErr) {
       console.error("advancePlacementStatus: adoption status/milestone email failed", emailErr);

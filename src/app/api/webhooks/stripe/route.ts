@@ -14,6 +14,11 @@ import {
   TINIES_GUARDIAN_CHECKOUT_TYPE,
   guardianTierFromAmountCents,
 } from "@/lib/giving/guardian-actions";
+import SignupDonationThankYouEmail from "@/lib/email/templates/signup-donation-thank-you";
+import {
+  notifyGuardianSubscriptionStarted,
+  notifyGuardianInvoicePaid,
+} from "@/lib/notifications/guardian-notifications";
 import type { GuardianTier } from "@prisma/client";
 
 const HANDLED_TYPES = [
@@ -122,6 +127,34 @@ export async function POST(request: NextRequest) {
               create: { userId, showOnLeaderboard },
               update: { showOnLeaderboard },
             });
+            try {
+              const [userRow, charityRow] = await Promise.all([
+                prisma.user.findUnique({
+                  where: { id: userId },
+                  select: { email: true },
+                }),
+                charityId
+                  ? prisma.charity.findUnique({
+                      where: { id: charityId },
+                      select: { name: true },
+                    })
+                  : Promise.resolve(null),
+              ]);
+              const charityName = charityRow?.name ?? "our charity partners";
+              const amountEur = (amountCents / 100).toFixed(2);
+              if (userRow?.email) {
+                await sendEmail({
+                  to: userRow.email,
+                  subject: `Thank you for EUR ${amountEur} to ${charityName}`,
+                  react: SignupDonationThankYouEmail({
+                    amountEur,
+                    charityName,
+                  }),
+                });
+              }
+            } catch (thankErr) {
+              console.error("Stripe webhook: signup donation thank-you email failed", thankErr);
+            }
           }
         }
         if (type === "one_time_donation" || type === "quick_donation") {
@@ -298,12 +331,22 @@ export async function POST(request: NextRequest) {
           tier,
           showOnLeaderboard,
         });
+        try {
+          await notifyGuardianSubscriptionStarted({
+            userId,
+            amountMonthlyCents,
+          });
+        } catch (welcomeErr) {
+          console.error("Stripe webhook: Guardian welcome email failed", welcomeErr);
+        }
         break;
       }
       case "invoice.paid": {
         const invoice = event.data.object as {
           id: string;
           amount_paid: number;
+          billing_reason?: string | null;
+          period_end?: number;
           subscription?: string | { id?: string } | null;
         };
         if (!invoice.amount_paid || invoice.amount_paid <= 0) break;
@@ -328,6 +371,26 @@ export async function POST(request: NextRequest) {
           amountCents: invoice.amount_paid,
           stripeInvoiceId: invoice.id,
         });
+        if (invoice.billing_reason === "subscription_cycle") {
+          try {
+            const monthLabel = invoice.period_end
+              ? new Date(invoice.period_end * 1000).toLocaleDateString("en-GB", {
+                  month: "long",
+                  year: "numeric",
+                })
+              : new Date().toLocaleDateString("en-GB", {
+                  month: "long",
+                  year: "numeric",
+                });
+            await notifyGuardianInvoicePaid({
+              userId,
+              amountCents: invoice.amount_paid,
+              monthLabel,
+            });
+          } catch (monthErr) {
+            console.error("Stripe webhook: Guardian monthly email failed", monthErr);
+          }
+        }
         break;
       }
       case "customer.subscription.updated": {

@@ -7,6 +7,7 @@ import { getStripeServer } from "@/lib/stripe";
 import { sendEmail } from "@/lib/email";
 import ReviewReceivedEmail from "@/lib/email/templates/review-received";
 import OwnerCancelledEmail from "@/lib/email/templates/owner-cancelled";
+import { sendSMS, buildOwnerCancelledProviderSMS } from "@/lib/sms";
 import { validatePetFormData, MAX_PHOTOS } from "@/lib/validations/pet";
 import { reviewFormSchema, MAX_PHOTOS as MAX_REVIEW_PHOTOS } from "@/lib/validations/review";
 import type { CancellationPolicy } from "@prisma/client";
@@ -550,13 +551,23 @@ export async function cancelBooking(bookingId: string): Promise<{ error?: string
       try {
         const providerUser = await prisma.user.findUnique({
           where: { id: booking.providerId },
-          select: { email: true },
+          select: { email: true, phone: true, phoneVerified: true },
         });
         if (providerUser?.email) {
           await sendEmail({
             to: providerUser.email,
             subject: `${ownerName} cancelled the booking for ${dateStr}`,
             react: OwnerCancelledEmail({
+              ownerName,
+              date: dateStr,
+              refundNote: "No charge was made.",
+            }),
+          });
+        }
+        if (providerUser?.phoneVerified && providerUser?.phone) {
+          await sendSMS({
+            to: providerUser.phone,
+            body: buildOwnerCancelledProviderSMS({
               ownerName,
               date: dateStr,
               refundNote: "No charge was made.",
@@ -608,13 +619,23 @@ export async function cancelBooking(bookingId: string): Promise<{ error?: string
       try {
         const providerUser = await prisma.user.findUnique({
           where: { id: booking.providerId },
-          select: { email: true },
+          select: { email: true, phone: true, phoneVerified: true },
         });
         if (providerUser?.email) {
           await sendEmail({
             to: providerUser.email,
             subject: `${ownerName} cancelled the booking for ${dateStr}`,
             react: OwnerCancelledEmail({
+              ownerName,
+              date: dateStr,
+              refundNote,
+            }),
+          });
+        }
+        if (providerUser?.phoneVerified && providerUser?.phone) {
+          await sendSMS({
+            to: providerUser.phone,
+            body: buildOwnerCancelledProviderSMS({
               ownerName,
               date: dateStr,
               refundNote,

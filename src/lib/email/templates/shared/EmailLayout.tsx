@@ -1,11 +1,12 @@
 import { Html, Head, Body, Container, Section, Text } from "@react-email/components";
 import * as React from "react";
 import { EmailFooter } from "./EmailFooter";
+import { BRAND_BG, BRAND_MUTED, BRAND_TEAL, BRAND_TEXT } from "@/lib/email/brand";
 
-const BACKGROUND = "#FFFEF7";
-const PRIMARY = "#2D6A4F";
-const TEXT = "#1A1A1A";
-const MUTED = "#6B7280";
+const BACKGROUND = BRAND_BG;
+const PRIMARY = BRAND_TEAL;
+const TEXT = BRAND_TEXT;
+const MUTED = BRAND_MUTED;
 
 type EmailLayoutProps = {
   children: React.ReactNode;

@@ -7,6 +7,7 @@ import { getStripeServer } from "@/lib/stripe";
 import { sendEmail } from "@/lib/email";
 import DisputeReportedEmail from "@/lib/email/templates/dispute-reported";
 import ClaimReportedEmail from "@/lib/email/templates/claim-reported";
+import CaseResolvedEmail from "@/lib/email/templates/case-resolved";
 import type { DisputeType, DisputeRuling } from "@prisma/client";
 import type { ClaimType } from "@prisma/client";
 
@@ -16,6 +17,34 @@ const MIN_DESCRIPTION_LENGTH = 100;
 const MAX_PHOTOS = 5;
 const RESPONSE_WINDOW_HOURS = 48;
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+
+function formatDisputeRulingSummary(ruling: DisputeRuling, notes: string | null): string {
+  const base: Record<DisputeRuling, string> = {
+    no_action: "No further action taken.",
+    warning: "A warning has been recorded.",
+    partial_refund: "A partial refund has been issued.",
+    full_refund: "A full refund has been issued.",
+    provider_suspended: "The provider account has been suspended.",
+    owner_restricted: "The pet owner account has been restricted.",
+  };
+  const head = base[ruling];
+  const n = notes?.trim();
+  return n ? `${head} ${n}` : head;
+}
+
+function formatClaimRulingSummary(
+  ruling: "approved_full" | "approved_partial" | "denied",
+  notes: string | null
+): string {
+  const head =
+    ruling === "approved_full"
+      ? "Claim approved — full payout as recorded."
+      : ruling === "approved_partial"
+        ? "Claim approved — partial payout as recorded."
+        : "Claim denied.";
+  const n = notes?.trim();
+  return n ? `${head} ${n}` : head;
+}
 
 function getPhotoFiles(formData: FormData, fieldPrefix = "photos"): File[] {
   const files: File[] = [];
@@ -490,7 +519,14 @@ export async function adminResolveDispute(
 
   const dispute = await prisma.dispute.findUnique({
     where: { id: disputeId },
-    include: { booking: true },
+    include: {
+      booking: {
+        include: {
+          owner: { select: { email: true } },
+          provider: { select: { email: true } },
+        },
+      },
+    },
   });
   if (!dispute) return { error: "Dispute not found." };
   if (dispute.status === "resolved") return { error: "Dispute already resolved." };
@@ -530,6 +566,38 @@ export async function adminResolveDispute(
       resolvedAt: new Date(),
     },
   });
+  try {
+    const summary = formatDisputeRulingSummary(
+      input.ruling,
+      input.rulingNotes ?? null
+    );
+    const ownerEmail = dispute.booking.owner.email;
+    const providerEmail = dispute.booking.provider.email;
+    if (ownerEmail) {
+      await sendEmail({
+        to: ownerEmail,
+        subject: "Your dispute has been resolved",
+        react: CaseResolvedEmail({
+          caseLabel: "dispute",
+          summary,
+          dashboardUrl: `${APP_URL}/dashboard/owner`,
+        }),
+      });
+    }
+    if (providerEmail) {
+      await sendEmail({
+        to: providerEmail,
+        subject: "Your dispute has been resolved",
+        react: CaseResolvedEmail({
+          caseLabel: "dispute",
+          summary,
+          dashboardUrl: `${APP_URL}/dashboard/provider`,
+        }),
+      });
+    }
+  } catch (e) {
+    console.error("adminResolveDispute: resolution email failed", e);
+  }
   revalidatePath("/dashboard/admin");
   return {};
 }
@@ -558,6 +626,14 @@ export async function adminResolveClaim(
 
   const claim = await prisma.guaranteeClaim.findUnique({
     where: { id: claimId },
+    include: {
+      booking: {
+        include: {
+          owner: { select: { email: true } },
+          provider: { select: { email: true } },
+        },
+      },
+    },
   });
   if (!claim) return { error: "Claim not found." };
   if (claim.status === "resolved") return { error: "Claim already resolved." };
@@ -586,6 +662,38 @@ export async function adminResolveClaim(
       payoutRecipientId: payoutRecipientId ?? undefined,
     },
   });
+  try {
+    const summary = formatClaimRulingSummary(
+      input.ruling,
+      input.rulingNotes ?? null
+    );
+    const ownerEmail = claim.booking.owner.email;
+    const providerEmail = claim.booking.provider.email;
+    if (ownerEmail) {
+      await sendEmail({
+        to: ownerEmail,
+        subject: "Your guarantee claim has been resolved",
+        react: CaseResolvedEmail({
+          caseLabel: "guarantee claim",
+          summary,
+          dashboardUrl: `${APP_URL}/dashboard/owner`,
+        }),
+      });
+    }
+    if (providerEmail) {
+      await sendEmail({
+        to: providerEmail,
+        subject: "Your guarantee claim has been resolved",
+        react: CaseResolvedEmail({
+          caseLabel: "guarantee claim",
+          summary,
+          dashboardUrl: `${APP_URL}/dashboard/provider`,
+        }),
+      });
+    }
+  } catch (e) {
+    console.error("adminResolveClaim: resolution email failed", e);
+  }
   revalidatePath("/dashboard/admin");
   return {};
 }

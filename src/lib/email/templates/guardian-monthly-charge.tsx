@@ -1,29 +1,31 @@
 import { Section, Text, Link } from "@react-email/components";
 import * as React from "react";
 import { EmailLayout } from "./shared/EmailLayout";
+import { BRAND_TEAL } from "@/lib/email/brand";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
-
-export type TipReceivedEmailProps = {
+export type GuardianMonthlyChargeEmailProps = {
   amountEur: string;
-  dashboardUrl?: string;
+  monthLabel: string;
+  givingUrl: string;
 };
 
-export default function TipReceivedEmail({
+export default function GuardianMonthlyChargeEmail({
   amountEur,
-  dashboardUrl = `${APP_URL}/dashboard/provider`,
-}: TipReceivedEmailProps) {
+  monthLabel,
+  givingUrl,
+}: GuardianMonthlyChargeEmailProps) {
   return (
-    <EmailLayout preview={`You received a €${amountEur} tip!`}>
+    <EmailLayout preview={`Guardian donation processed for ${monthLabel}`}>
       <Section>
         <Text style={{ fontSize: "16px", lineHeight: "24px", margin: "0 0 16px", color: "#1A1A1A" }}>
-          A client left you a <strong>€{amountEur} tip</strong>. Thank you for the great care you provide!
+          Your Guardian donation of <strong>EUR {amountEur}</strong> was processed for <strong>{monthLabel}</strong>.
+          Thank you for standing up for the tinies.
         </Text>
         <Link
-          href={dashboardUrl}
+          href={givingUrl}
           style={{
             display: "inline-block",
-            backgroundColor: "#0A8080",
+            backgroundColor: BRAND_TEAL,
             color: "#fff",
             padding: "12px 24px",
             borderRadius: "8px",
@@ -32,7 +34,7 @@ export default function TipReceivedEmail({
             marginTop: "8px",
           }}
         >
-          View earnings
+          View Giving
         </Link>
       </Section>
     </EmailLayout>

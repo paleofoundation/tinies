@@ -67,9 +67,11 @@ export function buildBookingRequestSMS(params: {
   ownerName: string;
   serviceType: string;
   date: string;
+  petName: string;
+  species: string;
 }): string {
   const link = `${APP_URL}/dashboard/provider`;
-  return `New booking request on Tinies from ${params.ownerName} for ${params.serviceType} on ${params.date}. Respond within 4 hours: ${link}`;
+  return `New booking request from ${params.ownerName} for ${params.serviceType} on ${params.date}. ${params.petName} (${params.species}). Respond within 4 hours: ${link}`;
 }
 
 /**
@@ -79,9 +81,10 @@ export function buildBookingRequestSMS(params: {
 export function buildBookingAcceptedSMS(params: {
   providerName: string;
   date: string;
+  petName: string;
 }): string {
   const link = `${APP_URL}/dashboard/owner`;
-  return `Great news! ${params.providerName} accepted your booking on Tinies for ${params.date}. View details: ${link}`;
+  return `${params.providerName} accepted your booking for ${params.petName} on ${params.date}. Payment confirmed. ${link}`;
 }
 
 /**
@@ -91,6 +94,45 @@ export function buildBookingAcceptedSMS(params: {
 export function buildBookingReminderSMS(params: {
   serviceType: string;
   time: string;
+  otherPartyName: string;
 }): string {
-  return `Reminder: Your ${params.serviceType} booking on Tinies starts tomorrow at ${params.time}.`;
+  return `Reminder: ${params.serviceType} with ${params.otherPartyName} on Tinies starts tomorrow at ${params.time}.`;
+}
+
+export function buildBookingExpiredSMS(params: { providerName: string }): string {
+  const link = `${APP_URL}/services/search`;
+  return `Your Tinies booking request expired — ${params.providerName} didn't respond in time. Payment released. Browse providers: ${link}`;
+}
+
+export function buildBookingServiceStartedSMS(params: {
+  providerName: string;
+  serviceType: string;
+  petName: string;
+}): string {
+  return `${params.providerName} has started the ${params.serviceType} for ${params.petName} on Tinies.`;
+}
+
+export function buildWalkTrackingStartedSMS(params: { providerName: string; petName: string; bookingId: string }): string {
+  const link = `${APP_URL}/dashboard/owner/walks/${params.bookingId}`;
+  return `${params.providerName} has started walking ${params.petName}. Track live: ${link}`;
+}
+
+export function buildOwnerCancelledProviderSMS(params: {
+  ownerName: string;
+  date: string;
+  refundNote: string;
+}): string {
+  return `${params.ownerName} cancelled the Tinies booking for ${params.date}. ${params.refundNote}`;
+}
+
+export function buildProviderCancelledOwnerSMS(params: {
+  providerName: string;
+  amountEur: string;
+}): string {
+  const link = `${APP_URL}/dashboard/owner`;
+  return `${params.providerName} cancelled your booking on Tinies. Full refund of EUR ${params.amountEur} initiated. ${link}`;
+}
+
+export function buildNewMessageSMS(params: { senderName: string }): string {
+  return `New message from ${params.senderName}. Reply on Tinies: ${APP_URL}/dashboard/messages`;
 }

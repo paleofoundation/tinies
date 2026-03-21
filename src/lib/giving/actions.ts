@@ -1248,6 +1248,7 @@ export async function sendMonthlyGivingReceiptEmail(params: {
 /** Send charity payout notification to charity contact. Call when a payout is recorded. Does not throw. */
 export async function sendCharityPayoutNotificationEmail(params: {
   to: string;
+  charityName: string;
   month: string;
   amountEur: string;
   donorCount: number;
@@ -1255,8 +1256,9 @@ export async function sendCharityPayoutNotificationEmail(params: {
   try {
     await sendEmail({
       to: params.to,
-      subject: `Your Tinies Giving payout for ${params.month}`,
+      subject: `${params.charityName}: Tinies Giving payout for ${params.month}`,
       react: CharityPayoutNotificationEmail({
+        charityName: params.charityName,
         month: params.month,
         amountEur: params.amountEur,
         donorCount: params.donorCount,
@@ -1264,5 +1266,30 @@ export async function sendCharityPayoutNotificationEmail(params: {
     });
   } catch (e) {
     console.error("sendCharityPayoutNotificationEmail failed", e);
+  }
+}
+
+/** When a fund payout to a charity is recorded, notify the charity contact. Safe to call from admin/cron. */
+export async function sendCharityPayoutNotificationToContact(params: {
+  charityId: string;
+  month: string;
+  amountEur: string;
+  donorCount: number;
+}): Promise<void> {
+  try {
+    const charity = await prisma.charity.findUnique({
+      where: { id: params.charityId },
+      select: { name: true, primaryContactEmail: true },
+    });
+    if (!charity?.primaryContactEmail) return;
+    await sendCharityPayoutNotificationEmail({
+      to: charity.primaryContactEmail,
+      charityName: charity.name,
+      month: params.month,
+      amountEur: params.amountEur,
+      donorCount: params.donorCount,
+    });
+  } catch (e) {
+    console.error("sendCharityPayoutNotificationToContact failed", e);
   }
 }

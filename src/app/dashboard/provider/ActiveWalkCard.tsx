@@ -4,7 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { MapPin, Square } from "lucide-react";
-import { startWalk, endWalk } from "./actions";
+import { startWalk, endWalk, cancelAcceptedBookingAsProvider } from "./actions";
 import { WalkTracker } from "@/components/maps/WalkTracker";
 import type { ProviderBookingCard } from "@/lib/utils/provider-helpers";
 
@@ -23,6 +23,7 @@ export function ActiveWalkCard({ booking }: { booking: ProviderBookingCard }) {
   const [currentPosition, setCurrentPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [activities, setActivities] = useState<WalkActivity[]>([]);
   const [ending, setEnding] = useState(false);
+  const [providerCancelling, setProviderCancelling] = useState(false);
   const watchIdRef = useRef<number | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startedAtRef = useRef<Date | null>(null);
@@ -145,6 +146,37 @@ export function ActiveWalkCard({ booking }: { booking: ProviderBookingCard }) {
     );
   }, [booking.id, router, sendPoint]);
 
+  const clearGeolocation = useCallback(() => {
+    if (watchIdRef.current != null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }, []);
+
+  const handleProviderCancelBooking = useCallback(async () => {
+    if (
+      !confirm(
+        "Cancel this walk booking? The owner receives a full refund and will be notified."
+      )
+    )
+      return;
+    setProviderCancelling(true);
+    clearGeolocation();
+    const result = await cancelAcceptedBookingAsProvider(booking.id);
+    setProviderCancelling(false);
+    setTracking(false);
+    if (result.error) {
+      toast.error(result.error);
+      return;
+    }
+    toast.success("Booking cancelled. Refund initiated.");
+    router.refresh();
+  }, [booking.id, clearGeolocation, router]);
+
   useEffect(() => {
     return () => {
       if (watchIdRef.current != null) navigator.geolocation.clearWatch(watchIdRef.current);
@@ -191,15 +223,25 @@ export function ActiveWalkCard({ booking }: { booking: ProviderBookingCard }) {
           <p className="font-medium" style={{ color: "var(--color-text)" }}>
             Walk in progress · {booking.petNames.join(", ")}
           </p>
-          <button
-            type="button"
-            onClick={stopTracking}
-            disabled={ending}
-            className="inline-flex items-center gap-2 rounded-[var(--radius-lg)] border-2 border-[var(--color-error)] px-3 py-1.5 text-sm font-semibold text-[var(--color-error)] hover:bg-[var(--color-error)]/10 disabled:opacity-50"
-          >
-            <Square className="h-4 w-4" />
-            End Walk
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handleProviderCancelBooking}
+              disabled={ending || providerCancelling}
+              className="rounded-[var(--radius-lg)] border border-[var(--color-border)] px-3 py-1.5 text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-background)] disabled:opacity-50"
+            >
+              {providerCancelling ? "Cancelling…" : "Cancel booking"}
+            </button>
+            <button
+              type="button"
+              onClick={stopTracking}
+              disabled={ending || providerCancelling}
+              className="inline-flex items-center gap-2 rounded-[var(--radius-lg)] border-2 border-[var(--color-error)] px-3 py-1.5 text-sm font-semibold text-[var(--color-error)] hover:bg-[var(--color-error)]/10 disabled:opacity-50"
+            >
+              <Square className="h-4 w-4" />
+              End Walk
+            </button>
+          </div>
         </div>
         <div className="mt-4">
           <WalkTracker
@@ -230,12 +272,20 @@ export function ActiveWalkCard({ booking }: { booking: ProviderBookingCard }) {
           <p className="font-medium" style={{ color: "var(--color-text)" }}>{booking.ownerName} · {booking.petNames.join(", ")} · Dog walking</p>
           <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>{new Date(booking.startDatetime).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-[var(--color-primary)]/15" style={{ color: "var(--color-primary)" }}>{booking.status}</span>
           <button
             type="button"
+            onClick={handleProviderCancelBooking}
+            disabled={starting || providerCancelling}
+            className="rounded-[var(--radius-lg)] border border-[var(--color-error)]/50 px-3 py-2 text-sm font-semibold text-[var(--color-error)] hover:bg-[var(--color-error)]/10 disabled:opacity-70"
+          >
+            {providerCancelling ? "Cancelling…" : "Cancel booking"}
+          </button>
+          <button
+            type="button"
             onClick={() => setBatteryWarningOpen(true)}
-            disabled={starting}
+            disabled={starting || providerCancelling}
             className="inline-flex items-center gap-2 rounded-[var(--radius-lg)] bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-70"
           >
             <MapPin className="h-4 w-4" />

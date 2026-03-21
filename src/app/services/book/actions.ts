@@ -359,6 +359,8 @@ export async function createBookingWithPaymentIntent(
             ownerName,
             serviceType: serviceLabel,
             date: dateStr,
+            petName: firstPet?.name ?? "Pet",
+            species: firstPet?.species ?? "pet",
           }),
         });
       }

@@ -490,6 +490,8 @@ model AdoptionPlacement {
   successStoryText       String?        @map("success_story_text")
   successStoryPhotos     String[]       @default([]) @map("success_story_photos")
   successStoryApprovedAt DateTime?      @map("success_story_approved_at")
+  /** Idempotent post-adoption marketing emails: e.g. "1w", "1m", "3m". */
+  postAdoptionReminderKeys String[]    @default([]) @map("post_adoption_reminder_keys")
   createdAt              DateTime       @default(now()) @map("created_at")
   updatedAt              DateTime       @updatedAt @map("updated_at")
 
