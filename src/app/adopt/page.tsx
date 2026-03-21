@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
-import { Heart, MapPin, Filter } from "lucide-react";
+import Image from "next/image";
+import { Heart, MapPin, Filter, PawPrint } from "lucide-react";
 import Link from "next/link";
+import { getAllAvailableAdoptionListings } from "@/lib/adoption/available-listings";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Adopt a Tiny | Rescue Animals in Cyprus",
@@ -35,18 +39,14 @@ const AGE_RANGES = [
   "7+ years",
 ] as const;
 
-const ANIMALS = [
-  { emoji: "🐕", name: "Max", species: "Dog", breed: "Mixed", age: "3 years", sex: "Male", location: "Limassol", id: "max" },
-  { emoji: "🐈", name: "Luna", species: "Cat", breed: "European Shorthair", age: "2 years", sex: "Female", location: "Nicosia", id: "luna" },
-  { emoji: "🐶", name: "Buddy", species: "Dog", breed: "Terrier mix", age: "6 months", sex: "Male", location: "Paphos", id: "buddy" },
-  { emoji: "🐱", name: "Mittens", species: "Cat", breed: "Tabby", age: "4 months", sex: "Female", location: "Larnaca", id: "mittens" },
-  { emoji: "🐕", name: "Roxy", species: "Dog", breed: "Lab mix", age: "5 years", sex: "Female", location: "Limassol", id: "roxy" },
-  { emoji: "🐈", name: "Shadow", species: "Cat", breed: "Black domestic", age: "1 year", sex: "Male", location: "Nicosia", id: "shadow" },
-  { emoji: "🐶", name: "Cooper", species: "Dog", breed: "Beagle mix", age: "2 years", sex: "Male", location: "Famagusta", id: "cooper" },
-  { emoji: "🐱", name: "Bella", species: "Cat", breed: "Calico", age: "8 months", sex: "Female", location: "Paphos", id: "bella" },
-] as const;
+function formatLabel(value: string | null | undefined): string {
+  if (!value) return "";
+  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+}
 
-export default function AdoptPage() {
+export default async function AdoptPage() {
+  const listings = await getAllAvailableAdoptionListings();
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
       {/* Hero */}
@@ -168,40 +168,68 @@ export default function AdoptPage() {
           <p className="mt-2" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
             Animals listed by rescue organisations — waiting for you.
           </p>
-          <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {ANIMALS.map((animal) => (
-              <article
-                key={animal.id}
-                className="group rounded-[var(--radius-lg)] border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]"
-                style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}
-              >
-                <div className="flex h-40 items-center justify-center rounded-t-[var(--radius-lg)] border-b text-6xl group-hover:bg-[var(--color-primary-50)]" style={{ backgroundColor: "var(--color-background)", borderColor: "var(--color-border)" }}>
-                  {animal.emoji}
-                </div>
-                <div className="p-8" style={{ padding: "var(--space-card)" }}>
-                  <h3 className="font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>{animal.name}</h3>
-                  <p className="mt-1 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-                    {animal.species} · {animal.breed}
-                  </p>
-                  <p className="mt-1 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-                    {animal.age} · {animal.sex}
-                  </p>
-                  <p className="mt-2 flex items-center gap-1 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-                    <MapPin className="h-3.5 w-3.5 shrink-0" />
-                    {animal.location}
-                  </p>
+          {listings.length === 0 ? (
+            <p className="mt-10 text-center text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+              No adoptable animals are listed yet. Check back soon, or contact rescues you know to join Tinies.
+            </p>
+          ) : (
+            <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              {listings.map((listing) => {
+                const photo = listing.photos[0];
+                const speciesLabel = formatLabel(listing.species) || "Pet";
+                const sexLabel = formatLabel(listing.sex);
+                return (
                   <Link
-                    href={`/adopt/apply/${animal.id}`}
-                    className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] px-4 font-semibold text-white transition-opacity hover:opacity-90"
-                    style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-secondary)" }}
+                    key={listing.slug}
+                    href={`/adopt/${listing.slug}`}
+                    className="group block rounded-[var(--radius-lg)] border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                    style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}
                   >
-                    <Heart className="h-4 w-4" />
-                    Adopt this Tiny
+                    <div
+                      className="relative h-40 overflow-hidden rounded-t-[var(--radius-lg)] border-b group-hover:bg-[var(--color-primary-50)]"
+                      style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}
+                    >
+                      {photo ? (
+                        <Image
+                          src={photo}
+                          alt={`${listing.name}, ${speciesLabel}`}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center" aria-hidden>
+                          <PawPrint className="h-16 w-16" style={{ color: "var(--color-primary-300)" }} strokeWidth={1.25} />
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-8" style={{ padding: "var(--space-card)" }}>
+                      <h3 className="font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>{listing.name}</h3>
+                      <p className="mt-1 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+                        {speciesLabel}
+                        {listing.breed ? ` · ${listing.breed}` : ""}
+                      </p>
+                      <p className="mt-1 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+                        {listing.estimatedAge ?? "Age TBC"}
+                        {sexLabel ? ` · ${sexLabel}` : ""}
+                      </p>
+                      <p className="mt-2 flex items-center gap-1 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+                        <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                        <span>{listing.org.name}{listing.org.location ? ` · ${listing.org.location}` : ""}</span>
+                      </p>
+                      <div
+                        className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] px-4 font-semibold text-white transition-opacity group-hover:opacity-90"
+                        style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-secondary)" }}
+                      >
+                        <Heart className="h-4 w-4" aria-hidden />
+                        Adopt this Tiny
+                      </div>
+                    </div>
                   </Link>
-                </div>
-              </article>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
     </div>
