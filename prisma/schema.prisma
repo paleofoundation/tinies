@@ -613,6 +613,7 @@ model Donation {
   @@index([bookingId])
   @@index([source])
   @@index([createdAt])
+  @@index([bookingId, source])
   @@map("donations")
 }
 
@@ -768,15 +769,16 @@ model GivingFundDistribution {
   month               DateTime  @db.Date // first of month
   totalFundAmount     Int       @map("total_fund_amount") // cents
   distributionMethod String    @map("distribution_method") // equal | weighted
-  perCharityAmounts   Json      @map("per_charity_amounts") // [{ charity_id, amount }]
-  approvedBy          String    @map("approved_by")
-  approvedAt          DateTime  @map("approved_at")
-  payoutStatus        PayoutStatus @map("payout_status")
+  perCharityAmounts   Json      @map("per_charity_amounts") // [{ charityId or charity_id, amount }]
+  approvedBy          String?   @map("approved_by")
+  approvedAt          DateTime? @map("approved_at")
+  /** pending | processing | completed */
+  payoutStatus        String    @default("pending") @map("payout_status")
   stripeTransferIds   Json?     @map("stripe_transfer_ids")
   createdAt           DateTime  @default(now()) @map("created_at")
   updatedAt           DateTime  @updatedAt @map("updated_at")
 
-  approvedByUser User @relation(fields: [approvedBy], references: [id], onDelete: Restrict)
+  approvedByUser User? @relation(fields: [approvedBy], references: [id], onDelete: SetNull)
 
   @@index([month])
   @@index([approvedBy])

@@ -7,7 +7,7 @@ import { sendEmail } from "@/lib/email";
 import BookingRequestEmail from "@/lib/email/templates/booking-request";
 import { sendSMS, buildBookingRequestSMS } from "@/lib/sms";
 import type { ServiceType } from "@prisma/client";
-import { DonationSource } from "@prisma/client";
+import { recordRoundUpDonation } from "@/lib/giving/actions";
 import type { GivingTier } from "@/lib/utils/giving-helpers";
 import {
   computeBookingTotalCents,
@@ -288,19 +288,11 @@ export async function createBookingWithPaymentIntent(
     }
 
     if (roundUpCents > 0) {
-      const prefs = await prisma.userGivingPreference.findUnique({
-        where: { userId: user.id },
-        select: { preferredCharityId: true },
-      });
-      await prisma.donation.create({
-        data: {
-          userId: user.id,
-          charityId: prefs?.preferredCharityId ?? null,
-          source: DonationSource.roundup,
-          amount: roundUpCents,
-          bookingId: booking.id,
-          stripePaymentIntentId: paymentIntent.id,
-        },
+      await recordRoundUpDonation({
+        userId: user.id,
+        bookingId: booking.id,
+        roundUpAmountCents: roundUpCents,
+        stripePaymentIntentId: paymentIntent.id,
       });
     }
 

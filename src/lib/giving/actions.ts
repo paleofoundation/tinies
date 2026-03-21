@@ -678,6 +678,248 @@ export async function getRecentDonationsForTicker(limit = 20): Promise<TickerIte
   }
 }
 
+// ---------------------------------------------------------------------------
+// Donations ledger — platform commission (90% to rescue), aggregates
+// ---------------------------------------------------------------------------
+
+/** Share of each booking commission allocated to animal rescue / Giving Fund (90%). */
+export const PLATFORM_COMMISSION_TO_RESCUE_RATE = 0.9;
+
+export type GivingStats = {
+  totalDonatedAllTimeCents: number;
+  totalDonatedThisMonthCents: number;
+  activeDonorsCount: number;
+  charitiesSupportedCount: number;
+};
+
+export type UserGivingHistoryRow = {
+  id: string;
+  createdAt: Date;
+  amountCents: number;
+  source: DonationSource;
+  charityId: string | null;
+  charityName: string | null;
+  bookingId: string | null;
+};
+
+export type CharityDonationLedgerSummary = {
+  totalReceivedCents: number;
+  bySource: Record<string, number>;
+  donorCount: number;
+};
+
+/**
+ * When a booking completes, record 90% of the platform commission as a platform_commission
+ * donation to the Tinies Giving Fund (charityId null). Idempotent per booking.
+ */
+export async function recordPlatformCommissionDonation(
+  bookingId: string,
+  commissionAmountCents: number
+): Promise<{ recordedCents: number; skipped: boolean }> {
+  const rescueShareCents = Math.round(commissionAmountCents * PLATFORM_COMMISSION_TO_RESCUE_RATE);
+  if (rescueShareCents <= 0) {
+    return { recordedCents: 0, skipped: true };
+  }
+  try {
+    const existing = await prisma.donation.findFirst({
+      where: { bookingId, source: DonationSource.platform_commission },
+      select: { id: true },
+    });
+    if (existing) {
+      return { recordedCents: 0, skipped: true };
+    }
+    await prisma.donation.create({
+      data: {
+        userId: null,
+        charityId: null,
+        source: DonationSource.platform_commission,
+        amount: rescueShareCents,
+        bookingId,
+      },
+    });
+    revalidatePath("/giving");
+    revalidatePath("/dashboard/owner/giving");
+    return { recordedCents: rescueShareCents, skipped: false };
+  } catch (e) {
+    console.error("recordPlatformCommissionDonation", e);
+    return { recordedCents: 0, skipped: true };
+  }
+}
+
+/**
+ * Record a booking round-up. If `charityId` is omitted, uses the user’s preferred charity
+ * from UserGivingPreference; explicit `null` forces Tinies Giving Fund.
+ */
+export async function recordRoundUpDonation(params: {
+  userId: string;
+  bookingId: string;
+  roundUpAmountCents: number;
+  charityId?: string | null;
+  stripePaymentIntentId?: string | null;
+}): Promise<void> {
+  if (params.roundUpAmountCents <= 0) return;
+  let charityId: string | null;
+  if (params.charityId === undefined) {
+    const prefs = await prisma.userGivingPreference.findUnique({
+      where: { userId: params.userId },
+      select: { preferredCharityId: true },
+    });
+    charityId = prefs?.preferredCharityId ?? null;
+  } else {
+    charityId = params.charityId;
+  }
+  const addEur = params.roundUpAmountCents / 100;
+  await prisma.$transaction(async (tx) => {
+    await tx.donation.create({
+      data: {
+        userId: params.userId,
+        charityId,
+        source: DonationSource.roundup,
+        amount: params.roundUpAmountCents,
+        bookingId: params.bookingId,
+        stripePaymentIntentId: params.stripePaymentIntentId ?? undefined,
+      },
+    });
+    const userRow = await tx.user.findUnique({
+      where: { id: params.userId },
+      select: { totalDonated: true },
+    });
+    await tx.user.update({
+      where: { id: params.userId },
+      data: { totalDonated: (userRow?.totalDonated ?? 0) + addEur },
+    });
+  });
+  revalidatePath("/giving");
+  revalidatePath("/dashboard/owner/giving");
+}
+
+/** Public /giving aggregates: all-time, this month, donors, charities with any attributed donation. */
+export async function getGivingStats(): Promise<GivingStats> {
+  const empty: GivingStats = {
+    totalDonatedAllTimeCents: 0,
+    totalDonatedThisMonthCents: 0,
+    activeDonorsCount: 0,
+    charitiesSupportedCount: 0,
+  };
+  try {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const [allSum, monthSum, donorRows, charityRows] = await Promise.all([
+      prisma.donation.aggregate({ _sum: { amount: true } }),
+      prisma.donation.aggregate({
+        where: { createdAt: { gte: startOfMonth } },
+        _sum: { amount: true },
+      }),
+      prisma.donation.findMany({
+        where: { userId: { not: null } },
+        distinct: ["userId"],
+        select: { userId: true },
+      }),
+      prisma.donation.findMany({
+        where: { charityId: { not: null } },
+        distinct: ["charityId"],
+        select: { charityId: true },
+      }),
+    ]);
+    return {
+      totalDonatedAllTimeCents: allSum._sum.amount ?? 0,
+      totalDonatedThisMonthCents: monthSum._sum.amount ?? 0,
+      activeDonorsCount: donorRows.length,
+      charitiesSupportedCount: charityRows.length,
+    };
+  } catch (e) {
+    console.error("getGivingStats", e);
+    return empty;
+  }
+}
+
+/** All donations for a user (ledger rows) with charity names. */
+export async function getUserGivingHistory(userId: string): Promise<UserGivingHistoryRow[]> {
+  const rows = await prisma.donation.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    include: { charity: { select: { name: true } } },
+  });
+  return rows.map((d) => ({
+    id: d.id,
+    createdAt: d.createdAt,
+    amountCents: d.amount,
+    source: d.source,
+    charityId: d.charityId,
+    charityName: d.charity?.name ?? null,
+    bookingId: d.bookingId,
+  }));
+}
+
+/** Per-charity totals from the donations table, broken down by source (for rescue dashboards). */
+export async function getCharityDonationSummary(
+  charityId: string
+): Promise<CharityDonationLedgerSummary | null> {
+  const charity = await prisma.charity.findUnique({
+    where: { id: charityId },
+    select: { id: true },
+  });
+  if (!charity) return null;
+  const donations = await prisma.donation.findMany({
+    where: { charityId },
+    select: { amount: true, source: true, userId: true },
+  });
+  const totalReceivedCents = donations.reduce((s, d) => s + d.amount, 0);
+  const bySource: Record<string, number> = {};
+  for (const d of donations) {
+    bySource[d.source] = (bySource[d.source] ?? 0) + d.amount;
+  }
+  const donorIds = new Set(
+    donations.map((d) => d.userId).filter((id): id is string => id != null)
+  );
+  return {
+    totalReceivedCents,
+    bySource,
+    donorCount: donorIds.size,
+  };
+}
+
+/**
+ * Tinies Giving Fund balance: platform commission earmarked for rescue (null charity) minus
+ * amounts in distributions already marked completed.
+ */
+export async function getGivingFundBalance(): Promise<{
+  unallocatedCents: number;
+  platformCommissionToFundCents: number;
+  distributedCompletedCents: number;
+}> {
+  try {
+    const [inAgg, outAgg] = await Promise.all([
+      prisma.donation.aggregate({
+        where: {
+          source: DonationSource.platform_commission,
+          charityId: null,
+        },
+        _sum: { amount: true },
+      }),
+      prisma.givingFundDistribution.aggregate({
+        where: { payoutStatus: "completed" },
+        _sum: { totalFundAmount: true },
+      }),
+    ]);
+    const platformCommissionToFundCents = inAgg._sum.amount ?? 0;
+    const distributedCompletedCents = outAgg._sum.totalFundAmount ?? 0;
+    const unallocatedCents = Math.max(0, platformCommissionToFundCents - distributedCompletedCents);
+    return {
+      unallocatedCents,
+      platformCommissionToFundCents,
+      distributedCompletedCents,
+    };
+  } catch (e) {
+    console.error("getGivingFundBalance", e);
+    return {
+      unallocatedCents: 0,
+      platformCommissionToFundCents: 0,
+      distributedCompletedCents: 0,
+    };
+  }
+}
+
 function countryToFlag(country: string | null): string {
   if (!country || !country.trim()) return "🌍";
   const c = country.trim().toLowerCase();

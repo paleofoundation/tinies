@@ -14,7 +14,6 @@ import PaymentReceiptEmail from "@/lib/email/templates/payment-receipt";
 import BookingDeclinedEmail from "@/lib/email/templates/booking-declined";
 import BookingExpiredEmail from "@/lib/email/templates/booking-expired";
 import { sendSMS, buildBookingAcceptedSMS } from "@/lib/sms";
-import { DonationSource } from "@prisma/client";
 import slugify from "slugify";
 import type {
   CreateStripeConnectOnboardingResult,
@@ -30,10 +29,9 @@ import type {
   UpdateProviderHomeDetailsInput,
 } from "@/lib/utils/provider-helpers";
 import { HOLIDAY_OPTIONS } from "@/lib/utils/provider-helpers";
+import { recordPlatformCommissionDonation } from "@/lib/giving/actions";
 
 const PENDING_RESPONSE_HOURS = 4;
-/** 10% of commission goes to Giving Fund (platform_commission donation). */
-const GIVING_COMMISSION_RATE = 0.1;
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 const DASHBOARD_RETURN = `${APP_URL}/dashboard/provider`;
@@ -216,17 +214,6 @@ export async function acceptBooking(bookingId: string): Promise<{ error?: string
       where: { id: bookingId },
       data: { status: "accepted" },
     });
-    // Platform 10% commission allocation to Giving Fund
-    const givingCents = Math.round(booking.commissionAmount * GIVING_COMMISSION_RATE);
-    if (givingCents > 0) {
-      await prisma.donation.create({
-        data: {
-          source: DonationSource.platform_commission,
-          amount: givingCents,
-          bookingId: booking.id,
-        },
-      });
-    }
     try {
       const full = await prisma.booking.findUnique({
         where: { id: bookingId },
@@ -582,6 +569,7 @@ export async function endWalk(bookingId: string): Promise<{ error?: string }> {
     },
     select: {
       id: true,
+      commissionAmount: true,
       walkStartedAt: true,
       walkRoute: true,
       walkActivities: true,
@@ -621,7 +609,8 @@ export async function endWalk(bookingId: string): Promise<{ error?: string }> {
         walkActivities: booking.walkActivities ?? undefined,
       },
     });
-    await updateProviderRepeatClientCount(booking.providerId);
+    await recordPlatformCommissionDonation(booking.id, booking.commissionAmount);
+    await updateProviderRepeatClientCount(user.id);
     revalidatePath("/dashboard/provider");
     revalidatePath("/dashboard/owner");
     return {};
