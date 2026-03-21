@@ -385,6 +385,7 @@ model RescueOrg {
   website             String?
   socialLinks         Json?     @map("social_links")
   logoUrl             String?   @map("logo_url")
+  bankIban            String?   @map("bank_iban")
   verified            Boolean   @default(false)
   slug                String    @unique
   createdAt           DateTime  @default(now()) @map("created_at")

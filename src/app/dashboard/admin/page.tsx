@@ -8,6 +8,8 @@ import { DisputesClaimsSection } from "./DisputesClaimsSection";
 import { AdminQRCodeSection } from "./AdminQRCodeSection";
 import { getProvidersPendingVerification, getRecentlyVerifiedProviders } from "./provider-verification/actions";
 import { ProviderVerificationSection } from "./provider-verification/ProviderVerificationSection";
+import { getAllRescueOrgs } from "./rescue-org-actions";
+import { RescueOrgVerifyButton } from "./rescue-orgs/RescueOrgVerifyButton";
 
 // TODO: enforce admin role – redirect or 403 if user is not admin (e.g. check session user role or app_metadata)
 
@@ -28,6 +30,8 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   let charitiesForQr: Awaited<ReturnType<typeof prisma.charity.findMany>> = [];
   let pendingVerification: Awaited<ReturnType<typeof getProvidersPendingVerification>> = [];
   let recentlyVerified: Awaited<ReturnType<typeof getRecentlyVerifiedProviders>> = [];
+  let rescueOrgs: Awaited<ReturnType<typeof getAllRescueOrgs>>["orgs"] = [];
+  let rescueOrgsError: string | undefined;
 
   try {
     const [placementsResult, disputesResult, claimsResult] = await Promise.all([
@@ -66,6 +70,15 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
     ]);
   } catch (e) {
     console.error("AdminDashboardPage listings/charities/providers", e);
+  }
+
+  try {
+    const rescueResult = await getAllRescueOrgs();
+    rescueOrgs = rescueResult.orgs;
+    rescueOrgsError = rescueResult.error;
+  } catch (e) {
+    console.error("AdminDashboardPage rescue orgs", e);
+    rescueOrgsError = "Failed to load rescue organisations.";
   }
 
   const statusLabel: Record<string, string> = {
@@ -164,6 +177,119 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
                         >
                           Edit
                         </Link>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* Rescue Organisations */}
+        <section
+          className="mt-8 rounded-[var(--radius-lg)] border p-8"
+          style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}
+        >
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <h2
+              className="text-lg font-normal"
+              style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}
+            >
+              Rescue Organisations
+            </h2>
+            <Link
+              href="/dashboard/admin/rescue-orgs/new"
+              className="inline-flex h-12 items-center justify-center rounded-[var(--radius-pill)] px-6 font-semibold text-white transition-opacity hover:opacity-90"
+              style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-primary)" }}
+            >
+              Register New Rescue Org
+            </Link>
+          </div>
+
+          {rescueOrgsError && (
+            <p className="mt-4 text-sm" style={{ color: "var(--color-error)", fontFamily: "var(--font-body), sans-serif" }}>
+              {rescueOrgsError}
+            </p>
+          )}
+
+          <div className="mt-6 overflow-x-auto">
+            <table className="w-full min-w-[720px] text-sm">
+              <thead>
+                <tr className="border-b border-[var(--color-border)]">
+                  <th className="pb-3 pr-4 text-left font-semibold" style={{ fontFamily: "var(--font-body), sans-serif" }}>
+                    Name
+                  </th>
+                  <th className="pb-3 pr-4 text-left font-semibold" style={{ fontFamily: "var(--font-body), sans-serif" }}>
+                    Location
+                  </th>
+                  <th className="pb-3 pr-4 text-left font-semibold" style={{ fontFamily: "var(--font-body), sans-serif" }}>
+                    Verified
+                  </th>
+                  <th className="pb-3 pr-4 text-left font-semibold" style={{ fontFamily: "var(--font-body), sans-serif" }}>
+                    Listings
+                  </th>
+                  <th className="pb-3 pr-4 text-left font-semibold" style={{ fontFamily: "var(--font-body), sans-serif" }}>
+                    Date added
+                  </th>
+                  <th className="pb-3 text-left font-semibold" style={{ fontFamily: "var(--font-body), sans-serif" }}>
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {rescueOrgs.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-8 text-center" style={{ fontFamily: "var(--font-body), sans-serif" }}>
+                      {rescueOrgsError ? "Could not load organisations." : "No rescue organisations yet. Register one to get started."}
+                    </td>
+                  </tr>
+                ) : (
+                  rescueOrgs.map((row) => (
+                    <tr key={row.id} className="border-b border-[var(--color-border)] last:border-0">
+                      <td className="py-3 pr-4 font-medium" style={{ fontFamily: "var(--font-body), sans-serif" }}>
+                        {row.name}
+                      </td>
+                      <td className="py-3 pr-4" style={{ fontFamily: "var(--font-body), sans-serif" }}>
+                        {row.location ?? "—"}
+                      </td>
+                      <td className="py-3 pr-4">
+                        <span
+                          className="rounded-[var(--radius-pill)] border px-2.5 py-0.5 text-xs font-medium"
+                          style={{
+                            backgroundColor: row.verified ? "var(--color-primary-50)" : "var(--color-background)",
+                            color: row.verified ? "var(--color-primary)" : "var(--color-text-secondary)",
+                            borderColor: row.verified ? "var(--color-primary-200)" : "var(--color-border)",
+                            fontFamily: "var(--font-body), sans-serif",
+                          }}
+                        >
+                          {row.verified ? "Yes" : "No"}
+                        </span>
+                      </td>
+                      <td className="py-3 pr-4" style={{ fontFamily: "var(--font-body), sans-serif" }}>
+                        {row.listingCount}
+                      </td>
+                      <td className="py-3 pr-4" style={{ fontFamily: "var(--font-body), sans-serif" }}>
+                        {new Date(row.createdAt).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className="py-3">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <Link
+                            href={`/dashboard/admin/rescue-orgs/${row.id}/edit`}
+                            className="font-semibold hover:underline"
+                            style={{ color: "var(--color-primary)", fontFamily: "var(--font-body), sans-serif" }}
+                          >
+                            Edit
+                          </Link>
+                          <span style={{ color: "var(--color-border)" }} aria-hidden>
+                            |
+                          </span>
+                          <RescueOrgVerifyButton orgId={row.id} verified={row.verified} />
+                        </div>
                       </td>
                     </tr>
                   ))
