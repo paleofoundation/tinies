@@ -5,15 +5,16 @@ import {
   DISTRICT_SLUGS,
   COUNTRY_SLUGS,
 } from "@/lib/constants/seo-landings";
-import { blogPosts, type BlogPost } from "@/lib/constants/blog-posts";
+import { getBlogPostSummaries } from "@/lib/blog/load-posts";
+import type { BlogPostSummary } from "@/lib/blog/types";
 
 export const dynamic = "force-dynamic";
 
 /** Canonical site origin for sitemap URLs (www per product SEO). */
 const BASE_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://www.tinies.app").replace(/\/$/, "");
 
-function blogPostLastModified(post: BlogPost): Date {
-  const parsed = Date.parse(post.date);
+function blogPostLastModified(post: BlogPostSummary): Date {
+  const parsed = Date.parse(post.dateISO);
   return Number.isNaN(parsed) ? new Date() : new Date(parsed);
 }
 
@@ -117,11 +118,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  const blogPages: MetadataRoute.Sitemap = blogPosts.map((post) => ({
+  const blogSummaries = getBlogPostSummaries();
+  const blogPages: MetadataRoute.Sitemap = blogSummaries.map((post) => ({
     url: `${BASE_URL}/blog/${post.slug}`,
     lastModified: blogPostLastModified(post),
-    changeFrequency: "monthly" as const,
-    priority: 0.5,
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
   }));
 
   return [

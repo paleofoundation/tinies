@@ -49,6 +49,7 @@ const CENTER_NAV = [
   { href: "/services", label: "Find Care" },
   { href: "/for-providers", label: "Become a Provider" },
   { href: "/adopt", label: "Adopt" },
+  { href: "/blog", label: "Blog" },
 ] as const;
 
 export function Header() {

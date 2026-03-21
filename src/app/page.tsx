@@ -6,10 +6,13 @@ import {
   PawPrint,
   Heart,
   Leaf,
+  BookOpen,
 } from "lucide-react";
 import Link from "next/link";
 import { HomeSearchBar } from "@/components/layout/HomeSearchBar";
 import { getFeaturedAvailableListings } from "@/lib/adoption/featured-for-home";
+import { getBlogPostSummaries } from "@/lib/blog/load-posts";
+import { BlogCard } from "@/components/blog/BlogCard";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
@@ -38,6 +41,7 @@ function formatSpecies(species: string): string {
 
 export default async function Home() {
   const featuredListings = await getFeaturedAvailableListings(4);
+  const recentPosts = getBlogPostSummaries().slice(0, 3);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
@@ -110,6 +114,56 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* From the blog */}
+      {recentPosts.length > 0 ? (
+        <section
+          className="border-t px-4 py-20 sm:px-6 lg:px-8"
+          style={{
+            borderColor: "var(--color-border)",
+            paddingTop: "var(--space-section)",
+            paddingBottom: "var(--space-section)",
+          }}
+        >
+          <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
+            <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+              <div>
+                <h2
+                  className="flex items-center gap-2"
+                  style={{
+                    fontFamily: "var(--font-heading), serif",
+                    fontSize: "var(--text-3xl)",
+                    color: "var(--color-text)",
+                  }}
+                >
+                  <BookOpen className="h-8 w-8 shrink-0 text-[var(--color-primary)]" aria-hidden />
+                  From the blog
+                </h2>
+                <p
+                  className="mt-2 max-w-lg"
+                  style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}
+                >
+                  Pet care tips, adoption guides, and rescue stories from Cyprus.
+                </p>
+              </div>
+              <Link
+                href="/blog"
+                className="shrink-0 text-sm font-semibold hover:underline"
+                style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-primary)" }}
+              >
+                View all posts →
+              </Link>
+            </div>
+            <ul className="mt-12 grid list-none gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {recentPosts.map((post) => (
+                <li key={post.slug}>
+                  <BlogCard post={post} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      ) : null}
 
       {/* Tinies Looking for Homes */}
       <section className="rounded-t-[2rem] bg-white px-4 py-20 sm:px-6 sm:rounded-t-[3rem] lg:px-8" style={{ paddingTop: "var(--space-section)", paddingBottom: "var(--space-section)" }}>

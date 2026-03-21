@@ -19,6 +19,7 @@ const PAGES = [
   "/for-providers",
   "/for-rescues",
   "/blog",
+  "/blog/how-to-find-a-trusted-pet-sitter-in-cyprus",
   "/giving/become-a-guardian",
   // Provider profiles
   "/services/provider/maria-georgiou",
