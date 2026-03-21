@@ -10,7 +10,11 @@ export const metadata: Metadata = {
   description:
     "No matter the size. Book verified pet care or adopt a rescue animal in Cyprus.",
   icons: {
-    icon: "/icon",
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32", type: "image/x-icon" },
+      { url: "/favicon.png", sizes: "32x32", type: "image/png" },
+      "/icon",
+    ],
     apple: "/apple-icon",
   },
   openGraph: {
