@@ -12,6 +12,7 @@ import {
   Plus,
   Pencil,
   ExternalLink,
+  Coins,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { OrgListingRow, OrgApplicationRow } from "./actions";
@@ -21,8 +22,10 @@ import {
   toggleListingStatus,
   updateOrgProfile,
 } from "./actions";
+import type { OrgDonationSummary } from "@/lib/giving/org-donation-actions";
+import { markRescueDonationsTabSeen } from "@/lib/giving/org-donation-actions";
 
-type TabId = "listings" | "inquiries" | "pipeline" | "messages" | "profile";
+type TabId = "listings" | "inquiries" | "pipeline" | "donations" | "messages" | "profile";
 
 type Props = {
   org: {
@@ -35,12 +38,31 @@ type Props = {
     logoUrl: string | null;
     slug: string;
     verified: boolean;
+    donationsTabLastSeenAt: Date | null;
   };
   listings: OrgListingRow[];
   applications: OrgApplicationRow[];
   placements: { id: string; status: string; destinationCountry: string; listingName: string; adopterName: string; createdAt: Date }[];
   /** From ?welcome=1 after self-registration */
   welcomeJustRegistered?: boolean;
+  donationSummary: OrgDonationSummary | null;
+  recentDonations: {
+    id: string;
+    createdAt: string;
+    amountCents: number;
+    sourceLabel: string;
+    donorDisplay: string;
+  }[];
+  payoutHistory: {
+    id: string;
+    monthLabel: string;
+    amountCents: number;
+    paymentMethod: string;
+    status: string;
+    paidAt: string | null;
+  }[];
+  charityLinked: boolean;
+  hasNewDonations: boolean;
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -76,15 +98,44 @@ const PLACEMENT_STATUS_LABELS: Record<string, string> = {
   follow_up: "Follow-up",
 };
 
+const PAYOUT_STATUS_LABELS: Record<string, string> = {
+  pending: "Pending",
+  processing: "Processing",
+  completed: "Completed",
+};
+
+function formatEurFromCents(cents: number): string {
+  return `€${(cents / 100).toFixed(2)}`;
+}
+
+const EMPTY_DONATION_SUMMARY: OrgDonationSummary = {
+  totalReceivedDirectCents: 0,
+  totalReceivedFundPayoutsCents: 0,
+  totalReceivedAllTimeCents: 0,
+  thisMonthDirectCents: 0,
+  supporterCount: 0,
+  pendingPayoutCents: 0,
+  latestDonationAt: null,
+  charityIds: [],
+};
+
 export function RescueDashboardClient({
   org,
   listings,
   applications,
   placements,
   welcomeJustRegistered = false,
+  donationSummary,
+  recentDonations,
+  payoutHistory,
+  charityLinked,
+  hasNewDonations,
 }: Props) {
   const router = useRouter();
   const [tab, setTab] = useState<TabId>("listings");
+  const [donationBadgeCleared, setDonationBadgeCleared] = useState(false);
+  const sum = donationSummary ?? EMPTY_DONATION_SUMMARY;
+  const showDonationsBadge = hasNewDonations && !donationBadgeCleared && tab !== "donations";
   const [expandedAppId, setExpandedAppId] = useState<string | null>(null);
   const [pendingApprove, setPendingApprove] = useState<string | null>(null);
   const [pendingDecline, setPendingDecline] = useState<string | null>(null);
@@ -142,10 +193,24 @@ export function RescueDashboardClient({
     }
   }
 
-  const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
+  function selectTab(next: TabId) {
+    setTab(next);
+    if (next === "donations") {
+      setDonationBadgeCleared(true);
+      void markRescueDonationsTabSeen(org.id);
+    }
+  }
+
+  const tabs: { id: TabId; label: string; icon: React.ReactNode; showBadge?: boolean }[] = [
     { id: "listings", label: "Active Listings", icon: <LayoutGrid className="h-4 w-4" /> },
     { id: "inquiries", label: "Adoption Inquiries", icon: <Inbox className="h-4 w-4" /> },
     { id: "pipeline", label: "Placement Pipeline", icon: <Truck className="h-4 w-4" /> },
+    {
+      id: "donations",
+      label: "Donations & Payouts",
+      icon: <Coins className="h-4 w-4" />,
+      showBadge: showDonationsBadge,
+    },
     { id: "messages", label: "Messages", icon: <MessageSquare className="h-4 w-4" /> },
     { id: "profile", label: "Org Profile", icon: <User className="h-4 w-4" /> },
   ];
@@ -183,14 +248,23 @@ export function RescueDashboardClient({
           <button
             key={t.id}
             type="button"
-            onClick={() => setTab(t.id)}
-            className={`flex items-center gap-2 rounded-t-[var(--radius-lg)] border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
+            onClick={() => selectTab(t.id)}
+            className={`relative flex items-center gap-2 rounded-t-[var(--radius-lg)] border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
               tab === t.id ? "border-[var(--color-primary)] text-[var(--color-primary)]" : "border-transparent hover:bg-[var(--color-primary-50)]"
             }`}
             style={{ color: tab === t.id ? "var(--color-primary)" : "var(--color-text-secondary)" }}
           >
             {t.icon}
-            {t.label}
+            <span className="flex items-center gap-1.5">
+              {t.label}
+              {t.showBadge && tab !== "donations" && (
+                <span
+                  className="h-2 w-2 shrink-0 rounded-full"
+                  style={{ backgroundColor: "var(--color-secondary)" }}
+                  aria-label="New donations"
+                />
+              )}
+            </span>
           </button>
         ))}
       </div>
@@ -455,6 +529,192 @@ export function RescueDashboardClient({
                 Admin adoption pipeline <ExternalLink className="h-4 w-4" />
               </Link>
             </p>
+          </div>
+        )}
+
+        {tab === "donations" && (
+          <div>
+            {!charityLinked && (
+              <div
+                className="mb-6 rounded-[var(--radius-lg)] border px-4 py-3 text-sm leading-relaxed"
+                style={{
+                  backgroundColor: "var(--color-primary-50)",
+                  borderColor: "var(--color-primary-200)",
+                  color: "var(--color-text)",
+                }}
+              >
+                <strong style={{ fontFamily: "var(--font-heading), serif" }}>No charity profile linked yet.</strong>{" "}
+                Donations and payouts appear when your Tinies charity profile matches this rescue — same account email,
+                same public slug, or an explicit link set by Tinies. Contact{" "}
+                <a href="mailto:hello@tinies.app" className="font-medium underline" style={{ color: "var(--color-primary)" }}>
+                  hello@tinies.app
+                </a>{" "}
+                if you need help connecting your charity.
+              </div>
+            )}
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {[
+                {
+                  label: "Total received (all time)",
+                  value: formatEurFromCents(sum.totalReceivedAllTimeCents),
+                  hint: "Direct gifts + completed fund payouts",
+                },
+                {
+                  label: "This month (direct)",
+                  value: formatEurFromCents(sum.thisMonthDirectCents),
+                  hint: "Round-ups, Guardian, one-time to your charity",
+                },
+                {
+                  label: "Supporters",
+                  value: String(sum.supporterCount),
+                  hint: "Unique donors + active Guardians",
+                },
+                {
+                  label: "Pending fund payout",
+                  value: formatEurFromCents(sum.pendingPayoutCents),
+                  hint: "Allocated in a Tinies run, not yet completed",
+                },
+              ].map((card) => (
+                <div
+                  key={card.label}
+                  className="rounded-[var(--radius-lg)] border p-4"
+                  style={{
+                    backgroundColor: "var(--color-surface)",
+                    borderColor: "var(--color-border)",
+                    boxShadow: "var(--shadow-sm)",
+                  }}
+                >
+                  <p className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--color-text-muted)" }}>
+                    {card.label}
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold tabular-nums" style={{ color: "var(--color-primary)" }}>
+                    {card.value}
+                  </p>
+                  <p className="mt-1 text-xs" style={{ color: "var(--color-text-secondary)" }}>
+                    {card.hint}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <p className="mt-4 text-xs" style={{ color: "var(--color-text-muted)" }}>
+              Giving Fund shares from platform commission are included in totals once paid in a completed monthly
+              distribution. They do not appear as rows in the table below (only direct gifts to your charity do).
+            </p>
+
+            <h3 className="mt-10 text-sm font-semibold" style={{ color: "var(--color-text)" }}>
+              Recent donations
+            </h3>
+            <div className="mt-3 overflow-x-auto rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--color-border)" }}>
+              <table className="w-full min-w-[520px] text-sm">
+                <thead>
+                  <tr className="border-b" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-primary-50)" }}>
+                    <th className="px-4 py-3 text-left font-semibold" style={{ color: "var(--color-text)" }}>
+                      Date
+                    </th>
+                    <th className="px-4 py-3 text-left font-semibold" style={{ color: "var(--color-text)" }}>
+                      Amount
+                    </th>
+                    <th className="px-4 py-3 text-left font-semibold" style={{ color: "var(--color-text)" }}>
+                      Source
+                    </th>
+                    <th className="px-4 py-3 text-left font-semibold" style={{ color: "var(--color-text)" }}>
+                      Donor
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentDonations.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="px-4 py-8 text-center" style={{ color: "var(--color-text-secondary)" }}>
+                        {charityLinked ? "No direct donations recorded yet." : "Link your charity to see donations."}
+                      </td>
+                    </tr>
+                  ) : (
+                    recentDonations.map((row) => (
+                      <tr key={row.id} className="border-b last:border-0" style={{ borderColor: "var(--color-border)" }}>
+                        <td className="px-4 py-3" style={{ color: "var(--color-text-secondary)" }}>
+                          {formatDate(new Date(row.createdAt))}
+                        </td>
+                        <td className="px-4 py-3 font-medium tabular-nums" style={{ color: "var(--color-primary)" }}>
+                          {formatEurFromCents(row.amountCents)}
+                        </td>
+                        <td className="px-4 py-3" style={{ color: "var(--color-text)" }}>
+                          {row.sourceLabel}
+                        </td>
+                        <td className="px-4 py-3" style={{ color: "var(--color-text-secondary)" }}>
+                          {row.donorDisplay}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <h3 className="mt-10 text-sm font-semibold" style={{ color: "var(--color-text)" }}>
+              Payout history
+            </h3>
+            {payoutHistory.length === 0 ? (
+              <p className="mt-3 text-sm leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
+                Payouts are processed monthly. Your first payout will be issued at the end of the month.
+              </p>
+            ) : (
+              <div className="mt-3 overflow-x-auto rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--color-border)" }}>
+                <table className="w-full min-w-[560px] text-sm">
+                  <thead>
+                    <tr className="border-b" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-primary-50)" }}>
+                      <th className="px-4 py-3 text-left font-semibold" style={{ color: "var(--color-text)" }}>
+                        Month
+                      </th>
+                      <th className="px-4 py-3 text-left font-semibold" style={{ color: "var(--color-text)" }}>
+                        Amount
+                      </th>
+                      <th className="px-4 py-3 text-left font-semibold" style={{ color: "var(--color-text)" }}>
+                        Method
+                      </th>
+                      <th className="px-4 py-3 text-left font-semibold" style={{ color: "var(--color-text)" }}>
+                        Status
+                      </th>
+                      <th className="px-4 py-3 text-left font-semibold" style={{ color: "var(--color-text)" }}>
+                        Date paid
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {payoutHistory.map((row) => (
+                      <tr key={row.id} className="border-b last:border-0" style={{ borderColor: "var(--color-border)" }}>
+                        <td className="px-4 py-3" style={{ color: "var(--color-text)" }}>
+                          {row.monthLabel}
+                        </td>
+                        <td className="px-4 py-3 font-medium tabular-nums" style={{ color: "var(--color-primary)" }}>
+                          {formatEurFromCents(row.amountCents)}
+                        </td>
+                        <td className="px-4 py-3" style={{ color: "var(--color-text-secondary)" }}>
+                          {row.paymentMethod}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span
+                            className="rounded-[var(--radius-pill)] border px-2.5 py-0.5 text-xs font-medium"
+                            style={{
+                              backgroundColor: "var(--color-primary-50)",
+                              color: "var(--color-primary)",
+                              borderColor: "var(--color-primary-200)",
+                            }}
+                          >
+                            {PAYOUT_STATUS_LABELS[row.status] ?? row.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3" style={{ color: "var(--color-text-secondary)" }}>
+                          {row.paidAt ? formatDate(new Date(row.paidAt)) : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
 

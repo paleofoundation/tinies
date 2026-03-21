@@ -37,6 +37,7 @@ export async function getRescueOrgDashboard(): Promise<{
     logoUrl: string | null;
     slug: string;
     verified: boolean;
+    donationsTabLastSeenAt: Date | null;
   } | null;
   error?: string;
 }> {
@@ -54,6 +55,7 @@ export async function getRescueOrgDashboard(): Promise<{
       logoUrl: org.logoUrl,
       slug: org.slug,
       verified: org.verified,
+      donationsTabLastSeenAt: org.donationsTabLastSeenAt,
     },
   };
 }

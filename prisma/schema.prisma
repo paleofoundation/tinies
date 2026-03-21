@@ -388,12 +388,14 @@ model RescueOrg {
   bankIban            String?   @map("bank_iban")
   verified            Boolean   @default(false)
   slug                String    @unique
+  donationsTabLastSeenAt DateTime? @map("donations_tab_last_seen_at")
   createdAt           DateTime  @default(now()) @map("created_at")
   updatedAt           DateTime  @updatedAt @map("updated_at")
 
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   listings  AdoptionListing[]
   placements AdoptionPlacement[]
+  linkedCharity Charity?
 
   @@index([userId])
   @@index([verified])
@@ -576,10 +578,12 @@ model Charity {
   active              Boolean   @default(true)
   userId              String?   @unique @map("user_id")
   inviteToken         String?   @unique @map("invite_token")
+  rescueOrgId         String?   @unique @map("rescue_org_id")
   createdAt           DateTime  @default(now()) @map("created_at")
   updatedAt           DateTime  @updatedAt @map("updated_at")
 
   user                User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  rescueOrg           RescueOrg? @relation(fields: [rescueOrgId], references: [id], onDelete: SetNull)
   donations           Donation[]
   guardianSubscriptions GuardianSubscription[]
   userGivingPreferences UserGivingPreference[]
@@ -589,6 +593,7 @@ model Charity {
   @@index([slug])
   @@index([active])
   @@index([userId])
+  @@index([rescueOrgId])
   @@map("charities")
 }
 

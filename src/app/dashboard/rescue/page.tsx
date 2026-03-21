@@ -8,6 +8,13 @@ import {
   getOrgApplications,
   getOrgPlacements,
 } from "./actions";
+import {
+  getOrgDonationSummary,
+  getOrgRecentDonations,
+  getOrgPayoutHistory,
+  rescueDonationsTabHasNew,
+  type OrgDonationSummary,
+} from "@/lib/giving/org-donation-actions";
 import { RescueDashboardClient } from "./RescueDashboardClient";
 
 export const dynamic = "force-dynamic";
@@ -41,6 +48,11 @@ export default async function RescueDashboardPage({ searchParams }: PageProps) {
   let applications: Awaited<ReturnType<typeof getOrgApplications>>["applications"] = [];
   let appError: string | undefined;
   let placements: Awaited<ReturnType<typeof getOrgPlacements>>["placements"] = [];
+  let donationSummary: OrgDonationSummary | null = null;
+  let recentDonations: Awaited<ReturnType<typeof getOrgRecentDonations>> = [];
+  let payoutHistory: Awaited<ReturnType<typeof getOrgPayoutHistory>> = [];
+  let hasNewDonations = false;
+  let charityLinked = false;
   try {
     const [dashboardResult, listingsResult, applicationsResult, placementsResult] = await Promise.all([
       getRescueOrgDashboard(),
@@ -55,6 +67,23 @@ export default async function RescueDashboardPage({ searchParams }: PageProps) {
     applications = applicationsResult.applications;
     appError = applicationsResult.error;
     placements = placementsResult.placements ?? [];
+
+    if (org) {
+      try {
+        const [sum, recent, payouts] = await Promise.all([
+          getOrgDonationSummary(org.id),
+          getOrgRecentDonations(org.id, 50),
+          getOrgPayoutHistory(org.id),
+        ]);
+        donationSummary = sum;
+        recentDonations = recent;
+        payoutHistory = payouts;
+        charityLinked = sum.charityIds.length > 0;
+        hasNewDonations = rescueDonationsTabHasNew(org.donationsTabLastSeenAt, sum.latestDonationAt);
+      } catch (donationErr) {
+        console.error("RescueDashboardPage donation data", donationErr);
+      }
+    }
   } catch (e) {
     console.error("RescueDashboardPage data fetch", e);
     orgError = "Failed to load dashboard.";
@@ -165,6 +194,17 @@ export default async function RescueDashboardPage({ searchParams }: PageProps) {
           applications={applications}
           placements={placements}
           welcomeJustRegistered={welcomeJustRegistered}
+          donationSummary={donationSummary}
+          recentDonations={recentDonations.map((d) => ({
+            ...d,
+            createdAt: d.createdAt.toISOString(),
+          }))}
+          payoutHistory={payoutHistory.map((p) => ({
+            ...p,
+            paidAt: p.paidAt ? p.paidAt.toISOString() : null,
+          }))}
+          charityLinked={charityLinked}
+          hasNewDonations={hasNewDonations}
         />
         <p className="mt-10">
           <Link href="/" className="text-sm hover:underline" style={{ color: "var(--color-text-secondary)" }}>
