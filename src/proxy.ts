@@ -39,5 +39,9 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
+  // Exclude paths with a dot (static files). Also exclude root metadata routes:
+  // they live in app/ (not under [locale]) and must not be rewritten to /en/...
+  matcher: [
+    "/((?!api|_next|_vercel|icon$|apple-icon$|opengraph-image$|.*\\..*).*)",
+  ],
 };
