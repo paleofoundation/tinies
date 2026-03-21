@@ -185,6 +185,7 @@ model User {
   charity Charity?
   providerFavoritesAsOwner   ProviderFavorite[] @relation("ProviderFavoriteOwner")
   providerFavoritesAsTarget  ProviderFavorite[] @relation("ProviderFavoriteProvider")
+  bookingUpdatesSent         BookingUpdate[]    @relation("BookingUpdateProvider")
 
   @@index([email])
   @@index([role])
@@ -329,6 +330,7 @@ model Booking {
   disputes Dispute[]
   meetAndGreets MeetAndGreet[]
   donations Donation[]
+  updates       BookingUpdate[]
 
   @@index([ownerId])
   @@index([providerId])
@@ -336,6 +338,23 @@ model Booking {
   @@index([startDatetime])
   @@index([createdAt])
   @@map("bookings")
+}
+
+model BookingUpdate {
+  id          String   @id @default(uuid())
+  bookingId   String   @map("booking_id")
+  providerId  String   @map("provider_id")
+  text        String?  @map("text")
+  photos      String[] @default([])
+  videoUrl    String?  @map("video_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  booking  Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  provider User    @relation("BookingUpdateProvider", fields: [providerId], references: [id], onDelete: Restrict)
+
+  @@index([bookingId])
+  @@index([createdAt])
+  @@map("booking_updates")
 }
 
 model Review {

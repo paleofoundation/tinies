@@ -136,3 +136,12 @@ export function buildProviderCancelledOwnerSMS(params: {
 export function buildNewMessageSMS(params: { senderName: string }): string {
   return `New message from ${params.senderName}. Reply on Tinies: ${APP_URL}/dashboard/messages`;
 }
+
+export function buildBookingUpdateSMS(params: {
+  providerName: string;
+  petName: string;
+  bookingId: string;
+}): string {
+  const link = `${APP_URL}/dashboard/owner?tab=bookings#owner-booking-${params.bookingId}`;
+  return `New photo of ${params.petName} from ${params.providerName}! ${link}`;
+}

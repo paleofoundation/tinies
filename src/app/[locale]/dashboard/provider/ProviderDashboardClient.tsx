@@ -44,6 +44,7 @@ import {
   cancelAcceptedBookingAsProvider,
 } from "./actions";
 import { ActiveWalkCard } from "./ActiveWalkCard";
+import { SendBookingUpdateModal } from "./SendBookingUpdateModal";
 import { ServiceReportForm } from "./ServiceReportForm";
 import { walkActivitySummary } from "@/components/maps/WalkTracker";
 
@@ -176,6 +177,7 @@ export function ProviderDashboardClient({
   const [startingServiceId, setStartingServiceId] = useState<string | null>(null);
   const [completingBookingId, setCompletingBookingId] = useState<string | null>(null);
   const [cancellingBookingId, setCancellingBookingId] = useState<string | null>(null);
+  const [sendUpdateBooking, setSendUpdateBooking] = useState<{ id: string; headline: string } | null>(null);
   const score = profileCompletenessPercentage ?? getCompletenessScore();
 
   useEffect(() => {
@@ -492,6 +494,14 @@ export function ProviderDashboardClient({
             onSuccess={() => setReportProblemBookingId(null)}
           />
         )}
+        {sendUpdateBooking && (
+          <SendBookingUpdateModal
+            bookingId={sendUpdateBooking.id}
+            open
+            onClose={() => setSendUpdateBooking(null)}
+            headline={`${sendUpdateBooking.headline} — share a moment with their family`}
+          />
+        )}
 
           {tab === "profile" && (
             <section className="rounded-[var(--radius-lg)] border p-8 sm:p-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
@@ -648,6 +658,22 @@ export function ProviderDashboardClient({
                               className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] bg-[var(--color-primary)] px-3 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-70"
                             >
                               {startingServiceId === b.id ? "Starting…" : "Start service"}
+                            </button>
+                          )}
+                          {b.status === "active" && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setSendUpdateBooking({
+                                  id: b.id,
+                                  headline: `${b.ownerName} · ${b.petNames.join(", ")} · ${SERVICE_LABELS[b.serviceType] ?? b.serviceType}`,
+                                })
+                              }
+                              disabled={completingBookingId === b.id || cancellingBookingId === b.id}
+                              className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] border border-[var(--color-primary)] px-3 py-2 text-sm font-semibold hover:bg-[var(--color-primary-50)] disabled:opacity-70"
+                              style={{ color: "var(--color-primary)" }}
+                            >
+                              Send update
                             </button>
                           )}
                           {(b.status === "active" || b.status === "accepted") && (

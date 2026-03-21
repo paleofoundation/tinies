@@ -25,6 +25,7 @@ import { ReviewForm } from "./ReviewForm";
 import { TipForm } from "./TipForm";
 import { getOwnerMeetAndGreets, acceptMeetAndGreetSuggestion } from "@/lib/meet-and-greet/actions";
 import type { OwnerMeetAndGreetCard } from "@/lib/meet-and-greet/actions";
+import { BookingUpdatesFeed } from "@/components/bookings/BookingUpdatesFeed";
 import { ReportProblemModal } from "@/components/disputes/ReportProblemModal";
 import { getDisputesForUser, getClaimsForUser, respondToDispute, respondToClaim } from "@/lib/disputes/actions";
 import type { DisputeCard, ClaimCard } from "@/lib/disputes/actions";
@@ -132,6 +133,7 @@ function BookingCard({
 
   return (
     <li
+      id={`owner-booking-${booking.id}`}
       className="rounded-[var(--radius-lg)] border p-4"
       style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}
     >
@@ -271,6 +273,24 @@ function BookingCard({
               ))}
             </div>
           )}
+        </div>
+      )}
+      {(booking.status === "active" || booking.status === "completed") && (
+        <div
+          className="mt-4 rounded-[var(--radius-xl)] border p-4 sm:p-5"
+          style={{ borderColor: "var(--color-border)", backgroundColor: "rgba(10, 128, 128, 0.05)" }}
+        >
+          <h4 className="text-sm font-semibold" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>
+            Moments from your carer
+          </h4>
+          <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-body), sans-serif" }}>
+            {booking.status === "active"
+              ? "We check for new photos about every 30 seconds while your booking is active."
+              : "Photos and notes from during the visit stay here in your history."}
+          </p>
+          <div className="mt-4">
+            <BookingUpdatesFeed bookingId={booking.id} pollWhileActive={booking.status === "active"} />
+          </div>
         </div>
       )}
       {showLeaveReview && openReviewBookingId === booking.id && (

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { MapPin, Square } from "lucide-react";
 import { startWalk, endWalk, cancelAcceptedBookingAsProvider } from "./actions";
+import { SendBookingUpdateModal } from "./SendBookingUpdateModal";
 import { WalkTracker } from "@/components/maps/WalkTracker";
 import type { ProviderBookingCard } from "@/lib/utils/provider-helpers";
 
@@ -24,6 +25,7 @@ export function ActiveWalkCard({ booking }: { booking: ProviderBookingCard }) {
   const [activities, setActivities] = useState<WalkActivity[]>([]);
   const [ending, setEnding] = useState(false);
   const [providerCancelling, setProviderCancelling] = useState(false);
+  const [sendUpdateOpen, setSendUpdateOpen] = useState(false);
   const watchIdRef = useRef<number | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startedAtRef = useRef<Date | null>(null);
@@ -231,6 +233,15 @@ export function ActiveWalkCard({ booking }: { booking: ProviderBookingCard }) {
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
+              onClick={() => setSendUpdateOpen(true)}
+              disabled={ending || providerCancelling}
+              className="rounded-[var(--radius-lg)] border border-[var(--color-primary)] px-3 py-1.5 text-sm font-semibold hover:bg-[var(--color-primary-50)] disabled:opacity-50"
+              style={{ color: "var(--color-primary)" }}
+            >
+              Send update
+            </button>
+            <button
+              type="button"
               onClick={handleProviderCancelBooking}
               disabled={ending || providerCancelling}
               className="rounded-[var(--radius-lg)] border border-[var(--color-border)] px-3 py-1.5 text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-background)] disabled:opacity-50"
@@ -248,6 +259,12 @@ export function ActiveWalkCard({ booking }: { booking: ProviderBookingCard }) {
             </button>
           </div>
         </div>
+        <SendBookingUpdateModal
+          bookingId={booking.id}
+          open={sendUpdateOpen}
+          onClose={() => setSendUpdateOpen(false)}
+          headline={`${booking.petNames.join(", ")} · share a moment with their family`}
+        />
         <div className="mt-4">
           <WalkTracker
             route={displayRoute}
