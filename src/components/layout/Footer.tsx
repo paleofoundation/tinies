@@ -8,6 +8,7 @@ const FOOTER_COLUMNS = [
       { href: "/services", label: "Find Care" },
       { href: "/how-it-works", label: "How It Works" },
       { href: "/adopt", label: "Adopt" },
+      { href: "/adopt/tinies-who-made-it", label: "Tinies Who Made It" },
     ],
   },
   {

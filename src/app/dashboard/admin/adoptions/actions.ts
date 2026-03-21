@@ -17,6 +17,7 @@ const PLACEMENT_STATUS_LABELS: Record<PlacementStatus, string> = {
   in_transit: "In transit",
   delivered: "Delivered",
   follow_up: "Follow-up",
+  completed: "Completed",
 };
 
 /** Send post-adoption check-in email to adopter. Call from cron when timeframe (1 week, 1 month, 3 months) is reached after arrival. Does not throw. */
@@ -24,9 +25,10 @@ export async function sendPostAdoptionCheckinEmail(params: {
   to: string;
   animalName: string;
   timeframe: string;
+  placementId: string;
 }): Promise<void> {
   try {
-    const shareUpdateUrl = `${APP_URL}/dashboard/adopter`;
+    const shareUpdateUrl = `${APP_URL}/adopt/tinies-who-made-it/share?placement=${encodeURIComponent(params.placementId)}`;
     await sendEmail({
       to: params.to,
       subject: `It's been ${params.timeframe} since ${params.animalName} arrived!`,
@@ -104,6 +106,9 @@ export type PlacementDetail = {
   checkin1w: Date | null;
   checkin1m: Date | null;
   checkin3m: Date | null;
+  successStoryText: string | null;
+  successStoryPhotos: string[];
+  successStoryApprovedAt: Date | null;
   createdAt: Date;
   listing: { name: string; species: string; breed: string | null; estimatedAge: string | null };
   adopter: { name: string; email: string };
@@ -137,6 +142,9 @@ export async function getPlacementById(id: string): Promise<PlacementDetail | nu
     checkin1w: placement.checkin1w,
     checkin1m: placement.checkin1m,
     checkin3m: placement.checkin3m,
+    successStoryText: placement.successStoryText,
+    successStoryPhotos: placement.successStoryPhotos,
+    successStoryApprovedAt: placement.successStoryApprovedAt,
     createdAt: placement.createdAt,
     listing: placement.listing,
     adopter: placement.adopter,

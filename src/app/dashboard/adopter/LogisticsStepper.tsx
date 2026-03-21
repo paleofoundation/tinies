@@ -14,7 +14,7 @@ type Placement = {
   checkin3m: Date | string | null;
 };
 
-const STATUS_ORDER = ["preparing", "vet_complete", "transport_booked", "in_transit", "delivered", "follow_up"];
+const STATUS_ORDER = ["preparing", "vet_complete", "transport_booked", "in_transit", "delivered", "follow_up", "completed"];
 
 function statusRank(s: string): number {
   const i = STATUS_ORDER.indexOf(s);
@@ -53,7 +53,7 @@ export function LogisticsStepper({ placement }: { placement: Placement }) {
   const departureDone = !!placement.departureDate;
   const inTransit = rank >= statusRank("in_transit");
   const delivered = rank >= statusRank("delivered");
-  const followUp = placement.status === "follow_up";
+  const followUpComplete = rank >= statusRank("follow_up");
 
   const vetSub: string[] = [];
   if (healthCheck) vetSub.push("Health check");
@@ -112,9 +112,14 @@ export function LogisticsStepper({ placement }: { placement: Placement }) {
   });
   stepsWithComplete.push({
     key: "followup",
-    label: "Follow-up",
-    complete: followUp,
-    detail: checkinDetails.length > 0 ? checkinDetails.join(" · ") : "Check-ins at 1 week, 1 month, 3 months",
+    label: placement.status === "completed" ? "Follow-up complete" : "Follow-up",
+    complete: followUpComplete,
+    detail:
+      placement.status === "completed"
+        ? "Placement complete on Tinies."
+        : checkinDetails.length > 0
+          ? checkinDetails.join(" · ")
+          : "Check-ins at 1 week, 1 month, 3 months",
   });
 
   const currentIndex = stepsWithComplete.findIndex((s) => !s.complete);

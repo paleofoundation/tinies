@@ -27,7 +27,7 @@ const BENEFITS = [
   {
     icon: Shield,
     title: "Tools and audience, not middlemen",
-    text: "Structured applications, clear status updates, and check-ins at 1 week, 1 month, and 3 months. Happy Tails stories celebrate every adoption. We don't coordinate vet prep or transport for you — we connect you with adopters and transport providers who do.",
+    text: "Structured applications, clear status updates, and check-ins at 1 week, 1 month, and 3 months. Tinies who made it celebrates every adoption. We don't coordinate vet prep or transport for you — we connect you with adopters and transport providers who do.",
   },
 ] as const;
 

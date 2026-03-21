@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import Image from "next/image";
 import {
   updatePlacement,
   advancePlacementStatus,
@@ -10,6 +11,7 @@ import {
   type TransportProviderRow,
 } from "../../actions";
 import { PlacementStatus } from "@prisma/client";
+import { approveAdoptionSuccessStory } from "@/lib/adoption/success-stories-actions";
 
 const PLACEMENT_STATUS_ORDER: PlacementStatus[] = [
   "preparing",
@@ -18,6 +20,7 @@ const PLACEMENT_STATUS_ORDER: PlacementStatus[] = [
   "in_transit",
   "delivered",
   "follow_up",
+  "completed",
 ];
 
 const STATUS_LABELS: Record<string, string> = {
@@ -27,6 +30,7 @@ const STATUS_LABELS: Record<string, string> = {
   in_transit: "In transit",
   delivered: "Delivered",
   follow_up: "Follow-up",
+  completed: "Completed",
 };
 
 const TRANSPORT_METHODS = [
@@ -132,6 +136,17 @@ export function PlacementManageForm({ placement, transportProviders }: Props) {
     if (result.error) toast.error(result.error);
     else {
       toast.success(`Status updated to ${STATUS_LABELS[nextStatus]}.`);
+      router.refresh();
+    }
+  }
+
+  async function handleApproveStory() {
+    setSaving(true);
+    const result = await approveAdoptionSuccessStory(placement.id);
+    setSaving(false);
+    if (result.error) toast.error(result.error);
+    else {
+      toast.success("Story approved for the public gallery.");
       router.refresh();
     }
   }
@@ -381,8 +396,69 @@ export function PlacementManageForm({ placement, transportProviders }: Props) {
                 Start Follow-Up
               </button>
             )}
+            {nextStatusButton === "completed" && (
+              <button
+                type="button"
+                onClick={() => handleAdvanceStatus("completed")}
+                disabled={saving}
+                className="rounded-[var(--radius-lg)] bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
+              >
+                Mark placement complete
+              </button>
+            )}
           </div>
         )}
+      </section>
+
+      {/* Tinies Who Made It */}
+      <section className="rounded-[var(--radius-lg)] border p-6" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}>
+        <h3 className="text-lg font-semibold" style={{ color: "var(--color-text)" }}>Tinies Who Made It</h3>
+        <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+          Adopter-submitted success stories appear on <span className="font-medium">/adopt/tinies-who-made-it</span> after approval.
+        </p>
+        {(() => {
+          const hasContent =
+            (placement.successStoryText?.trim().length ?? 0) > 0 || placement.successStoryPhotos.length > 0;
+          if (!hasContent) {
+            return (
+              <p className="mt-4 text-sm" style={{ color: "var(--color-text-muted)" }}>
+                No story submitted yet. Adopters receive check-in emails with a link to share an update.
+              </p>
+            );
+          }
+          return (
+            <div className="mt-4 space-y-4">
+              {placement.successStoryText ? (
+                <blockquote className="border-l-2 pl-3 text-sm italic leading-relaxed" style={{ borderColor: "var(--color-primary)", color: "var(--color-text)" }}>
+                  &ldquo;{placement.successStoryText.trim()}&rdquo;
+                </blockquote>
+              ) : null}
+              {placement.successStoryPhotos.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {placement.successStoryPhotos.map((url) => (
+                    <div key={url} className="relative h-24 w-24 overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--color-border)" }}>
+                      <Image src={url} alt="Success story" fill className="object-cover" sizes="96px" />
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+              {placement.successStoryApprovedAt ? (
+                <p className="text-sm font-medium" style={{ color: "#16A34A" }}>
+                  Approved for gallery · {new Date(placement.successStoryApprovedAt).toLocaleString("en-GB")}
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => void handleApproveStory()}
+                  disabled={saving}
+                  className="rounded-[var(--radius-lg)] bg-[var(--color-secondary)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
+                >
+                  Approve for public gallery
+                </button>
+              )}
+            </div>
+          );
+        })()}
       </section>
     </div>
   );

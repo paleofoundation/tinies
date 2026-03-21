@@ -62,6 +62,15 @@ export default async function AdoptPage() {
           <p className="mt-4 mx-auto max-w-2xl text-lg" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
             Rescue organisations list their animals on Tinies. Browse dogs and cats, apply through the platform, and connect with rescues and transport providers — locally in Cyprus or internationally.
           </p>
+          <p className="mt-6">
+            <Link
+              href="/adopt/tinies-who-made-it"
+              className="text-sm font-semibold hover:underline"
+              style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-primary)" }}
+            >
+              See tinies who made it →
+            </Link>
+          </p>
         </div>
       </section>
 

@@ -181,7 +181,8 @@ public/                   # Static assets (logo, favicons, OG images)
 /adopt/[listing-slug]               Animal profile
 /adopt/apply/[listing-slug]         Adoption application form
 /adopt/from-cyprus-to-[country]     Country-specific SEO pages
-/adopt/happy-tails                  Adopted animals gallery
+/adopt/tinies-who-made-it           Adoption success stories gallery
+/adopt/tinies-who-made-it/share     Adopter success story submission (auth)
 /giving                             Public transparency dashboard
 /giving/[charity-slug]              Charity profile
 /giving/become-a-guardian           Guardian subscription signup

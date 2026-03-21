@@ -11,6 +11,7 @@ const PAGES = [
   "/services",
   "/services/search",
   "/adopt",
+  "/adopt/tinies-who-made-it",
   "/giving",
   "/give",
   "/how-it-works",

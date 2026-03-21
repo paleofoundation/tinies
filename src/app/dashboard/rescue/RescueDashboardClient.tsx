@@ -24,6 +24,7 @@ import {
 } from "./actions";
 import type { OrgDonationSummary } from "@/lib/giving/org-donation-actions";
 import { markRescueDonationsTabSeen } from "@/lib/giving/org-donation-actions";
+import { approveAdoptionSuccessStory } from "@/lib/adoption/success-stories-actions";
 
 type TabId = "listings" | "inquiries" | "pipeline" | "donations" | "messages" | "profile";
 
@@ -42,7 +43,15 @@ type Props = {
   };
   listings: OrgListingRow[];
   applications: OrgApplicationRow[];
-  placements: { id: string; status: string; destinationCountry: string; listingName: string; adopterName: string; createdAt: Date }[];
+  placements: {
+    id: string;
+    status: string;
+    destinationCountry: string;
+    listingName: string;
+    adopterName: string;
+    createdAt: Date;
+    awaitingGalleryApproval: boolean;
+  }[];
   /** From ?welcome=1 after self-registration */
   welcomeJustRegistered?: boolean;
   donationSummary: OrgDonationSummary | null;
@@ -96,6 +105,7 @@ const PLACEMENT_STATUS_LABELS: Record<string, string> = {
   in_transit: "In transit",
   delivered: "Delivered",
   follow_up: "Follow-up",
+  completed: "Completed",
 };
 
 const PAYOUT_STATUS_LABELS: Record<string, string> = {
@@ -140,6 +150,7 @@ export function RescueDashboardClient({
   const [pendingApprove, setPendingApprove] = useState<string | null>(null);
   const [pendingDecline, setPendingDecline] = useState<string | null>(null);
   const [pendingToggle, setPendingToggle] = useState<string | null>(null);
+  const [pendingStoryApprove, setPendingStoryApprove] = useState<string | null>(null);
 
   const byStatus = {
     new: applications.filter((a) => a.status === "new"),
@@ -166,6 +177,17 @@ export function RescueDashboardClient({
     if (result.error) toast.error(result.error);
     else {
       toast.success("Application declined.");
+      router.refresh();
+    }
+  }
+
+  async function handleApproveGalleryStory(placementId: string) {
+    setPendingStoryApprove(placementId);
+    const result = await approveAdoptionSuccessStory(placementId);
+    setPendingStoryApprove(null);
+    if (result.error) toast.error(result.error);
+    else {
+      toast.success("Story approved for Tinies who made it.");
       router.refresh();
     }
   }
@@ -501,16 +523,29 @@ export function RescueDashboardClient({
                           {p.destinationCountry} · {formatDate(p.createdAt)}
                         </p>
                       </div>
-                      <span
-                        className="rounded-[var(--radius-pill)] border px-2.5 py-0.5 text-xs font-medium"
-                        style={{
-                          backgroundColor: "var(--color-primary-50)",
-                          color: "var(--color-primary)",
-                          borderColor: "var(--color-primary-200)",
-                        }}
-                      >
-                        {PLACEMENT_STATUS_LABELS[p.status] ?? p.status}
-                      </span>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {p.awaitingGalleryApproval ? (
+                          <button
+                            type="button"
+                            onClick={() => void handleApproveGalleryStory(p.id)}
+                            disabled={pendingStoryApprove === p.id}
+                            className="rounded-[var(--radius-pill)] px-3 py-1 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                            style={{ backgroundColor: "var(--color-secondary)" }}
+                          >
+                            {pendingStoryApprove === p.id ? "Approving…" : "Approve gallery story"}
+                          </button>
+                        ) : null}
+                        <span
+                          className="rounded-[var(--radius-pill)] border px-2.5 py-0.5 text-xs font-medium"
+                          style={{
+                            backgroundColor: "var(--color-primary-50)",
+                            color: "var(--color-primary)",
+                            borderColor: "var(--color-primary-200)",
+                          }}
+                        >
+                          {PLACEMENT_STATUS_LABELS[p.status] ?? p.status}
+                        </span>
+                      </div>
                     </div>
                   </li>
                 ))}

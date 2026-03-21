@@ -133,6 +133,7 @@ export type OrgPlacementRow = {
   listingName: string;
   adopterName: string;
   createdAt: Date;
+  awaitingGalleryApproval: boolean;
 };
 
 export async function getOrgPlacements(): Promise<{
@@ -150,14 +151,19 @@ export async function getOrgPlacements(): Promise<{
     },
   });
   return {
-    placements: rows.map((r) => ({
-      id: r.id,
-      status: r.status,
-      destinationCountry: r.destinationCountry,
-      listingName: r.listing.name,
-      adopterName: r.adopter.name,
-      createdAt: r.createdAt,
-    })),
+    placements: rows.map((r) => {
+      const hasBody =
+        (r.successStoryText?.trim().length ?? 0) > 0 || r.successStoryPhotos.length > 0;
+      return {
+        id: r.id,
+        status: r.status,
+        destinationCountry: r.destinationCountry,
+        listingName: r.listing.name,
+        adopterName: r.adopter.name,
+        createdAt: r.createdAt,
+        awaitingGalleryApproval: hasBody && !r.successStoryApprovedAt,
+      };
+    }),
   };
 }
 

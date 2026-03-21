@@ -92,6 +92,7 @@ enum PlacementStatus {
   in_transit
   delivered
   follow_up
+  completed
 }
 
 enum PayoutStatus {
@@ -486,6 +487,9 @@ model AdoptionPlacement {
   checkin1w              DateTime?      @map("checkin_1w")
   checkin1m              DateTime?      @map("checkin_1m")
   checkin3m              DateTime?      @map("checkin_3m")
+  successStoryText       String?        @map("success_story_text")
+  successStoryPhotos     String[]       @default([]) @map("success_story_photos")
+  successStoryApprovedAt DateTime?      @map("success_story_approved_at")
   createdAt              DateTime       @default(now()) @map("created_at")
   updatedAt              DateTime       @updatedAt @map("updated_at")
 
@@ -501,6 +505,7 @@ model AdoptionPlacement {
   @@index([adopterId])
   @@index([transportProviderId])
   @@index([status])
+  @@index([successStoryApprovedAt])
   @@map("adoption_placements")
 }
 

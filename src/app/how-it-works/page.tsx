@@ -75,7 +75,7 @@ const ADOPTER_STEPS = [
   {
     icon: Home,
     title: "Welcome your tiny home",
-    text: "Check-ins at 1 week, 1 month, and 3 months. Share your story for Happy Tails and inspire the next adoption.",
+    text: "Check-ins at 1 week, 1 month, and 3 months. Share your story for Tinies who made it and inspire the next adoption.",
   },
 ] as const;
 
