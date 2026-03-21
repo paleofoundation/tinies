@@ -8,7 +8,7 @@ export type AdoptBrowseListing = {
   estimatedAge: string | null;
   sex: string | null;
   photos: string[];
-  org: { name: string; location: string | null };
+  org: { name: string; slug: string; location: string | null; verified: boolean };
 };
 
 /** All active, available adoption listings for /adopt browse (newest first). */
@@ -25,7 +25,7 @@ export async function getAllAvailableAdoptionListings(): Promise<AdoptBrowseList
         estimatedAge: true,
         sex: true,
         photos: true,
-        org: { select: { name: true, location: true } },
+        org: { select: { name: true, slug: true, location: true, verified: true } },
       },
     });
   } catch (e) {

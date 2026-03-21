@@ -100,10 +100,23 @@ export default async function AdoptionListingProfilePage({ params }: Props) {
               {listing.estimatedAge ? ` · ${listing.estimatedAge}` : ""}
               {listing.sex ? ` · ${listing.sex}` : ""}
             </p>
-            <p className="mt-4 flex items-center gap-2 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-muted)" }}>
-              <MapPin className="h-4 w-4 shrink-0" aria-hidden />
-              {listing.org.name}
-              {listing.org.location ? ` · ${listing.org.location}` : ""}
+            {listing.org.location ? (
+              <p className="mt-4 flex items-center gap-2 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-muted)" }}>
+                <MapPin className="h-4 w-4 shrink-0" aria-hidden />
+                {listing.org.location}
+              </p>
+            ) : null}
+            <p className={`text-sm ${listing.org.location ? "mt-2" : "mt-4"}`} style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+              Cared for by{" "}
+              {listing.org.verified ? (
+                <Link href={`/rescue/${listing.org.slug}`} className="font-semibold hover:underline" style={{ color: "var(--color-primary)" }}>
+                  {listing.org.name}
+                </Link>
+              ) : (
+                <span className="font-semibold" style={{ color: "var(--color-text)" }}>
+                  {listing.org.name}
+                </span>
+              )}
             </p>
 
             {listing.temperament && (

@@ -179,32 +179,38 @@ export default async function AdoptPage() {
                 const speciesLabel = formatLabel(listing.species) || "Pet";
                 const sexLabel = formatLabel(listing.sex);
                 return (
-                  <Link
+                  <article
                     key={listing.slug}
-                    href={`/adopt/${listing.slug}`}
-                    className="group block rounded-[var(--radius-lg)] border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                    className="group rounded-[var(--radius-lg)] border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]"
                     style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}
                   >
-                    <div
-                      className="relative h-40 overflow-hidden rounded-t-[var(--radius-lg)] border-b group-hover:bg-[var(--color-primary-50)]"
-                      style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}
+                    <Link
+                      href={`/adopt/${listing.slug}`}
+                      className="block rounded-t-[var(--radius-lg)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
                     >
-                      {photo ? (
-                        <Image
-                          src={photo}
-                          alt={`${listing.name}, ${speciesLabel}`}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center" aria-hidden>
-                          <PawPrint className="h-16 w-16" style={{ color: "var(--color-primary-300)" }} strokeWidth={1.25} />
-                        </div>
-                      )}
-                    </div>
+                      <div
+                        className="relative h-40 overflow-hidden rounded-t-[var(--radius-lg)] border-b group-hover:bg-[var(--color-primary-50)]"
+                        style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}
+                      >
+                        {photo ? (
+                          <Image
+                            src={photo}
+                            alt={`${listing.name}, ${speciesLabel}`}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center" aria-hidden>
+                            <PawPrint className="h-16 w-16" style={{ color: "var(--color-primary-300)" }} strokeWidth={1.25} />
+                          </div>
+                        )}
+                      </div>
+                    </Link>
                     <div className="p-8" style={{ padding: "var(--space-card)" }}>
-                      <h3 className="font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>{listing.name}</h3>
+                      <Link href={`/adopt/${listing.slug}`}>
+                        <h3 className="font-semibold hover:underline" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>{listing.name}</h3>
+                      </Link>
                       <p className="mt-1 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
                         {speciesLabel}
                         {listing.breed ? ` · ${listing.breed}` : ""}
@@ -213,19 +219,31 @@ export default async function AdoptPage() {
                         {listing.estimatedAge ?? "Age TBC"}
                         {sexLabel ? ` · ${sexLabel}` : ""}
                       </p>
-                      <p className="mt-2 flex items-center gap-1 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+                      <p className="mt-2 flex flex-wrap items-center gap-x-1 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
                         <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                        <span>{listing.org.name}{listing.org.location ? ` · ${listing.org.location}` : ""}</span>
+                        {listing.org.verified ? (
+                          <Link
+                            href={`/rescue/${listing.org.slug}`}
+                            className="font-medium hover:underline"
+                            style={{ color: "var(--color-primary)" }}
+                          >
+                            {listing.org.name}
+                          </Link>
+                        ) : (
+                          <span>{listing.org.name}</span>
+                        )}
+                        {listing.org.location ? <span> · {listing.org.location}</span> : null}
                       </p>
-                      <div
+                      <Link
+                        href={`/adopt/${listing.slug}`}
                         className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] px-4 font-semibold text-white transition-opacity group-hover:opacity-90"
                         style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-secondary)" }}
                       >
                         <Heart className="h-4 w-4" aria-hidden />
                         Adopt this Tiny
-                      </div>
+                      </Link>
                     </div>
-                  </Link>
+                  </article>
                 );
               })}
             </div>

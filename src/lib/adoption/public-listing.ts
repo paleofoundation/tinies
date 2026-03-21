@@ -15,7 +15,7 @@ export type PublicAdoptionListing = {
   specialNeeds: string | null;
   internationalEligible: boolean;
   destinationCountries: string[];
-  org: { name: string; slug: string; location: string | null };
+  org: { name: string; slug: string; location: string | null; verified: boolean };
 };
 
 /** Public animal profile: available + active listings only. */
@@ -40,7 +40,7 @@ export async function getPublicAdoptionListingBySlug(
         specialNeeds: true,
         internationalEligible: true,
         destinationCountries: true,
-        org: { select: { name: true, slug: true, location: true } },
+        org: { select: { name: true, slug: true, location: true, verified: true } },
       },
     });
     return listing;

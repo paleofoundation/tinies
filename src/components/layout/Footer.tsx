@@ -22,6 +22,7 @@ const FOOTER_COLUMNS = [
     links: [
       { href: "/dashboard/rescue/listings/new", label: "List Your Animals" },
       { href: "/for-rescues", label: "For Rescues" },
+      { href: "/rescue", label: "Our rescue partners" },
     ],
   },
   {
