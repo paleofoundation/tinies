@@ -2,7 +2,7 @@
 @import "tailwindcss";
 
 :root {
-  /* Brand colors — Refine Design tokens */
+  /* Brand colors */
   --color-primary: #0A8080;
   --color-secondary: #F45D48;
   --color-accent: #0A8080;
@@ -13,7 +13,7 @@
   --color-text-muted: rgba(28, 28, 28, 0.5);
   --color-border: rgba(10, 128, 128, 0.15);
 
-  /* Primary scale */
+  /* Primary shade scale */
   --color-primary-50: #F1F9F9;
   --color-primary-100: #DFF6F6;
   --color-primary-200: #B3F9F9;
@@ -26,7 +26,7 @@
   --color-primary-900: #064141;
   --color-primary-950: #072222;
 
-  /* Secondary scale */
+  /* Secondary shade scale */
   --color-secondary-50: #F9F1F0;
   --color-secondary-100: #F7E1DE;
   --color-secondary-200: #FABBB2;
@@ -39,7 +39,7 @@
   --color-secondary-900: #420D05;
   --color-secondary-950: #220A07;
 
-  /* Accent scale (same as primary) */
+  /* Accent shade scale (same as primary) */
   --color-accent-50: #F1F9F9;
   --color-accent-100: #DFF6F6;
   --color-accent-200: #B3F9F9;
@@ -52,7 +52,7 @@
   --color-accent-900: #064141;
   --color-accent-950: #072222;
 
-  /* Neutral scale */
+  /* Neutral shade scale */
   --color-neutral-50: #F5F5F5;
   --color-neutral-100: #EBEBEB;
   --color-neutral-200: #D6D6D6;
@@ -64,11 +64,6 @@
   --color-neutral-800: #333333;
   --color-neutral-900: #242424;
   --color-neutral-950: #141414;
-
-  /* Typography — GCentra not on Google Fonts; add via self-host or use font file */
-  --font-heading: 'GCentra', Georgia, serif;
-  --font-body: 'Roboto', sans-serif;
-  --type-scale-ratio: 1.25;
 
   /* Type scale */
   --text-xs: 0.640rem;
@@ -92,6 +87,11 @@
   --shadow-sm: 0 2px 8px rgba(10, 128, 128, 0.06);
   --shadow-md: 0 4px 16px rgba(10, 128, 128, 0.08);
   --shadow-lg: 0 8px 32px rgba(10, 128, 128, 0.1);
+
+  /* Typography — Georgia / Roboto (Roboto loaded via next/font in layout.tsx) */
+  --font-heading: Georgia, serif;
+  --font-body: "Roboto", sans-serif;
+  --type-scale-ratio: 1.25;
 
   /* Spacing (app-specific) */
   --space-section: 80px;

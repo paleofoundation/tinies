@@ -46,7 +46,7 @@ export function Footer() {
   return (
     <footer
       className="px-4 py-14 sm:px-6 lg:px-8"
-      style={{ backgroundColor: "var(--color-primary-950)" }}
+      style={{ backgroundColor: "var(--color-primary-900)" }}
     >
       <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
         <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">

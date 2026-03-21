@@ -846,7 +846,11 @@ export function OwnerDashboardClient({
           const booking = bookings.find((b) => b.id === openTipBookingId);
           if (!booking) return null;
           return (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setOpenTipBookingId(null)}>
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              style={{ backgroundColor: "color-mix(in srgb, var(--color-primary-900) 55%, transparent)" }}
+              onClick={() => setOpenTipBookingId(null)}
+            >
               <div className="max-h-[90vh] w-full max-w-md overflow-auto rounded-[var(--radius-lg)] border bg-[var(--color-surface)] shadow-lg" style={{ borderColor: "var(--color-border)" }} onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-end border-b p-2" style={{ borderColor: "var(--color-border)" }}>
                   <button type="button" onClick={() => setOpenTipBookingId(null)} className="rounded p-1 hover:bg-[var(--color-neutral-200)]" aria-label="Close">
