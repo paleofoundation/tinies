@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { Heart, MapPin, Filter, PawPrint } from "lucide-react";
+import { Heart, MapPin, PawPrint } from "lucide-react";
 import Link from "next/link";
 import { getAllAvailableAdoptionListings } from "@/lib/adoption/available-listings";
+import {
+  adoptBrowseQueryHasFilters,
+  parseAdoptBrowseQuery,
+} from "@/lib/adoption/adopt-browse-params";
+import { AdoptBrowseFilters } from "@/components/adoption/AdoptBrowseFilters";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
@@ -22,30 +27,20 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: "Adopt a Tiny | Rescue Animals in Cyprus", description: "Every tiny deserves a home. Browse rescue animals in Cyprus and apply to adopt through Tinies." },
 };
 
-const DISTRICTS = [
-  "All districts",
-  "Nicosia",
-  "Limassol",
-  "Larnaca",
-  "Paphos",
-  "Famagusta",
-] as const;
-
-const AGE_RANGES = [
-  "Any age",
-  "Under 1 year",
-  "1–3 years",
-  "3–7 years",
-  "7+ years",
-] as const;
-
 function formatLabel(value: string | null | undefined): string {
   if (!value) return "";
   return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
 }
 
-export default async function AdoptPage() {
-  const listings = await getAllAvailableAdoptionListings();
+type PageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function AdoptPage({ searchParams }: PageProps) {
+  const rawParams = await searchParams;
+  const browseQuery = parseAdoptBrowseQuery(rawParams);
+  const listings = await getAllAvailableAdoptionListings(browseQuery);
+  const filtersActive = adoptBrowseQueryHasFilters(browseQuery);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
@@ -112,58 +107,7 @@ export default async function AdoptPage() {
         </div>
       </section>
 
-      {/* Filters */}
-      <section className="px-4 pb-8 sm:px-6 lg:px-8" aria-label="Filter adoptable animals">
-        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
-          <div className="flex flex-wrap items-center gap-4 rounded-[var(--radius-lg)] border px-6 py-4" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
-            <span className="flex items-center gap-2 text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-              <Filter className="h-4 w-4" />
-              Filters
-            </span>
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>Species:</span>
-              <div className="flex rounded-[var(--radius-pill)] border p-0.5" style={{ backgroundColor: "var(--color-background)", borderColor: "var(--color-border)" }}>
-                {(["All", "Dogs", "Cats"] as const).map((opt) => (
-                  <button
-                    key={opt}
-                    type="button"
-                    className={`rounded-[var(--radius-pill)] px-4 py-2 text-sm font-medium transition-colors ${opt === "All"
-                      ? "text-white"
-                      : "hover:bg-[var(--color-primary-50)]"
-                    }`}
-                    style={{
-                      fontFamily: "var(--font-body), sans-serif",
-                      ...(opt === "All" ? { backgroundColor: "var(--color-primary)" } : { color: "var(--color-text-secondary)" }),
-                    }}
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <select
-              className="rounded-[var(--radius-lg)] border px-4 py-2 text-sm focus:outline-none focus:ring-2"
-              style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-background)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
-              aria-label="District"
-              defaultValue=""
-            >
-              {DISTRICTS.map((d) => (
-                <option key={d} value={d === "All districts" ? "" : d}>{d}</option>
-              ))}
-            </select>
-            <select
-              className="rounded-[var(--radius-lg)] border px-4 py-2 text-sm focus:outline-none focus:ring-2"
-              style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-background)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
-              aria-label="Age range"
-              defaultValue=""
-            >
-              {AGE_RANGES.map((a) => (
-                <option key={a} value={a === "Any age" ? "" : a}>{a}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </section>
+      <AdoptBrowseFilters query={browseQuery} />
 
       {/* Animal grid */}
       <section id="animals" className="px-4 pb-20 sm:px-6 lg:px-8" style={{ paddingBottom: "var(--space-section)" }}>
@@ -177,11 +121,39 @@ export default async function AdoptPage() {
           <p className="mt-2" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
             Animals listed by rescue organisations — waiting for you.
           </p>
-          {listings.length === 0 ? (
+          <p
+            className="mt-4 text-sm font-medium"
+            style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}
+            aria-live="polite"
+          >
+            Showing {listings.length} {listings.length === 1 ? "animal" : "animals"}
+          </p>
+          {listings.length === 0 && filtersActive ? (
+            <div
+              className="mt-10 rounded-[var(--radius-lg)] border px-6 py-10 text-center"
+              style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}
+            >
+              <p
+                className="text-sm font-medium"
+                style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}
+              >
+                No tinies match your filters. Try broadening your search.
+              </p>
+              <Link
+                href="/adopt"
+                className="mt-4 inline-flex items-center justify-center rounded-[var(--radius-lg)] bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90"
+                style={{ fontFamily: "var(--font-body), sans-serif" }}
+              >
+                Clear filters
+              </Link>
+            </div>
+          ) : null}
+          {listings.length === 0 && !filtersActive ? (
             <p className="mt-10 text-center text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
               No adoptable animals are listed yet. Check back soon, or contact rescues you know to join Tinies.
             </p>
-          ) : (
+          ) : null}
+          {listings.length > 0 ? (
             <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
               {listings.map((listing) => {
                 const photo = listing.photos[0];
@@ -256,7 +228,7 @@ export default async function AdoptPage() {
                 );
               })}
             </div>
-          )}
+          ) : null}
         </div>
       </section>
     </div>
