@@ -37,6 +37,15 @@ export function MeetAndGreetRequestModal({
   const [locationNotes, setLocationNotes] = useState("");
 
   useEffect(() => {
+    if (!open) return;
+    const onEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onEscape);
+    return () => window.removeEventListener("keydown", onEscape);
+  }, [open]);
+
+  useEffect(() => {
     if (open) {
       setLoadingPets(true);
       getOwnerPetsForMeetAndGreet().then((res) => {
@@ -122,6 +131,7 @@ export function MeetAndGreetRequestModal({
           style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
           aria-modal="true"
           role="dialog"
+          onClick={() => setOpen(false)}
         >
           <div
             className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[var(--radius-lg)] border p-6 shadow-lg"

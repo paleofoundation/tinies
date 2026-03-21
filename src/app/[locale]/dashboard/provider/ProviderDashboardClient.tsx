@@ -900,73 +900,119 @@ export function ProviderDashboardClient({
               <h2 className="font-normal" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>Meet & Greet Requests</h2>
               <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>Accept, suggest an alternative time, or decline requests from pet owners.</p>
 
-              <h3 className="mt-8 font-medium" style={{ color: "var(--color-text)" }}>Pending requests</h3>
-              {meetAndGreets.requested.length === 0 ? (
-                <p className="mt-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>No pending requests.</p>
-              ) : (
-                <ul className="mt-4 space-y-4">
-                  {meetAndGreets.requested.map((m) => (
-                    <li key={m.id} className="rounded-[var(--radius-lg)] border p-4" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}>
-                      <div>
-                        <p className="font-semibold" style={{ color: "var(--color-text)" }}>{m.ownerName}</p>
-                        <p className="mt-0.5 text-sm" style={{ color: "var(--color-text-secondary)" }}>Pets: {m.petNames.join(", ")}</p>
-                        <p className="mt-0.5 text-sm flex items-center gap-1" style={{ color: "var(--color-text-secondary)" }}>
-                          <CalendarClock className="h-4 w-4" />
-                          {formatDateTime(m.requestedDatetime)}
-                        </p>
-                        <p className="mt-0.5 text-sm" style={{ color: "var(--color-text-secondary)" }}>Location: {m.locationType}</p>
-                        {m.locationNotes && <p className="mt-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>Notes: {m.locationNotes}</p>}
-                      </div>
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          onClick={() => handleMeetAndGreetRespond(m.id, "accept")}
-                          disabled={mngRespondingId === m.id}
-                          className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] bg-[var(--color-primary)] px-3 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-70"
-                        >
-                          <Check className="h-4 w-4" />
-                          {mngRespondingId === m.id ? "Sending…" : "Accept"}
-                        </button>
-                        <div className="inline-flex flex-wrap items-center gap-2">
-                          <input
-                            type="datetime-local"
-                            value={mngSuggestDatetime[m.id] ?? ""}
-                            onChange={(e) => setMngSuggestDatetime((prev) => ({ ...prev, [m.id]: e.target.value }))}
-                            className="rounded-[var(--radius-lg)] border px-2 py-1.5 text-sm"
-                            style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)", color: "var(--color-text)" }}
-                            placeholder="Suggest time"
-                          />
-                          <input
-                            type="text"
-                            value={mngMessage[m.id] ?? ""}
-                            onChange={(e) => setMngMessage((prev) => ({ ...prev, [m.id]: e.target.value }))}
-                            placeholder="Message (optional)"
-                            className="rounded-[var(--radius-lg)] border px-2 py-1.5 text-sm w-40"
-                            style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)", color: "var(--color-text)" }}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => handleMeetAndGreetRespond(m.id, "suggest")}
-                            disabled={mngRespondingId === m.id}
-                            className="rounded-[var(--radius-lg)] border border-[var(--color-primary)] px-3 py-1.5 text-sm font-semibold text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 disabled:opacity-70"
-                          >
-                            Suggest alternative
-                          </button>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleMeetAndGreetRespond(m.id, "decline")}
-                          disabled={mngRespondingId === m.id}
-                          className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] border border-[var(--color-error)]/50 px-3 py-2 text-sm font-semibold text-[var(--color-error)] hover:bg-[var(--color-error)]/10 disabled:opacity-70"
-                        >
-                          <X className="h-4 w-4" />
-                          Decline
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              {(() => {
+                const needsYourResponse = meetAndGreets.requested.filter((m) => !m.providerSuggestedDatetime);
+                const awaitingOwner = meetAndGreets.requested.filter((m) => m.providerSuggestedDatetime);
+                return (
+                  <>
+                    <h3 className="mt-8 font-medium" style={{ color: "var(--color-text)" }}>Needs your response</h3>
+                    {needsYourResponse.length === 0 ? (
+                      <p className="mt-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>Nothing waiting on you right now.</p>
+                    ) : (
+                      <ul className="mt-4 space-y-4">
+                        {needsYourResponse.map((m) => (
+                          <li key={m.id} className="rounded-[var(--radius-lg)] border p-4" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}>
+                            <div>
+                              <p className="font-semibold" style={{ color: "var(--color-text)" }}>{m.ownerName}</p>
+                              <p className="mt-0.5 text-sm" style={{ color: "var(--color-text-secondary)" }}>Pets: {m.petNames.join(", ")}</p>
+                              <p className="mt-0.5 text-sm flex items-center gap-1" style={{ color: "var(--color-text-secondary)" }}>
+                                <CalendarClock className="h-4 w-4" />
+                                {formatDateTime(m.requestedDatetime)}
+                              </p>
+                              <p className="mt-0.5 text-sm" style={{ color: "var(--color-text-secondary)" }}>Location: {m.locationType}</p>
+                              {m.locationNotes && <p className="mt-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>Notes: {m.locationNotes}</p>}
+                            </div>
+                            <div className="mt-4 flex flex-wrap gap-2">
+                              <button
+                                type="button"
+                                onClick={() => handleMeetAndGreetRespond(m.id, "accept")}
+                                disabled={mngRespondingId === m.id}
+                                className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] bg-[var(--color-primary)] px-3 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-70"
+                              >
+                                <Check className="h-4 w-4" />
+                                {mngRespondingId === m.id ? "Sending…" : "Accept"}
+                              </button>
+                              <div className="inline-flex flex-wrap items-center gap-2">
+                                <input
+                                  type="datetime-local"
+                                  value={mngSuggestDatetime[m.id] ?? ""}
+                                  onChange={(e) => setMngSuggestDatetime((prev) => ({ ...prev, [m.id]: e.target.value }))}
+                                  className="rounded-[var(--radius-lg)] border px-2 py-1.5 text-sm"
+                                  style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)", color: "var(--color-text)" }}
+                                  placeholder="Suggest time"
+                                />
+                                <input
+                                  type="text"
+                                  value={mngMessage[m.id] ?? ""}
+                                  onChange={(e) => setMngMessage((prev) => ({ ...prev, [m.id]: e.target.value }))}
+                                  placeholder="Message (optional)"
+                                  className="rounded-[var(--radius-lg)] border px-2 py-1.5 text-sm w-40"
+                                  style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)", color: "var(--color-text)" }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => handleMeetAndGreetRespond(m.id, "suggest")}
+                                  disabled={mngRespondingId === m.id}
+                                  className="rounded-[var(--radius-lg)] border border-[var(--color-primary)] px-3 py-1.5 text-sm font-semibold text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 disabled:opacity-70"
+                                >
+                                  Suggest alternative
+                                </button>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleMeetAndGreetRespond(m.id, "decline")}
+                                disabled={mngRespondingId === m.id}
+                                className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] border border-[var(--color-error)]/50 px-3 py-2 text-sm font-semibold text-[var(--color-error)] hover:bg-[var(--color-error)]/10 disabled:opacity-70"
+                              >
+                                <X className="h-4 w-4" />
+                                Decline
+                              </button>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    <h3 className="mt-10 font-medium" style={{ color: "var(--color-text)" }}>Awaiting pet owner confirmation</h3>
+                    <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                      You suggested a different time. The owner needs to accept it before the Meet & Greet is confirmed.
+                    </p>
+                    {awaitingOwner.length === 0 ? (
+                      <p className="mt-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>None.</p>
+                    ) : (
+                      <ul className="mt-4 space-y-4">
+                        {awaitingOwner.map((m) => (
+                          <li key={m.id} className="rounded-[var(--radius-lg)] border p-4" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}>
+                            <div>
+                              <p className="font-semibold" style={{ color: "var(--color-text)" }}>{m.ownerName}</p>
+                              <p className="mt-0.5 text-sm" style={{ color: "var(--color-text-secondary)" }}>Pets: {m.petNames.join(", ")}</p>
+                              <p className="mt-0.5 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                                They asked for: {formatDateTime(m.requestedDatetime)}
+                              </p>
+                              <p className="mt-0.5 text-sm font-medium" style={{ color: "var(--color-primary)" }}>
+                                You suggested: {m.providerSuggestedDatetime ? formatDateTime(m.providerSuggestedDatetime) : "—"}
+                              </p>
+                              {m.providerMessage && <p className="mt-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>Your message: {m.providerMessage}</p>}
+                              <p className="mt-2 text-sm" style={{ color: "var(--color-text-muted)" }}>Waiting for the owner to accept this time.</p>
+                            </div>
+                            <div className="mt-4">
+                              <button
+                                type="button"
+                                onClick={() => handleMeetAndGreetRespond(m.id, "decline")}
+                                disabled={mngRespondingId === m.id}
+                                className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] border border-[var(--color-error)]/50 px-3 py-2 text-sm font-semibold text-[var(--color-error)] hover:bg-[var(--color-error)]/10 disabled:opacity-70"
+                              >
+                                <X className="h-4 w-4" />
+                                Cancel request
+                              </button>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </>
+                );
+              })()}
 
               <h3 className="mt-8 font-medium" style={{ color: "var(--color-text)" }}>Confirmed</h3>
               {meetAndGreets.confirmed.length === 0 ? (

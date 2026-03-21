@@ -11,6 +11,8 @@ import { getProvidersPendingVerification, getRecentlyVerifiedProviders } from ".
 import { ProviderVerificationSection } from "./provider-verification/ProviderVerificationSection";
 import { getAllRescueOrgs } from "./rescue-org-actions";
 import { RescueOrgVerifyButton } from "./rescue-orgs/RescueOrgVerifyButton";
+import { getRevenueOverview, getRevenueByMonth, getCurrentVsLastMonth } from "@/lib/admin/revenue-actions";
+import { AdminRevenueSection } from "./AdminRevenueSection";
 
 // TODO: enforce admin role – redirect or 403 if user is not admin (e.g. check session user role or app_metadata)
 
@@ -46,6 +48,10 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   let rescueOrgs: Awaited<ReturnType<typeof getAllRescueOrgs>>["orgs"] = [];
   let rescueOrgsError: string | undefined;
   let pendingRescueVerificationCount = 0;
+  let revenueOverview: Awaited<ReturnType<typeof getRevenueOverview>> | null = null;
+  let revenueComparison: Awaited<ReturnType<typeof getCurrentVsLastMonth>> | null = null;
+  let revenueMonthly: Awaited<ReturnType<typeof getRevenueByMonth>> | null = null;
+  let revenueError: string | undefined;
 
   try {
     const [placementsResult, disputesResult, claimsResult] = await Promise.all([
@@ -99,6 +105,20 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
     rescueOrgsError = "Failed to load rescue organisations.";
   }
 
+  try {
+    const [ov, cmp, mo] = await Promise.all([
+      getRevenueOverview(),
+      getCurrentVsLastMonth(),
+      getRevenueByMonth(12),
+    ]);
+    revenueOverview = ov;
+    revenueComparison = cmp;
+    revenueMonthly = mo;
+  } catch (e) {
+    console.error("AdminDashboardPage revenue", e);
+    revenueError = "Failed to load revenue data.";
+  }
+
   const statusLabel: Record<string, string> = {
     available: "Available",
     application_pending: "Application Pending",
@@ -119,6 +139,14 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
         <p className="mt-1" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
           Manage adoption listings and platform settings.
         </p>
+
+        {revenueError ? (
+          <p className="mt-6 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-error)" }}>
+            {revenueError}
+          </p>
+        ) : revenueOverview && revenueComparison && revenueMonthly ? (
+          <AdminRevenueSection overview={revenueOverview} comparison={revenueComparison} monthlyRows={revenueMonthly} />
+        ) : null}
 
         <div className="mt-6 flex flex-wrap gap-4">
           <Link

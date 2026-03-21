@@ -5,10 +5,22 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email";
 import MeetAndGreetRequestEmail from "@/lib/email/templates/meet-and-greet-request";
+import MeetAndGreetOwnerUpdateEmail from "@/lib/email/templates/meet-and-greet-owner-update";
+import MeetAndGreetProviderConfirmedEmail from "@/lib/email/templates/meet-and-greet-provider-confirmed";
 import type { LocationType } from "@prisma/client";
-import { MeetAndGreetStatus } from "@prisma/client";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+
+function formatMeetEmailDate(d: Date): string {
+  return new Date(d).toLocaleDateString("en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 /** Get current user's pets (id, name) for meet & greet request form. */
 export async function getOwnerPetsForMeetAndGreet(): Promise<{
@@ -76,14 +88,7 @@ export async function requestMeetAndGreet(
     });
 
     const ownerName = (user.user_metadata?.name as string) ?? user.email ?? "A pet owner";
-    const dateStr = requestedDatetime.toLocaleDateString("en-GB", {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    const dateStr = formatMeetEmailDate(requestedDatetime);
     const locationLabel = locationTypeLabel(data.locationType);
     const dashboardUrl = `${APP_URL}/dashboard/provider`;
 
@@ -131,14 +136,47 @@ export async function respondToMeetAndGreet(
 
   const meet = await prisma.meetAndGreet.findFirst({
     where: { id: meetAndGreetId, providerId: user.id, status: "requested" },
+    include: {
+      owner: { select: { email: true, name: true } },
+      provider: { select: { name: true } },
+    },
   });
   if (!meet) return { error: "Request not found or already responded." };
+
+  if (meet.providerSuggestedDatetime != null && input.action === "accept") {
+    return {
+      error:
+        "You already suggested another time. Wait for the owner to confirm it, or decline the request to cancel.",
+    };
+  }
+
+  const pets = await prisma.pet.findMany({
+    where: { id: { in: meet.petIds } },
+    select: { name: true },
+  });
+  const petNames = pets.map((p) => p.name);
+  const ownerDashboardUrl = `${APP_URL}/dashboard/owner?tab=meetgreet`;
+  const providerName = meet.provider.name || "Your provider";
+  const originalRequested = formatMeetEmailDate(meet.requestedDatetime);
 
   if (input.action === "accept") {
     await prisma.meetAndGreet.update({
       where: { id: meetAndGreetId },
       data: { status: "confirmed", confirmedDatetime: meet.requestedDatetime },
     });
+    if (meet.owner.email) {
+      await sendEmail({
+        to: meet.owner.email,
+        subject: `${providerName} confirmed your Meet & Greet`,
+        react: MeetAndGreetOwnerUpdateEmail({
+          providerName,
+          variant: "confirmed",
+          petNames,
+          originalRequested,
+          dashboardUrl: ownerDashboardUrl,
+        }),
+      });
+    }
   } else if (input.action === "suggest") {
     const suggested = input.suggestedDatetime ? new Date(input.suggestedDatetime) : null;
     if (!suggested || Number.isNaN(suggested.getTime()))
@@ -150,6 +188,21 @@ export async function respondToMeetAndGreet(
         providerMessage: input.message?.trim() || null,
       },
     });
+    if (meet.owner.email) {
+      await sendEmail({
+        to: meet.owner.email,
+        subject: `${providerName} suggested another time for your Meet & Greet`,
+        react: MeetAndGreetOwnerUpdateEmail({
+          providerName,
+          variant: "alternative_suggested",
+          petNames,
+          originalRequested,
+          suggestedDate: formatMeetEmailDate(suggested),
+          providerMessage: input.message?.trim() || undefined,
+          dashboardUrl: ownerDashboardUrl,
+        }),
+      });
+    }
   } else {
     await prisma.meetAndGreet.update({
       where: { id: meetAndGreetId },
@@ -158,6 +211,20 @@ export async function respondToMeetAndGreet(
         providerMessage: input.message?.trim() || null,
       },
     });
+    if (meet.owner.email) {
+      await sendEmail({
+        to: meet.owner.email,
+        subject: `Meet & Greet update from ${providerName}`,
+        react: MeetAndGreetOwnerUpdateEmail({
+          providerName,
+          variant: "declined",
+          petNames,
+          originalRequested,
+          providerMessage: input.message?.trim() || undefined,
+          dashboardUrl: ownerDashboardUrl,
+        }),
+      });
+    }
   }
 
   revalidatePath("/dashboard/provider");
@@ -175,14 +242,42 @@ export async function acceptMeetAndGreetSuggestion(meetAndGreetId: string): Prom
 
   const meet = await prisma.meetAndGreet.findFirst({
     where: { id: meetAndGreetId, ownerId: user.id, status: "requested" },
+    include: {
+      provider: { select: { email: true, name: true } },
+    },
   });
   if (!meet) return { error: "Request not found." };
   if (!meet.providerSuggestedDatetime) return { error: "No suggested time to accept." };
 
+  const confirmedAt = meet.providerSuggestedDatetime;
+
   await prisma.meetAndGreet.update({
     where: { id: meetAndGreetId },
-    data: { status: "confirmed", confirmedDatetime: meet.providerSuggestedDatetime },
+    data: { status: "confirmed", confirmedDatetime: confirmedAt },
   });
+
+  const pets = await prisma.pet.findMany({
+    where: { id: { in: meet.petIds } },
+    select: { name: true },
+  });
+  const petNames = pets.map((p) => p.name);
+  const ownerName = user.user_metadata?.name && typeof user.user_metadata.name === "string"
+    ? user.user_metadata.name
+    : user.email ?? "A pet owner";
+
+  if (meet.provider.email) {
+    await sendEmail({
+      to: meet.provider.email,
+      subject: `${ownerName} confirmed your Meet & Greet time`,
+      react: MeetAndGreetProviderConfirmedEmail({
+        ownerName,
+        petNames,
+        confirmedDate: formatMeetEmailDate(confirmedAt),
+        dashboardUrl: `${APP_URL}/dashboard/provider?tab=meetgreet`,
+      }),
+    });
+  }
+
   revalidatePath("/dashboard/provider");
   revalidatePath("/dashboard/owner");
   return {};
