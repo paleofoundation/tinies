@@ -165,8 +165,10 @@ export async function getCharityOverviewStats(): Promise<{
   let nextPayoutCents: number | null = null;
   let nextPayoutMonth: string | null = null;
   for (const d of distributions) {
-    const amounts = d.perCharityAmounts as { charity_id: string; amount: number }[] | null;
-    const entry = amounts?.find((a) => a.charity_id === charity.id);
+    const amounts = d.perCharityAmounts as
+      | { charity_id?: string; charityId?: string; amount: number }[]
+      | null;
+    const entry = amounts?.find((a) => (a.charityId ?? a.charity_id) === charity.id);
     if (entry && entry.amount > 0) {
       nextPayoutCents = entry.amount;
       nextPayoutMonth = new Date(d.month).toLocaleDateString("en-GB", { month: "long", year: "numeric" });
@@ -303,8 +305,10 @@ export async function getCharityPayouts(): Promise<{ payouts: PayoutRow[]; error
 
   const payouts: PayoutRow[] = [];
   for (const d of distributions) {
-    const amounts = d.perCharityAmounts as { charity_id: string; amount: number }[] | null;
-    const entry = amounts?.find((a) => a.charity_id === charity.id);
+    const amounts = d.perCharityAmounts as
+      | { charity_id?: string; charityId?: string; amount: number }[]
+      | null;
+    const entry = amounts?.find((a) => (a.charityId ?? a.charity_id) === charity.id);
     if (!entry || entry.amount <= 0) continue;
     const expectedBy =
       d.payoutStatus === "pending" || d.payoutStatus === "processing"

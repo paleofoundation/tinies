@@ -828,12 +828,17 @@ export async function getCharityDonationSummary(
  * amounts in distributions already marked completed.
  */
 export async function getGivingFundBalance(): Promise<{
+  /** Platform commission to the central fund minus completed distributions only (historical “paid out”). */
   unallocatedCents: number;
   platformCommissionToFundCents: number;
   distributedCompletedCents: number;
+  /** Totals still locked in approved-but-not-paid distributions. */
+  pendingOrProcessingLockedCents: number;
+  /** Amount available to approve in a new distribution: unallocated minus pending/processing locks. */
+  availableForDistributionCents: number;
 }> {
   try {
-    const [inAgg, outAgg] = await Promise.all([
+    const [inAgg, completedAgg, pendingAgg] = await Promise.all([
       prisma.donation.aggregate({
         where: {
           source: DonationSource.platform_commission,
@@ -845,14 +850,22 @@ export async function getGivingFundBalance(): Promise<{
         where: { payoutStatus: "completed" },
         _sum: { totalFundAmount: true },
       }),
+      prisma.givingFundDistribution.aggregate({
+        where: { payoutStatus: { in: ["pending", "processing"] } },
+        _sum: { totalFundAmount: true },
+      }),
     ]);
     const platformCommissionToFundCents = inAgg._sum.amount ?? 0;
-    const distributedCompletedCents = outAgg._sum.totalFundAmount ?? 0;
+    const distributedCompletedCents = completedAgg._sum.totalFundAmount ?? 0;
+    const pendingOrProcessingLockedCents = pendingAgg._sum.totalFundAmount ?? 0;
     const unallocatedCents = Math.max(0, platformCommissionToFundCents - distributedCompletedCents);
+    const availableForDistributionCents = Math.max(0, unallocatedCents - pendingOrProcessingLockedCents);
     return {
       unallocatedCents,
       platformCommissionToFundCents,
       distributedCompletedCents,
+      pendingOrProcessingLockedCents,
+      availableForDistributionCents,
     };
   } catch (e) {
     console.error("getGivingFundBalance", e);
@@ -860,6 +873,8 @@ export async function getGivingFundBalance(): Promise<{
       unallocatedCents: 0,
       platformCommissionToFundCents: 0,
       distributedCompletedCents: 0,
+      pendingOrProcessingLockedCents: 0,
+      availableForDistributionCents: 0,
     };
   }
 }

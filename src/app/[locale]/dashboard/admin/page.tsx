@@ -13,6 +13,8 @@ import { getAllRescueOrgs } from "./rescue-org-actions";
 import { RescueOrgVerifyButton } from "./rescue-orgs/RescueOrgVerifyButton";
 import { getRevenueOverview, getRevenueByMonth, getCurrentVsLastMonth } from "@/lib/admin/revenue-actions";
 import { AdminRevenueSection } from "./AdminRevenueSection";
+import { getDistributionPreview, getPastDistributions } from "@/lib/giving/distribution-actions";
+import { AdminGivingFundDistributionSection } from "./AdminGivingFundDistributionSection";
 
 // TODO: enforce admin role – redirect or 403 if user is not admin (e.g. check session user role or app_metadata)
 
@@ -52,6 +54,10 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   let revenueComparison: Awaited<ReturnType<typeof getCurrentVsLastMonth>> | null = null;
   let revenueMonthly: Awaited<ReturnType<typeof getRevenueByMonth>> | null = null;
   let revenueError: string | undefined;
+  let givingDistributionPreview: Awaited<ReturnType<typeof getDistributionPreview>> | null = null;
+  let givingPastDistributions: Awaited<ReturnType<typeof getPastDistributions>>["distributions"] = [];
+  let givingDistributionFatalError: string | undefined;
+  let givingPastDistributionsError: string | undefined;
 
   try {
     const [placementsResult, disputesResult, claimsResult] = await Promise.all([
@@ -119,6 +125,16 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
     revenueError = "Failed to load revenue data.";
   }
 
+  try {
+    const [preview, pastResult] = await Promise.all([getDistributionPreview(), getPastDistributions()]);
+    givingDistributionPreview = preview;
+    givingPastDistributions = pastResult.distributions;
+    if (pastResult.error) givingPastDistributionsError = pastResult.error;
+  } catch (e) {
+    console.error("AdminDashboardPage giving distribution", e);
+    givingDistributionFatalError = "Failed to load giving fund distribution data.";
+  }
+
   const statusLabel: Record<string, string> = {
     available: "Available",
     application_pending: "Application Pending",
@@ -146,6 +162,30 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
           </p>
         ) : revenueOverview && revenueComparison && revenueMonthly ? (
           <AdminRevenueSection overview={revenueOverview} comparison={revenueComparison} monthlyRows={revenueMonthly} />
+        ) : null}
+
+        {givingDistributionFatalError ? (
+          <AdminGivingFundDistributionSection
+            preview={{
+              unallocatedCents: 0,
+              pendingOrProcessingLockedCents: 0,
+              availableForDistributionCents: 0,
+              platformCommissionToFundCents: 0,
+              distributedCompletedCents: 0,
+              charityRows: [],
+              currentMonthStartIso: new Date().toISOString(),
+              canApprove: false,
+              approveBlockedReason: givingDistributionFatalError,
+            }}
+            past={[]}
+            loadError={givingDistributionFatalError}
+          />
+        ) : givingDistributionPreview ? (
+          <AdminGivingFundDistributionSection
+            preview={givingDistributionPreview}
+            past={givingPastDistributions}
+            pastLoadError={givingPastDistributionsError}
+          />
         ) : null}
 
         <div className="mt-6 flex flex-wrap gap-4">
