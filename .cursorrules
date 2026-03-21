@@ -229,6 +229,7 @@ TWILIO_PHONE_NUMBER=
 RESEND_API_KEY=
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
 SENTRY_DSN=
+CRON_SECRET=                         # Bearer token for /api/cron/* (Vercel Cron Authorization header)
 NEXT_PUBLIC_APP_URL=https://tinies.app
 ```
 

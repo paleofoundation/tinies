@@ -157,6 +157,8 @@ model User {
   languagePreference String?  @map("language_preference")
   totalDonated      Float?    @map("total_donated")
   stripeCustomerId  String?   @unique @map("stripe_customer_id")
+  /** Exclusive end (UTC) of the donation month window last covered by a monthly giving summary email. */
+  givingSummaryPeriodEndSent DateTime? @map("giving_summary_period_end_sent")
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
 
@@ -319,6 +321,8 @@ model Booking {
   serviceReport         Json?           @map("service_report")   // { arrivalTime, departureTime, notes, photos[], activities[], submittedAt }
   tipAmount             Int?            @map("tip_amount")      // cents
   tipStripePaymentIntentId String?       @map("tip_stripe_payment_intent_id")
+  reminder24hSentAt     DateTime?       @map("reminder_24h_sent_at")
+  reviewPromptSentAt    DateTime?       @map("review_prompt_sent_at")
   createdAt               DateTime        @default(now()) @map("created_at")
   updatedAt               DateTime        @updatedAt @map("updated_at")
 

@@ -2,7 +2,11 @@ import { Section, Text, Link } from "@react-email/components";
 import * as React from "react";
 import { EmailLayout } from "./shared/EmailLayout";
 
-export type MeetAndGreetOwnerUpdateVariant = "confirmed" | "alternative_suggested" | "declined";
+export type MeetAndGreetOwnerUpdateVariant =
+  | "confirmed"
+  | "alternative_suggested"
+  | "declined"
+  | "expired";
 
 export type MeetAndGreetOwnerUpdateEmailProps = {
   providerName: string;
@@ -28,13 +32,24 @@ export default function MeetAndGreetOwnerUpdateEmail({
       ? "Your Meet & Greet is confirmed"
       : variant === "alternative_suggested"
         ? "Alternative time suggested"
-        : "Meet & Greet request declined";
+        : variant === "expired"
+          ? "Meet & Greet request expired"
+          : "Meet & Greet request declined";
 
   return (
     <EmailLayout preview={`${providerName}: ${title}`}>
       <Section>
         <Text style={{ fontSize: "16px", lineHeight: "24px", margin: "0 0 16px", color: "#1A1A1A" }}>
-          <strong>{providerName}</strong> has updated your Meet & Greet request.
+          {variant === "expired" ? (
+            <>
+              Your Meet & Greet with <strong>{providerName}</strong> timed out — they did not respond within 24
+              hours.
+            </>
+          ) : (
+            <>
+              <strong>{providerName}</strong> has updated your Meet & Greet request.
+            </>
+          )}
         </Text>
         <Text style={{ fontSize: "16px", lineHeight: "24px", margin: "0 0 16px", color: "#1A1A1A" }}>
           Pets: <strong>{petNames.join(", ")}</strong>
@@ -58,12 +73,17 @@ export default function MeetAndGreetOwnerUpdateEmail({
             They are not available for this Meet & Greet. You can try another provider or send a new request later.
           </Text>
         )}
+        {variant === "expired" && (
+          <Text style={{ fontSize: "16px", lineHeight: "24px", margin: "0 0 16px", color: "#1A1A1A" }}>
+            You can request a Meet & Greet with another provider from your dashboard whenever you are ready.
+          </Text>
+        )}
         {providerMessage && (
           <Text style={{ fontSize: "16px", lineHeight: "24px", margin: "0 0 16px", color: "#1A1A1A" }}>
             Message: {providerMessage}
           </Text>
         )}
-        {(variant === "alternative_suggested" || variant === "confirmed") && (
+        {(variant === "alternative_suggested" || variant === "confirmed" || variant === "expired") && (
           <Link
             href={dashboardUrl}
             style={{
