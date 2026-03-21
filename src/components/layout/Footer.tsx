@@ -1,52 +1,56 @@
 import { MapPin } from "lucide-react";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
-const FOOTER_COLUMNS = [
-  {
-    title: "For Pet Owners",
-    links: [
-      { href: "/services", label: "Find Care" },
-      { href: "/how-it-works", label: "How It Works" },
-      { href: "/adopt", label: "Adopt" },
-      { href: "/adopt/tinies-who-made-it", label: "Tinies Who Made It" },
-    ],
-  },
-  {
-    title: "For Providers",
-    links: [
-      { href: "/for-providers", label: "Become a Provider" },
-      { href: "/how-it-works", label: "How It Works" },
-    ],
-  },
-  {
-    title: "For Rescues",
-    links: [
-      { href: "/dashboard/rescue/listings/new", label: "List Your Animals" },
-      { href: "/for-rescues", label: "For Rescues" },
-      { href: "/rescue", label: "Our rescue partners" },
-    ],
-  },
-  {
-    title: "Giving",
-    links: [
-      { href: "/giving", label: "Tinies Giving" },
-      { href: "/giving/become-a-guardian", label: "Become a Guardian" },
-      { href: "/give", label: "Donate" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { href: "/about", label: "About" },
-      { href: "/blog", label: "Blog" },
-      { href: "/terms", label: "Terms" },
-      { href: "/privacy", label: "Privacy" },
-      { href: "mailto:hello@tinies.app", label: "Contact" },
-    ],
-  },
-] as const;
+export async function Footer() {
+  const t = await getTranslations("footer");
 
-export function Footer() {
+  const columns = [
+    {
+      title: t("columns.forPetOwners"),
+      links: [
+        { href: "/services", label: t("links.findCare") },
+        { href: "/how-it-works", label: t("links.howItWorks") },
+        { href: "/adopt", label: t("links.adopt") },
+        { href: "/adopt/tinies-who-made-it", label: t("links.tiniesWhoMadeIt") },
+      ],
+    },
+    {
+      title: t("columns.forProviders"),
+      links: [
+        { href: "/for-providers", label: t("links.becomeProvider") },
+        { href: "/how-it-works", label: t("links.howItWorks") },
+      ],
+    },
+    {
+      title: t("columns.forRescues"),
+      links: [
+        { href: "/dashboard/rescue/listings/new", label: t("links.listAnimals") },
+        { href: "/for-rescues", label: t("links.forRescues") },
+        { href: "/rescue", label: t("links.rescuePartners") },
+      ],
+    },
+    {
+      title: t("columns.giving"),
+      links: [
+        { href: "/giving", label: t("links.tiniesGiving") },
+        { href: "/giving/become-a-guardian", label: t("links.becomeGuardian") },
+        { href: "/give", label: t("links.donate") },
+      ],
+    },
+    {
+      title: t("columns.company"),
+      links: [
+        { href: "/about", label: t("links.about") },
+        { href: "/blog", label: t("links.blog") },
+        { href: "/terms", label: t("links.terms") },
+        { href: "/privacy", label: t("links.privacy") },
+        { href: "mailto:hello@tinies.app", label: t("links.contact"), external: true },
+      ],
+    },
+  ] as const;
+
   return (
     <footer
       className="px-4 py-14 sm:px-6 lg:px-8"
@@ -65,17 +69,17 @@ export function Footer() {
               className="mt-2 text-lg italic text-white"
               style={{ fontFamily: "var(--font-heading), serif" }}
             >
-              Book a walk. Help a tiny.
+              {t("brandSubtitle")}
             </p>
             <p className="mt-2 max-w-xs text-sm" style={{ color: "rgba(255,255,255,0.7)" }}>
-              Trusted pet care and rescue adoption in Cyprus.
+              {t("brandDescription")}
             </p>
           </div>
           <nav
             className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5"
             aria-label="Footer"
           >
-            {FOOTER_COLUMNS.map((col) => (
+            {columns.map((col) => (
               <div key={col.title} className="flex flex-col gap-3">
                 <p
                   className="text-xs font-semibold uppercase tracking-wider"
@@ -86,25 +90,39 @@ export function Footer() {
                 >
                   {col.title}
                 </p>
-                {col.links.map((link) => (
-                  <Link
-                    key={link.href + link.label}
-                    href={link.href}
-                    className="text-sm transition-opacity hover:opacity-100 hover:underline"
-                    style={{
-                      fontFamily: "var(--font-body), sans-serif",
-                      color: "rgba(255,255,255,0.9)",
-                    }}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
+                {col.links.map((link) =>
+                  "external" in link && link.external ? (
+                    <a
+                      key={link.href + link.label}
+                      href={link.href}
+                      className="text-sm transition-opacity hover:opacity-100 hover:underline"
+                      style={{
+                        fontFamily: "var(--font-body), sans-serif",
+                        color: "rgba(255,255,255,0.9)",
+                      }}
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link
+                      key={link.href + link.label}
+                      href={link.href}
+                      className="text-sm transition-opacity hover:opacity-100 hover:underline"
+                      style={{
+                        fontFamily: "var(--font-body), sans-serif",
+                        color: "rgba(255,255,255,0.9)",
+                      }}
+                    >
+                      {link.label}
+                    </Link>
+                  )
+                )}
               </div>
             ))}
           </nav>
         </div>
         <div
-          className="mt-14 flex flex-col gap-4 border-t pt-10 sm:flex-row sm:items-center sm:justify-between"
+          className="mt-14 flex flex-col gap-4 border-t pt-10 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
           style={{ borderColor: "rgba(255,255,255,0.2)" }}
         >
           <p
@@ -114,17 +132,20 @@ export function Footer() {
               color: "rgba(255,255,255,0.8)",
             }}
           >
-            © {new Date().getFullYear()} Tinies. All rights reserved.
+            {t("copyright", { year: new Date().getFullYear() })}
           </p>
-          <div
-            className="flex items-center gap-2 text-sm"
-            style={{
-              fontFamily: "var(--font-body), sans-serif",
-              color: "rgba(255,255,255,0.8)",
-            }}
-          >
-            <MapPin className="h-4 w-4" />
-            Cyprus
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
+            <LanguageSwitcher />
+            <div
+              className="flex items-center gap-2 text-sm"
+              style={{
+                fontFamily: "var(--font-body), sans-serif",
+                color: "rgba(255,255,255,0.8)",
+              }}
+            >
+              <MapPin className="h-4 w-4" />
+              {t("cyprus")}
+            </div>
           </div>
         </div>
       </div>

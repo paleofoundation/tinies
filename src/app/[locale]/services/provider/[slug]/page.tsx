@@ -9,7 +9,7 @@ import {
   Share2,
   Heart,
 } from "lucide-react";
-import { getProviderBySlug, getProviderReviewsBySlug } from "@/app/services/book/actions";
+import { getProviderBySlug, getProviderReviewsBySlug } from "@/app/[locale]/services/book/actions";
 import { ProviderLocationMap } from "@/components/maps";
 import { HOLIDAY_LABELS } from "@/lib/constants/holidays";
 import { GivingTierBadge } from "@/components/giving/GivingTierBadge";

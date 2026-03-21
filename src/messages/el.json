@@ -1,0 +1,122 @@
+{
+  "nav": {
+    "findCare": "Find Care",
+    "becomeProvider": "Become a Provider",
+    "adopt": "Adopt",
+    "blog": "Blog",
+    "signUp": "Sign Up",
+    "signIn": "Sign In"
+  },
+  "footer": {
+    "brandSubtitle": "Book a walk. Help a tiny.",
+    "brandDescription": "Trusted pet care and rescue adoption in Cyprus.",
+    "copyright": "© {year} Tinies. All rights reserved.",
+    "cyprus": "Cyprus",
+    "language": "Language",
+    "columns": {
+      "forPetOwners": "For Pet Owners",
+      "forProviders": "For Providers",
+      "forRescues": "For Rescues",
+      "giving": "Giving",
+      "company": "Company"
+    },
+    "links": {
+      "findCare": "Find Care",
+      "howItWorks": "How It Works",
+      "adopt": "Adopt",
+      "tiniesWhoMadeIt": "Tinies Who Made It",
+      "becomeProvider": "Become a Provider",
+      "listAnimals": "List Your Animals",
+      "forRescues": "For Rescues",
+      "rescuePartners": "Our rescue partners",
+      "tiniesGiving": "Tinies Giving",
+      "becomeGuardian": "Become a Guardian",
+      "donate": "Donate",
+      "about": "About",
+      "blog": "Blog",
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "contact": "Contact"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "No matter the size.",
+      "tagline": "Trusted pet care and rescue adoption in Cyprus",
+      "subtagline": "Every booking helps a tiny."
+    },
+    "search": {
+      "placeholder": "Address or area",
+      "chooseService": "Choose a service",
+      "serviceAria": "Service type",
+      "cta": "Find Care",
+      "walking": "Dog Walking",
+      "sitting": "Pet Sitting",
+      "boarding": "Overnight Boarding",
+      "dropIn": "Drop-In Visits",
+      "daycare": "Daycare"
+    },
+    "howItWorksPreview": {
+      "title": "How it works",
+      "subtitle": "Book trusted pet care in three simple steps.",
+      "stepSearch": "Search",
+      "stepSearchDesc": "Find verified providers near you",
+      "stepBook": "Book",
+      "stepBookDesc": "Secure payment, instant confirmation",
+      "stepRelax": "Relax",
+      "stepRelaxDesc": "Photo updates while you are away"
+    }
+  },
+  "howItWorks": {
+    "title": "How it works",
+    "intro": "Tinies is a marketplace. We connect pet owners with independent service providers, and adopters with rescue organisations and transport providers. We don't walk dogs, sit pets, or run adoptions ourselves — we provide the platform, handle payment, and take a small commission so we can fund rescue animal care.",
+    "stepLabel": "Step {n}",
+    "forOwnersTitle": "For pet owners",
+    "forOwnersSubtitle": "Book trusted care in a few clicks.",
+    "findCareCta": "Find care",
+    "forAdoptersTitle": "For adopters",
+    "forAdoptersIntro": "Rescue organisations list animals available for adoption. Transport providers offer their logistics services. You browse, apply, and connect — all through Tinies. We provide the platform and payment; rescues and transport providers run their side. Think of it like Airbnb: we don't own the homes.",
+    "browseAnimalsCta": "Browse animals",
+    "backHome": "Back to home",
+    "ownerSteps": [
+      {
+        "title": "Search verified providers",
+        "text": "Find independent carers near you by service type, location, and availability. Every provider is ID-verified and reviewed. Tinies lists them; they provide the care."
+      },
+      {
+        "title": "Book securely",
+        "text": "Pay with card through Tinies. Payment is only captured when your provider accepts. Cancel for free if plans change before acceptance."
+      },
+      {
+        "title": "Get updates",
+        "text": "Receive photo and message updates during the booking. For walks, track the route in real time if the carer has started the walk."
+      },
+      {
+        "title": "Leave reviews",
+        "text": "After the stay, leave a star rating and review to help other owners and build your carer's reputation."
+      }
+    ],
+    "adopterSteps": [
+      {
+        "title": "Browse animals",
+        "text": "Explore adoptable dogs and cats listed by rescue organisations on Tinies. Filter by species, age, and destination country."
+      },
+      {
+        "title": "Apply",
+        "text": "Submit an application with your home situation, experience, and vet reference. The rescue reviews and approves — they run their own adoption process."
+      },
+      {
+        "title": "Rescue and transport handle logistics",
+        "text": "The rescue and transport providers handle vet prep, vaccinations, microchip, EU pet passport, and transport. Tinies gives you the platform to connect and pay; they do the coordination."
+      },
+      {
+        "title": "Track progress",
+        "text": "Follow each step in your dashboard — from vet completion to transport booked to departure and arrival."
+      },
+      {
+        "title": "Welcome your tiny home",
+        "text": "Check-ins at 1 week, 1 month, and 3 months. Share your story for Tinies who made it and inspire the next adoption."
+      }
+    ]
+  }
+}

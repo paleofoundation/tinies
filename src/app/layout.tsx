@@ -1,16 +1,6 @@
 import type { Metadata } from "next";
-import { Roboto } from "next/font/google";
-import { Toaster } from "sonner";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
+import type { ReactNode } from "react";
 import "./globals.css";
-
-const roboto = Roboto({
-  weight: ["400", "500", "600", "700"],
-  subsets: ["latin"],
-  variable: "--font-body",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: {
@@ -38,28 +28,6 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = "force-dynamic";
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html lang="en" className={roboto.variable}>
-      <body
-        className="min-h-screen antialiased flex flex-col"
-        style={{
-          fontFamily: "var(--font-body), sans-serif",
-          backgroundColor: "var(--color-background)",
-          color: "var(--color-text)",
-        }}
-      >
-        <Header />
-        <div className="flex-1">{children}</div>
-        <Footer />
-        <Toaster position="top-center" richColors closeButton />
-      </body>
-    </html>
-  );
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return children;
 }

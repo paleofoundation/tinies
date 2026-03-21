@@ -6,8 +6,11 @@ import { type NextRequest, NextResponse } from "next/server";
  * Refreshes the session on every request and sets/updates cookies on the response.
  * Returns the response and the user (null if not authenticated).
  */
-export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({ request });
+export async function updateSession(
+  request: NextRequest,
+  baseResponse?: NextResponse
+) {
+  let response = baseResponse ?? NextResponse.next({ request });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

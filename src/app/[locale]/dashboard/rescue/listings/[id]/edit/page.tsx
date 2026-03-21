@@ -2,8 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
-import { AdoptionListingForm } from "@/app/dashboard/admin/adoptions/new/AdoptionListingForm";
-import type { CreateListingInput } from "@/app/dashboard/admin/actions";
+import { AdoptionListingForm } from "@/app/[locale]/dashboard/admin/adoptions/new/AdoptionListingForm";
+import type { CreateListingInput } from "@/app/[locale]/dashboard/admin/actions";
 import { updateRescueAdoptionListing } from "../../../actions";
 
 export default async function EditRescueListingPage({

@@ -13,7 +13,7 @@ import { sendEmail } from "@/lib/email";
 import BookingReminderEmail from "@/lib/email/templates/booking-reminder";
 import ReviewPromptEmail from "@/lib/email/templates/review-prompt";
 import { sendSMS, buildBookingReminderSMS } from "@/lib/sms";
-import { sendPostAdoptionCheckinEmail } from "@/app/dashboard/admin/adoptions/actions";
+import { sendPostAdoptionCheckinEmail } from "@/app/[locale]/dashboard/admin/adoptions/actions";
 import { sendMonthlyGivingReceiptEmail } from "@/lib/giving/actions";
 import { DonationSource } from "@prisma/client";
 import type { PostAdoptionPhase } from "@/lib/email/templates/post-adoption-checkin";

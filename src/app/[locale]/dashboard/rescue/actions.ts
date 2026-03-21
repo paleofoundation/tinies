@@ -12,7 +12,7 @@ import {
   PlacementStatus,
   Prisma,
 } from "@prisma/client";
-import type { CreateListingInput } from "@/app/dashboard/admin/actions";
+import type { CreateListingInput } from "@/app/[locale]/dashboard/admin/actions";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 

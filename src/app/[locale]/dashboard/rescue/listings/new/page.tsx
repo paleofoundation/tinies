@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AdoptionListingForm } from "@/app/dashboard/admin/adoptions/new/AdoptionListingForm";
+import { AdoptionListingForm } from "@/app/[locale]/dashboard/admin/adoptions/new/AdoptionListingForm";
 import { createRescueAdoptionListing } from "../../actions";
 
 export default function NewRescueListingPage() {

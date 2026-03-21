@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, useRef, useMemo } from "react";
+import { useTranslations } from "next-intl";
+import { Link, useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import type { UserRole } from "@prisma/client";
 import { Menu, X } from "lucide-react";
-import { getUnreadMessageCount } from "@/app/dashboard/messages/actions";
+import { getUnreadMessageCount } from "@/app/[locale]/dashboard/messages/actions";
 import { getLinkedCharity } from "@/lib/charity/actions";
 import { getHeaderNavMeta } from "@/lib/header-actions";
 import { dashboardHrefForUser } from "@/lib/utils/dashboard-nav";
@@ -45,14 +45,18 @@ function avatarUrlForUser(user: User, dbAvatarUrl: string | null): string | null
   return null;
 }
 
-const CENTER_NAV = [
-  { href: "/services", label: "Find Care" },
-  { href: "/for-providers", label: "Become a Provider" },
-  { href: "/adopt", label: "Adopt" },
-  { href: "/blog", label: "Blog" },
-] as const;
-
 export function Header() {
+  const t = useTranslations("nav");
+  const centerNav = useMemo(
+    () =>
+      [
+        { href: "/services" as const, label: t("findCare") },
+        { href: "/for-providers" as const, label: t("becomeProvider") },
+        { href: "/adopt" as const, label: t("adopt") },
+        { href: "/blog" as const, label: t("blog") },
+      ] as const,
+    [t]
+  );
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -172,7 +176,7 @@ export function Header() {
 
         {/* Center nav — desktop & tablet (md+) */}
         <nav className="hidden flex-1 items-center justify-center gap-6 md:flex" aria-label="Main">
-          {CENTER_NAV.map(({ href, label }) => (
+          {centerNav.map(({ href, label }) => (
             <Link key={href} href={href} className={linkClass} style={linkStyle}>
               {label}
             </Link>
@@ -271,7 +275,7 @@ export function Header() {
                   color: "var(--color-primary)",
                 }}
               >
-                Sign Up
+                {t("signUp")}
               </Link>
               <Link
                 href="/login"
@@ -282,7 +286,7 @@ export function Header() {
                   backgroundColor: "var(--color-primary)",
                 }}
               >
-                Sign In
+                {t("signIn")}
               </Link>
             </>
           ) : null}
@@ -320,7 +324,7 @@ export function Header() {
                 >
                   Dashboard
                 </Link>
-                {CENTER_NAV.map(({ href, label }) => (
+                {centerNav.map(({ href, label }) => (
                   <Link
                     key={href}
                     href={href}
@@ -380,7 +384,7 @@ export function Header() {
               </>
             ) : (
               <>
-                {CENTER_NAV.map(({ href, label }) => (
+                {centerNav.map(({ href, label }) => (
                   <Link
                     key={href}
                     href={href}
@@ -398,7 +402,7 @@ export function Header() {
                   style={linkStyle}
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Sign Up
+                  {t("signUp")}
                 </Link>
                 <Link
                   href="/login"
@@ -406,7 +410,7 @@ export function Header() {
                   style={linkStyle}
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Sign In
+                  {t("signIn")}
                 </Link>
               </>
             )}

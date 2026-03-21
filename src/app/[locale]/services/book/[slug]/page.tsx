@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { redirect } from "next/navigation";
 import { getProviderBySlug, getBookingRoundupDefaults } from "../actions";
-import { getOwnerPets } from "@/app/dashboard/owner/actions";
+import { getOwnerPets } from "@/app/[locale]/dashboard/owner/actions";
 import { createClient } from "@/lib/supabase/server";
 import { BookingFlow } from "./BookingFlow";
 

@@ -1,20 +1,25 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
+import { useMemo, useState } from "react";
 import { Search, ChevronDown, Loader2 } from "lucide-react";
-import { geocodeSearchLocation } from "@/app/services/search/actions";
+import { geocodeSearchLocation } from "@/app/[locale]/services/search/actions";
 import { AddressAutocomplete } from "@/components/maps";
 
-const SERVICE_OPTIONS: { label: string; value: string }[] = [
-  { label: "Dog Walking", value: "walking" },
-  { label: "Pet Sitting", value: "sitting" },
-  { label: "Overnight Boarding", value: "boarding" },
-  { label: "Drop-In Visits", value: "drop_in" },
-  { label: "Daycare", value: "daycare" },
-];
-
 export function HomeSearchBar() {
+  const t = useTranslations("home.search");
+  const serviceOptions = useMemo(
+    () =>
+      [
+        { label: t("walking"), value: "walking" },
+        { label: t("sitting"), value: "sitting" },
+        { label: t("boarding"), value: "boarding" },
+        { label: t("dropIn"), value: "drop_in" },
+        { label: t("daycare"), value: "daycare" },
+      ] as const,
+    [t]
+  );
   const router = useRouter();
   const [location, setLocation] = useState("");
   const [lat, setLat] = useState<number | null>(null);
@@ -69,7 +74,7 @@ export function HomeSearchBar() {
           <AddressAutocomplete
             value={location}
             onChange={handleAddressChange}
-            placeholder="Address or area"
+            placeholder={t("placeholder")}
             defaultCountry="cy"
             className="py-3.5 sm:rounded-none sm:rounded-l-[var(--radius-lg)] sm:border-r-0"
           />
@@ -81,10 +86,10 @@ export function HomeSearchBar() {
             onChange={(e) => setService(e.target.value)}
             className="w-full appearance-none rounded-[var(--radius-lg)] border py-3.5 pl-11 pr-4 focus:outline-none focus:ring-2 sm:rounded-none sm:border-r"
             style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
-            aria-label="Service type"
+            aria-label={t("serviceAria")}
           >
-            <option value="">Choose a service</option>
-            {SERVICE_OPTIONS.map((opt) => (
+            <option value="">{t("chooseService")}</option>
+            {serviceOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>
@@ -99,7 +104,7 @@ export function HomeSearchBar() {
         style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-primary)" }}
       >
         {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
-        Find Care
+        {t("cta")}
       </button>
       {error && (
         <p className="absolute top-full mt-1 w-full text-center text-sm sm:relative sm:mt-0 sm:col-span-2" style={{ color: "var(--color-error)" }}>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { MapPin, Star, ArrowRight } from "lucide-react";
-import { getSearchProviders } from "@/app/services/search/actions";
+import { getSearchProviders } from "@/app/[locale]/services/search/actions";
 import {
   SERVICE_TYPE_SLUGS,
   DISTRICT_SLUGS,

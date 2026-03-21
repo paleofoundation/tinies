@@ -8,7 +8,8 @@ import {
   Leaf,
   BookOpen,
 } from "lucide-react";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { HomeSearchBar } from "@/components/layout/HomeSearchBar";
 import { getFeaturedAvailableListings } from "@/lib/adoption/featured-for-home";
 import { getBlogPostSummaries } from "@/lib/blog/load-posts";
@@ -40,6 +41,8 @@ function formatSpecies(species: string): string {
 }
 
 export default async function Home() {
+  const tHero = await getTranslations("home.hero");
+  const tPreview = await getTranslations("home.howItWorksPreview");
   const featuredListings = await getFeaturedAvailableListings(4);
   const recentPosts = getBlogPostSummaries().slice(0, 3);
 
@@ -57,13 +60,13 @@ export default async function Home() {
             className="font-normal tracking-tight sm:text-5xl"
             style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-4xl)", color: "var(--color-text)" }}
           >
-            No matter the size.
+            {tHero("title")}
           </h1>
           <p className="mt-4 mx-auto max-w-xl text-lg sm:text-xl" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-            Trusted pet care and rescue adoption in Cyprus
+            {tHero("tagline")}
           </p>
           <p className="mt-2 text-base font-medium sm:text-lg" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-primary)" }}>
-            Every booking helps a tiny.
+            {tHero("subtagline")}
           </p>
 
           {/* Search area: geocodes location and redirects to /services/search?lat=&lng=&type= */}
@@ -78,37 +81,37 @@ export default async function Home() {
             className="text-center"
             style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
           >
-            How it works
+            {tPreview("title")}
           </h2>
           <p className="mt-2 mx-auto max-w-lg text-center" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-            Book trusted pet care in three simple steps.
+            {tPreview("subtitle")}
           </p>
           <div className="mt-12 grid gap-10 sm:grid-cols-3 sm:gap-8">
             <div className="flex flex-col items-center text-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-full" style={{ backgroundColor: "var(--color-primary-50)", color: "var(--color-primary)" }}>
                 <Search className="h-7 w-7" />
               </div>
-              <h3 className="mt-4 font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>Search</h3>
+              <h3 className="mt-4 font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>{tPreview("stepSearch")}</h3>
               <p className="mt-1 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-                Find verified providers near you
+                {tPreview("stepSearchDesc")}
               </p>
             </div>
             <div className="flex flex-col items-center text-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-full" style={{ backgroundColor: "var(--color-primary-50)", color: "var(--color-primary)" }}>
                 <CreditCard className="h-7 w-7" />
               </div>
-              <h3 className="mt-4 font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>Book</h3>
+              <h3 className="mt-4 font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>{tPreview("stepBook")}</h3>
               <p className="mt-1 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-                Secure payment, instant confirmation
+                {tPreview("stepBookDesc")}
               </p>
             </div>
             <div className="flex flex-col items-center text-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-full" style={{ backgroundColor: "var(--color-primary-50)", color: "var(--color-primary)" }}>
                 <Camera className="h-7 w-7" />
               </div>
-              <h3 className="mt-4 font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>Relax</h3>
+              <h3 className="mt-4 font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>{tPreview("stepRelax")}</h3>
               <p className="mt-1 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-                Photo updates while you&apos;re away
+                {tPreview("stepRelaxDesc")}
               </p>
             </div>
           </div>
