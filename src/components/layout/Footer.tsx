@@ -38,6 +38,8 @@ const FOOTER_COLUMNS = [
     links: [
       { href: "/about", label: "About" },
       { href: "/blog", label: "Blog" },
+      { href: "/terms", label: "Terms" },
+      { href: "/privacy", label: "Privacy" },
       { href: "mailto:hello@tinies.app", label: "Contact" },
     ],
   },

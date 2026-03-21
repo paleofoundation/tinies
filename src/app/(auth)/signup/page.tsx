@@ -185,6 +185,18 @@ export default function SignupPage() {
               </div>
             )}
 
+            <p className="text-center text-xs leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-muted)" }}>
+              By signing up, you agree to our{" "}
+              <Link href="/terms" className="underline hover:opacity-90" style={{ color: "var(--color-primary)" }}>
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" className="underline hover:opacity-90" style={{ color: "var(--color-primary)" }}>
+                Privacy Policy
+              </Link>
+              .
+            </p>
+
             <button
               type="submit"
               disabled={loading}
