@@ -1,380 +1,405 @@
 import type { Metadata } from "next";
-import { Leaf, Coins, Heart, ArrowRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
-import { getGivingPageData, getCommunityOfGivers, getRecentDonationsForTicker } from "@/lib/giving/actions";
-import { DonationTicker } from "@/components/giving/DonationTicker";
-import { CommunityOfGivers } from "@/components/giving/CommunityOfGivers";
+import { Building2, Coins, Heart, Leaf, Users } from "lucide-react";
+import {
+  getGivingStats,
+  getGivingMonthlyTransparencyRows,
+  getGivingRescuePartnerCards,
+  getAnimalsSupportedCount,
+} from "@/lib/giving/actions";
+import { GivingAnimatedTotal } from "@/components/giving/GivingAnimatedTotal";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Tinies Giving | Transparency & Impact",
+  title: "Tinies Giving | Every Booking Helps",
   description:
-    "Every booking helps. 10% of our commission goes to animal rescue. Round up at checkout, become a Tinies Guardian, or support featured charities. See how we give.",
+    "90% of Tinies commission goes directly to rescue animal care in Cyprus. See real totals: round-ups, Guardians, platform giving — full transparency.",
   openGraph: {
-    title: "Tinies Giving | Transparency & Impact",
-    description: "Every booking helps. 10% of our commission goes to animal rescue. Round up at checkout, become a Tinies Guardian, or support featured charities.",
+    title: "Tinies Giving | Every Booking Helps",
+    description:
+      "90% of our commission goes to rescue animal care in Cyprus. Real numbers, full transparency — round-ups, Guardians, and more.",
     url: `${BASE_URL}/giving`,
     siteName: "Tinies",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tinies Giving | Transparency & Impact",
-    description: "Every booking helps. 10% of our commission goes to animal rescue.",
+    title: "Tinies Giving | Every Booking Helps",
+    description: "90% of our commission goes to rescue animal care in Cyprus. Full transparency.",
   },
 };
 
-const GUARDIAN_TIERS = [
-  { name: "Friend", amount: "€3", perMonth: "/month", description: "Support rescue every month. Badge on your profile." },
-  { name: "Guardian", amount: "€5", perMonth: "/month", description: "Our most popular. Monthly impact email + early access to new adoptions." },
-  { name: "Champion", amount: "€10", perMonth: "/month", description: "Maximum impact. Everything in Guardian, plus featured in our community." },
-] as const;
+const eur = new Intl.NumberFormat("en-GB", {
+  style: "currency",
+  currency: "EUR",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
 
-const SOURCE_LABELS: Record<string, string> = {
-  roundup: "Round-up",
-  signup: "Signup",
-  guardian: "Guardian",
-  platform_commission: "Platform 10%",
-};
-
-const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-const DEFAULT_STATS = {
-  totalDonatedCents: 0,
-  charitiesFundedCount: 0,
-  activeGuardiansCount: 0,
-  supporterCount: 0,
-  monthlyBreakdown: [] as { year: number; month: number; source: string; totalCents: number }[],
-  featuredCharities: [] as { id: string; name: string; mission: string | null; logoUrl: string | null; slug: string }[],
-  allCharities: [] as { id: string; name: string; mission: string | null; logoUrl: string | null; slug: string }[],
-};
+function formatEurCents(cents: number): string {
+  return eur.format(cents / 100);
+}
 
 export default async function GivingPage() {
-  let stats = DEFAULT_STATS;
-  let givers: Awaited<ReturnType<typeof getCommunityOfGivers>> = [];
-  let tickerItems: Awaited<ReturnType<typeof getRecentDonationsForTicker>> = [];
-  try {
-    [stats, givers, tickerItems] = await Promise.all([
-      getGivingPageData(),
-      getCommunityOfGivers(),
-      getRecentDonationsForTicker(20),
-    ]);
-  } catch (e) {
-    console.error("GivingPage data fetch", e);
-  }
+  const [stats, monthlyRows, partners, animalsSupported] = await Promise.all([
+    getGivingStats(),
+    getGivingMonthlyTransparencyRows(),
+    getGivingRescuePartnerCards(),
+    getAnimalsSupportedCount(),
+  ]);
 
   const donateActionJsonLd = {
     "@context": "https://schema.org",
     "@type": "DonateAction",
-    name: "Donate to Tinies Giving",
+    name: "Support Tinies Giving",
     target: {
       "@type": "EntryPoint",
-      url: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app"}/giving`,
+      url: `${BASE_URL}/giving/become-a-guardian`,
     },
-    description: "10% of Tinies proceeds go to animal rescue. Round up at checkout, become a Guardian, or support featured charities.",
+    recipient: {
+      "@type": "Organization",
+      name: "Tinies Giving",
+      description: "Animal rescue support in Cyprus — 90% of Tinies commission plus community donations.",
+    },
+    description:
+      "Tinies allocates 90% of platform commission to rescue animal care in Cyprus. Donate via round-ups, one-time gifts, or monthly Tinies Guardians.",
   };
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(donateActionJsonLd) }}
-      />
-      {/* Hero */}
-      <section className="relative overflow-hidden px-4 pt-10 pb-14 sm:px-6 sm:pt-14 sm:pb-20 lg:px-8">
-        <div className="absolute inset-0 rounded-b-[3rem] sm:rounded-b-[4rem]" style={{ backgroundColor: "rgba(10, 110, 92, 0.05)" }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(donateActionJsonLd) }} />
+
+      {/* Section 1 — Hero */}
+      <section className="relative overflow-hidden px-4 pt-10 pb-16 sm:px-6 sm:pt-14 sm:pb-20 lg:px-8">
+        <div
+          className="absolute inset-0 rounded-b-[3rem] sm:rounded-b-[4rem]"
+          style={{ backgroundColor: "rgba(10, 128, 128, 0.06)" }}
+        />
         <div className="relative mx-auto text-center" style={{ maxWidth: "var(--max-width)" }}>
           <h1
             className="font-normal tracking-tight sm:text-5xl lg:text-6xl"
             style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-4xl)", color: "var(--color-text)" }}
           >
-            Every booking helps.
+            Tinies Giving: Every booking helps.
           </h1>
-          <p className="mt-4 mx-auto max-w-xl text-lg" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-            10% of Tinies&apos; proceeds go directly to animal rescue in Cyprus. Here&apos;s how it works.
+          <p
+            className="mt-5 mx-auto max-w-2xl text-lg leading-relaxed"
+            style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}
+          >
+            90% of our commission goes directly to rescue animal care in Cyprus. And our community gives even more.
           </p>
-        </div>
-      </section>
-
-      {/* Counters - live data */}
-      <section className="-mt-4 px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
-            <div className="rounded-[var(--radius-lg)] border px-8 py-10 text-center" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
-              <p className="tabular-nums text-3xl font-bold sm:text-4xl" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-secondary)" }}>
-                €{(stats.totalDonatedCents / 100).toLocaleString("en-GB", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-              </p>
-              <p className="mt-2 text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-                donated to date
-              </p>
-            </div>
-            <div className="rounded-[var(--radius-lg)] border px-8 py-10 text-center" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
-              <p className="tabular-nums text-3xl font-bold sm:text-4xl" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-secondary)" }}>
-                {stats.charitiesFundedCount}
-              </p>
-              <p className="mt-2 text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-                charities funded
-              </p>
-            </div>
-            <div className="rounded-[var(--radius-lg)] border px-8 py-10 text-center" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
-              <p className="tabular-nums text-3xl font-bold sm:text-4xl" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-secondary)" }}>
-                {stats.activeGuardiansCount}
-              </p>
-              <p className="mt-2 text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-                Tinies Guardians
-              </p>
+          <div className="mt-12">
+            <p className="text-sm font-medium uppercase tracking-wide" style={{ color: "var(--color-text-muted)" }}>
+              Total donated to date (all sources)
+            </p>
+            <div className="mt-3 text-4xl font-bold tabular-nums sm:text-5xl lg:text-6xl">
+              <GivingAnimatedTotal totalCents={stats.totalAllTime} className="inline-block" />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Recent activity ticker */}
-      <DonationTicker items={tickerItems} />
+      {/* Section 2 — How it works */}
+      <section className="px-4 pb-16 sm:px-6 lg:px-8" style={{ paddingBottom: "var(--space-section)" }}>
+        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
+          <div className="grid gap-8 lg:grid-cols-3">
+            <div
+              className="rounded-[var(--radius-xl)] border p-8"
+              style={{
+                backgroundColor: "var(--color-surface)",
+                borderColor: "var(--color-border)",
+                boxShadow: "var(--shadow-md)",
+                padding: "var(--space-card)",
+              }}
+            >
+              <div
+                className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-lg)]"
+                style={{ backgroundColor: "var(--color-primary-50)", color: "var(--color-primary)" }}
+              >
+                <Leaf className="h-6 w-6" aria-hidden />
+              </div>
+              <h2 className="mt-6 text-xl font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
+                We give 90%
+              </h2>
+              <p className="mt-3 leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+                90% of every commission goes to animal rescue. Automatically. Always.
+              </p>
+            </div>
+            <div
+              className="rounded-[var(--radius-xl)] border p-8"
+              style={{
+                backgroundColor: "var(--color-surface)",
+                borderColor: "var(--color-border)",
+                boxShadow: "var(--shadow-md)",
+                padding: "var(--space-card)",
+              }}
+            >
+              <div
+                className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-lg)]"
+                style={{ backgroundColor: "var(--color-primary-50)", color: "var(--color-primary)" }}
+              >
+                <Coins className="h-6 w-6" aria-hidden />
+              </div>
+              <h2 className="mt-6 text-xl font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
+                Round up your booking
+              </h2>
+              <p className="mt-3 leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+                Round up to the nearest euro at checkout. Every cent goes to rescue.
+              </p>
+            </div>
+            <div
+              className="rounded-[var(--radius-xl)] border p-8"
+              style={{
+                backgroundColor: "var(--color-surface)",
+                borderColor: "var(--color-border)",
+                boxShadow: "var(--shadow-md)",
+                padding: "var(--space-card)",
+              }}
+            >
+              <div
+                className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-lg)]"
+                style={{ backgroundColor: "var(--color-secondary-50)", color: "var(--color-secondary)" }}
+              >
+                <Heart className="h-6 w-6" aria-hidden />
+              </div>
+              <h2 className="mt-6 text-xl font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
+                Become a Tinies Guardian
+              </h2>
+              <p className="mt-3 leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+                Give monthly and support rescue animals year-round.
+              </p>
+              <Link
+                href="/giving/become-a-guardian"
+                className="mt-6 inline-flex font-semibold hover:underline"
+                style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-primary)" }}
+              >
+                Learn more →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      {/* Monthly breakdown - last 12 months */}
-      {stats.monthlyBreakdown.length > 0 && (
-        <section className="mt-12 px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto rounded-[var(--radius-lg)] border p-6" style={{ maxWidth: "var(--max-width)", backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}>
-            <h2 className="text-lg font-semibold" style={{ color: "var(--color-text)" }}>Monthly breakdown (last 12 months)</h2>
-            <div className="mt-4 overflow-x-auto">
-              <table className="w-full min-w-[320px] text-sm">
+      {/* Section 3 — Impact numbers */}
+      <section className="border-t px-4 py-16 sm:px-6 lg:px-8" style={{ borderColor: "var(--color-border)" }}>
+        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
+          <h2
+            className="font-normal text-center sm:text-3xl"
+            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-2xl)", color: "var(--color-text)" }}
+          >
+            Impact at a glance
+          </h2>
+          <div className="mt-12 grid grid-cols-2 gap-6 lg:grid-cols-4">
+            {[
+              { label: "Total donated (all time)", value: formatEurCents(stats.totalAllTime), icon: Coins },
+              { label: "Animals on Tinies (available now)", value: String(animalsSupported), icon: Heart },
+              { label: "Charities funded", value: String(stats.charitiesSupported), icon: Building2 },
+              {
+                label: "Monthly Tinies Guardians",
+                value: String(stats.activeGuardiansCount),
+                icon: Users,
+              },
+            ].map((tile) => (
+              <div
+                key={tile.label}
+                className="rounded-[var(--radius-lg)] border p-6 text-center"
+                style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-sm)" }}
+              >
+                <tile.icon className="mx-auto h-8 w-8" style={{ color: "var(--color-primary)" }} aria-hidden />
+                <p className="mt-4 text-2xl font-bold tabular-nums sm:text-3xl" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
+                  {tile.value}
+                </p>
+                <p className="mt-2 text-xs font-medium sm:text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+                  {tile.label}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Section 4 — Rescue partners */}
+      <section className="px-4 py-16 sm:px-6 lg:px-8" style={{ backgroundColor: "var(--color-primary-50)", paddingTop: "var(--space-section)", paddingBottom: "var(--space-section)" }}>
+        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
+          <h2
+            className="font-normal sm:text-3xl"
+            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-2xl)", color: "var(--color-text)" }}
+          >
+            Our rescue partners
+          </h2>
+          <p className="mt-2 max-w-2xl" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+            Verified organisations listing animals on Tinies. See how support flows to each partner.
+          </p>
+          {partners.length === 0 ? (
+            <p className="mt-10 text-sm" style={{ color: "var(--color-text-muted)" }}>
+              Verified rescue partners will appear here as they join the platform.
+            </p>
+          ) : (
+            <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {partners.map((p) => (
+                <Link
+                  key={p.slug}
+                  href={`/rescue/${p.slug}`}
+                  className="group flex flex-col rounded-[var(--radius-xl)] border p-6 transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]"
+                  style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}
+                >
+                  <div
+                    className="relative mx-auto h-20 w-20 shrink-0 overflow-hidden rounded-full border"
+                    style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}
+                  >
+                    {p.logoUrl ? (
+                      <Image src={p.logoUrl} alt={`${p.name} logo`} fill className="object-cover" sizes="80px" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center" aria-hidden>
+                        <Building2 className="h-10 w-10" style={{ color: "var(--color-primary-300)" }} strokeWidth={1.25} />
+                      </div>
+                    )}
+                  </div>
+                  <h3
+                    className="mt-4 text-center text-lg font-semibold group-hover:underline"
+                    style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}
+                  >
+                    {p.name}
+                  </h3>
+                  {p.missionExcerpt ? (
+                    <p className="mt-2 flex-1 text-center text-sm leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+                      {p.missionExcerpt}
+                    </p>
+                  ) : null}
+                  <div className="mt-4 text-center text-sm" style={{ fontFamily: "var(--font-body), sans-serif" }}>
+                    {p.receivedThroughTiniesCents === null ? (
+                      <span style={{ color: "var(--color-text-muted)" }}>Just joined</span>
+                    ) : (
+                      <>
+                        <span className="block font-semibold tabular-nums" style={{ color: "var(--color-primary)" }}>
+                          {formatEurCents(p.receivedThroughTiniesCents)}
+                        </span>
+                        <span className="mt-1 block text-xs" style={{ color: "var(--color-text-muted)" }}>
+                          received through Tinies
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Section 5 — Monthly breakdown */}
+      <section className="px-4 py-16 sm:px-6 lg:px-8">
+        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
+          <h2
+            className="font-normal sm:text-3xl"
+            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-2xl)", color: "var(--color-text)" }}
+          >
+            Monthly breakdown
+          </h2>
+          <p className="mt-2 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+            Donations recorded in the Tinies ledger (last 12 months, months with activity only).
+          </p>
+          {monthlyRows.length === 0 ? (
+            <p className="mt-8 rounded-[var(--radius-lg)] border p-6 text-sm" style={{ borderColor: "var(--color-border)", color: "var(--color-text-muted)" }}>
+              No donation activity in the last 12 months yet. When the community gives, it will show here — EUR 0.00 until then.
+            </p>
+          ) : (
+            <div className="mt-8 overflow-x-auto rounded-[var(--radius-xl)] border" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}>
+              <table className="w-full min-w-[640px] text-left text-sm">
                 <thead>
-                  <tr className="border-b" style={{ borderColor: "var(--color-border)" }}>
-                    <th className="pb-2 text-left font-medium" style={{ color: "var(--color-text-secondary)" }}>Month</th>
-                    <th className="pb-2 text-left font-medium" style={{ color: "var(--color-text-secondary)" }}>Source</th>
-                    <th className="pb-2 text-right font-medium" style={{ color: "var(--color-text-secondary)" }}>Amount</th>
+                  <tr className="border-b" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-primary-50)" }}>
+                    <th className="px-4 py-3 font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
+                      Month
+                    </th>
+                    <th className="px-4 py-3 font-semibold text-right tabular-nums" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
+                      Total donated
+                    </th>
+                    <th className="px-4 py-3 font-semibold text-right tabular-nums" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
+                      Platform (90%)
+                    </th>
+                    <th className="px-4 py-3 font-semibold text-right tabular-nums" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
+                      Round-ups
+                    </th>
+                    <th className="px-4 py-3 font-semibold text-right tabular-nums" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
+                      Guardians
+                    </th>
+                    <th className="px-4 py-3 font-semibold text-right tabular-nums" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
+                      One-time
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {stats.monthlyBreakdown.map((row, i) => (
-                    <tr key={`${row.year}-${row.month}-${row.source}-${i}`} className="border-b last:border-0" style={{ borderColor: "var(--color-border)" }}>
-                      <td className="py-2" style={{ color: "var(--color-text)" }}>{MONTH_NAMES[row.month - 1]} {row.year}</td>
-                      <td className="py-2" style={{ color: "var(--color-text)" }}>{SOURCE_LABELS[row.source] ?? row.source}</td>
-                      <td className="py-2 text-right tabular-nums" style={{ color: "var(--color-text)" }}>€{(row.totalCents / 100).toFixed(2)}</td>
+                  {monthlyRows.map((row) => (
+                    <tr key={`${row.year}-${row.month}`} className="border-b last:border-0" style={{ borderColor: "var(--color-border)" }}>
+                      <td className="px-4 py-3" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
+                        {row.label}
+                      </td>
+                      <td className="px-4 py-3 text-right tabular-nums" style={{ color: "var(--color-text)" }}>
+                        {formatEurCents(row.totalCents)}
+                      </td>
+                      <td className="px-4 py-3 text-right tabular-nums" style={{ color: "var(--color-text-secondary)" }}>
+                        {formatEurCents(row.platformCents)}
+                      </td>
+                      <td className="px-4 py-3 text-right tabular-nums" style={{ color: "var(--color-text-secondary)" }}>
+                        {formatEurCents(row.roundupCents)}
+                      </td>
+                      <td className="px-4 py-3 text-right tabular-nums" style={{ color: "var(--color-text-secondary)" }}>
+                        {formatEurCents(row.guardianCents)}
+                      </td>
+                      <td className="px-4 py-3 text-right tabular-nums" style={{ color: "var(--color-text-secondary)" }}>
+                        {formatEurCents(row.oneTimeCents)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </div>
-        </section>
-      )}
-
-      {/* How we give */}
-      <section className="px-4 py-20 sm:px-6 lg:px-8" style={{ paddingTop: "var(--space-section)", paddingBottom: "var(--space-section)" }}>
-        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
-          <h2
-            className="text-center font-normal sm:text-3xl"
-            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-2xl)", color: "var(--color-text)" }}
-          >
-            How we give
-          </h2>
-          <div className="mt-14 space-y-8">
-            <div className="flex gap-6 rounded-[var(--radius-lg)] border p-8 sm:gap-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)", padding: "var(--space-card)" }}>
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[var(--radius-lg)]" style={{ backgroundColor: "var(--color-primary-50)", color: "var(--color-primary)" }}>
-                <Leaf className="h-7 w-7" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
-                  We give 10% of every commission to animal rescue. Automatically. Always.
-                </h3>
-                <p className="mt-3 leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-                  When a booking completes, 10% of what Tinies earns goes straight into the Giving Fund. No opt-in, no extra step. It&apos;s built into how we run the platform. You book care — we share the proceeds with rescues and sanctuaries in Cyprus.
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-6 rounded-[var(--radius-lg)] border p-8 sm:gap-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)", padding: "var(--space-card)" }}>
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[var(--radius-lg)]" style={{ backgroundColor: "var(--color-primary-50)", color: "var(--color-primary)" }}>
-                <Coins className="h-7 w-7" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
-                  Round up your booking to donate the change.
-                </h3>
-                <p className="mt-3 leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-                  At checkout, you can round up to the nearest euro. The difference goes to your chosen charity or the general Giving Fund. It&apos;s on by default — you can turn it off anytime. Every round-up adds up.
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-6 rounded-[var(--radius-lg)] border p-8 sm:gap-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)", padding: "var(--space-card)" }}>
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[var(--radius-lg)]" style={{ backgroundColor: "var(--color-secondary-50)", color: "var(--color-secondary)" }}>
-                <Heart className="h-7 w-7" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
-                  Become a Tinies Guardian and give monthly (from €3/month).
-                </h3>
-                <p className="mt-3 leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-                  Guardians give a set amount each month to a charity they choose (or the general fund). You get a badge on your profile, impact updates, and early access to new adoption listings. Pause or cancel anytime.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured charities - live */}
-      <section className="rounded-t-[2rem] px-4 py-20 sm:px-6 lg:px-8" style={{ backgroundColor: "var(--color-surface)", paddingTop: "var(--space-section)", paddingBottom: "var(--space-section)" }}>
-        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
-          <h2
-            className="font-normal"
-            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
-          >
-            Featured charities
-          </h2>
-          <p className="mt-2" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-            Verified rescues and sanctuaries we support.
-          </p>
-          <div className="mt-10 grid gap-8 sm:grid-cols-3">
-            {stats.featuredCharities.length > 0 ? (
-              stats.featuredCharities.map((charity) => (
-                <div
-                  key={charity.id}
-                  className="rounded-[var(--radius-lg)] border p-8 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]"
-                  style={{ backgroundColor: "var(--color-background)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)", padding: "var(--space-card)" }}
-                >
-                  {charity.logoUrl && (
-                    <img src={charity.logoUrl} alt="" className="mb-4 h-16 w-16 rounded-[var(--radius-lg)] object-cover" />
-                  )}
-                  <h3 className="font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>{charity.name}</h3>
-                  {charity.mission && (
-                    <p className="mt-3 text-sm leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>{charity.mission}</p>
-                  )}
-                  <Link
-                    href={`/giving/${charity.slug}`}
-                    className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] border-2 bg-transparent px-4 font-semibold transition-opacity hover:opacity-90"
-                    style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", borderColor: "var(--color-primary)", color: "var(--color-primary)" }}
-                  >
-                    Support this charity
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </div>
-              ))
-            ) : (
-              <p className="col-span-3 text-sm" style={{ color: "var(--color-text-secondary)" }}>No featured charities yet.</p>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Our Community of Givers */}
-      <section className="px-4 py-16 sm:px-6 lg:px-8" style={{ backgroundColor: "var(--color-background)" }}>
-        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
-          <h2
-            className="font-normal"
-            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
-          >
-            Our Community of Givers
-          </h2>
-          <p className="mt-2 text-lg" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-            Together, <strong style={{ color: "var(--color-text)" }}>{stats.supporterCount}</strong> supporters have donated{" "}
-            <strong style={{ color: "var(--color-text)" }}>EUR {(stats.totalDonatedCents / 100).toLocaleString("en-GB", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</strong> to{" "}
-            <strong style={{ color: "var(--color-text)" }}>{stats.charitiesFundedCount}</strong> sanctuaries.
-          </p>
-          <div className="mt-8">
-            <CommunityOfGivers givers={givers} />
-          </div>
-          <p className="mt-8 text-center">
-            <Link
-              href="/giving/become-a-guardian"
-              className="inline-flex h-12 items-center rounded-[var(--radius-pill)] border-2 px-6 font-semibold transition-opacity hover:opacity-90"
-              style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}
-            >
-              Join {stats.supporterCount} supporters
-            </Link>
-          </p>
-        </div>
-      </section>
-
-      {/* All charities grid */}
-      <section className="px-4 py-12 sm:px-6 lg:px-8" style={{ paddingBottom: "var(--space-section)" }}>
-        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
-          <h2
-            className="font-normal"
-            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-2xl)", color: "var(--color-text)" }}
-          >
-            All charities
-          </h2>
-          <p className="mt-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>
-            Every active charity on Tinies Giving.
-          </p>
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {stats.allCharities.map((charity) => (
-              <div
-                key={charity.id}
-                className="rounded-[var(--radius-lg)] border p-6 transition-shadow hover:shadow-md"
-                style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}
-              >
-                <div className="flex items-start gap-4">
-                  {charity.logoUrl && (
-                    <img src={charity.logoUrl} alt="" className="h-12 w-12 shrink-0 rounded-[var(--radius-lg)] object-cover" />
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold" style={{ color: "var(--color-text)" }}>{charity.name}</h3>
-                    {charity.mission && (
-                      <p className="mt-1 line-clamp-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>{charity.mission}</p>
-                    )}
-                    <Link
-                      href={`/giving/${charity.slug}`}
-                      className="mt-3 inline-flex items-center gap-1 text-sm font-medium hover:underline"
-                      style={{ color: "var(--color-primary)" }}
-                    >
-                      View profile <ArrowRight className="h-3 w-3" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          {stats.allCharities.length === 0 && (
-            <p className="mt-4 text-sm" style={{ color: "var(--color-text-secondary)" }}>No charities listed yet.</p>
           )}
         </div>
       </section>
 
-      {/* Become a Guardian CTA */}
-      <section className="px-4 py-20 sm:px-6 lg:px-8" style={{ paddingTop: "var(--space-section)", paddingBottom: "var(--space-section)" }}>
+      {/* Section 6 — Guardian CTA */}
+      <section className="px-4 pb-12 sm:px-6 sm:pb-16 lg:px-8">
         <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
-          <div className="rounded-[var(--radius-lg)] px-8 py-14 text-center text-white sm:px-12 sm:py-16" style={{ backgroundColor: "var(--color-primary)" }}>
+          <div
+            className="rounded-[var(--radius-xl)] px-8 py-14 text-center sm:px-12 sm:py-16"
+            style={{ backgroundColor: "var(--color-primary)", color: "var(--color-background)" }}
+          >
             <h2
               className="font-normal sm:text-3xl"
-              style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-2xl)", color: "white" }}
+              style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-2xl)", color: "var(--color-background)" }}
             >
-              Become a Tinies Guardian
+              Join our Tinies Guardians
             </h2>
-            <p className="mx-auto mt-4 max-w-lg text-sm sm:text-base" style={{ fontFamily: "var(--font-body), sans-serif", color: "rgba(255,255,255,0.9)" }}>
-              Give monthly to animal rescue. Choose your tier, pick a charity or the general fund, and get a Guardian badge plus impact updates.
+            <p
+              className="mx-auto mt-4 max-w-xl text-base"
+              style={{ fontFamily: "var(--font-body), sans-serif", color: "rgba(255, 255, 255, 0.92)" }}
+            >
+              Supporting animal rescue every month. Starting from EUR 3/month.
             </p>
-            <div className="mt-12 grid gap-8 sm:grid-cols-3">
-              {GUARDIAN_TIERS.map((tier) => (
-                <div
-                  key={tier.name}
-                  className="rounded-[var(--radius-lg)] border p-8 backdrop-blur-sm"
-                  style={{ borderColor: "rgba(255,255,255,0.2)", backgroundColor: "rgba(255,255,255,0.05)" }}
-                >
-                  <p className="font-semibold text-white" style={{ fontFamily: "var(--font-body), sans-serif" }}>{tier.name}</p>
-                  <p className="mt-2 text-2xl font-bold tabular-nums text-white" style={{ fontFamily: "var(--font-body), sans-serif" }}>
-                    {tier.amount}
-                    <span className="text-lg font-normal text-white/80">{tier.perMonth}</span>
-                  </p>
-                  <p className="mt-3 text-sm leading-relaxed text-white/85" style={{ fontFamily: "var(--font-body), sans-serif" }}>
-                    {tier.description}
-                  </p>
-                </div>
-              ))}
-            </div>
             <Link
               href="/giving/become-a-guardian"
-              className="mt-12 inline-flex h-12 items-center rounded-[var(--radius-pill)] bg-white px-8 font-semibold transition-opacity hover:opacity-95"
+              className="mt-10 inline-flex h-12 items-center justify-center rounded-[var(--radius-pill)] bg-white px-8 font-semibold transition-opacity hover:opacity-95"
               style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", color: "var(--color-primary)" }}
             >
               Become a Guardian
             </Link>
           </div>
         </div>
+      </section>
+
+      {/* Footer note */}
+      <section className="px-4 pb-16 sm:px-6 lg:px-8">
+        <p
+          className="mx-auto max-w-2xl text-center text-xs leading-relaxed sm:text-sm"
+          style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-muted)" }}
+        >
+          Every euro is tracked. Every cent is accounted for. Full transparency, always.
+        </p>
       </section>
     </div>
   );

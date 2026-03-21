@@ -690,6 +690,32 @@ export type GivingStats = {
   totalDonatedThisMonthCents: number;
   activeDonorsCount: number;
   charitiesSupportedCount: number;
+  /** All-time total donated in cents (alias for transparency UI). */
+  totalAllTime: number;
+  /** Distinct charities with attributed donations (alias). */
+  charitiesSupported: number;
+  activeGuardiansCount: number;
+};
+
+/** Monthly aggregates for /giving transparency table (months with any activity only). */
+export type GivingMonthlyTransparencyRow = {
+  year: number;
+  month: number;
+  label: string;
+  totalCents: number;
+  platformCents: number;
+  roundupCents: number;
+  guardianCents: number;
+  oneTimeCents: number;
+};
+
+export type GivingRescuePartnerCard = {
+  slug: string;
+  name: string;
+  missionExcerpt: string;
+  logoUrl: string | null;
+  /** null = no linked charity row; show “Just joined” */
+  receivedThroughTiniesCents: number | null;
 };
 
 export type UserGivingHistoryRow = {
@@ -800,11 +826,14 @@ export async function getGivingStats(): Promise<GivingStats> {
     totalDonatedThisMonthCents: 0,
     activeDonorsCount: 0,
     charitiesSupportedCount: 0,
+    totalAllTime: 0,
+    charitiesSupported: 0,
+    activeGuardiansCount: 0,
   };
   try {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const [allSum, monthSum, donorRows, charityRows] = await Promise.all([
+    const [allSum, monthSum, donorRows, charityRows, activeGuardiansCount] = await Promise.all([
       prisma.donation.aggregate({ _sum: { amount: true } }),
       prisma.donation.aggregate({
         where: { createdAt: { gte: startOfMonth } },
@@ -820,16 +849,148 @@ export async function getGivingStats(): Promise<GivingStats> {
         distinct: ["charityId"],
         select: { charityId: true },
       }),
+      prisma.guardianSubscription.count({ where: { status: "active" } }),
     ]);
+    const totalDonatedAllTimeCents = allSum._sum.amount ?? 0;
+    const charitiesSupportedCount = charityRows.length;
     return {
-      totalDonatedAllTimeCents: allSum._sum.amount ?? 0,
+      totalDonatedAllTimeCents,
       totalDonatedThisMonthCents: monthSum._sum.amount ?? 0,
       activeDonorsCount: donorRows.length,
-      charitiesSupportedCount: charityRows.length,
+      charitiesSupportedCount,
+      totalAllTime: totalDonatedAllTimeCents,
+      charitiesSupported: charitiesSupportedCount,
+      activeGuardiansCount,
     };
   } catch (e) {
     console.error("getGivingStats", e);
     return empty;
+  }
+}
+
+const MONTH_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** Last 12 rolling months; only rows where totalCents > 0. */
+export async function getGivingMonthlyTransparencyRows(): Promise<GivingMonthlyTransparencyRow[]> {
+  try {
+    const now = new Date();
+    const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 11, 1));
+    const donations = await prisma.donation.findMany({
+      where: { createdAt: { gte: start } },
+      select: { amount: true, source: true, createdAt: true },
+    });
+    const bucket = new Map<
+      string,
+      { year: number; month: number; total: number; platform: number; roundup: number; guardian: number; oneTime: number }
+    >();
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 11 + i, 1));
+      const y = d.getUTCFullYear();
+      const m = d.getUTCMonth() + 1;
+      bucket.set(`${y}-${m}`, { year: y, month: m, total: 0, platform: 0, roundup: 0, guardian: 0, oneTime: 0 });
+    }
+    for (const row of donations) {
+      const dt = row.createdAt;
+      const key = `${dt.getUTCFullYear()}-${dt.getUTCMonth() + 1}`;
+      const cell = bucket.get(key);
+      if (!cell) continue;
+      cell.total += row.amount;
+      switch (row.source) {
+        case DonationSource.platform_commission:
+          cell.platform += row.amount;
+          break;
+        case DonationSource.roundup:
+          cell.roundup += row.amount;
+          break;
+        case DonationSource.guardian:
+          cell.guardian += row.amount;
+          break;
+        case DonationSource.one_time:
+        case DonationSource.signup:
+          cell.oneTime += row.amount;
+          break;
+        default:
+          break;
+      }
+    }
+    const out: GivingMonthlyTransparencyRow[] = [];
+    for (const cell of bucket.values()) {
+      if (cell.total <= 0) continue;
+      out.push({
+        year: cell.year,
+        month: cell.month,
+        label: `${MONTH_SHORT[cell.month - 1]} ${cell.year}`,
+        totalCents: cell.total,
+        platformCents: cell.platform,
+        roundupCents: cell.roundup,
+        guardianCents: cell.guardian,
+        oneTimeCents: cell.oneTime,
+      });
+    }
+    out.sort((a, b) => (a.year !== b.year ? a.year - b.year : a.month - b.month));
+    return out;
+  } catch (e) {
+    console.error("getGivingMonthlyTransparencyRows", e);
+    return [];
+  }
+}
+
+function excerptMission(text: string | null, maxLen: number): string {
+  if (!text?.trim()) return "";
+  const t = text.trim();
+  if (t.length <= maxLen) return t;
+  return `${t.slice(0, maxLen - 1)}…`;
+}
+
+/** Verified rescue orgs for /giving partner grid with optional linked charity donation totals. */
+export async function getGivingRescuePartnerCards(): Promise<GivingRescuePartnerCard[]> {
+  try {
+    const orgs = await prisma.rescueOrg.findMany({
+      where: { verified: true },
+      orderBy: { name: "asc" },
+      select: { slug: true, name: true, mission: true, logoUrl: true, userId: true },
+    });
+    const cards: GivingRescuePartnerCard[] = [];
+    for (const org of orgs) {
+      const charity = await prisma.charity.findFirst({
+        where: {
+          active: true,
+          OR: [{ slug: org.slug }, { userId: org.userId }],
+        },
+        select: { id: true },
+      });
+      let receivedThroughTiniesCents: number | null = null;
+      if (charity) {
+        const agg = await prisma.donation.aggregate({
+          where: { charityId: charity.id },
+          _sum: { amount: true },
+        });
+        receivedThroughTiniesCents = agg._sum.amount ?? 0;
+      }
+      cards.push({
+        slug: org.slug,
+        name: org.name,
+        missionExcerpt: excerptMission(org.mission, 140),
+        logoUrl: org.logoUrl,
+        receivedThroughTiniesCents,
+      });
+    }
+    return cards;
+  } catch (e) {
+    console.error("getGivingRescuePartnerCards", e);
+    return [];
+  }
+}
+
+/** Animals currently listed as available for adoption (public impact number). */
+export async function getAnimalsSupportedCount(): Promise<number> {
+  try {
+    return await prisma.adoptionListing.count({
+      where: { active: true, status: "available" },
+    });
+  } catch (e) {
+    console.error("getAnimalsSupportedCount", e);
+    return 0;
   }
 }
 
