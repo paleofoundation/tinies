@@ -9,6 +9,7 @@ import {
   type ProfileRowForSearchCard,
 } from "@/lib/providers/search-provider-card-map";
 import type { SearchProviderCard } from "@/lib/utils/search-helpers";
+import type { FavoriteViewerKind } from "@/lib/providers/favorite-actions-types";
 
 const profileInclude = {
   user: { select: { name: true, avatarUrl: true, district: true } as const },
@@ -19,8 +20,6 @@ const profileInclude = {
     select: { text: true },
   },
 } as const;
-
-export type FavoriteViewerKind = "guest" | "owner" | "authenticated_non_owner";
 
 export async function getFavoriteViewerState(): Promise<{
   kind: FavoriteViewerKind;

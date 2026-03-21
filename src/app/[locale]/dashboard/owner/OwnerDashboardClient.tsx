@@ -24,11 +24,11 @@ import type { OwnerBookingCard } from "@/lib/utils/owner-helpers";
 import { ReviewForm } from "./ReviewForm";
 import { TipForm } from "./TipForm";
 import { getOwnerMeetAndGreets, acceptMeetAndGreetSuggestion } from "@/lib/meet-and-greet/actions";
-import type { OwnerMeetAndGreetCard } from "@/lib/meet-and-greet/actions";
+import type { OwnerMeetAndGreetCard } from "@/lib/meet-and-greet/meet-and-greet-types";
 import { BookingUpdatesFeed } from "@/components/bookings/BookingUpdatesFeed";
 import { ReportProblemModal } from "@/components/disputes/ReportProblemModal";
 import { getDisputesForUser, getClaimsForUser, respondToDispute, respondToClaim } from "@/lib/disputes/actions";
-import type { DisputeCard, ClaimCard } from "@/lib/disputes/actions";
+import type { ClaimCard, DisputeCard } from "@/lib/disputes/dispute-action-types";
 
 type PetCard = {
   id: string;

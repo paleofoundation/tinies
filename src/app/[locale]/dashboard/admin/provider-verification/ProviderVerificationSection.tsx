@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import type { ProviderVerificationRow } from "./actions";
+import type { ProviderVerificationRow } from "../provider-verification-types";
 import { approveProviderVerification, rejectProviderVerification } from "./actions";
 
 type Props = {

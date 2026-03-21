@@ -3,12 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import {
-  createTransportProvider,
-  updateTransportProvider,
-  type TransportProviderRow,
-  type TransportProviderInput,
-} from "../adoptions/actions";
+import { createTransportProvider, updateTransportProvider } from "../adoptions/actions";
+import type { TransportProviderInput, TransportProviderRow } from "../adoptions/placement-action-types";
 
 const TYPES = [
   { value: "courier", label: "Courier" },

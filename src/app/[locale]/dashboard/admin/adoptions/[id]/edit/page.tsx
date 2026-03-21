@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { AdoptionListingForm } from "../../new/AdoptionListingForm";
-import type { CreateListingInput } from "../../../actions";
+import type { CreateListingInput } from "../../../adoption-listing-types";
 
 export default async function EditAdoptionListingPage({
   params,

@@ -5,6 +5,10 @@ import slugify from "slugify";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { AdoptionListingStatus } from "@prisma/client";
+import type {
+  CreateListingInput,
+  UpdateListingInput,
+} from "@/app/[locale]/dashboard/admin/adoption-listing-types";
 
 const GARDENS_ORG_SLUG = "gardens-of-st-gertrude";
 const GARDENS_ORG_NAME = "Gardens of St Gertrude";
@@ -50,23 +54,6 @@ export async function getOrCreateGardensRescueOrg(userId: string, userEmail: str
   });
   return org;
 }
-
-export type CreateListingInput = {
-  name: string;
-  species: string;
-  breed?: string;
-  estimatedAge?: string;
-  sex?: string;
-  spayedNeutered: boolean;
-  temperament?: string;
-  medicalHistory?: string;
-  specialNeeds?: string;
-  localAdoptionFeeEur?: number;
-  internationalEligible: boolean;
-  destinationCountries: string[];
-  photoUrls: string[];
-  status: string;
-};
 
 const STATUS_MAP: Record<string, AdoptionListingStatus> = {
   available: AdoptionListingStatus.available,
@@ -122,8 +109,6 @@ export async function createAdoptionListing(input: CreateListingInput): Promise<
     return { error: e instanceof Error ? e.message : "Failed to create listing." };
   }
 }
-
-export type UpdateListingInput = CreateListingInput;
 
 export async function updateAdoptionListing(
   id: string,

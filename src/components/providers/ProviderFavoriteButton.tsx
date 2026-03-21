@@ -6,7 +6,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { Heart } from "lucide-react";
 import { toast } from "sonner";
 import { toggleProviderFavorite } from "@/lib/providers/favorite-actions";
-import type { FavoriteViewerKind } from "@/lib/providers/favorite-actions";
+import type { FavoriteViewerKind } from "@/lib/providers/favorite-actions-types";
 
 type Props = {
   providerUserId: string;

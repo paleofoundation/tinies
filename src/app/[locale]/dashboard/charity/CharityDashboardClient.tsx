@@ -19,7 +19,7 @@ import {
   getCharityPayouts,
   updateCharityProfile,
 } from "@/lib/charity/actions";
-import type { DonationRow, PayoutRow } from "@/lib/charity/actions";
+import type { DonationRow, PayoutRow } from "@/lib/charity/charity-action-types";
 import { QRCodeGenerator } from "@/components/giving/QRCodeGenerator";
 import { toast } from "sonner";
 

@@ -6,18 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 import ProviderIdentityVerifiedEmail from "@/lib/email/templates/provider-identity-verified";
 import ProviderVerificationRejectedEmail from "@/lib/email/templates/provider-verification-rejected";
-
-export type ProviderVerificationRow = {
-  id: string;
-  userId: string;
-  slug: string;
-  bio: string | null;
-  idDocumentUrl: string | null;
-  stripeVerificationSessionId: string | null;
-  verified: boolean;
-  verifiedAt: Date | null;
-  user: { name: string; email: string };
-};
+import type { ProviderVerificationRow } from "@/app/[locale]/dashboard/admin/provider-verification-types";
 
 /** Providers awaiting verification: unverified with ID doc or Stripe session. */
 export async function getProvidersPendingVerification(): Promise<ProviderVerificationRow[]> {

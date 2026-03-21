@@ -26,14 +26,14 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import type { ProviderStripeStatus, ProviderBookingCard, ProviderReviewForDashboard, ProviderEarnings } from "@/lib/utils/provider-helpers";
-import type { ProviderMeetAndGreetCard } from "@/lib/meet-and-greet/actions";
+import type { ProviderMeetAndGreetCard } from "@/lib/meet-and-greet/meet-and-greet-types";
 import {
   getProviderMeetAndGreets,
   respondToMeetAndGreet,
 } from "@/lib/meet-and-greet/actions";
 import { ReportProblemModal } from "@/components/disputes/ReportProblemModal";
 import { getDisputesForUser, getClaimsForUser, respondToDispute, respondToClaim } from "@/lib/disputes/actions";
-import type { DisputeCard, ClaimCard } from "@/lib/disputes/actions";
+import type { ClaimCard, DisputeCard } from "@/lib/disputes/dispute-action-types";
 import {
   createStripeConnectOnboardingLink,
   acceptBooking,

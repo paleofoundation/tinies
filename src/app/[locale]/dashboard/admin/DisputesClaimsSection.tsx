@@ -9,7 +9,7 @@ import {
   getOpenDisputesForAdmin,
   getOpenClaimsForAdmin,
 } from "@/lib/disputes/actions";
-import type { AdminDisputeRow, AdminClaimRow } from "@/lib/disputes/actions";
+import type { AdminClaimRow, AdminDisputeRow } from "@/lib/disputes/dispute-action-types";
 import type { DisputeRuling } from "@prisma/client";
 
 const DISPUTE_RULINGS: { value: DisputeRuling; label: string }[] = [

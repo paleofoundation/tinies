@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { createAdoptionListing, type CreateListingInput } from "../../actions";
+import { createAdoptionListing } from "../../actions";
+import type { CreateListingInput } from "../../adoption-listing-types";
 import { LISTING_DESTINATION_COUNTRY_OPTIONS } from "@/lib/adoption/country-requirements";
 
 const SPECIES = ["Cat", "Dog", "Other"] as const;

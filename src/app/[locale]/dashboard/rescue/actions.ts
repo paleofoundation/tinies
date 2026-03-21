@@ -12,7 +12,13 @@ import {
   PlacementStatus,
   Prisma,
 } from "@prisma/client";
-import type { CreateListingInput } from "@/app/[locale]/dashboard/admin/actions";
+import type { CreateListingInput } from "@/app/[locale]/dashboard/admin/adoption-listing-types";
+import type {
+  OrgApplicationRow,
+  OrgListingRow,
+  OrgPlacementRow,
+  UpdateOrgProfileInput,
+} from "@/lib/rescue/rescue-org-dashboard-types";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
@@ -69,18 +75,6 @@ export async function getRescueOrgDashboard(): Promise<{
   };
 }
 
-export type OrgListingRow = {
-  id: string;
-  name: string;
-  species: string;
-  breed: string | null;
-  estimatedAge: string | null;
-  status: string;
-  active: boolean;
-  slug: string;
-  photos: string[];
-};
-
 export async function getOrgListings(): Promise<{
   listings: OrgListingRow[];
   error?: string;
@@ -116,34 +110,6 @@ export async function getOrgListings(): Promise<{
     })),
   };
 }
-
-export type OrgApplicationRow = {
-  id: string;
-  status: string;
-  createdAt: Date;
-  country: string;
-  city: string;
-  livingSituation: string | null;
-  hasGarden: boolean | null;
-  otherPets: string | null;
-  childrenAges: string | null;
-  experience: string | null;
-  reason: string | null;
-  vetReference: string | null;
-  applicantName: string;
-  listingName: string;
-  listingSlug: string;
-};
-
-export type OrgPlacementRow = {
-  id: string;
-  status: string;
-  destinationCountry: string;
-  listingName: string;
-  adopterName: string;
-  createdAt: Date;
-  awaitingGalleryApproval: boolean;
-};
 
 export async function getOrgPlacements(): Promise<{
   placements: OrgPlacementRow[];
@@ -325,15 +291,6 @@ export async function toggleListingStatus(listingId: string): Promise<{ error?: 
     return { error: e instanceof Error ? e.message : "Failed to update." };
   }
 }
-
-export type UpdateOrgProfileInput = {
-  name?: string;
-  mission?: string;
-  location?: string;
-  website?: string;
-  socialLinks?: string;
-  logoUrl?: string;
-};
 
 export async function updateOrgProfile(formData: FormData): Promise<{ error?: string }> {
   const { org, error } = await getRescueOrgForUser();

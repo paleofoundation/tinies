@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { deleteTransportProvider, type TransportProviderRow } from "../adoptions/actions";
+import { deleteTransportProvider } from "../adoptions/actions";
+import type { TransportProviderRow } from "../adoptions/placement-action-types";
 import { TransportProviderForm } from "./TransportProviderForm";
 
 type Props = {

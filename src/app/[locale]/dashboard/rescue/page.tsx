@@ -12,8 +12,8 @@ import {
   getOrgDonationSummary,
   getOrgRecentDonations,
   getOrgPayoutHistory,
-  type OrgDonationSummary,
 } from "@/lib/giving/org-donation-actions";
+import type { OrgDonationSummary } from "@/lib/giving/org-donation-types";
 import { rescueDonationsTabHasNew } from "@/lib/giving/org-donation-helpers";
 import { RescueDashboardClient } from "./RescueDashboardClient";
 

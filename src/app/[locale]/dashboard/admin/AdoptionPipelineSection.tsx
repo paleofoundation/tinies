@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import type { PlacementRow } from "./adoptions/actions";
+import type { PlacementRow } from "./adoptions/placement-action-types";
 
 const PLACEMENT_STATUS_LABELS: Record<string, string> = {
   preparing: "Preparing",

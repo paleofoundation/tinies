@@ -4,12 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Image from "next/image";
-import {
-  updatePlacement,
-  advancePlacementStatus,
-  type PlacementDetail,
-  type TransportProviderRow,
-} from "../../actions";
+import { advancePlacementStatus, updatePlacement } from "../../actions";
+import type { PlacementDetail, TransportProviderRow } from "../../placement-action-types";
 import { PlacementStatus } from "@prisma/client";
 import { approveAdoptionSuccessStory } from "@/lib/adoption/success-stories-actions";
 

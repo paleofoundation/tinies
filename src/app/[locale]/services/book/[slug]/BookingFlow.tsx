@@ -5,7 +5,7 @@ import Link from "next/link";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { toast } from "sonner";
-import type { ProviderForBooking } from "../actions";
+import type { ProviderForBooking } from "../booking-action-types";
 import { createBookingWithPaymentIntent } from "../actions";
 import {
   computeBookingTotalCents,

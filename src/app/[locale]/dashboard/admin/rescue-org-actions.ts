@@ -6,19 +6,10 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { ensureUniqueOrgSlug } from "@/lib/rescue/ensure-unique-org-slug";
 import { createClient } from "@/lib/supabase/server";
+import type { RescueOrgDetail, RescueOrgRow } from "@/app/[locale]/dashboard/admin/rescue-org-types";
 
 const PLACEHOLDER_PASSWORD_HASH = "supabase-auth-placeholder";
 const MISSION_MAX = 500;
-
-export type RescueOrgRow = {
-  id: string;
-  name: string;
-  location: string | null;
-  verified: boolean;
-  listingCount: number;
-  createdAt: Date;
-  slug: string;
-};
 
 export async function getAllRescueOrgs(): Promise<{ orgs: RescueOrgRow[]; error?: string }> {
   const supabase = await createClient();
@@ -50,22 +41,6 @@ export async function getAllRescueOrgs(): Promise<{ orgs: RescueOrgRow[]; error?
     return { orgs: [], error: "Failed to load rescue organisations." };
   }
 }
-
-export type RescueOrgDetail = {
-  id: string;
-  userId: string;
-  name: string;
-  mission: string | null;
-  location: string | null;
-  charityRegistration: string | null;
-  website: string | null;
-  socialLinks: unknown;
-  logoUrl: string | null;
-  bankIban: string | null;
-  verified: boolean;
-  slug: string;
-  contactEmail: string;
-};
 
 export async function getRescueOrgById(id: string): Promise<RescueOrgDetail | null> {
   const supabase = await createClient();

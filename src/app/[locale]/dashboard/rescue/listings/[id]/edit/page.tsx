@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { AdoptionListingForm } from "@/app/[locale]/dashboard/admin/adoptions/new/AdoptionListingForm";
-import type { CreateListingInput } from "@/app/[locale]/dashboard/admin/actions";
+import type { CreateListingInput } from "@/app/[locale]/dashboard/admin/adoption-listing-types";
 import { updateRescueAdoptionListing } from "../../../actions";
 
 export default async function EditRescueListingPage({

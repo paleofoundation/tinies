@@ -8,8 +8,15 @@ import { sendEmail } from "@/lib/email";
 import DisputeReportedEmail from "@/lib/email/templates/dispute-reported";
 import ClaimReportedEmail from "@/lib/email/templates/claim-reported";
 import CaseResolvedEmail from "@/lib/email/templates/case-resolved";
-import type { DisputeType, DisputeRuling } from "@prisma/client";
-import type { ClaimType } from "@prisma/client";
+import type { ClaimType, DisputeRuling, DisputeType } from "@prisma/client";
+import type {
+  AdminClaimRow,
+  AdminDisputeRow,
+  AdminResolveClaimInput,
+  AdminResolveDisputeInput,
+  ClaimCard,
+  DisputeCard,
+} from "@/lib/disputes/dispute-action-types";
 
 /** Create a bucket named "evidence" in Supabase Storage for dispute/claim photos. */
 const EVIDENCE_BUCKET = "evidence";
@@ -283,37 +290,6 @@ export async function respondToClaim(
   return {};
 }
 
-export type DisputeCard = {
-  id: string;
-  bookingId: string;
-  disputeType: string;
-  description: string;
-  evidencePhotos: string[];
-  status: string;
-  respondentResponse: string | null;
-  respondentPhotos: string[];
-  createdAt: Date;
-  openedByName: string;
-  respondentName: string;
-  isReporter: boolean;
-  bookingSummary: string;
-};
-
-export type ClaimCard = {
-  id: string;
-  bookingId: string;
-  claimType: string;
-  description: string;
-  photos: string[];
-  status: string;
-  otherPartyResponse: string | null;
-  otherPartyPhotos: string[];
-  createdAt: Date;
-  reporterName: string;
-  isReporter: boolean;
-  bookingSummary: string;
-};
-
 export async function getDisputesForUser(): Promise<{ disputes: DisputeCard[]; error?: string }> {
   const supabase = await createClient();
   const {
@@ -386,44 +362,6 @@ export async function getClaimsForUser(): Promise<{ claims: ClaimCard[]; error?:
   return { claims };
 }
 
-export type AdminDisputeRow = {
-  id: string;
-  bookingId: string;
-  disputeType: string;
-  description: string;
-  evidencePhotos: string[];
-  respondentResponse: string | null;
-  respondentPhotos: string[];
-  status: string;
-  ruling: DisputeRuling | null;
-  refundAmount: number | null;
-  openedByName: string;
-  respondentName: string;
-  bookingTotalCents: number;
-  stripePaymentIntentId: string | null;
-  createdAt: Date;
-};
-
-export type AdminClaimRow = {
-  id: string;
-  bookingId: string;
-  claimType: string;
-  description: string;
-  photos: string[];
-  otherPartyResponse: string | null;
-  otherPartyPhotos: string[];
-  status: string;
-  ruling: string | null;
-  payoutAmount: number | null;
-  payoutRecipientName: string | null;
-  reporterName: string;
-  createdAt: Date;
-  ownerId: string;
-  ownerName: string;
-  providerId: string;
-  providerName: string;
-};
-
 export async function getOpenDisputesForAdmin(): Promise<{ disputes: AdminDisputeRow[]; error?: string }> {
   const supabase = await createClient();
   const {
@@ -495,12 +433,6 @@ export async function getOpenClaimsForAdmin(): Promise<{ claims: AdminClaimRow[]
   }));
   return { claims };
 }
-
-export type AdminResolveDisputeInput = {
-  ruling: DisputeRuling;
-  refundAmountCents?: number | null;
-  rulingNotes?: string | null;
-};
 
 export async function adminResolveDispute(
   disputeId: string,
@@ -601,13 +533,6 @@ export async function adminResolveDispute(
   revalidatePath("/dashboard/admin");
   return {};
 }
-
-export type AdminResolveClaimInput = {
-  ruling: "approved_full" | "approved_partial" | "denied";
-  payoutAmountCents?: number | null;
-  payoutRecipientId?: string | null;
-  rulingNotes?: string | null;
-};
 
 export async function adminResolveClaim(
   claimId: string,

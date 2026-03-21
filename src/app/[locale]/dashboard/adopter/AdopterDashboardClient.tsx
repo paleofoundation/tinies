@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Heart, MessageSquare } from "lucide-react";
 import { LogisticsStepper } from "./LogisticsStepper";
-import type { AdopterApplicationSummary } from "./actions";
+import type { AdopterApplicationSummary } from "./adopter-dashboard-types";
 
 const STATUS_LABELS: Record<string, string> = {
   new: "Received",

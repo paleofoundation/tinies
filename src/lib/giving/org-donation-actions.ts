@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { DonationSource } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
+import type { OrgDonationRow, OrgDonationSummary, OrgPayoutRow } from "@/lib/giving/org-donation-types";
 
 const SOURCE_LABELS: Record<DonationSource, string> = {
   roundup: "Round-up",
@@ -49,17 +50,6 @@ export async function resolveCharityIdsForRescueOrg(rescueOrgId: string): Promis
 
   return [...new Set([...byLink, ...byUser, ...bySlug].map((c) => c.id))];
 }
-
-export type OrgDonationSummary = {
-  totalReceivedDirectCents: number;
-  totalReceivedFundPayoutsCents: number;
-  totalReceivedAllTimeCents: number;
-  thisMonthDirectCents: number;
-  supporterCount: number;
-  pendingPayoutCents: number;
-  latestDonationAt: Date | null;
-  charityIds: string[];
-};
 
 export async function getOrgDonationSummary(orgId: string): Promise<OrgDonationSummary> {
   const charityIds = await resolveCharityIdsForRescueOrg(orgId);
@@ -146,14 +136,6 @@ export async function getOrgDonationSummary(orgId: string): Promise<OrgDonationS
   };
 }
 
-export type OrgDonationRow = {
-  id: string;
-  createdAt: Date;
-  amountCents: number;
-  sourceLabel: string;
-  donorDisplay: string;
-};
-
 export async function getOrgRecentDonations(orgId: string, limit = 50): Promise<OrgDonationRow[]> {
   const charityIds = await resolveCharityIdsForRescueOrg(orgId);
   if (charityIds.length === 0) return [];
@@ -173,15 +155,6 @@ export async function getOrgRecentDonations(orgId: string, limit = 50): Promise<
     donorDisplay: d.user?.name?.trim() || "Anonymous",
   }));
 }
-
-export type OrgPayoutRow = {
-  id: string;
-  monthLabel: string;
-  amountCents: number;
-  paymentMethod: string;
-  status: string;
-  paidAt: Date | null;
-};
 
 function payoutPaymentMethod(
   stripeTransferIds: unknown,

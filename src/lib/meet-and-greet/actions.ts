@@ -8,6 +8,12 @@ import MeetAndGreetRequestEmail from "@/lib/email/templates/meet-and-greet-reque
 import MeetAndGreetOwnerUpdateEmail from "@/lib/email/templates/meet-and-greet-owner-update";
 import MeetAndGreetProviderConfirmedEmail from "@/lib/email/templates/meet-and-greet-provider-confirmed";
 import type { LocationType } from "@prisma/client";
+import type {
+  OwnerMeetAndGreetCard,
+  ProviderMeetAndGreetCard,
+  RequestMeetAndGreetInput,
+  RespondToMeetAndGreetInput,
+} from "@/lib/meet-and-greet/meet-and-greet-types";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
@@ -39,14 +45,6 @@ export async function getOwnerPetsForMeetAndGreet(): Promise<{
   });
   return { pets };
 }
-
-export type RequestMeetAndGreetInput = {
-  providerSlug: string;
-  petIds: string[];
-  requestedDatetime: string; // ISO
-  locationType: LocationType;
-  locationNotes?: string | null;
-};
 
 export async function requestMeetAndGreet(
   data: RequestMeetAndGreetInput
@@ -115,14 +113,6 @@ export async function requestMeetAndGreet(
     return { error: e instanceof Error ? e.message : "Failed to send request." };
   }
 }
-
-export type MeetAndGreetResponseAction = "accept" | "suggest" | "decline";
-
-export type RespondToMeetAndGreetInput = {
-  action: MeetAndGreetResponseAction;
-  suggestedDatetime?: string | null; // ISO, for suggest
-  message?: string | null; // for suggest or decline
-};
 
 export async function respondToMeetAndGreet(
   meetAndGreetId: string,
@@ -298,21 +288,6 @@ async function completeExpiredMeetAndGreets() {
   });
 }
 
-export type ProviderMeetAndGreetCard = {
-  id: string;
-  ownerName: string;
-  petNames: string[];
-  requestedDatetime: Date;
-  confirmedDatetime: Date | null;
-  locationType: string;
-  locationNotes: string | null;
-  status: string;
-  providerSuggestedDatetime: Date | null;
-  providerMessage: string | null;
-  createdAt: Date;
-  providerSlug: string;
-};
-
 export async function getProviderMeetAndGreets(): Promise<{
   requested: ProviderMeetAndGreetCard[];
   confirmed: ProviderMeetAndGreetCard[];
@@ -370,23 +345,6 @@ export async function getProviderMeetAndGreets(): Promise<{
 
   return { requested, confirmed, completed };
 }
-
-export type OwnerMeetAndGreetCard = {
-  id: string;
-  providerName: string;
-  providerSlug: string;
-  petNames: string[];
-  requestedDatetime: Date;
-  confirmedDatetime: Date | null;
-  locationType: string;
-  locationNotes: string | null;
-  status: string;
-  providerSuggestedDatetime: Date | null;
-  providerMessage: string | null;
-  createdAt: Date;
-  ledToBooking: boolean;
-  bookingId: string | null;
-};
 
 export async function getOwnerMeetAndGreets(): Promise<{
   meetAndGreets: OwnerMeetAndGreetCard[];

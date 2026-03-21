@@ -9,12 +9,9 @@ import {
   buildRescueSocialLinks,
   rescueSelfRegistrationSchema,
 } from "@/lib/validations/rescue-registration";
+import type { RegisterRescueResult } from "./register-rescue-types";
 
 const PLACEHOLDER_PASSWORD_HASH = "supabase-auth-placeholder";
-
-export type RegisterRescueResult =
-  | { ok: true }
-  | { ok: false; error: string; fieldErrors?: Record<string, string[]> };
 
 export async function registerRescueOrganisation(raw: unknown): Promise<RegisterRescueResult> {
   const parsed = rescueSelfRegistrationSchema.safeParse(raw);

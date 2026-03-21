@@ -15,14 +15,14 @@ import {
   Coins,
 } from "lucide-react";
 import { toast } from "sonner";
-import type { OrgListingRow, OrgApplicationRow } from "./actions";
+import type { OrgApplicationRow, OrgListingRow } from "@/lib/rescue/rescue-org-dashboard-types";
 import {
   approveApplication,
   declineApplication,
   toggleListingStatus,
   updateOrgProfile,
 } from "./actions";
-import type { OrgDonationSummary } from "@/lib/giving/org-donation-actions";
+import type { OrgDonationSummary } from "@/lib/giving/org-donation-types";
 import { markRescueDonationsTabSeen } from "@/lib/giving/org-donation-actions";
 import { approveAdoptionSuccessStory } from "@/lib/adoption/success-stories-actions";
 

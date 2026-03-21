@@ -6,8 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email";
 import { validateAdoptionApplication } from "@/lib/validations/adoption-application";
 import AdoptionApplicationReceivedEmail from "@/lib/email/templates/adoption-application-received";
-
-export type SubmitResult = { error?: string } | null;
+import type { SubmitResult } from "@/app/[locale]/adopt/apply/application-submit-types";
 
 /** Get adoption listing by slug; null if not found or not available. */
 export async function getListingBySlug(slug: string) {

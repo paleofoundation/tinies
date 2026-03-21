@@ -4,7 +4,7 @@ import { Fragment, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
-import type { DistributionPreview, PastDistributionRow } from "@/lib/giving/distribution-actions";
+import type { DistributionPreview, PastDistributionRow } from "@/lib/giving/distribution-shared";
 import { approveDistribution, markDistributionCompleted } from "@/lib/giving/distribution-actions";
 
 const eur = new Intl.NumberFormat("en-GB", {

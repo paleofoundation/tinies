@@ -3,7 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
-import { PlacementStatus, type Prisma } from "@prisma/client";
+import { PlacementStatus } from "@prisma/client";
+import type {
+  PlacementDetail,
+  PlacementRow,
+  TransportProviderInput,
+  TransportProviderRow,
+  UpdatePlacementData,
+} from "@/app/[locale]/dashboard/admin/adoptions/placement-action-types";
 import { sendEmail } from "@/lib/email";
 import AdoptionStatusUpdateEmail from "@/lib/email/templates/adoption-status-update";
 import AdoptionMilestoneEmail from "@/lib/email/templates/adoption-milestone";
@@ -71,16 +78,6 @@ export async function sendPostAdoptionCheckinEmail(params: {
   }
 }
 
-export type PlacementRow = {
-  id: string;
-  status: string;
-  destinationCountry: string;
-  createdAt: Date;
-  daysSinceCreated: number;
-  listingName: string;
-  adopterName: string;
-};
-
 export async function getAllPlacements(statusFilter?: string): Promise<{
   placements: PlacementRow[];
   error?: string;
@@ -116,32 +113,6 @@ export async function getAllPlacements(statusFilter?: string): Promise<{
     return { placements: [], error: "Failed to load placements." };
   }
 }
-
-export type PlacementDetail = {
-  id: string;
-  status: string;
-  destinationCountry: string;
-  vetPrepStatus: unknown;
-  transportMethod: string | null;
-  transportProviderId: string | null;
-  transportBookedDate: Date | null;
-  departureDate: Date | null;
-  arrivalDate: Date | null;
-  vetCost: number | null;
-  transportCost: number | null;
-  coordinationFee: number | null;
-  totalFee: number;
-  checkin1w: Date | null;
-  checkin1m: Date | null;
-  checkin3m: Date | null;
-  successStoryText: string | null;
-  successStoryPhotos: string[];
-  successStoryApprovedAt: Date | null;
-  createdAt: Date;
-  listing: { name: string; species: string; breed: string | null; estimatedAge: string | null };
-  adopter: { name: string; email: string };
-  rescueOrg: { name: string };
-};
 
 export async function getPlacementById(id: string): Promise<PlacementDetail | null> {
   const placement = await prisma.adoptionPlacement.findUnique({
@@ -179,19 +150,6 @@ export async function getPlacementById(id: string): Promise<PlacementDetail | nu
     rescueOrg: placement.rescueOrg,
   };
 }
-
-export type UpdatePlacementData = {
-  vetPrepStatus?: Prisma.InputJsonValue;
-  transportMethod?: string | null;
-  transportProviderId?: string | null;
-  transportBookedDate?: string | null;
-  departureDate?: string | null;
-  arrivalDate?: string | null;
-  vetCost?: number | null;
-  transportCost?: number | null;
-  coordinationFee?: number | null;
-  status?: PlacementStatus;
-};
 
 export async function updatePlacement(id: string, data: UpdatePlacementData): Promise<{ error?: string }> {
   const supabase = await createClient();
@@ -297,17 +255,6 @@ export async function advancePlacementStatus(id: string, nextStatus: PlacementSt
   }
 }
 
-export type TransportProviderRow = {
-  id: string;
-  name: string;
-  type: string;
-  countriesServed: string[];
-  contactInfo: string | null;
-  pricingNotes: string | null;
-  rating: number | null;
-  active: boolean;
-};
-
 export async function getTransportProviders(): Promise<{ providers: TransportProviderRow[]; error?: string }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -334,16 +281,6 @@ export async function getTransportProviders(): Promise<{ providers: TransportPro
     return { providers: [], error: "Failed to load providers." };
   }
 }
-
-export type TransportProviderInput = {
-  name: string;
-  type: string;
-  countriesServed: string[];
-  contactInfo?: string | null;
-  pricingNotes?: string | null;
-  rating?: number | null;
-  active: boolean;
-};
 
 export async function createTransportProvider(data: TransportProviderInput): Promise<{ error?: string }> {
   const supabase = await createClient();

@@ -9,7 +9,7 @@ import type { SearchProviderCard, SortOption } from "@/lib/utils/search-helpers"
 import { HOLIDAY_LABELS, HOLIDAY_IDS } from "@/lib/constants/holidays";
 import { ProviderSearchListCard } from "@/components/providers/ProviderSearchListCard";
 import { ProviderFavoriteButton } from "@/components/providers/ProviderFavoriteButton";
-import type { FavoriteViewerKind } from "@/lib/providers/favorite-actions";
+import type { FavoriteViewerKind } from "@/lib/providers/favorite-actions-types";
 
 const SERVICE_TYPES = [
   { value: "", label: "All services" },

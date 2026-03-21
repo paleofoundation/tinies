@@ -3,6 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
+import type {
+  AdminInviteCharityInput,
+  DonationRow,
+  PayoutRow,
+  UpdateCharityProfileInput,
+} from "@/lib/charity/charity-action-types";
 import { sendEmail } from "@/lib/email";
 import CharityInviteEmail from "@/lib/email/templates/charity-invite";
 import type { DonationSource } from "@prisma/client";
@@ -199,14 +205,6 @@ export async function getCharityOverviewStats(): Promise<{
   };
 }
 
-export type DonationRow = {
-  id: string;
-  date: Date;
-  amountCents: number;
-  source: string;
-  donorFirstName: string | null;
-};
-
 /** Donation activity with optional filters. */
 export async function getCharityDonations(filters?: {
   source?: DonationSource;
@@ -283,15 +281,6 @@ export async function getCharitySupportersCounts(): Promise<{
   };
 }
 
-export type PayoutRow = {
-  id: string;
-  month: string;
-  amountCents: number;
-  breakdown: { source: string; amountCents: number }[];
-  status: string;
-  expectedBy: string | null;
-};
-
 /** Payout history for this charity (from GivingFundDistribution where charity is in perCharityAmounts). */
 export async function getCharityPayouts(): Promise<{ payouts: PayoutRow[]; error?: string }> {
   const { charity } = await getCharityForDashboard();
@@ -327,16 +316,6 @@ export async function getCharityPayouts(): Promise<{ payouts: PayoutRow[]; error
   return { payouts };
 }
 
-export type UpdateCharityProfileInput = {
-  name?: string;
-  mission?: string | null;
-  logoUrl?: string | null;
-  photos?: string[];
-  howFundsUsed?: string | null;
-  annualUpdateText?: string | null;
-  website?: string | null;
-};
-
 export async function updateCharityProfile(input: UpdateCharityProfileInput): Promise<{ error?: string }> {
   const supabase = await createClient();
   const {
@@ -371,14 +350,6 @@ export async function updateCharityProfile(input: UpdateCharityProfileInput): Pr
 // ---------------------------------------------------------------------------
 // Admin: Invite Charity
 // ---------------------------------------------------------------------------
-
-export type AdminInviteCharityInput = {
-  name: string;
-  mission: string | null;
-  contactName: string;
-  contactEmail: string;
-  logoUrl: string | null;
-};
 
 export async function adminInviteCharity(input: AdminInviteCharityInput): Promise<{ error?: string }> {
   const supabase = await createClient();
