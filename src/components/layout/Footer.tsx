@@ -44,9 +44,10 @@ export async function Footer() {
       links: [
         { href: "/about", label: t("links.about") },
         { href: "/blog", label: t("links.blog") },
+        { href: "/faq", label: t("links.faq") },
+        { href: "/contact", label: t("links.contact") },
         { href: "/terms", label: t("links.terms") },
         { href: "/privacy", label: t("links.privacy") },
-        { href: "mailto:hello@tinies.app", label: t("links.contact"), external: true },
       ],
     },
   ] as const;
