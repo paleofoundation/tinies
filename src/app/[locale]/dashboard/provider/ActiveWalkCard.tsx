@@ -34,16 +34,20 @@ export function ActiveWalkCard({ booking }: { booking: ProviderBookingCard }) {
   const sendPoint = useCallback(
     async (lat: number, lng: number) => {
       try {
-        await fetch(`${API_URL}/api/walks/track`, {
+        const res = await fetch(`${API_URL}/api/walk/${booking.id}/location`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({
-            bookingId: booking.id,
             lat,
             lng,
             timestamp: Date.now(),
           }),
         });
+        if (!res.ok) {
+          const data = (await res.json().catch(() => ({}))) as { error?: string };
+          console.error("sendPoint failed", data.error ?? res.status);
+        }
       } catch (e) {
         console.error("sendPoint failed", e);
       }
@@ -197,6 +201,7 @@ export function ActiveWalkCard({ booking }: { booking: ProviderBookingCard }) {
         const res = await fetch(`${API_URL}/api/walks/activity`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({ bookingId: booking.id, type, lat: pos.lat, lng: pos.lng, timestamp: ts }),
         });
         if (!res.ok) {
@@ -249,6 +254,8 @@ export function ActiveWalkCard({ booking }: { booking: ProviderBookingCard }) {
             currentPosition={currentPosition}
             startedAt={startedAt}
             walkActivities={displayActivities}
+            trackingActive
+            showPositionMarker
           />
         </div>
         <div className="mt-3 flex flex-wrap gap-2">
