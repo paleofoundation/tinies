@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import type { AdoptionListingStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getAllPlacements } from "./adoptions/actions";
 import { AdoptionPipelineSection } from "./AdoptionPipelineSection";
@@ -15,6 +16,18 @@ import { RescueOrgVerifyButton } from "./rescue-orgs/RescueOrgVerifyButton";
 
 export const dynamic = "force-dynamic";
 
+type AdminListingSummaryRow = {
+  id: string;
+  name: string;
+  species: string;
+  breed: string | null;
+  estimatedAge: string | null;
+  status: AdoptionListingStatus;
+  createdAt: Date;
+};
+
+type AdminCharityQrRow = { id: string; name: string; slug: string };
+
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
@@ -26,8 +39,8 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   let placements: Awaited<ReturnType<typeof getAllPlacements>>["placements"] = [];
   let openDisputes: Awaited<ReturnType<typeof getOpenDisputesForAdmin>>["disputes"] = [];
   let openClaims: Awaited<ReturnType<typeof getOpenClaimsForAdmin>>["claims"] = [];
-  let listings: Awaited<ReturnType<typeof prisma.adoptionListing.findMany>> = [];
-  let charitiesForQr: Awaited<ReturnType<typeof prisma.charity.findMany>> = [];
+  let listings: AdminListingSummaryRow[] = [];
+  let charitiesForQr: AdminCharityQrRow[] = [];
   let pendingVerification: Awaited<ReturnType<typeof getProvidersPendingVerification>> = [];
   let recentlyVerified: Awaited<ReturnType<typeof getRecentlyVerifiedProviders>> = [];
   let rescueOrgs: Awaited<ReturnType<typeof getAllRescueOrgs>>["orgs"] = [];

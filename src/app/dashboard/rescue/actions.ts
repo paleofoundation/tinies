@@ -6,7 +6,12 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email";
 import AdoptionStatusUpdateEmail from "@/lib/email/templates/adoption-status-update";
-import { AdoptionListingStatus, ApplicationStatus, PlacementStatus } from "@prisma/client";
+import {
+  AdoptionListingStatus,
+  ApplicationStatus,
+  PlacementStatus,
+  Prisma,
+} from "@prisma/client";
 import type { CreateListingInput } from "@/app/dashboard/admin/actions";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
@@ -356,7 +361,10 @@ export async function updateOrgProfile(formData: FormData): Promise<{ error?: st
         location,
         website,
         logoUrl,
-        socialLinks,
+        socialLinks:
+          socialLinks == null
+            ? Prisma.DbNull
+            : (socialLinks as Prisma.InputJsonValue),
       },
     });
     revalidatePath("/dashboard/rescue");

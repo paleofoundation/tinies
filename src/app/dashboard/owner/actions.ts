@@ -740,7 +740,7 @@ export async function createReview(formData: FormData): Promise<{ error?: string
 
   if (!bookingId || !providerId) return { error: "Missing booking or provider." };
   const validated = reviewFormSchema.safeParse({ rating, text });
-  if (!validated.success) return { error: validated.error.errors[0]?.message ?? "Invalid input." };
+  if (!validated.success) return { error: validated.error.issues[0]?.message ?? "Invalid input." };
 
   const booking = await prisma.booking.findFirst({
     where: { id: bookingId, ownerId: user.id, status: "completed" },
@@ -819,7 +819,7 @@ export async function updateReview(formData: FormData): Promise<{ error?: string
 
   if (!reviewId) return { error: "Missing review." };
   const validated = reviewFormSchema.safeParse({ rating, text });
-  if (!validated.success) return { error: validated.error.errors[0]?.message ?? "Invalid input." };
+  if (!validated.success) return { error: validated.error.issues[0]?.message ?? "Invalid input." };
 
   const review = await prisma.review.findFirst({
     where: { id: reviewId, reviewerId: user.id },

@@ -16,7 +16,7 @@ export const petFormSchema = z.object({
     .min(1, "Name is required")
     .max(NAME_MAX, `Name must be ${NAME_MAX} characters or less`)
     .trim(),
-  species: z.enum(PET_SPECIES, { required_error: "Species is required" }),
+  species: z.enum(PET_SPECIES, { message: "Species is required" }),
   breed: z.string().max(NAME_MAX).trim().optional().or(z.literal("")),
   ageYears: z
     .union([

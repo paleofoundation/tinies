@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Heart, Sparkles, Mail, PawPrint } from "lucide-react";
 import { toast } from "sonner";
-import { createGuardianSubscription } from "@/lib/giving/actions";
+import { createGuardianSubscription } from "@/lib/giving/guardian-actions";
 import type { GuardianTier } from "@prisma/client";
 
 const TIERS: {

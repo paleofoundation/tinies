@@ -18,7 +18,15 @@ import type {
   CreateQuickDonationInput,
   CreateQuickGuardianSubscriptionInput,
 } from "@/lib/utils/giving-helpers";
-import { TINIES_GUARDIAN_CHECKOUT_TYPE } from "./guardian-actions";
+import { TINIES_GUARDIAN_CHECKOUT_TYPE } from "./guardian-stripe";
+import { PLATFORM_COMMISSION_TO_RESCUE_RATE } from "./giving-ledger-shared";
+import type {
+  CharityDonationLedgerSummary,
+  GivingMonthlyTransparencyRow,
+  GivingRescuePartnerCard,
+  GivingStats,
+  UserGivingHistoryRow,
+} from "./giving-ledger-shared";
 
 const GUARDIAN_PRODUCT_ID = process.env.STRIPE_GUARDIAN_PRODUCT_ID;
 
@@ -112,16 +120,6 @@ async function getOrCreateStripeCustomer(userId: string, email: string, name: st
   });
   return customer.id;
 }
-
-export {
-  createGuardianSubscription,
-  pauseGuardianSubscription,
-  resumeGuardianSubscription,
-  cancelGuardianSubscription,
-  getGuardianSubscription,
-  recordGuardianDonation,
-  guardianTierFromAmountCents,
-} from "./guardian-actions";
 
 /** List verified charities + "Tinies Giving Fund" for dropdowns. */
 export async function getCharitiesForGuardian(): Promise<
@@ -542,58 +540,6 @@ export async function getRecentDonationsForTicker(limit = 20): Promise<TickerIte
 // Donations ledger — platform commission (90% to rescue), aggregates
 // ---------------------------------------------------------------------------
 
-/** Share of each booking commission allocated to animal rescue / Giving Fund (90%). */
-export const PLATFORM_COMMISSION_TO_RESCUE_RATE = 0.9;
-
-export type GivingStats = {
-  totalDonatedAllTimeCents: number;
-  totalDonatedThisMonthCents: number;
-  activeDonorsCount: number;
-  charitiesSupportedCount: number;
-  /** All-time total donated in cents (alias for transparency UI). */
-  totalAllTime: number;
-  /** Distinct charities with attributed donations (alias). */
-  charitiesSupported: number;
-  activeGuardiansCount: number;
-};
-
-/** Monthly aggregates for /giving transparency table (months with any activity only). */
-export type GivingMonthlyTransparencyRow = {
-  year: number;
-  month: number;
-  label: string;
-  totalCents: number;
-  platformCents: number;
-  roundupCents: number;
-  guardianCents: number;
-  oneTimeCents: number;
-};
-
-export type GivingRescuePartnerCard = {
-  slug: string;
-  name: string;
-  missionExcerpt: string;
-  logoUrl: string | null;
-  /** null = no linked charity row; show “Just joined” */
-  receivedThroughTiniesCents: number | null;
-};
-
-export type UserGivingHistoryRow = {
-  id: string;
-  createdAt: Date;
-  amountCents: number;
-  source: DonationSource;
-  charityId: string | null;
-  charityName: string | null;
-  bookingId: string | null;
-};
-
-export type CharityDonationLedgerSummary = {
-  totalReceivedCents: number;
-  bySource: Record<string, number>;
-  donorCount: number;
-};
-
 /**
  * When a booking completes, record 90% of the platform commission as a platform_commission
  * donation to the Tinies Giving Fund (charityId null). Idempotent per booking.
@@ -654,54 +600,6 @@ export async function updateOwnerRoundupEnabled(enabled: boolean): Promise<{ err
     console.error("updateOwnerRoundupEnabled", e);
     return { error: "Could not save preference." };
   }
-}
-
-export async function recordRoundUpDonation(params: {
-  userId: string;
-  bookingId: string;
-  roundUpAmountCents: number;
-  charityId?: string | null;
-  stripePaymentIntentId?: string | null;
-}): Promise<void> {
-  if (params.roundUpAmountCents <= 0) return;
-  const existing = await prisma.donation.findFirst({
-    where: { bookingId: params.bookingId, source: DonationSource.roundup },
-    select: { id: true },
-  });
-  if (existing) return;
-  let charityId: string | null;
-  if (params.charityId === undefined) {
-    const prefs = await prisma.userGivingPreference.findUnique({
-      where: { userId: params.userId },
-      select: { preferredCharityId: true },
-    });
-    charityId = prefs?.preferredCharityId ?? null;
-  } else {
-    charityId = params.charityId;
-  }
-  const addEur = params.roundUpAmountCents / 100;
-  await prisma.$transaction(async (tx) => {
-    await tx.donation.create({
-      data: {
-        userId: params.userId,
-        charityId,
-        source: DonationSource.roundup,
-        amount: params.roundUpAmountCents,
-        bookingId: params.bookingId,
-        stripePaymentIntentId: params.stripePaymentIntentId ?? undefined,
-      },
-    });
-    const userRow = await tx.user.findUnique({
-      where: { id: params.userId },
-      select: { totalDonated: true },
-    });
-    await tx.user.update({
-      where: { id: params.userId },
-      data: { totalDonated: (userRow?.totalDonated ?? 0) + addEur },
-    });
-  });
-  revalidatePath("/giving");
-  revalidatePath("/dashboard/owner/giving");
 }
 
 /** Public /giving aggregates: all-time, this month, donors, charities with any attributed donation. */

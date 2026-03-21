@@ -7,10 +7,12 @@ import { toast } from "sonner";
 import {
   setPreferredCharity,
   updateRoundupEnabled,
+} from "@/lib/giving/actions";
+import {
   pauseGuardianSubscription,
   cancelGuardianSubscription,
   resumeGuardianSubscription,
-} from "@/lib/giving/actions";
+} from "@/lib/giving/guardian-actions";
 import type { OwnerGivingData } from "@/lib/utils/giving-helpers";
 
 type Props = { data: OwnerGivingData };

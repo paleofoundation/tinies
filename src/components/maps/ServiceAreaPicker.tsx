@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, type ComponentProps } from "react";
 import { APIProvider, Map, useMap } from "@vis.gl/react-google-maps";
 
 const CYPRUS_CENTER = { lat: 35.1856, lng: 33.3823 };
@@ -72,15 +72,15 @@ export function ServiceAreaPicker({
       ? { lat: value.lat, lng: value.lng }
       : null;
 
-  const handleMapClick = useCallback(
-    (e: { detail?: { latLng?: { lat: () => number; lng: () => number } | null }; latLng?: () => { lat: () => number; lng: () => number } }) => {
-      const latLng = e.detail?.latLng ?? (typeof e.latLng === "function" ? e.latLng() : null);
+  const handleMapClick = useCallback<
+    NonNullable<ComponentProps<typeof Map>["onClick"]>
+  >(
+    (event) => {
+      const latLng = event.detail.latLng;
       if (!latLng) return;
-      const lat = typeof latLng.lat === "function" ? latLng.lat() : (latLng as { lat: number; lng: number }).lat;
-      const lng = typeof latLng.lng === "function" ? latLng.lng() : (latLng as { lat: number; lng: number }).lng;
       onChange({
-        lat,
-        lng,
+        lat: latLng.lat,
+        lng: latLng.lng,
         radiusKm: value.radiusKm,
       });
     },

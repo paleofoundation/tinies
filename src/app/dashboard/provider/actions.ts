@@ -95,7 +95,7 @@ export async function createStripeConnectOnboardingLink(): Promise<CreateStripeC
 
   try {
     const { accountId } = await createConnectExpressAccount({
-      email: user.email ?? undefined,
+      email: user.email ?? "",
       country: "CY",
     });
     await prisma.providerProfile.update({

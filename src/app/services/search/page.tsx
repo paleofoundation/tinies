@@ -1,5 +1,19 @@
+import type { SortOption } from "@/lib/utils/search-helpers";
 import { getSearchProviders } from "./actions";
 import { SearchContent } from "./SearchContent";
+
+const SORT_OPTIONS = [
+  "distance",
+  "rating",
+  "price_low",
+  "price_high",
+  "review_count",
+] as const satisfies readonly SortOption[];
+
+function parseSortParam(raw: string | undefined): SortOption | undefined {
+  if (!raw) return undefined;
+  return (SORT_OPTIONS as readonly string[]).includes(raw) ? (raw as SortOption) : undefined;
+}
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +33,7 @@ export default async function ServicesSearchPage({ searchParams }: Props) {
   const lngParam = typeof params.lng === "string" ? params.lng : "";
   const lat = latParam ? parseFloat(latParam) : undefined;
   const lng = lngParam ? parseFloat(lngParam) : undefined;
-  const sort = (typeof params.sort === "string" ? params.sort : "") || undefined;
+  const sort = parseSortParam(typeof params.sort === "string" ? params.sort : undefined);
   const cancellationPolicy = typeof params.cancellationPolicy === "string" ? params.cancellationPolicy : "";
   const homeType = typeof params.homeType === "string" ? params.homeType : "";
   const hasYardParam = typeof params.hasYard === "string" ? params.hasYard : "";
@@ -38,7 +52,7 @@ export default async function ServicesSearchPage({ searchParams }: Props) {
     holiday: holiday || undefined,
     lat: Number.isFinite(lat) ? lat : undefined,
     lng: Number.isFinite(lng) ? lng : undefined,
-    sort: sort as "distance" | "rating" | "price_low" | "price_high" | "review_count" | undefined,
+    sort,
   };
 
   let providers: Awaited<ReturnType<typeof getSearchProviders>>;

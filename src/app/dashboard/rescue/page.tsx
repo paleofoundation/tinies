@@ -12,9 +12,9 @@ import {
   getOrgDonationSummary,
   getOrgRecentDonations,
   getOrgPayoutHistory,
-  rescueDonationsTabHasNew,
   type OrgDonationSummary,
 } from "@/lib/giving/org-donation-actions";
+import { rescueDonationsTabHasNew } from "@/lib/giving/org-donation-helpers";
 import { RescueDashboardClient } from "./RescueDashboardClient";
 
 export const dynamic = "force-dynamic";

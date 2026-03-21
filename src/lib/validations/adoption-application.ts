@@ -13,14 +13,14 @@ const VET_REF_MAX = 200;
 
 export const adoptionApplicationSchema = z.object({
   listingSlug: z.string().min(1, "Listing is required").trim(),
-  country: z.enum(COUNTRY_VALUES, { required_error: "Country is required" }),
+  country: z.enum(COUNTRY_VALUES, { message: "Country is required" }),
   city: z
     .string()
     .min(1, "City is required")
     .max(CITY_MAX, `City must be ${CITY_MAX} characters or less`)
     .trim(),
   livingSituation: z
-    .enum(LIVING_SITUATION_VALUES, { required_error: "Living situation is required" }),
+    .enum(LIVING_SITUATION_VALUES, { message: "Living situation is required" }),
   hasGarden: z
     .union([z.boolean(), z.literal("yes"), z.literal("no"), z.literal("")])
     .optional()

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
-import { PlacementStatus } from "@prisma/client";
+import { PlacementStatus, type Prisma } from "@prisma/client";
 import { sendEmail } from "@/lib/email";
 import AdoptionStatusUpdateEmail from "@/lib/email/templates/adoption-status-update";
 import AdoptionMilestoneEmail from "@/lib/email/templates/adoption-milestone";
@@ -181,7 +181,7 @@ export async function getPlacementById(id: string): Promise<PlacementDetail | nu
 }
 
 export type UpdatePlacementData = {
-  vetPrepStatus?: Record<string, unknown>;
+  vetPrepStatus?: Prisma.InputJsonValue;
   transportMethod?: string | null;
   transportProviderId?: string | null;
   transportBookedDate?: string | null;

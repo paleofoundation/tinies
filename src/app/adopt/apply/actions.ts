@@ -20,6 +20,9 @@ export async function getListingBySlug(slug: string) {
       species: true,
       breed: true,
       estimatedAge: true,
+      temperament: true,
+      medicalHistory: true,
+      specialNeeds: true,
       photos: true,
       orgId: true,
       org: {

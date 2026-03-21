@@ -10,11 +10,12 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY 
 type Props = {
   onSuccess?: () => void;
   className?: string;
+  style?: React.CSSProperties;
   children?: React.ReactNode;
 };
 
 /** Opens Stripe Identity verification modal (document + selfie). On success, webhook will set provider verified. */
-export function VerifyIdentityButton({ onSuccess, className, children }: Props) {
+export function VerifyIdentityButton({ onSuccess, className, style, children }: Props) {
   const [loading, setLoading] = useState(false);
 
   async function handleClick() {
@@ -63,6 +64,7 @@ export function VerifyIdentityButton({ onSuccess, className, children }: Props) 
       onClick={handleClick}
       disabled={loading}
       className={className}
+      style={style}
     >
       {children ?? (loading ? "Opening…" : "Verify with Stripe (ID + selfie)")}
     </button>

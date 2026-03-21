@@ -6,14 +6,14 @@ import ProviderIdentityVerifiedEmail from "@/lib/email/templates/provider-identi
 import PayoutProcessedEmail from "@/lib/email/templates/payout-processed";
 import TipReceivedEmail from "@/lib/email/templates/tip-received";
 import { DonationSource } from "@prisma/client";
-import { recordRoundUpDonation } from "@/lib/giving/actions";
+import { recordRoundUpDonation } from "@/lib/giving/roundup-donation";
 import {
   upsertGuardianFromCheckoutSession,
   recordGuardianDonation,
   syncGuardianSubscriptionFromStripe,
   TINIES_GUARDIAN_CHECKOUT_TYPE,
   guardianTierFromAmountCents,
-} from "@/lib/giving/guardian-actions";
+} from "@/lib/giving/guardian-stripe";
 import SignupDonationThankYouEmail from "@/lib/email/templates/signup-donation-thank-you";
 import {
   notifyGuardianSubscriptionStarted,

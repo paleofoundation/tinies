@@ -39,10 +39,10 @@ export default async function ProviderDashboardPage() {
     ]);
   } catch (e) {
     console.error("ProviderDashboardPage data fetch", e);
-    completeness = { showWizard: false, percentage: 0, profile: null };
+    completeness = { showWizard: false, percentage: 0, profile: null, incompleteSteps: [] };
     stripeStatus = { hasProfile: false, hasStripeConnect: false };
     bookingsResult = { bookings: [] };
-    reviews = [];
+    reviews = { reviews: [], error: "Failed to load." };
     earningsResult = { earnings: null };
     meetAndGreets = { requested: [], confirmed: [], completed: [], error: "Failed to load." };
     disputesResult = { disputes: [] };
@@ -50,7 +50,7 @@ export default async function ProviderDashboardPage() {
   }
 
   if (completeness.showWizard && completeness.profile) {
-    let areaPriceGuidance: Awaited<ReturnType<typeof getProviderAreaPriceGuidance>> = [];
+    let areaPriceGuidance: Awaited<ReturnType<typeof getProviderAreaPriceGuidance>> = {};
     try {
       areaPriceGuidance = await getProviderAreaPriceGuidance(completeness.profile.district);
     } catch (e) {
@@ -74,7 +74,7 @@ export default async function ProviderDashboardPage() {
     <ProviderDashboardClient
       stripeStatus={stripeStatus}
       initialBookings={bookings}
-      initialReviews={reviews}
+      initialReviews={reviews.reviews}
       initialEarnings={earnings}
       initialMeetAndGreets={{ requested, confirmed, completed }}
       initialDisputes={disputesList}
