@@ -19,6 +19,7 @@ export async function getFeaturedAvailableListings(
       where: {
         status: "available",
         active: true,
+        org: { verified: true },
       },
       orderBy: { createdAt: "desc" },
       take: limit,

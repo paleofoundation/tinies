@@ -32,6 +32,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   let recentlyVerified: Awaited<ReturnType<typeof getRecentlyVerifiedProviders>> = [];
   let rescueOrgs: Awaited<ReturnType<typeof getAllRescueOrgs>>["orgs"] = [];
   let rescueOrgsError: string | undefined;
+  let pendingRescueVerificationCount = 0;
 
   try {
     const [placementsResult, disputesResult, claimsResult] = await Promise.all([
@@ -73,9 +74,13 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   }
 
   try {
-    const rescueResult = await getAllRescueOrgs();
+    const [rescueResult, pendingRescueCount] = await Promise.all([
+      getAllRescueOrgs(),
+      prisma.rescueOrg.count({ where: { verified: false } }),
+    ]);
     rescueOrgs = rescueResult.orgs;
     rescueOrgsError = rescueResult.error;
+    pendingRescueVerificationCount = pendingRescueCount;
   } catch (e) {
     console.error("AdminDashboardPage rescue orgs", e);
     rescueOrgsError = "Failed to load rescue organisations.";
@@ -206,6 +211,17 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
               Register New Rescue Org
             </Link>
           </div>
+
+          {pendingRescueVerificationCount > 0 && (
+            <p
+              className="mt-3 text-sm font-medium"
+              style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}
+            >
+              {pendingRescueVerificationCount} rescue organisation
+              {pendingRescueVerificationCount === 1 ? "" : "s"} pending verification — use the table below to
+              review and verify.
+            </p>
+          )}
 
           {rescueOrgsError && (
             <p className="mt-4 text-sm" style={{ color: "var(--color-error)", fontFamily: "var(--font-body), sans-serif" }}>

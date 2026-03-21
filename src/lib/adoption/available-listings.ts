@@ -15,7 +15,7 @@ export type AdoptBrowseListing = {
 export async function getAllAvailableAdoptionListings(): Promise<AdoptBrowseListing[]> {
   try {
     return await prisma.adoptionListing.findMany({
-      where: { status: "available", active: true },
+      where: { status: "available", active: true, org: { verified: true } },
       orderBy: { createdAt: "desc" },
       select: {
         slug: true,

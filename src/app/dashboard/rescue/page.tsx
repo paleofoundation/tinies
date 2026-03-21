@@ -17,7 +17,15 @@ export const metadata: Metadata = {
   description: "Manage your adoption listings and inquiries.",
 };
 
-export default async function RescueDashboardPage() {
+type PageProps = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default async function RescueDashboardPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const welcomeRaw = params.welcome;
+  const welcomeJustRegistered =
+    welcomeRaw === "1" || welcomeRaw === "true" || (Array.isArray(welcomeRaw) && welcomeRaw[0] === "1");
   const supabase = await createClient();
   const {
     data: { user },
@@ -89,12 +97,20 @@ export default async function RescueDashboardPage() {
               You don&apos;t have a rescue organisation account yet. Rescue organisations can list adoptable animals, receive applications, and manage placements through Tinies.
             </p>
             <p className="mt-4 text-sm" style={{ color: "var(--color-text-secondary)" }}>
-              To register your organisation, get in touch with us. We&apos;ll set up your rescue profile and give you access to this dashboard. In the meantime, you can browse the platform as an adopter or pet owner.
+              Create your organisation profile in a few minutes. We&apos;ll verify your rescue within a few business
+              days; you can add listings while you wait. You can also browse the platform as an adopter or pet owner.
             </p>
             <div className="mt-6 flex flex-wrap gap-4">
               <Link
-                href="/adopt"
+                href="/signup/rescue"
                 className="inline-flex h-10 items-center rounded-[var(--radius-pill)] bg-[var(--color-primary)] px-5 text-sm font-semibold text-white hover:opacity-90"
+              >
+                Register your rescue
+              </Link>
+              <Link
+                href="/adopt"
+                className="inline-flex h-10 items-center rounded-[var(--radius-pill)] border px-5 text-sm font-semibold hover:bg-[var(--color-primary-50)]"
+                style={{ borderColor: "var(--color-border)", color: "var(--color-text)" }}
               >
                 Browse adoptions
               </Link>
@@ -106,6 +122,12 @@ export default async function RescueDashboardPage() {
                 For rescues
               </Link>
             </div>
+            <p className="mt-6 text-sm" style={{ color: "var(--color-text-muted)" }}>
+              Already registered?{" "}
+              <Link href="/login?next=/dashboard/rescue" className="font-medium hover:underline" style={{ color: "var(--color-primary)" }}>
+                Sign in
+              </Link>
+            </p>
           </div>
           <p className="mt-8">
             <Link href="/" className="text-sm hover:underline" style={{ color: "var(--color-text-secondary)" }}>
@@ -142,6 +164,7 @@ export default async function RescueDashboardPage() {
           listings={listings}
           applications={applications}
           placements={placements}
+          welcomeJustRegistered={welcomeJustRegistered}
         />
         <p className="mt-10">
           <Link href="/" className="text-sm hover:underline" style={{ color: "var(--color-text-secondary)" }}>

@@ -34,10 +34,13 @@ type Props = {
     socialLinks: unknown;
     logoUrl: string | null;
     slug: string;
+    verified: boolean;
   };
   listings: OrgListingRow[];
   applications: OrgApplicationRow[];
   placements: { id: string; status: string; destinationCountry: string; listingName: string; adopterName: string; createdAt: Date }[];
+  /** From ?welcome=1 after self-registration */
+  welcomeJustRegistered?: boolean;
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -73,7 +76,13 @@ const PLACEMENT_STATUS_LABELS: Record<string, string> = {
   follow_up: "Follow-up",
 };
 
-export function RescueDashboardClient({ org, listings, applications, placements }: Props) {
+export function RescueDashboardClient({
+  org,
+  listings,
+  applications,
+  placements,
+  welcomeJustRegistered = false,
+}: Props) {
   const router = useRouter();
   const [tab, setTab] = useState<TabId>("listings");
   const [expandedAppId, setExpandedAppId] = useState<string | null>(null);
@@ -143,6 +152,32 @@ export function RescueDashboardClient({ org, listings, applications, placements 
 
   return (
     <div className="mt-8">
+      {!org.verified && (
+        <div
+          className="mb-6 rounded-[var(--radius-lg)] border px-4 py-3 text-sm leading-relaxed"
+          role="status"
+          style={{
+            backgroundColor: "var(--color-warning-bg)",
+            borderColor: "var(--color-warning-border)",
+            color: "var(--color-text)",
+            fontFamily: "var(--font-body), sans-serif",
+          }}
+        >
+          {welcomeJustRegistered ? (
+            <p style={{ fontFamily: "var(--font-heading), serif" }}>
+              Welcome! Your organisation is pending verification. Our team will review your profile within 5
+              business days. You can start adding animal listings while you wait.
+            </p>
+          ) : (
+            <p>
+              Your organisation is pending verification. You can add listings and manage your profile while you
+              wait. Our team will verify your organisation within 5 business days. Your listings won&apos;t appear
+              in public search until your organisation is verified.
+            </p>
+          )}
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-2 border-b" style={{ borderColor: "var(--color-border)" }}>
         {tabs.map((t) => (
           <button

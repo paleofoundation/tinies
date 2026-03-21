@@ -2,9 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { randomUUID } from "crypto";
-import slugify from "slugify";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { ensureUniqueOrgSlug } from "@/lib/rescue/ensure-unique-org-slug";
 import { createClient } from "@/lib/supabase/server";
 
 const PLACEHOLDER_PASSWORD_HASH = "supabase-auth-placeholder";
@@ -96,19 +96,6 @@ export async function getRescueOrgById(id: string): Promise<RescueOrgDetail | nu
   };
 }
 
-async function ensureUniqueOrgSlug(baseName: string): Promise<string> {
-  const baseSlug = slugify(baseName, { lower: true, strict: true }) || "rescue-org";
-  const rows = await prisma.rescueOrg.findMany({
-    where: { slug: { startsWith: baseSlug } },
-    select: { slug: true },
-  });
-  const used = new Set(rows.map((r) => r.slug));
-  if (!used.has(baseSlug)) return baseSlug;
-  let n = 1;
-  while (used.has(`${baseSlug}-${n}`)) n += 1;
-  return `${baseSlug}-${n}`;
-}
-
 function parseSocialLinks(formData: FormData): Record<string, string> | null {
   const instagram = (formData.get("instagram") as string)?.trim() || "";
   const facebook = (formData.get("facebook") as string)?.trim() || "";
@@ -133,7 +120,7 @@ export async function createRescueOrg(formData: FormData): Promise<{ error?: str
   const name = (formData.get("name") as string)?.trim();
   if (!name) return { error: "Organisation name is required." };
 
-  let mission = (formData.get("mission") as string)?.trim() || null;
+  const mission = (formData.get("mission") as string)?.trim() || null;
   if (mission && mission.length > MISSION_MAX) {
     return { error: `Mission must be ${MISSION_MAX} characters or less.` };
   }
@@ -223,7 +210,7 @@ export async function updateRescueOrg(
   const name = (formData.get("name") as string)?.trim();
   if (!name) return { error: "Organisation name is required." };
 
-  let mission = (formData.get("mission") as string)?.trim() || null;
+  const mission = (formData.get("mission") as string)?.trim() || null;
   if (mission && mission.length > MISSION_MAX) {
     return { error: `Mission must be ${MISSION_MAX} characters or less.` };
   }

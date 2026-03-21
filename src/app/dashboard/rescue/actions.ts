@@ -36,6 +36,7 @@ export async function getRescueOrgDashboard(): Promise<{
     socialLinks: unknown;
     logoUrl: string | null;
     slug: string;
+    verified: boolean;
   } | null;
   error?: string;
 }> {
@@ -52,6 +53,7 @@ export async function getRescueOrgDashboard(): Promise<{
       socialLinks: org.socialLinks,
       logoUrl: org.logoUrl,
       slug: org.slug,
+      verified: org.verified,
     },
   };
 }

@@ -24,7 +24,7 @@ export async function getPublicAdoptionListingBySlug(
 ): Promise<PublicAdoptionListing | null> {
   try {
     const listing = await prisma.adoptionListing.findFirst({
-      where: { slug, status: "available", active: true },
+      where: { slug, status: "available", active: true, org: { verified: true } },
       select: {
         id: true,
         slug: true,

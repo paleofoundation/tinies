@@ -133,6 +133,7 @@ export default async function CountryAdoptionPage({ params }: Props) {
       active: true,
       internationalEligible: true,
       destinationCountries: { hasSome: destinationValues },
+      org: { verified: true },
     },
     select: {
       slug: true,

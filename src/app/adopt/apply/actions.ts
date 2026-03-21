@@ -12,7 +12,7 @@ export type SubmitResult = { error?: string } | null;
 /** Get adoption listing by slug; null if not found or not available. */
 export async function getListingBySlug(slug: string) {
   const listing = await prisma.adoptionListing.findFirst({
-    where: { slug, status: "available", active: true },
+    where: { slug, status: "available", active: true, org: { verified: true } },
     select: {
       id: true,
       slug: true,

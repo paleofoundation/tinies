@@ -79,12 +79,18 @@ export default function ForRescuesPage() {
             start receiving applications. You run the adoptions — we give you the platform.
           </p>
           <Link
-            href="/dashboard/rescue"
+            href="/signup/rescue"
             className="mt-8 inline-flex h-12 items-center rounded-[var(--radius-pill)] bg-white px-8 font-semibold transition-opacity hover:opacity-95"
             style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", color: "var(--color-primary)" }}
           >
             Sign up as a rescue
           </Link>
+          <p className="mt-5 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "rgba(255,255,255,0.9)" }}>
+            Already registered?{" "}
+            <Link href="/login?next=/dashboard/rescue" className="font-semibold underline underline-offset-2 hover:opacity-95">
+              Sign in
+            </Link>
+          </p>
         </section>
 
         <p className="mt-16 text-center">
