@@ -13,6 +13,8 @@ export type AdoptBrowseQuery = {
   species?: AdoptBrowseSpecies;
   district?: AdoptBrowseDistrictSlug;
   age?: AdoptAgeBand;
+  /** When true, only internationally eligible listings with at least one destination. */
+  international?: boolean;
 };
 
 const SPECIES_VALUES: AdoptBrowseSpecies[] = ["dog", "cat"];
@@ -45,15 +47,19 @@ export function parseAdoptBrowseQuery(
   const ageRaw = firstParam(raw.age)?.toLowerCase();
   const age = AGE_VALUES.find((a) => a === ageRaw);
 
+  const intlRaw = firstParam(raw.international)?.toLowerCase();
+  const international = intlRaw === "true" || intlRaw === "1" || intlRaw === "yes";
+
   const out: AdoptBrowseQuery = {};
   if (species) out.species = species;
   if (district) out.district = district;
   if (age) out.age = age;
+  if (international) out.international = true;
   return out;
 }
 
 export function adoptBrowseQueryHasFilters(q: AdoptBrowseQuery): boolean {
-  return !!(q.species || q.district || q.age);
+  return !!(q.species || q.district || q.age || q.international);
 }
 
 /** Substring matched case-insensitively against rescue org `location`. */
@@ -68,6 +74,7 @@ export function buildAdoptBrowseSearchParams(
   if (q.species) params.set("species", q.species);
   if (q.district) params.set("district", q.district);
   if (q.age) params.set("age", q.age);
+  if (q.international) params.set("international", "true");
   return params;
 }
 

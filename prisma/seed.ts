@@ -150,7 +150,7 @@ const CHARITIES = [
 // ---------------------------------------------------------------------------
 
 const GARDENS_ORG_SLUG = "gardens-of-st-gertrude";
-const GARDENS_DESTINATIONS = ["UK", "Germany", "Netherlands", "Sweden"];
+const GARDENS_DESTINATIONS = ["UK", "Germany", "Netherlands", "Sweden", "Austria", "Switzerland"];
 
 const GARDENS_CATS = [
   {

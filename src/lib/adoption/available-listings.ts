@@ -35,6 +35,12 @@ export async function getAllAvailableAdoptionListings(
         status: "available",
         active: true,
         org: orgWhere,
+        ...(filters.international
+          ? {
+              internationalEligible: true,
+              destinationCountries: { isEmpty: false },
+            }
+          : {}),
         ...(filters.species != null
           ? {
               species: {

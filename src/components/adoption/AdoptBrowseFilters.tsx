@@ -6,6 +6,7 @@ import type { AdoptBrowseQuery } from "@/lib/adoption/adopt-browse-params";
 import {
   ADOPT_AGE_OPTIONS,
   ADOPT_DISTRICT_OPTIONS,
+  adoptBrowseQueryHasFilters,
   buildAdoptBrowseSearchParams,
 } from "@/lib/adoption/adopt-browse-params";
 import type { AdoptBrowseSpecies } from "@/lib/adoption/adopt-browse-params";
@@ -47,6 +48,14 @@ function setAge(q: AdoptBrowseQuery, age: string): AdoptBrowseQuery {
   return { ...next, age: age as AdoptAgeBand };
 }
 
+function toggleInternational(q: AdoptBrowseQuery): AdoptBrowseQuery {
+  if (q.international) {
+    const { international: _i, ...rest } = q;
+    return rest;
+  }
+  return { ...q, international: true };
+}
+
 const SPECIES_LABEL: Record<AdoptBrowseSpecies, string> = {
   dog: "Dog",
   cat: "Cat",
@@ -66,7 +75,7 @@ export function AdoptBrowseFilters({ query }: Props) {
     router.push(adoptPath(next));
   };
 
-  const hasFilters = !!(query.species || query.district || query.age);
+  const hasFilters = adoptBrowseQueryHasFilters(query);
 
   return (
     <section className="px-4 pb-8 sm:px-6 lg:px-8" aria-label="Filter adoptable animals">
@@ -149,6 +158,20 @@ export function AdoptBrowseFilters({ query }: Props) {
                 ))}
               </select>
             </label>
+            <button
+              type="button"
+              onClick={() => navigate(toggleInternational(query))}
+              className="rounded-[var(--radius-pill)] border px-4 py-2 text-sm font-medium transition-colors"
+              style={{
+                fontFamily: "var(--font-body), sans-serif",
+                borderColor: query.international ? "var(--color-primary)" : "var(--color-border)",
+                backgroundColor: query.international ? "rgba(10, 128, 128, 0.12)" : "var(--color-background)",
+                color: query.international ? "var(--color-primary)" : "var(--color-text-secondary)",
+              }}
+              aria-pressed={!!query.international}
+            >
+              International only
+            </button>
             <label className="flex flex-wrap items-center gap-2">
               <span className="sr-only">Age range</span>
               <select
@@ -239,6 +262,26 @@ export function AdoptBrowseFilters({ query }: Props) {
                   {AGE_LABEL[query.age] ?? query.age}
                   <X className="h-3.5 w-3.5" aria-hidden />
                   <span className="sr-only">Remove age filter</span>
+                </button>
+              )}
+              {query.international && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const { international: _i, ...rest } = query;
+                    navigate(rest);
+                  }}
+                  className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border px-3 py-1 text-sm font-medium"
+                  style={{
+                    fontFamily: "var(--font-body), sans-serif",
+                    borderColor: "var(--color-primary)",
+                    backgroundColor: "rgba(10, 128, 128, 0.12)",
+                    color: "var(--color-primary)",
+                  }}
+                >
+                  International only
+                  <X className="h-3.5 w-3.5" aria-hidden />
+                  <span className="sr-only">Remove international filter</span>
                 </button>
               )}
               <button

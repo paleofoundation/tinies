@@ -5,10 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createAdoptionListing, type CreateListingInput } from "../../actions";
+import { LISTING_DESTINATION_COUNTRY_OPTIONS } from "@/lib/adoption/country-requirements";
 
 const SPECIES = ["Cat", "Dog", "Other"] as const;
 const SEX = ["Male", "Female", "Unknown"] as const;
-const DESTINATION_COUNTRIES = ["UK", "Germany", "Netherlands", "Sweden", "Other EU"] as const;
 const STATUS_OPTIONS = [
   { value: "available", label: "Available" },
   { value: "application_pending", label: "Application Pending" },
@@ -269,7 +269,7 @@ export function AdoptionListingForm({ initial, listingId, onCreate, onUpdate, su
             <div>
               <span className="block text-sm font-medium text-[#1B2432] mb-2">Destination countries</span>
               <div className="flex flex-wrap gap-3">
-                {DESTINATION_COUNTRIES.map((c) => (
+                {LISTING_DESTINATION_COUNTRY_OPTIONS.map((c) => (
                   <label key={c} className="flex items-center gap-2">
                     <input
                       type="checkbox"

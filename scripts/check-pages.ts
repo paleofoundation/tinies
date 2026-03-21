@@ -31,6 +31,8 @@ const PAGES = [
   // SEO
   "/dog-walking/limassol",
   "/adopt/from-cyprus-to-uk",
+  "/adopt/from-cyprus-to-germany",
+  "/adopt/from-cyprus-to-switzerland",
 ];
 
 interface Result {

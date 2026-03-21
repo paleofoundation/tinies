@@ -1,101 +1,42 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import { Heart, ArrowRight, CheckCircle } from "lucide-react";
+import { notFound } from "next/navigation";
+import { ArrowRight, CheckCircle } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { COUNTRY_SLUGS, COUNTRY_SLUG_TO_NAME, COUNTRY_SLUG_TO_DESTINATION } from "@/lib/constants/seo-landings";
+import {
+  ADOPTION_COUNTRY_SLUGS,
+  getCountryAdoptionSeo,
+} from "@/lib/adoption/country-requirements";
+import { getApprovedSuccessStoriesForDestinationMatchers } from "@/lib/adoption/success-stories";
+import { AdoptionListingCard } from "@/components/adoption/AdoptionListingCard";
+import type { AdoptBrowseListing } from "@/lib/adoption/available-listings";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+const BASE_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app").replace(/\/$/, "");
 
 type Props = {
   params: Promise<{ country: string }>;
 };
 
-const COUNTRY_GUIDES: Record<
-  string,
-  { intro: string; requirements: string[]; timeline: string; cta: string }
-> = {
-  uk: {
-    intro:
-      "Adopting a rescue animal from Cyprus to the UK is a journey we support from start to finish. Our rescue partners prepare dogs and cats for travel with full vet checks, microchipping, and the rabies titer test required by UK law. We coordinate paperwork and transport so you can focus on welcoming your new tiny.",
-    requirements: [
-      "Rabies vaccination and EU pet passport",
-      "Rabies titer test (blood test) at least 30 days before travel",
-      "UK-approved transport (we work with registered carriers)",
-      "Pre-arrival tapeworm treatment for dogs",
-    ],
-    timeline:
-      "From application to arrival typically takes 3–4 months, depending on vet prep and transport availability. We’ll keep you updated at every step.",
-    cta: "Ready to find your match? Browse dogs and cats eligible for adoption to the UK.",
-  },
-  germany: {
-    intro:
-      "Bringing a Cypriot rescue to Germany is something we help with regularly. Our rescues ensure each animal is microchipped, vaccinated, and ready for EU entry. We’ll guide you through the paperwork and connect you with reliable transport.",
-    requirements: [
-      "Microchip (ISO 11784/11785)",
-      "Rabies vaccination and EU pet passport",
-      "Compliance with EU animal health regulations",
-      "Some breed-specific rules may apply — we’ll flag these per listing",
-    ],
-    timeline:
-      "Most adoptions to Germany are completed within 2–4 months after approval, including vet prep and transport booking.",
-    cta: "See dogs and cats that can come to Germany.",
-  },
-  netherlands: {
-    intro:
-      "Adopting from Cyprus to the Netherlands is straightforward with Tinies. Our rescue partners prepare animals to EU standards, and we handle the logistics so your new pet can travel safely to you.",
-    requirements: [
-      "Microchip and rabies vaccination",
-      "EU pet passport",
-      "Health certificate issued close to travel date",
-      "Transport booked with an approved carrier",
-    ],
-    timeline:
-      "Expect roughly 2–3 months from application to arrival, depending on vet scheduling and transport slots.",
-    cta: "Browse animals eligible for adoption to the Netherlands.",
-  },
-  sweden: {
-    intro:
-      "We help adopters in Sweden welcome rescue dogs and cats from Cyprus. Animals are fully prepared for EU travel and we coordinate transport and documentation so everything is in order for Swedish entry.",
-    requirements: [
-      "Microchip and rabies vaccination",
-      "EU pet passport",
-      "Treatment against Echinococcus (for dogs) before entry",
-      "Health certificate and approved transport",
-    ],
-    timeline:
-      "Plan for about 2–4 months from approval to arrival, including vet prep and transport.",
-    cta: "Find dogs and cats that can be adopted to Sweden.",
-  },
-  "other-eu": {
-    intro:
-      "Tinies works with rescues across Cyprus to rehome dogs and cats to other EU countries. Each animal is vet-checked, vaccinated, and prepared for travel. We’ll tailor the process to your destination and keep you informed.",
-    requirements: [
-      "Microchip and rabies vaccination",
-      "EU pet passport where applicable",
-      "Destination-specific rules (we’ll confirm for your country)",
-      "Approved transport and health documentation",
-    ],
-    timeline:
-      "Timelines vary by destination and transport availability; we’ll give you an estimate once your application is approved.",
-    cta: "Browse all internationally eligible animals and filter by destination.",
-  },
-};
-
-export async function generateStaticParams() {
-  return COUNTRY_SLUGS.map((country) => ({ country }));
+export function generateStaticParams() {
+  return ADOPTION_COUNTRY_SLUGS.map((country) => ({ country }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { country } = await params;
-  const countryName = COUNTRY_SLUG_TO_NAME[country] ?? country;
-  const title = `Adopt a Rescue Animal from Cyprus to ${countryName.charAt(0).toUpperCase() + countryName.slice(1)} | Tinies`;
-  const description = `How to adopt a dog or cat from Cyprus to ${countryName}. Requirements, timeline, and eligible rescue listings. Every tiny deserves a home.`;
+  const seo = getCountryAdoptionSeo(country);
+  if (!seo) {
+    return { title: "International adoption | Tinies" };
+  }
+  const title = `Adopt a Rescue Animal from Cyprus to ${seo.seoTitleCountry} | Tinies`;
+  const description = `Adopt a rescue dog or cat from Cyprus to ${seo.seoTitleCountry}. EU pet passport, vet preparation, transport, and Tinies coordination — one transparent fee, no hidden costs.`;
   const url = `${BASE_URL}/adopt/from-cyprus-to-${country}`;
   return {
     title,
     description,
+    alternates: { canonical: url },
     openGraph: {
       title,
       description,
@@ -111,151 +52,360 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+function formatStoryDate(d: Date): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(d);
+}
+
 export default async function CountryAdoptionPage({ params }: Props) {
   const { country } = await params;
-  const countryName = COUNTRY_SLUG_TO_NAME[country] ?? country;
-  const destinationValues = COUNTRY_SLUG_TO_DESTINATION[country];
+  const seo = getCountryAdoptionSeo(country);
+  if (!seo) notFound();
 
-  if (!destinationValues || !countryName) {
-    return (
-      <div className="mx-auto max-w-2xl px-4 py-20 text-center">
-        <h1 className="text-xl font-semibold" style={{ color: "var(--color-text)" }}>Page not found</h1>
-        <Link href="/adopt" className="mt-4 inline-block font-medium" style={{ color: "var(--color-primary)" }}>
-          Browse adoptions →
-        </Link>
-      </div>
-    );
-  }
+  const [listingsRaw, stories] = await Promise.all([
+    prisma.adoptionListing.findMany({
+      where: {
+        status: "available",
+        active: true,
+        internationalEligible: true,
+        destinationCountries: { hasSome: seo.listingDestinationValues },
+        org: { verified: true },
+      },
+      select: {
+        slug: true,
+        name: true,
+        species: true,
+        breed: true,
+        estimatedAge: true,
+        sex: true,
+        photos: true,
+        org: { select: { name: true, slug: true, location: true, verified: true } },
+      },
+      take: 12,
+      orderBy: { updatedAt: "desc" },
+    }),
+    getApprovedSuccessStoriesForDestinationMatchers(seo.successStoryCountryMatchers, 6),
+  ]);
 
-  const listings = await prisma.adoptionListing.findMany({
-    where: {
-      status: "available",
-      active: true,
-      internationalEligible: true,
-      destinationCountries: { hasSome: destinationValues },
-      org: { verified: true },
+  const listings: AdoptBrowseListing[] = listingsRaw;
+
+  const pageUrl = `${BASE_URL}/adopt/from-cyprus-to-${country}`;
+  const browseInternationalHref = "/adopt?international=true";
+
+  const howItWorks = [
+    {
+      step: 1,
+      title: `Browse animals eligible for ${seo.heroCountryPhrase}`,
+      body: "Filter international listings and read profiles from verified Cyprus rescues.",
     },
-    select: {
-      slug: true,
-      name: true,
-      species: true,
-      breed: true,
-      estimatedAge: true,
-      photos: true,
+    {
+      step: 2,
+      title: "Submit your adoption application",
+      body: "Tell us about your home and experience. The rescue reviews and follows up through Tinies.",
     },
-    take: 12,
-    orderBy: { updatedAt: "desc" },
-  });
+    {
+      step: 3,
+      title: "We coordinate vet prep, passport, and transport",
+      body: "Vaccinations, microchip, EU pet passport, and travel are organised with trusted partners.",
+    },
+    {
+      step: 4,
+      title: "Your new family member arrives at your door",
+      body: "We stay in touch through arrival and early days so your tiny settles in safely.",
+    },
+  ];
 
-  const guide = COUNTRY_GUIDES[country] ?? COUNTRY_GUIDES["other-eu"];
-  const displayCountryName =
-    countryName.startsWith("the ") ? countryName : countryName.charAt(0).toUpperCase() + countryName.slice(1);
+  const feeIncluded = [
+    "Veterinary preparation (vaccinations, microchip, spay/neuter where applicable)",
+    "EU pet passport",
+    `Transport to ${seo.heroCountryPhrase}`,
+    "Tinies coordination",
+    "Post-adoption support and check-ins",
+  ];
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": `${pageUrl}#webpage`,
+        url: pageUrl,
+        name: `Adopt a rescue animal from Cyprus to ${seo.seoTitleCountry}`,
+        description: `International rescue adoption from Cyprus to ${seo.seoTitleCountry} with vet preparation, EU pet passport, transport, and coordination through Tinies.`,
+        isPartOf: {
+          "@type": "WebSite",
+          name: "Tinies",
+          url: BASE_URL,
+        },
+      },
+      {
+        "@type": "ItemList",
+        "@id": `${pageUrl}#eligible-animals`,
+        name: `Animals eligible for adoption to ${seo.heroCountryPhrase}`,
+        numberOfItems: listings.length,
+        itemListElement: listings.map((l, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          name: l.name,
+          url: `${BASE_URL}/adopt/${l.slug}`,
+        })),
+      },
+    ],
+  };
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
-      <div className="mx-auto px-4 py-16 sm:px-6 lg:px-8" style={{ maxWidth: "var(--max-width)" }}>
-        <h1
-          className="font-normal tracking-tight sm:text-4xl"
-          style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
-        >
-          Adopt a rescue animal from Cyprus to {displayCountryName}
-        </h1>
-        <p className="mt-4 max-w-2xl text-lg" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-          {guide.intro}
-        </p>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-        <section className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="rounded-[var(--radius-lg)] border p-6" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}>
-            <h2 className="flex items-center gap-2 font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
-              <CheckCircle className="h-5 w-5" style={{ color: "var(--color-primary)" }} />
-              What you’ll need
-            </h2>
+      {/* Hero */}
+      <section className="relative overflow-hidden px-4 pt-10 pb-12 sm:px-6 sm:pt-14 sm:pb-16 lg:px-8">
+        <div className="absolute inset-0 rounded-b-[3rem] sm:rounded-b-[4rem]" style={{ backgroundColor: "rgba(10, 128, 128, 0.06)" }} />
+        <div className="relative mx-auto" style={{ maxWidth: "var(--max-width)" }}>
+          <h1
+            className="font-normal tracking-tight sm:text-4xl lg:text-5xl"
+            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
+          >
+            Adopt a rescue animal from Cyprus to {seo.heroCountryPhrase}
+          </h1>
+          <p
+            className="mt-4 max-w-2xl text-lg leading-relaxed"
+            style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}
+          >
+            We coordinate everything — vet preparation, EU pet passport, transport, and customs documentation. One transparent fee. No hidden costs.
+          </p>
+        </div>
+      </section>
+
+      <div className="mx-auto px-4 pb-20 sm:px-6 lg:px-8" style={{ maxWidth: "var(--max-width)", paddingBottom: "var(--space-section)" }}>
+        {/* How it works */}
+        <section aria-labelledby="how-heading">
+          <h2
+            id="how-heading"
+            className="font-normal sm:text-2xl"
+            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-xl)", color: "var(--color-text)" }}
+          >
+            How it works
+          </h2>
+          <ol className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {howItWorks.map((item) => (
+              <li
+                key={item.step}
+                className="rounded-[var(--radius-lg)] border p-6"
+                style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-sm)" }}
+              >
+                <span
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold text-white"
+                  style={{ backgroundColor: "var(--color-primary)", fontFamily: "var(--font-body), sans-serif" }}
+                >
+                  {item.step}
+                </span>
+                <h3 className="mt-4 text-base font-semibold" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>
+                  {item.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+                  {item.body}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {/* Requirements */}
+        <section className="mt-16" aria-labelledby="req-heading">
+          <h2
+            id="req-heading"
+            className="font-normal sm:text-2xl"
+            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-xl)", color: "var(--color-text)" }}
+          >
+            Key requirements for {seo.heroCountryPhrase}
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-muted)" }}>
+            Rules change over time; we confirm the exact steps for your animal and destination. The following is a practical overview, not legal advice.
+          </p>
+          <div
+            className="mt-8 rounded-[var(--radius-lg)] border p-6 sm:p-8"
+            style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}
+          >
+            <h3 className="flex items-center gap-2 text-base font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
+              <CheckCircle className="h-5 w-5 shrink-0" style={{ color: "var(--color-primary)" }} aria-hidden />
+              Import &amp; travel checklist
+            </h3>
             <ul className="mt-4 space-y-2">
-              {guide.requirements.map((req, i) => (
-                <li key={i} className="flex gap-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>
-                  <span style={{ color: "var(--color-primary)" }}>•</span>
-                  {req}
+              {seo.requirements.map((req) => (
+                <li key={req} className="flex gap-2 text-sm leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+                  <span className="shrink-0" style={{ color: "var(--color-primary)" }}>
+                    •
+                  </span>
+                  <span>{req}</span>
                 </li>
               ))}
             </ul>
-          </div>
-          <div className="rounded-[var(--radius-lg)] border p-6" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}>
-            <h2 className="font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
-              Timeline
-            </h2>
-            <p className="mt-4 text-sm leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-              {guide.timeline}
+            <p className="mt-6 text-sm leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+              <span className="font-semibold" style={{ color: "var(--color-text)" }}>
+                Transport &amp; routing:{" "}
+              </span>
+              {seo.transportNotes}
             </p>
           </div>
         </section>
 
-        <section className="mt-14">
+        {/* Eligible animals */}
+        <section className="mt-16" aria-labelledby="eligible-heading">
           <h2
+            id="eligible-heading"
             className="font-normal sm:text-2xl"
             style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-xl)", color: "var(--color-text)" }}
           >
             Eligible animals
           </h2>
-          <p className="mt-2 text-base" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-            {guide.cta}
+          <p className="mt-2" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+            Verified rescues — listed for international adoption to {seo.heroCountryPhrase}.
           </p>
           {listings.length > 0 ? (
-            <ul className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
               {listings.map((listing) => (
-                <li
-                  key={listing.slug}
-                  className="rounded-[var(--radius-lg)] border p-4 transition-shadow hover:shadow-[var(--shadow-md)]"
-                  style={{
-                    backgroundColor: "var(--color-surface)",
-                    borderColor: "var(--color-border)",
-                    boxShadow: "var(--shadow-sm)",
-                  }}
-                >
-                  <Link href={`/adopt/${listing.slug}`} className="block">
-                    <div className="aspect-[4/3] overflow-hidden rounded-[var(--radius-lg)] bg-[var(--color-background)]">
-                      {listing.photos[0] ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={listing.photos[0]}
-                          alt=""
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-4xl">🐾</div>
-                      )}
-                    </div>
-                    <h3 className="mt-3 font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
-                      {listing.name}
-                    </h3>
-                    <p className="mt-0.5 text-sm" style={{ color: "var(--color-text-secondary)" }}>
-                      {listing.species}
-                      {listing.breed ? ` · ${listing.breed}` : ""}
-                      {listing.estimatedAge ? ` · ${listing.estimatedAge}` : ""}
-                    </p>
-                  </Link>
-                  <Link
-                    href={`/adopt/apply/${listing.slug}`}
-                    className="mt-4 flex h-10 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] px-4 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                    style={{ backgroundColor: "var(--color-secondary)" }}
-                  >
-                    Adopt this Tiny
-                  </Link>
+                <AdoptionListingCard key={listing.slug} listing={listing} />
+              ))}
+            </div>
+          ) : (
+            <p className="mt-8 text-base leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+              No animals are listed for {seo.heroCountryPhrase} right now. New rescues join regularly — browse all international listings or check back soon.
+            </p>
+          )}
+        </section>
+
+        {/* Fee breakdown */}
+        <section className="mt-16" aria-labelledby="fee-heading">
+          <h2
+            id="fee-heading"
+            className="font-normal sm:text-2xl"
+            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-xl)", color: "var(--color-text)" }}
+          >
+            What&apos;s included in the adoption fee?
+          </h2>
+          <div
+            className="mt-6 rounded-[var(--radius-lg)] border p-6 sm:p-8"
+            style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}
+          >
+            <ul className="space-y-3">
+              {feeIncluded.map((line) => (
+                <li key={line} className="flex gap-2 text-sm leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+                  <span style={{ color: "var(--color-primary)" }}>✓</span>
+                  {line}
                 </li>
               ))}
             </ul>
+            <p className="mt-6 text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
+              {seo.typicalTotalNarrative}
+            </p>
+          </div>
+        </section>
+
+        {/* Testimonials */}
+        <section className="mt-16" aria-labelledby="stories-heading">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <h2
+              id="stories-heading"
+              className="font-normal sm:text-2xl"
+              style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-xl)", color: "var(--color-text)" }}
+            >
+              Tinies who made it
+            </h2>
+            <Link
+              href="/adopt/tinies-who-made-it"
+              className="text-sm font-semibold hover:underline"
+              style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-primary)" }}
+            >
+              View all stories →
+            </Link>
+          </div>
+          <p className="mt-2 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+            Success stories from families who adopted to {seo.heroCountryPhrase} (when available).
+          </p>
+          {stories.length > 0 ? (
+            <div className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {stories.map((s) => {
+                const cover = s.afterPhoto ?? s.beforePhoto;
+                return (
+                  <article
+                    key={s.placementId}
+                    className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border transition-shadow hover:shadow-[var(--shadow-md)]"
+                    style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-sm)" }}
+                  >
+                    <Link href={`/adopt/tinies-who-made-it#story-${s.placementId}`} className="relative block aspect-[4/3] bg-[var(--color-background)]">
+                      {cover ? (
+                        <Image
+                          src={cover}
+                          alt={`${s.animalName}, adoption success story`}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 640px) 100vw, 33vw"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-sm" style={{ color: "var(--color-text-muted)" }}>
+                          Photo soon
+                        </div>
+                      )}
+                    </Link>
+                    <div className="flex flex-1 flex-col p-6" style={{ padding: "var(--space-card)" }}>
+                      <h3 className="text-lg font-semibold" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>
+                        {s.animalName}
+                      </h3>
+                      <p className="mt-1 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+                        {s.originLabel} → {s.destinationLabel}
+                      </p>
+                      {s.quote ? (
+                        <blockquote
+                          className="mt-3 line-clamp-4 border-l-2 pl-3 text-sm italic leading-relaxed"
+                          style={{ borderColor: "var(--color-primary)", color: "var(--color-text-secondary)", fontFamily: "var(--font-body), sans-serif" }}
+                        >
+                          &ldquo;{s.quote}&rdquo;
+                        </blockquote>
+                      ) : null}
+                      <p className="mt-3 text-xs" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-muted)" }}>
+                        Adopted {formatStoryDate(s.adoptedAt)}
+                      </p>
+                      <Link
+                        href={`/adopt/tinies-who-made-it#story-${s.placementId}`}
+                        className="mt-4 text-sm font-semibold hover:underline"
+                        style={{ color: "var(--color-primary)", fontFamily: "var(--font-body), sans-serif" }}
+                      >
+                        Read full story →
+                      </Link>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
           ) : (
-            <p className="mt-6 text-base" style={{ color: "var(--color-text-secondary)" }}>
-              No animals are currently listed for adoption to {displayCountryName}. New rescues are added regularly — check back or browse all adoptable animals.
+            <p className="mt-8 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+              We&apos;re collecting the first stories for this destination. See the full gallery for all approved happy tails.
             </p>
           )}
-          <div className="mt-10">
+        </section>
+
+        {/* CTA */}
+        <section className="mt-16">
+          <div
+            className="rounded-[var(--radius-xl)] border px-6 py-10 text-center sm:px-10"
+            style={{ backgroundColor: "var(--color-primary-50)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}
+          >
+            <h2 className="text-xl font-normal sm:text-2xl" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>
+              Browse animals available for adoption to {seo.heroCountryPhrase}
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+              See every internationally eligible tiny on Tinies, then apply when you find your match.
+            </p>
             <Link
-              href="/adopt"
-              className="inline-flex h-12 items-center gap-2 rounded-[var(--radius-pill)] px-6 font-semibold text-white transition-opacity hover:opacity-90"
-              style={{ backgroundColor: "var(--color-primary)" }}
+              href={browseInternationalHref}
+              className="mt-8 inline-flex h-12 items-center gap-2 rounded-[var(--radius-pill)] px-8 font-semibold text-white transition-opacity hover:opacity-90"
+              style={{ backgroundColor: "var(--color-primary)", fontFamily: "var(--font-body), sans-serif" }}
             >
-              <Heart className="h-5 w-5" />
-              Browse all adoptable animals <ArrowRight className="h-4 w-4" />
+              Browse international adoptions
+              <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
           </div>
         </section>

@@ -2,6 +2,11 @@
  * SEO landing page slugs and labels for district service pages and country adoption pages.
  */
 
+import {
+  ADOPTION_COUNTRY_SLUGS,
+  ADOPTION_COUNTRY_SEO,
+} from "@/lib/adoption/country-requirements";
+
 export const SERVICE_TYPE_SLUGS = [
   "dog-walking",
   "pet-sitting",
@@ -47,22 +52,15 @@ export const SERVICE_TYPE_TO_LABEL: Record<string, string> = {
   daycare: "Daycare",
 };
 
-export const COUNTRY_SLUGS = ["uk", "germany", "netherlands", "sweden", "other-eu"] as const;
+/** Country adoption SEO pages: /adopt/from-cyprus-to-[slug] */
+export const COUNTRY_SLUGS = ADOPTION_COUNTRY_SLUGS;
 
-/** Map country URL slug -> display name */
-export const COUNTRY_SLUG_TO_NAME: Record<string, string> = {
-  uk: "the UK",
-  germany: "Germany",
-  netherlands: "the Netherlands",
-  sweden: "Sweden",
-  "other-eu": "Other EU countries",
-};
+/** Map country URL slug -> display name (hero / sentences) */
+export const COUNTRY_SLUG_TO_NAME: Record<string, string> = Object.fromEntries(
+  ADOPTION_COUNTRY_SLUGS.map((slug) => [slug, ADOPTION_COUNTRY_SEO[slug].heroCountryPhrase])
+) as Record<string, string>;
 
 /** Map country slug -> value stored in AdoptionListing.destinationCountries (for filtering) */
-export const COUNTRY_SLUG_TO_DESTINATION: Record<string, string[]> = {
-  uk: ["UK", "United Kingdom"],
-  germany: ["Germany"],
-  netherlands: ["Netherlands"],
-  sweden: ["Sweden"],
-  "other-eu": ["EU", "Other EU", "France", "Italy", "Spain", "Austria", "Belgium", "Ireland", "Portugal", "Other"],
-};
+export const COUNTRY_SLUG_TO_DESTINATION: Record<string, string[]> = Object.fromEntries(
+  ADOPTION_COUNTRY_SLUGS.map((slug) => [slug, ADOPTION_COUNTRY_SEO[slug].listingDestinationValues])
+) as Record<string, string[]>;
