@@ -100,7 +100,8 @@ export const NOTIFICATION_REGISTRY: Record<NotificationTriggerId, Entry> = {
   [NotificationTrigger.BOOKING_COMPLETED]: {
     channels: "email",
     emailTemplate: "booking-completed.tsx",
-    trigger: "sendBookingCompletedNotifications (notifications/booking-notifications) from endWalk / completeNonWalkBooking",
+    trigger:
+      "sendBookingCompletedNotifications from submitTiniesCard (owner email skipped when Tinies Card email sent); provider email unchanged",
   },
   [NotificationTrigger.REVIEW_PROMPT_24H]: {
     channels: "email",

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import {
   PawPrint,
@@ -17,16 +17,24 @@ import {
   Heart,
   CalendarClock,
   AlertCircle,
+  Repeat,
 } from "lucide-react";
 import { toast } from "sonner";
-import { deletePet, cancelBooking } from "./actions";
-import type { OwnerBookingCard } from "@/lib/utils/owner-helpers";
+import {
+  deletePet,
+  cancelBooking,
+  pauseOwnerRecurringBooking,
+  resumeOwnerRecurringBooking,
+  cancelOwnerRecurringBooking,
+} from "./actions";
+import type { OwnerBookingCard, OwnerRecurringCard } from "@/lib/utils/owner-helpers";
 import { ReviewForm } from "./ReviewForm";
 import { TipForm } from "./TipForm";
 import { getOwnerMeetAndGreets, acceptMeetAndGreetSuggestion } from "@/lib/meet-and-greet/actions";
 import type { OwnerMeetAndGreetCard } from "@/lib/meet-and-greet/meet-and-greet-types";
 import { BookingUpdatesFeed } from "@/components/bookings/BookingUpdatesFeed";
 import { ReportProblemModal } from "@/components/disputes/ReportProblemModal";
+import { TipSuccessHandler } from "@/components/tipping/TipSuccessHandler";
 import { getDisputesForUser, getClaimsForUser, respondToDispute, respondToClaim } from "@/lib/disputes/actions";
 import type { ClaimCard, DisputeCard } from "@/lib/disputes/dispute-action-types";
 
@@ -39,7 +47,7 @@ type PetCard = {
   photos: string[];
 };
 
-type TabId = "pets" | "bookings" | "meetgreet" | "disputes" | "messages";
+type TabId = "pets" | "bookings" | "recurring" | "meetgreet" | "disputes" | "messages";
 
 const SERVICE_LABELS: Record<string, string> = {
   walking: "Dog walking",
@@ -67,6 +75,7 @@ function formatDateTime(d: Date | string): string {
 const TABS: { id: TabId; label: string; icon: typeof PawPrint }[] = [
   { id: "pets", label: "My Pets", icon: PawPrint },
   { id: "bookings", label: "My Bookings", icon: Calendar },
+  { id: "recurring", label: "Recurring", icon: Repeat },
   { id: "meetgreet", label: "Meet & Greets", icon: Heart },
   { id: "disputes", label: "Disputes & Claims", icon: AlertCircle },
   { id: "messages", label: "Messages", icon: MessageSquare },
@@ -182,7 +191,10 @@ function BookingCard({
           <p className="font-semibold" style={{ color: "var(--color-text)" }}>
             {formatEur(booking.totalPriceCents)}
           </p>
-          {booking.serviceType === "walking" && booking.status === "active" && booking.walkStartedAt && (
+          {booking.serviceType === "walking" &&
+            booking.status === "active" &&
+            booking.walkStartedAt &&
+            !booking.walkEndedAt && (
             <Link
               href={`/dashboard/owner/walks/${booking.id}`}
               className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] bg-[var(--color-secondary)] px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90"
@@ -212,6 +224,15 @@ function BookingCard({
               {booking.existingReview ? "Edit review" : "Leave a Review"}
             </button>
           )}
+          {booking.status === "completed" && booking.tiniesCardId && (
+            <Link
+              href={`/dashboard/owner/bookings/${booking.id}/card`}
+              className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] border border-[var(--color-primary)] px-3 py-1.5 text-sm font-semibold hover:bg-[var(--color-primary-50)]"
+              style={{ color: "var(--color-primary)" }}
+            >
+              View Tinies Card
+            </Link>
+          )}
           {booking.status === "completed" && !booking.hasDispute && !booking.hasGuaranteeClaim && (
             <button
               type="button"
@@ -222,7 +243,7 @@ function BookingCard({
               Report a Problem
             </button>
           )}
-          {booking.status === "completed" && booking.tipAmount == null && (
+          {booking.status === "completed" && booking.tipAmountCents == null && (
             <button
               type="button"
               onClick={() => onOpenTip(booking.id)}
@@ -231,8 +252,8 @@ function BookingCard({
               Tip {booking.providerName}
             </button>
           )}
-          {booking.status === "completed" && booking.tipAmount != null && (
-            <span className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Tipped {formatEur(booking.tipAmount)}</span>
+          {booking.status === "completed" && booking.tipAmountCents != null && (
+            <span className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Tipped {formatEur(booking.tipAmountCents)}</span>
           )}
         </div>
       </div>
@@ -307,15 +328,19 @@ function BookingCard({
   );
 }
 
+const WEEKDAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
+
 export function OwnerDashboardClient({
   initialPets,
   initialBookings = [],
+  initialRecurring = [],
   initialMeetAndGreets = [],
   initialDisputes = [],
   initialClaims = [],
 }: {
   initialPets: PetCard[];
   initialBookings?: OwnerBookingCard[];
+  initialRecurring?: OwnerRecurringCard[];
   initialMeetAndGreets?: OwnerMeetAndGreetCard[];
   initialDisputes?: DisputeCard[];
   initialClaims?: ClaimCard[];
@@ -337,16 +362,13 @@ export function OwnerDashboardClient({
   const [respondingDisputeId, setRespondingDisputeId] = useState<string | null>(null);
   const [respondingClaimId, setRespondingClaimId] = useState<string | null>(null);
   const [openTipBookingId, setOpenTipBookingId] = useState<string | null>(null);
+  const [recurring, setRecurring] = useState<OwnerRecurringCard[]>(initialRecurring ?? []);
+  const [recurringActionId, setRecurringActionId] = useState<string | null>(null);
   const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const tipReturnPath = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
 
   useEffect(() => {
-    if (searchParams.get("tip") === "success") {
-      toast.success("Tip sent! Thank you.");
-      router.replace("/dashboard/owner");
-      router.refresh();
-      setOpenTipBookingId(null);
-      return;
-    }
     const roundUpRaw = searchParams.get("roundUp");
     if (roundUpRaw !== null && roundUpRaw !== "") {
       const cents = parseInt(roundUpRaw, 10);
@@ -373,6 +395,9 @@ export function OwnerDashboardClient({
     setDisputes(initialDisputes ?? []);
     setClaims(initialClaims ?? []);
   }, [initialDisputes, initialClaims]);
+  useEffect(() => {
+    setRecurring(initialRecurring ?? []);
+  }, [initialRecurring]);
 
   const upcomingBookings = bookings.filter((b) =>
     ["pending", "accepted"].includes(b.status)
@@ -476,6 +501,7 @@ export function OwnerDashboardClient({
 
   return (
     <>
+      <TipSuccessHandler />
       <div className="mt-8 border-b border-[var(--color-border)]">
         <nav className="flex gap-1 overflow-x-auto" aria-label="Dashboard sections">
           {TABS.map((t) => (
@@ -774,6 +800,151 @@ export function OwnerDashboardClient({
           </section>
         )}
 
+        {tab === "recurring" && (
+          <section
+            className="rounded-[var(--radius-lg)] border p-8 sm:p-8"
+            style={{
+              backgroundColor: "var(--color-surface)",
+              borderColor: "var(--color-border)",
+              boxShadow: "var(--shadow-md)",
+            }}
+          >
+            <h2 className="font-normal" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>
+              Recurring bookings
+            </h2>
+            <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+              Weekly dog walks after your first visit is accepted. Future sessions are charged automatically the week before.
+            </p>
+            {recurring.length === 0 ? (
+              <p className="mt-6 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                No recurring series yet. When booking a walk, turn on &quot;Make this recurring?&quot; to set one up.
+              </p>
+            ) : (
+              <ul className="mt-6 space-y-6">
+                {recurring.map((r) => (
+                  <li
+                    key={r.id}
+                    className="rounded-[var(--radius-lg)] border p-4 sm:p-5"
+                    style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}
+                  >
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <p className="font-semibold" style={{ color: "var(--color-text)" }}>
+                          {SERVICE_LABELS[r.serviceType] ?? r.serviceType} with {r.providerName}
+                        </p>
+                        <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                          {r.daysOfWeek.map((d) => WEEKDAY_SHORT[d] ?? d).join(", ")} at {r.timeSlot}
+                        </p>
+                        <p className="mt-1 text-sm font-medium tabular-nums" style={{ color: "var(--color-text)" }}>
+                          {formatEur(r.pricePerSessionCents)} per session
+                        </p>
+                        <p className="mt-1 text-xs capitalize" style={{ color: "var(--color-text-muted)" }}>
+                          Status: {r.status.replace("_", " ")}
+                        </p>
+                        {r.nextBookingDate && r.status === "active" && (
+                          <p className="mt-1 text-xs" style={{ color: "var(--color-text-secondary)" }}>
+                            Next scheduled occurrence: {formatDateTime(r.nextBookingDate)}
+                          </p>
+                        )}
+                        {r.endDate && (
+                          <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
+                            Repeats until {formatDateTime(r.endDate)} (last day)
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {r.status === "active" && (
+                          <button
+                            type="button"
+                            disabled={recurringActionId !== null}
+                            onClick={async () => {
+                              if (recurringActionId) return;
+                              setRecurringActionId(r.id);
+                              const res = await pauseOwnerRecurringBooking(r.id);
+                              setRecurringActionId(null);
+                              if (res.error) {
+                                toast.error(res.error);
+                                return;
+                              }
+                              setRecurring((prev) => prev.map((x) => (x.id === r.id ? { ...x, status: "paused" } : x)));
+                              router.refresh();
+                              toast.success("Recurring schedule paused. No new visits will be booked until you resume.");
+                            }}
+                            className="rounded-[var(--radius-lg)] border border-[var(--color-border)] px-3 py-2 text-sm font-semibold hover:bg-[var(--color-neutral-200)] disabled:opacity-70"
+                            style={{ color: "var(--color-text)" }}
+                          >
+                            Pause
+                          </button>
+                        )}
+                        {r.status === "paused" && (
+                          <button
+                            type="button"
+                            disabled={recurringActionId !== null}
+                            onClick={async () => {
+                              if (recurringActionId) return;
+                              setRecurringActionId(r.id);
+                              const res = await resumeOwnerRecurringBooking(r.id);
+                              setRecurringActionId(null);
+                              if (res.error) {
+                                toast.error(res.error);
+                                return;
+                              }
+                              router.refresh();
+                              toast.success("Recurring schedule resumed.");
+                            }}
+                            className="rounded-[var(--radius-lg)] bg-[var(--color-primary)] px-3 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-70"
+                          >
+                            Resume
+                          </button>
+                        )}
+                        {r.status !== "cancelled" && (
+                          <button
+                            type="button"
+                            disabled={recurringActionId !== null}
+                            onClick={async () => {
+                              if (recurringActionId) return;
+                              if (!window.confirm("Cancel this recurring series? No future visits will be scheduled.")) return;
+                              setRecurringActionId(r.id);
+                              const res = await cancelOwnerRecurringBooking(r.id);
+                              setRecurringActionId(null);
+                              if (res.error) {
+                                toast.error(res.error);
+                                return;
+                              }
+                              setRecurring((prev) =>
+                                prev.map((x) => (x.id === r.id ? { ...x, status: "cancelled", nextBookingDate: null } : x))
+                              );
+                              router.refresh();
+                              toast.success("Recurring series cancelled.");
+                            }}
+                            className="rounded-[var(--radius-lg)] border border-[var(--color-error)]/50 px-3 py-2 text-sm font-semibold text-[var(--color-error)] hover:bg-[var(--color-error)]/10 disabled:opacity-70"
+                          >
+                            Cancel series
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    {r.history.length > 0 && (
+                      <div className="mt-4 border-t pt-4" style={{ borderColor: "var(--color-border)" }}>
+                        <p className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>
+                          Visits from this series
+                        </p>
+                        <ul className="mt-2 space-y-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                          {r.history.map((h) => (
+                            <li key={h.id}>
+                              {formatDateTime(h.startDatetime)} · {h.status} · {formatEur(h.totalPriceCents)}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
+
         {tab === "meetgreet" && (
           <section
             className="rounded-[var(--radius-lg)] border p-8 sm:p-8"
@@ -895,7 +1066,7 @@ export function OwnerDashboardClient({
                 <TipForm
                   bookingId={booking.id}
                   providerName={booking.providerName}
-                  onSuccess={() => { router.refresh(); setOpenTipBookingId(null); }}
+                  returnPath={tipReturnPath}
                   onClose={() => setOpenTipBookingId(null)}
                 />
               </div>

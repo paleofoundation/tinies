@@ -42,12 +42,40 @@ export type ProviderBookingCard = {
   } | null;
   hasDispute: boolean;
   hasGuaranteeClaim: boolean;
+  /** Present when this booking was completed with a Tinies Card. */
+  tiniesCardId: string | null;
 };
 
 export type ProviderEarnings = {
   totalEarnedCents: number;
   tipsTotalCents: number;
   completedBookingsCount: number;
+};
+
+/** Tips received (for earnings UI line items). */
+export type ProviderTipLineItem = {
+  bookingId: string;
+  ownerName: string;
+  dateLabel: string;
+  amountCents: number;
+};
+
+export type ProviderRecurringClientRow = {
+  id: string;
+  ownerName: string;
+  serviceType: string;
+  daysOfWeek: number[];
+  timeSlot: string;
+  pricePerSessionCents: number;
+  status: string;
+  nextBookingDate: Date | null;
+};
+
+export type ProviderRecurringUpcomingRow = {
+  bookingId: string;
+  startDatetime: Date;
+  ownerName: string;
+  recurringBookingId: string | null;
 };
 
 export type ProviderReviewForDashboard = {

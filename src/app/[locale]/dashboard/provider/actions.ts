@@ -16,13 +16,19 @@ import BookingExpiredEmail from "@/lib/email/templates/booking-expired";
 import ProviderCancelledEmail from "@/lib/email/templates/provider-cancelled";
 import { sendSMS, buildBookingAcceptedSMS, buildBookingExpiredSMS, buildWalkTrackingStartedSMS, buildBookingServiceStartedSMS, buildProviderCancelledOwnerSMS } from "@/lib/sms";
 import { sendBookingCompletedNotifications } from "@/lib/notifications/booking-notifications";
+import { cancelRecurringBookingIfPendingSetup } from "@/lib/recurring-bookings/cancel-setup";
+import { nextOccurrenceUtc, parseTimeSlot } from "@/lib/recurring-bookings/schedule";
 import slugify from "slugify";
+import { addDays } from "date-fns";
 import { Prisma } from "@prisma/client";
 import type {
   CreateStripeConnectOnboardingResult,
   ProviderStripeStatus,
   ProviderBookingCard,
   ProviderEarnings,
+  ProviderTipLineItem,
+  ProviderRecurringClientRow,
+  ProviderRecurringUpcomingRow,
   ProviderReviewForDashboard,
   SubmitServiceReportInput,
   ProviderWizardProfile,
@@ -47,8 +53,6 @@ import {
   qualificationsFromPrismaJson,
 } from "@/lib/validations/provider-rich-profile";
 import { HOLIDAY_OPTIONS } from "@/lib/utils/provider-helpers";
-import { recordPlatformCommissionDonation } from "@/lib/giving/actions";
-
 const PENDING_RESPONSE_HOURS = 4;
 
 const SERVICE_TYPE_LABELS: Record<string, string> = {
@@ -161,6 +165,7 @@ export async function getProviderBookings(): Promise<{
       orderBy: { createdAt: "desc" },
       include: {
         owner: { select: { name: true } },
+        tiniesCard: { select: { id: true } },
       },
     });
     const allPetIds = rows.flatMap((r) => r.petIds);
@@ -198,6 +203,7 @@ export async function getProviderBookings(): Promise<{
         serviceReport: b.serviceReport as ProviderBookingCard["serviceReport"],
         hasDispute: b.hasDispute,
         hasGuaranteeClaim: b.hasGuaranteeClaim,
+        tiniesCardId: b.tiniesCard?.id ?? null,
       };
     });
     return { bookings };
@@ -214,10 +220,13 @@ export async function getProviderEarnings(): Promise<{ earnings: ProviderEarning
   try {
     const completed = await prisma.booking.findMany({
       where: { providerId: user.id, status: "completed" },
-      select: { totalPrice: true, commissionAmount: true, tipAmount: true },
+      select: { totalPrice: true, commissionAmount: true, tipAmountCents: true },
     });
-    const totalEarnedCents = completed.reduce((sum, b) => sum + (b.totalPrice - b.commissionAmount) + (b.tipAmount ?? 0), 0);
-    const tipsTotalCents = completed.reduce((sum, b) => sum + (b.tipAmount ?? 0), 0);
+    const totalEarnedCents = completed.reduce(
+      (sum, b) => sum + (b.totalPrice - b.commissionAmount) + (b.tipAmountCents ?? 0),
+      0
+    );
+    const tipsTotalCents = completed.reduce((sum, b) => sum + (b.tipAmountCents ?? 0), 0);
     return {
       earnings: {
         totalEarnedCents,
@@ -231,6 +240,113 @@ export async function getProviderEarnings(): Promise<{ earnings: ProviderEarning
   }
 }
 
+export async function getProviderTipLineItems(): Promise<{
+  items: ProviderTipLineItem[];
+  error?: string;
+}> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { items: [], error: "Not signed in." };
+  try {
+    const rows = await prisma.booking.findMany({
+      where: { providerId: user.id, tipAmountCents: { not: null } },
+      orderBy: [{ tipPaidAt: "desc" }, { updatedAt: "desc" }],
+      select: {
+        id: true,
+        startDatetime: true,
+        tipAmountCents: true,
+        owner: { select: { name: true } },
+      },
+    });
+    const items: ProviderTipLineItem[] = rows.map((r) => ({
+      bookingId: r.id,
+      ownerName: r.owner.name?.trim() || "Pet owner",
+      dateLabel: new Date(r.startDatetime).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }),
+      amountCents: r.tipAmountCents ?? 0,
+    }));
+    return { items };
+  } catch (e) {
+    console.error("getProviderTipLineItems", e);
+    return { items: [], error: "Failed to load tips." };
+  }
+}
+
+export async function getProviderRecurringClients(): Promise<{
+  clients: ProviderRecurringClientRow[];
+  error?: string;
+}> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { clients: [], error: "Not signed in." };
+  try {
+    const rows = await prisma.recurringBooking.findMany({
+      where: {
+        providerId: user.id,
+        status: { in: ["active", "paused", "pending_setup"] },
+      },
+      orderBy: { updatedAt: "desc" },
+      include: { owner: { select: { name: true } } },
+    });
+    const clients: ProviderRecurringClientRow[] = rows.map((r) => ({
+      id: r.id,
+      ownerName: r.owner.name?.trim() || "Pet owner",
+      serviceType: r.serviceType,
+      daysOfWeek: r.daysOfWeek,
+      timeSlot: r.timeSlot,
+      pricePerSessionCents: r.pricePerSessionCents,
+      status: r.status,
+      nextBookingDate: r.nextBookingDate,
+    }));
+    return { clients };
+  } catch (e) {
+    console.error("getProviderRecurringClients", e);
+    return { clients: [], error: "Failed to load recurring clients." };
+  }
+}
+
+export async function getProviderRecurringUpcoming(): Promise<{
+  upcoming: ProviderRecurringUpcomingRow[];
+  error?: string;
+}> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { upcoming: [], error: "Not signed in." };
+  try {
+    const now = new Date();
+    const horizon = addDays(now, 21);
+    const bookings = await prisma.booking.findMany({
+      where: {
+        providerId: user.id,
+        recurringBookingId: { not: null },
+        status: { in: ["pending", "accepted", "active"] },
+        startDatetime: { gte: now, lte: horizon },
+      },
+      orderBy: { startDatetime: "asc" },
+      include: { owner: { select: { name: true } } },
+    });
+    const upcoming: ProviderRecurringUpcomingRow[] = bookings.map((b) => ({
+      bookingId: b.id,
+      startDatetime: b.startDatetime,
+      ownerName: b.owner.name?.trim() || "Pet owner",
+      recurringBookingId: b.recurringBookingId,
+    }));
+    return { upcoming };
+  } catch (e) {
+    console.error("getProviderRecurringUpcoming", e);
+    return { upcoming: [], error: "Failed to load upcoming recurring visits." };
+  }
+}
+
 export async function acceptBooking(bookingId: string): Promise<{ error?: string }> {
   const supabase = await createClient();
   const {
@@ -239,7 +355,13 @@ export async function acceptBooking(bookingId: string): Promise<{ error?: string
   if (!user) return { error: "Not signed in." };
   const booking = await prisma.booking.findFirst({
     where: { id: bookingId, providerId: user.id, status: "pending" },
-    select: { id: true, stripePaymentIntentId: true, commissionAmount: true },
+    select: {
+      id: true,
+      stripePaymentIntentId: true,
+      commissionAmount: true,
+      recurringBookingId: true,
+      startDatetime: true,
+    },
   });
   if (!booking) return { error: "Booking not found or not pending." };
   if (!booking.stripePaymentIntentId) return { error: "No payment intent for this booking." };
@@ -250,6 +372,19 @@ export async function acceptBooking(bookingId: string): Promise<{ error?: string
       where: { id: bookingId },
       data: { status: "accepted" },
     });
+    if (booking.recurringBookingId) {
+      const recRow = await prisma.recurringBooking.findUnique({
+        where: { id: booking.recurringBookingId },
+      });
+      if (recRow?.status === "pending_setup") {
+        const { h, m } = parseTimeSlot(recRow.timeSlot);
+        const next = nextOccurrenceUtc(booking.startDatetime, recRow.daysOfWeek, h, m, recRow.endDate);
+        await prisma.recurringBooking.update({
+          where: { id: recRow.id },
+          data: { status: "active", nextBookingDate: next },
+        });
+      }
+    }
     try {
       const full = await prisma.booking.findUnique({
         where: { id: bookingId },
@@ -344,7 +479,7 @@ export async function declineBooking(bookingId: string): Promise<{ error?: strin
   if (!user) return { error: "Not signed in." };
   const booking = await prisma.booking.findFirst({
     where: { id: bookingId, providerId: user.id, status: "pending" },
-    select: { id: true, stripePaymentIntentId: true },
+    select: { id: true, stripePaymentIntentId: true, recurringBookingId: true },
   });
   if (!booking) return { error: "Booking not found or not pending." };
   try {
@@ -360,6 +495,7 @@ export async function declineBooking(bookingId: string): Promise<{ error?: strin
       where: { id: bookingId },
       data: { status: "declined" },
     });
+    await cancelRecurringBookingIfPendingSetup(booking.recurringBookingId);
     try {
       const full = await prisma.booking.findUnique({
         where: { id: bookingId },
@@ -405,6 +541,7 @@ export async function expireStaleBookings(): Promise<{ expired: number; error?: 
     select: {
       id: true,
       stripePaymentIntentId: true,
+      recurringBookingId: true,
       owner: { select: { email: true, phone: true, phoneVerified: true } },
       provider: { select: { name: true } },
     },
@@ -428,6 +565,7 @@ export async function expireStaleBookings(): Promise<{ expired: number; error?: 
           cancelledBy: "system",
         },
       });
+      await cancelRecurringBookingIfPendingSetup(b.recurringBookingId);
       try {
         if (b.owner?.email) {
           await sendEmail({
@@ -672,7 +810,6 @@ export async function endWalk(bookingId: string): Promise<{ error?: string }> {
     await prisma.booking.update({
       where: { id: bookingId },
       data: {
-        status: "completed",
         walkEndedAt: now,
         walkDistanceKm: Math.round(distanceKm * 1000) / 1000,
         walkDurationMinutes: durationMinutes,
@@ -680,9 +817,6 @@ export async function endWalk(bookingId: string): Promise<{ error?: string }> {
         walkActivities: booking.walkActivities ?? undefined,
       },
     });
-    await recordPlatformCommissionDonation(booking.id, booking.commissionAmount);
-    await updateProviderRepeatClientCount(user.id);
-    await sendBookingCompletedNotifications(bookingId);
     revalidatePath("/dashboard/provider");
     revalidatePath("/dashboard/owner");
     return {};
@@ -747,40 +881,6 @@ export async function startNonWalkService(bookingId: string): Promise<{ error?: 
   } catch (e) {
     console.error("startNonWalkService", e);
     return { error: e instanceof Error ? e.message : "Failed to start service." };
-  }
-}
-
-/** Non-walk: mark completed (commission + completion emails). */
-export async function completeNonWalkBooking(bookingId: string): Promise<{ error?: string }> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Not signed in." };
-  const booking = await prisma.booking.findFirst({
-    where: {
-      id: bookingId,
-      providerId: user.id,
-      status: { in: ["accepted", "active"] },
-      serviceType: { not: "walking" },
-    },
-    select: { id: true, commissionAmount: true },
-  });
-  if (!booking) return { error: "Booking not found or not eligible to complete." };
-  try {
-    await prisma.booking.update({
-      where: { id: bookingId },
-      data: { status: "completed" },
-    });
-    await recordPlatformCommissionDonation(booking.id, booking.commissionAmount);
-    await updateProviderRepeatClientCount(user.id);
-    await sendBookingCompletedNotifications(bookingId);
-    revalidatePath("/dashboard/provider");
-    revalidatePath("/dashboard/owner");
-    return {};
-  } catch (e) {
-    console.error("completeNonWalkBooking", e);
-    return { error: e instanceof Error ? e.message : "Failed to complete booking." };
   }
 }
 
@@ -854,35 +954,6 @@ export async function cancelAcceptedBookingAsProvider(
   } catch (e) {
     console.error("cancelAcceptedBookingAsProvider", e);
     return { error: e instanceof Error ? e.message : "Failed to cancel booking." };
-  }
-}
-
-/** Count unique owners with 2+ completed bookings for this provider; set repeatClientCount on ProviderProfile. */
-export async function updateProviderRepeatClientCount(providerId: string): Promise<void> {
-  const completed = await prisma.booking.findMany({
-    where: { providerId, status: "completed" },
-    select: { ownerId: true },
-  });
-  const ownerCounts = new Map<string, number>();
-  for (const b of completed) {
-    ownerCounts.set(b.ownerId, (ownerCounts.get(b.ownerId) ?? 0) + 1);
-  }
-  const repeatCount = [...ownerCounts.values()].filter((c) => c >= 2).length;
-  const uniqueOwners = ownerCounts.size;
-  const repeatClientRate =
-    uniqueOwners > 0 ? Math.round((repeatCount / uniqueOwners) * 1000) / 10 : null;
-  const profile = await prisma.providerProfile.findUnique({
-    where: { userId: providerId },
-    select: { id: true },
-  });
-  if (profile) {
-    await prisma.providerProfile.update({
-      where: { id: profile.id },
-      data: {
-        repeatClientCount: repeatCount,
-        repeatClientRate,
-      },
-    });
   }
 }
 

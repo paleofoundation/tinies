@@ -20,6 +20,8 @@ import type {
   ProviderReviewPublic,
   ServiceOffer,
 } from "@/app/[locale]/services/book/booking-action-types";
+import { getOrCreateStripeCustomerForUser } from "@/lib/stripe/customer";
+import { endOfDayFromYmdString } from "@/lib/recurring-bookings/schedule";
 import { qualificationsFromPrismaJson } from "@/lib/validations/provider-rich-profile";
 import { getPublicCertificationsForProviderUserId } from "@/lib/training/course-actions";
 
@@ -243,11 +245,59 @@ export async function createBookingWithPaymentIntent(
   }
   if (totalCents <= 0) return { error: "Invalid price." };
 
+  const rec = input.recurring;
+  if (rec) {
+    if (input.serviceType !== "walking") {
+      return { error: "Recurring bookings are only available for dog walking right now." };
+    }
+    const uniqDays = [...new Set(rec.daysOfWeek)].filter((d) => d >= 0 && d <= 6);
+    if (uniqDays.length < 1) return { error: "Select at least one day of the week for your recurring schedule." };
+    if (rec.durationMinutes < 15 || rec.durationMinutes > 12 * 60) {
+      return { error: "Invalid visit duration for recurring booking." };
+    }
+    if (rec.repeatUntil === "until_date") {
+      if (!rec.endDateYmd?.trim()) return { error: "Choose an end date or select Indefinitely." };
+      const endSer = endOfDayFromYmdString(rec.endDateYmd);
+      if (!endSer || endSer < new Date(input.startDatetime)) {
+        return { error: "Repeat end date must be on or after the first visit." };
+      }
+    }
+  }
+
   const roundUpCents = input.roundUpEnabled ? computeRoundUpCents(totalCents) : 0;
   const chargeCents = totalCents + roundUpCents;
   const commissionAmount = Math.round(totalCents * COMMISSION_RATE);
 
+  const ownerEmail = user.email ?? "";
+  const ownerDisplayName =
+    (typeof user.user_metadata?.name === "string" && user.user_metadata.name) || ownerEmail || "Owner";
+
   try {
+    let recurringId: string | null = null;
+    if (rec) {
+      const seriesEnd =
+        rec.repeatUntil === "until_date" && rec.endDateYmd ? endOfDayFromYmdString(rec.endDateYmd) : null;
+      const recurringRow = await prisma.recurringBooking.create({
+        data: {
+          ownerId: user.id,
+          providerId: provider.providerId,
+          petIds: input.petIds,
+          serviceType: input.serviceType,
+          daysOfWeek: [...new Set(rec.daysOfWeek)].filter((d) => d >= 0 && d <= 6).sort((a, b) => a - b),
+          timeSlot: rec.timeSlot,
+          durationMinutes: rec.durationMinutes,
+          specialInstructions: input.specialInstructions?.trim() || null,
+          pricePerSessionCents: totalCents,
+          additionalPetCount: Math.max(0, petCount - 1),
+          status: "pending_setup",
+          startDate: new Date(input.startDatetime),
+          endDate: seriesEnd,
+          nextBookingDate: null,
+        },
+      });
+      recurringId = recurringRow.id;
+    }
+
     const booking = await prisma.booking.create({
       data: {
         ownerId: user.id,
@@ -265,22 +315,40 @@ export async function createBookingWithPaymentIntent(
           additionalPetPriceCents: serviceConfig.additional_pet_price,
           petCount,
         },
+        recurringBookingId: recurringId,
       },
     });
 
     const stripe = getStripeServer();
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: chargeCents,
-      currency: "eur",
-      capture_method: "manual",
-      metadata: {
-        type: "booking",
-        bookingId: booking.id,
-        roundUpCents: String(roundUpCents),
-        ownerId: user.id,
-      },
-      automatic_payment_methods: { enabled: true },
-    });
+    let stripeCustomerId: string | undefined;
+    if (rec) {
+      stripeCustomerId = await getOrCreateStripeCustomerForUser(user.id, ownerEmail, ownerDisplayName);
+    }
+    let paymentIntent: Awaited<ReturnType<typeof stripe.paymentIntents.create>>;
+    try {
+      paymentIntent = await stripe.paymentIntents.create({
+        amount: chargeCents,
+        currency: "eur",
+        capture_method: "manual",
+        ...(stripeCustomerId
+          ? { customer: stripeCustomerId, setup_future_usage: rec ? ("off_session" as const) : undefined }
+          : {}),
+        metadata: {
+          type: "booking",
+          bookingId: booking.id,
+          roundUpCents: String(roundUpCents),
+          ownerId: user.id,
+          ...(recurringId ? { recurringBookingId: recurringId } : {}),
+        },
+        automatic_payment_methods: { enabled: true },
+      });
+    } catch (stripeErr) {
+      await prisma.booking.delete({ where: { id: booking.id } }).catch(() => undefined);
+      if (recurringId) {
+        await prisma.recurringBooking.delete({ where: { id: recurringId } }).catch(() => undefined);
+      }
+      throw stripeErr;
+    }
 
     await prisma.booking.update({
       where: { id: booking.id },

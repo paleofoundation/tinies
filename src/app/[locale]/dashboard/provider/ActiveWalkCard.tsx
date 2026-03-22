@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { MapPin, Square } from "lucide-react";
 import { startWalk, endWalk, cancelAcceptedBookingAsProvider } from "./actions";
 import { SendBookingUpdateModal } from "./SendBookingUpdateModal";
+import { TiniesCardModal } from "@/components/tinies-card/TiniesCardModal";
 import { WalkTracker } from "@/components/maps/WalkTracker";
 import type { ProviderBookingCard } from "@/lib/utils/provider-helpers";
 
@@ -26,12 +27,16 @@ export function ActiveWalkCard({ booking }: { booking: ProviderBookingCard }) {
   const [ending, setEnding] = useState(false);
   const [providerCancelling, setProviderCancelling] = useState(false);
   const [sendUpdateOpen, setSendUpdateOpen] = useState(false);
+  const [tiniesCardOpen, setTiniesCardOpen] = useState(false);
+  /** Until router.refresh() returns updated booking.walkEndedAt */
+  const [localWalkEnded, setLocalWalkEnded] = useState(false);
   const watchIdRef = useRef<number | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startedAtRef = useRef<Date | null>(null);
 
   const isWalking = booking.serviceType === "walking" && booking.status === "accepted";
   const isActive = booking.status === "active" && booking.walkStartedAt;
+  const walkFinishedNeedsCard = isActive && (Boolean(booking.walkEndedAt) || localWalkEnded);
 
   const sendPoint = useCallback(
     async (lat: number, lng: number) => {
@@ -135,7 +140,11 @@ export function ActiveWalkCard({ booking }: { booking: ProviderBookingCard }) {
             setEnding(false);
             setTracking(false);
             if (result.error) toast.error(result.error);
-            else toast.success("Walk ended.");
+            else {
+              setLocalWalkEnded(true);
+              toast.success("Walk ended. Complete your Tinies Card to finish.");
+              setTiniesCardOpen(true);
+            }
             router.refresh();
           });
         });
@@ -145,7 +154,11 @@ export function ActiveWalkCard({ booking }: { booking: ProviderBookingCard }) {
           setEnding(false);
           setTracking(false);
           if (result.error) toast.error(result.error);
-          else toast.success("Walk ended.");
+          else {
+            setLocalWalkEnded(true);
+            toast.success("Walk ended. Complete your Tinies Card to finish.");
+            setTiniesCardOpen(true);
+          }
           router.refresh();
         });
       }
@@ -217,7 +230,58 @@ export function ActiveWalkCard({ booking }: { booking: ProviderBookingCard }) {
       }
     };
 
-  if (tracking || (isActive && !booking.walkEndedAt)) {
+  if (walkFinishedNeedsCard && !tracking) {
+    const displayRoute = (booking.walkRoute ?? []) as WalkPoint[];
+    const displayActivities = (booking.walkActivities ?? []) as WalkActivity[];
+    return (
+      <li
+        className="rounded-[var(--radius-lg)] border p-4"
+        style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="font-medium" style={{ color: "var(--color-text)" }}>
+            Walk finished · {booking.petNames.join(", ")}
+          </p>
+          <button
+            type="button"
+            onClick={() => setTiniesCardOpen(true)}
+            className="rounded-[var(--radius-lg)] bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+          >
+            Complete Tinies Card
+          </button>
+        </div>
+        <p className="mt-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+          Submit your activity report to mark this booking complete and notify the owner.
+        </p>
+        <div className="mt-4">
+          <WalkTracker
+            route={displayRoute}
+            currentPosition={null}
+            startedAt={booking.walkStartedAt ? new Date(booking.walkStartedAt) : null}
+            walkActivities={displayActivities}
+            trackingActive={false}
+            showPositionMarker={false}
+          />
+        </div>
+        {booking.walkSummaryMapUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={booking.walkSummaryMapUrl}
+            alt="Walk route"
+            className="mt-4 h-40 w-full rounded-[var(--radius-lg)] object-cover"
+          />
+        ) : null}
+        <TiniesCardModal
+          booking={booking}
+          open={tiniesCardOpen}
+          onClose={() => setTiniesCardOpen(false)}
+          autoOpenNote="GPS and distance are included from your walk."
+        />
+      </li>
+    );
+  }
+
+  if (tracking || (isActive && !booking.walkEndedAt && !localWalkEnded)) {
     const startedAt = startedAtRef.current ?? (booking.walkStartedAt ? new Date(booking.walkStartedAt) : null);
     const displayRoute = route.length > 0 ? route : (booking.walkRoute ?? []);
     const displayActivities = activities.length > 0 ? activities : (booking.walkActivities ?? []);

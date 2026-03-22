@@ -140,6 +140,13 @@ enum LocationType {
   video
 }
 
+enum RecurringBookingStatus {
+  pending_setup
+  active
+  paused
+  cancelled
+}
+
 // ---------------------------------------------------------------------------
 // Users & profiles
 // ---------------------------------------------------------------------------
@@ -194,6 +201,10 @@ model User {
   bookingUpdatesSent         BookingUpdate[]    @relation("BookingUpdateProvider")
   providerCertifications     ProviderCertification[]
   feedbackSubmissions        Feedback[]
+  tiniesCardsAsProvider      TiniesCard[] @relation("TiniesCardProvider")
+  tiniesCardsAsOwner         TiniesCard[] @relation("TiniesCardOwner")
+  recurringBookingsAsOwner   RecurringBooking[] @relation("RecurringBookingOwner")
+  recurringBookingsAsProvider RecurringBooking[] @relation("RecurringBookingProvider")
 
   @@index([email])
   @@index([role])
@@ -365,15 +376,18 @@ model Booking {
   walkSummaryMapUrl       String?         @map("walk_summary_map_url")
   walkActivities         Json?           @map("walk_activities") // [{ type: "pee"|"poo"|"food"|"water", lat, lng, timestamp }]
   serviceReport         Json?           @map("service_report")   // { arrivalTime, departureTime, notes, photos[], activities[], submittedAt }
-  tipAmount             Int?            @map("tip_amount")      // cents
+  tipAmountCents        Int?            @map("tip_amount") // cents; legacy column name
   tipStripePaymentIntentId String?       @map("tip_stripe_payment_intent_id")
+  tipPaidAt             DateTime?       @map("tip_paid_at")
   reminder24hSentAt     DateTime?       @map("reminder_24h_sent_at")
   reviewPromptSentAt    DateTime?       @map("review_prompt_sent_at")
+  recurringBookingId    String?         @map("recurring_booking_id")
   createdAt               DateTime        @default(now()) @map("created_at")
   updatedAt               DateTime        @updatedAt @map("updated_at")
 
   owner    User    @relation("BookingOwner", fields: [ownerId], references: [id], onDelete: Restrict)
   provider User    @relation("BookingProvider", fields: [providerId], references: [id], onDelete: Restrict)
+  recurringBooking RecurringBooking? @relation(fields: [recurringBookingId], references: [id], onDelete: SetNull)
   reviews  Review[]
   messages Message[]
   guaranteeClaims GuaranteeClaim[]
@@ -381,13 +395,76 @@ model Booking {
   meetAndGreets MeetAndGreet[]
   donations Donation[]
   updates       BookingUpdate[]
+  tiniesCard    TiniesCard?
 
   @@index([ownerId])
   @@index([providerId])
   @@index([status])
   @@index([startDatetime])
   @@index([createdAt])
+  @@index([recurringBookingId])
   @@map("bookings")
+}
+
+/// Weekly repeat arrangement; first session is a normal Booking until provider accepts.
+model RecurringBooking {
+  id                     String                 @id @default(uuid())
+  ownerId                String                 @map("owner_id")
+  providerId             String                 @map("provider_id")
+  petIds                 String[]               @map("pet_ids")
+  serviceType            ServiceType            @map("service_type")
+  /// 0 = Sunday … 6 = Saturday (JavaScript convention)
+  daysOfWeek             Int[]                  @map("days_of_week")
+  timeSlot               String                 @map("time_slot")
+  durationMinutes        Int?                   @map("duration_minutes")
+  specialInstructions    String?                @map("special_instructions")
+  pricePerSessionCents   Int                    @map("price_per_session_cents")
+  additionalPetCount     Int                    @default(0) @map("additional_pet_count")
+  status                 RecurringBookingStatus
+  startDate              DateTime               @map("start_date")
+  endDate                DateTime?              @map("end_date")
+  nextBookingDate        DateTime?              @map("next_booking_date")
+  createdAt              DateTime               @default(now()) @map("created_at")
+  updatedAt              DateTime               @updatedAt @map("updated_at")
+
+  owner    User     @relation("RecurringBookingOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  provider User     @relation("RecurringBookingProvider", fields: [providerId], references: [id], onDelete: Restrict)
+  bookings Booking[]
+
+  @@index([ownerId])
+  @@index([providerId])
+  @@index([status, nextBookingDate])
+  @@map("recurring_bookings")
+}
+
+/// Post-service activity report (Tinies Card) — one per completed booking.
+model TiniesCard {
+  id                String      @id @default(uuid())
+  bookingId         String      @unique @map("booking_id")
+  providerId        String      @map("provider_id")
+  ownerId           String      @map("owner_id")
+  petIds            String[]    @map("pet_ids")
+  serviceType       ServiceType @map("service_type")
+  startedAt         DateTime    @map("started_at")
+  endedAt           DateTime    @map("ended_at")
+  durationMinutes   Int         @map("duration_minutes")
+  walkDistanceKm    Float?      @map("walk_distance_km")
+  walkRouteJson     Json?       @map("walk_route_json")
+  walkMapImageUrl   String?     @map("walk_map_image_url")
+  activities        Json
+  photos            String[]    @default([])
+  personalNote      String      @map("personal_note") @db.VarChar(500)
+  mood              String      @db.VarChar(32)
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+
+  booking  Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  provider User    @relation("TiniesCardProvider", fields: [providerId], references: [id], onDelete: Restrict)
+  owner    User    @relation("TiniesCardOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+
+  @@index([ownerId])
+  @@index([providerId])
+  @@map("tinies_cards")
 }
 
 model BookingUpdate {

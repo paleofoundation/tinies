@@ -5,6 +5,7 @@
     { "path": "/api/cron/post-adoption-checkins", "schedule": "0 9 * * *" },
     { "path": "/api/cron/monthly-giving-receipt", "schedule": "0 8 1 * *" },
     { "path": "/api/cron/expire-pending-bookings", "schedule": "*/15 * * * *" },
-    { "path": "/api/cron/expire-meet-and-greets", "schedule": "0 * * * *" }
+    { "path": "/api/cron/expire-meet-and-greets", "schedule": "0 * * * *" },
+    { "path": "/api/cron/generate-recurring-bookings", "schedule": "0 0 * * *" }
   ]
 }

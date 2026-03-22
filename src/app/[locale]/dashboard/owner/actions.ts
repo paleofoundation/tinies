@@ -11,7 +11,15 @@ import { sendSMS, buildOwnerCancelledProviderSMS } from "@/lib/sms";
 import { validatePetFormData, MAX_PHOTOS } from "@/lib/validations/pet";
 import { reviewFormSchema, MAX_PHOTOS as MAX_REVIEW_PHOTOS } from "@/lib/validations/review";
 import type { CancellationPolicy } from "@prisma/client";
-import type { CreatePetResult, UpdatePetResult, DeletePetResult, OwnerBookingCard, WalkRouteData } from "@/lib/utils/owner-helpers";
+import type {
+  CreatePetResult,
+  UpdatePetResult,
+  DeletePetResult,
+  OwnerBookingCard,
+  OwnerRecurringCard,
+  WalkRouteData,
+} from "@/lib/utils/owner-helpers";
+import { nextOccurrenceUtc, parseTimeSlot } from "@/lib/recurring-bookings/schedule";
 
 /** Create a bucket named "pets" in Supabase Storage (Dashboard → Storage) and allow public read if you want public image URLs. */
 const PETS_BUCKET = "pets";
@@ -345,6 +353,7 @@ export async function getOwnerBookings(): Promise<{
       include: {
         provider: { select: { id: true, name: true, avatarUrl: true } },
         reviews: { select: { id: true, createdAt: true } },
+        tiniesCard: { select: { id: true } },
       },
     });
     const allPetIds = rows.flatMap((r) => r.petIds);
@@ -386,7 +395,8 @@ export async function getOwnerBookings(): Promise<{
         serviceReport: b.serviceReport as OwnerBookingCard["serviceReport"],
         hasDispute: b.hasDispute,
         hasGuaranteeClaim: b.hasGuaranteeClaim,
-        tipAmount: b.tipAmount,
+        tipAmountCents: b.tipAmountCents,
+        tiniesCardId: b.tiniesCard?.id ?? null,
       };
     });
     return { bookings };
@@ -405,20 +415,30 @@ export async function createTipPaymentIntent(bookingId: string, amountCents: num
   if (amountCents > 10000) return { clientSecret: null, error: "Maximum tip is €100." };
   const booking = await prisma.booking.findFirst({
     where: { id: bookingId, ownerId: user.id, status: "completed" },
-    select: { id: true, tipAmount: true, tipStripePaymentIntentId: true, providerId: true },
+    select: {
+      id: true,
+      tipAmountCents: true,
+      tipStripePaymentIntentId: true,
+      providerId: true,
+      provider: { select: { name: true } },
+    },
   });
   if (!booking) return { clientSecret: null, error: "Booking not found or not completed." };
-  if (booking.tipAmount != null || booking.tipStripePaymentIntentId) return { clientSecret: null, error: "You have already tipped for this booking." };
+  if (booking.tipAmountCents != null || booking.tipStripePaymentIntentId) {
+    return { clientSecret: null, error: "You have already tipped for this booking." };
+  }
   const profile = await prisma.providerProfile.findUnique({
     where: { userId: booking.providerId },
     select: { stripeConnectAccountId: true },
   });
   if (!profile?.stripeConnectAccountId) return { clientSecret: null, error: "This provider cannot receive tips yet." };
+  const providerName = booking.provider.name?.trim() || "your carer";
   try {
     const stripe = getStripeServer();
     const pi = await stripe.paymentIntents.create({
       amount: amountCents,
       currency: "eur",
+      description: `Tinies tip for ${providerName}`,
       transfer_data: { destination: profile.stripeConnectAccountId },
       application_fee_amount: 0,
       metadata: { type: "booking_tip", bookingId: booking.id },
@@ -844,4 +864,105 @@ export async function updateReview(formData: FormData): Promise<{ error?: string
     console.error("updateReview", e);
     return { error: e instanceof Error ? e.message : "Failed to update review." };
   }
+}
+
+export async function getOwnerRecurringBookings(): Promise<{
+  recurring: OwnerRecurringCard[];
+  error?: string;
+}> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { recurring: [], error: "Not signed in." };
+  try {
+    const rows = await prisma.recurringBooking.findMany({
+      where: { ownerId: user.id },
+      orderBy: { createdAt: "desc" },
+      include: {
+        provider: { select: { name: true } },
+        bookings: {
+          orderBy: { startDatetime: "desc" },
+          select: { id: true, startDatetime: true, status: true, totalPrice: true },
+        },
+      },
+    });
+    const recurring: OwnerRecurringCard[] = rows.map((r) => ({
+      id: r.id,
+      providerName: r.provider.name?.trim() || "Provider",
+      serviceType: r.serviceType,
+      daysOfWeek: r.daysOfWeek,
+      timeSlot: r.timeSlot,
+      pricePerSessionCents: r.pricePerSessionCents,
+      status: r.status,
+      nextBookingDate: r.nextBookingDate,
+      endDate: r.endDate,
+      history: r.bookings.map((b) => ({
+        id: b.id,
+        startDatetime: b.startDatetime,
+        status: b.status,
+        totalPriceCents: b.totalPrice,
+      })),
+    }));
+    return { recurring };
+  } catch (e) {
+    console.error("getOwnerRecurringBookings", e);
+    return { recurring: [], error: "Failed to load recurring bookings." };
+  }
+}
+
+export async function pauseOwnerRecurringBooking(recurringId: string): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+  const u = await prisma.recurringBooking.updateMany({
+    where: { id: recurringId, ownerId: user.id, status: "active" },
+    data: { status: "paused" },
+  });
+  if (u.count === 0) return { error: "Series not found or not active." };
+  revalidatePath("/dashboard/owner");
+  return {};
+}
+
+export async function resumeOwnerRecurringBooking(recurringId: string): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+  const row = await prisma.recurringBooking.findFirst({
+    where: { id: recurringId, ownerId: user.id },
+  });
+  if (!row || row.status !== "paused") return { error: "Series not found or not paused." };
+  const last = await prisma.booking.findFirst({
+    where: { recurringBookingId: recurringId },
+    orderBy: { startDatetime: "desc" },
+    select: { startDatetime: true },
+  });
+  const afterExclusive = last?.startDatetime ?? new Date(0);
+  const { h, m } = parseTimeSlot(row.timeSlot);
+  const next = nextOccurrenceUtc(afterExclusive, row.daysOfWeek, h, m, row.endDate);
+  await prisma.recurringBooking.update({
+    where: { id: recurringId },
+    data: { status: "active", nextBookingDate: next },
+  });
+  revalidatePath("/dashboard/owner");
+  return {};
+}
+
+export async function cancelOwnerRecurringBooking(recurringId: string): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+  const u = await prisma.recurringBooking.updateMany({
+    where: { id: recurringId, ownerId: user.id, status: { not: "cancelled" } },
+    data: { status: "cancelled", nextBookingDate: null },
+  });
+  if (u.count === 0) return { error: "Series not found or already cancelled." };
+  revalidatePath("/dashboard/owner");
+  return {};
 }

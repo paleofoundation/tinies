@@ -35,7 +35,21 @@ export type OwnerBookingCard = {
   } | null;
   hasDispute: boolean;
   hasGuaranteeClaim: boolean;
-  tipAmount: number | null;
+  tipAmountCents: number | null;
+  tiniesCardId: string | null;
+};
+
+export type OwnerRecurringCard = {
+  id: string;
+  providerName: string;
+  serviceType: string;
+  daysOfWeek: number[];
+  timeSlot: string;
+  pricePerSessionCents: number;
+  status: string;
+  nextBookingDate: Date | null;
+  endDate: Date | null;
+  history: { id: string; startDatetime: Date; status: string; totalPriceCents: number }[];
 };
 
 export type WalkRouteData = {

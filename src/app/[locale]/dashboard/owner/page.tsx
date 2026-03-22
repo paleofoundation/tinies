@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getOwnerPets, getOwnerBookings } from "./actions";
+import { getOwnerPets, getOwnerBookings, getOwnerRecurringBookings } from "./actions";
 import { getOwnerMeetAndGreets } from "@/lib/meet-and-greet/actions";
 import { getDisputesForUser, getClaimsForUser } from "@/lib/disputes/actions";
 import { OwnerDashboardClient } from "./OwnerDashboardClient";
@@ -20,13 +20,15 @@ export default async function OwnerDashboardPage() {
   let meetAndGreets: Awaited<ReturnType<typeof getOwnerMeetAndGreets>>["meetAndGreets"] = [];
   let disputesList: Awaited<ReturnType<typeof getDisputesForUser>>["disputes"] = [];
   let claimsList: Awaited<ReturnType<typeof getClaimsForUser>>["claims"] = [];
+  let recurringList: Awaited<ReturnType<typeof getOwnerRecurringBookings>>["recurring"] = [];
   try {
-    const [petsResult, bookingsResult, meetResult, disputesResult, claimsResult] = await Promise.all([
+    const [petsResult, bookingsResult, meetResult, disputesResult, claimsResult, recurringResult] = await Promise.all([
       getOwnerPets(),
       getOwnerBookings(),
       getOwnerMeetAndGreets().then((r) => (r.error ? { meetAndGreets: [] } : r)),
       getDisputesForUser().then((r) => (r.error ? { disputes: [] } : r)),
       getClaimsForUser().then((r) => (r.error ? { claims: [] } : r)),
+      getOwnerRecurringBookings().then((r) => (r.error ? { recurring: [] } : r)),
     ]);
     pets = petsResult.pets;
     error = petsResult.error;
@@ -34,6 +36,7 @@ export default async function OwnerDashboardPage() {
     meetAndGreets = meetResult.meetAndGreets ?? [];
     disputesList = disputesResult.disputes ?? [];
     claimsList = claimsResult.claims ?? [];
+    recurringList = recurringResult.recurring ?? [];
   } catch (e) {
     console.error("OwnerDashboardPage data fetch", e);
     error = "Failed to load dashboard.";
@@ -70,7 +73,14 @@ export default async function OwnerDashboardPage() {
 
         <OwnerFavoritesSection />
 
-        <OwnerDashboardClient initialPets={pets} initialBookings={bookings} initialMeetAndGreets={meetAndGreets} initialDisputes={disputesList} initialClaims={claimsList} />
+        <OwnerDashboardClient
+          initialPets={pets}
+          initialBookings={bookings}
+          initialMeetAndGreets={meetAndGreets}
+          initialDisputes={disputesList}
+          initialClaims={claimsList}
+          initialRecurring={recurringList}
+        />
 
         <p className="mt-8 flex flex-wrap gap-4">
           <Link

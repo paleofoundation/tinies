@@ -180,21 +180,55 @@ export async function POST(request: NextRequest) {
           const bookingId = pi.metadata?.bookingId;
           const amountCents = pi.amount;
           if (bookingId && amountCents > 0) {
-            await prisma.booking.update({
+            const before = await prisma.booking.findUnique({
               where: { id: bookingId },
-              data: { tipAmount: amountCents, tipStripePaymentIntentId: pi.id },
+              select: { tipAmountCents: true },
             });
-            const booking = await prisma.booking.findUnique({
-              where: { id: bookingId },
-              include: { provider: { select: { email: true } } },
-            });
-            if (booking?.provider?.email) {
-              const amountEur = (amountCents / 100).toFixed(2);
-              await sendEmail({
-                to: booking.provider.email,
-                subject: `You received a €${amountEur} tip!`,
-                react: TipReceivedEmail({ amountEur }),
+            if (before?.tipAmountCents == null) {
+              await prisma.booking.update({
+                where: { id: bookingId },
+                data: {
+                  tipAmountCents: amountCents,
+                  tipStripePaymentIntentId: pi.id,
+                  tipPaidAt: new Date(),
+                },
               });
+              const booking = await prisma.booking.findUnique({
+                where: { id: bookingId },
+                include: {
+                  provider: { select: { email: true } },
+                  owner: { select: { name: true } },
+                },
+              });
+              if (booking?.provider?.email) {
+                const amountEur = (amountCents / 100).toFixed(2);
+                const SERVICE_LABELS: Record<string, string> = {
+                  walking: "dog walking",
+                  sitting: "pet sitting",
+                  boarding: "boarding",
+                  drop_in: "drop-in visit",
+                  daycare: "daycare",
+                };
+                const serviceLabel =
+                  SERVICE_LABELS[booking.serviceType] ?? String(booking.serviceType).replace(/_/g, " ");
+                const bookingDate = new Date(booking.startDatetime).toLocaleDateString("en-GB", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                });
+                const ownerName = booking.owner.name?.trim() || "A client";
+                await sendEmail({
+                  to: booking.provider.email,
+                  subject: `${ownerName} left you a €${amountEur} tip`,
+                  react: TipReceivedEmail({
+                    amountEur,
+                    ownerName,
+                    serviceTypeLabel: serviceLabel,
+                    bookingDate,
+                  }),
+                });
+              }
             }
           }
         }

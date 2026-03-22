@@ -72,6 +72,10 @@ export function BookingFlow({ provider, pets, roundupDefaults }: BookingFlowProp
   const [selectedPetIds, setSelectedPetIds] = useState<string[]>([]);
   const [specialInstructions, setSpecialInstructions] = useState("");
   const [roundUpEnabled, setRoundUpEnabled] = useState(roundupDefaults.roundupEnabledDefault);
+  const [recurringEnabled, setRecurringEnabled] = useState(false);
+  const [recurringDays, setRecurringDays] = useState<number[]>([]);
+  const [recurringRepeatUntil, setRecurringRepeatUntil] = useState<"indefinite" | "until_date">("indefinite");
+  const [recurringEndDate, setRecurringEndDate] = useState("");
   const [confirming, setConfirming] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [bookingId, setBookingId] = useState<string | null>(null);
@@ -82,6 +86,15 @@ export function BookingFlow({ provider, pets, roundupDefaults }: BookingFlowProp
       setEndDate(startDate);
     }
   }, [isRangeService, startDate, endDate]);
+
+  useEffect(() => {
+    if (serviceType !== "walking") {
+      setRecurringEnabled(false);
+      setRecurringDays([]);
+      setRecurringRepeatUntil("indefinite");
+      setRecurringEndDate("");
+    }
+  }, [serviceType]);
 
   const serviceConfig = useMemo(
     () => provider.services.find((s) => s.type === serviceType),
@@ -120,6 +133,37 @@ export function BookingFlow({ provider, pets, roundupDefaults }: BookingFlowProp
     [roundUpEnabled, totalCents]
   );
   const chargeCents = totalCents + roundUpCents;
+
+  const sessionsPerWeek = recurringDays.length;
+  const recurringPriceLine =
+    serviceType === "walking" && recurringEnabled && serviceConfig && selectedPetIds.length > 0 && sessionsPerWeek > 0
+      ? `${formatEur(totalCents)}/session × ${sessionsPerWeek} day${sessionsPerWeek === 1 ? "" : "s"}/week`
+      : null;
+
+  function setRecurringOn(on: boolean) {
+    setRecurringEnabled(on);
+    if (on && serviceType === "walking" && startDate) {
+      const parts = startDate.split("-").map(Number);
+      const y = parts[0];
+      const mo = parts[1];
+      const d = parts[2];
+      if (y && mo && d) {
+        const dow = new Date(y, mo - 1, d).getDay();
+        setRecurringDays([dow]);
+      }
+    }
+    if (!on) {
+      setRecurringDays([]);
+      setRecurringRepeatUntil("indefinite");
+      setRecurringEndDate("");
+    }
+  }
+
+  function toggleRecurringDay(d: number) {
+    setRecurringDays((prev) =>
+      prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d].sort((a, b) => a - b)
+    );
+  }
 
   async function persistRoundupPreference(enabled: boolean) {
     const result = await updateOwnerRoundupEnabled(enabled);
@@ -160,6 +204,30 @@ export function BookingFlow({ provider, pets, roundupDefaults }: BookingFlowProp
       toast.error("End must be after start.");
       return;
     }
+    if (recurringEnabled) {
+      if (serviceType !== "walking") {
+        toast.error("Recurring is only available for dog walking.");
+        return;
+      }
+      if (recurringDays.length < 1) {
+        toast.error("Select at least one day of the week for your recurring schedule.");
+        return;
+      }
+      if (recurringRepeatUntil === "until_date") {
+        if (!recurringEndDate.trim()) {
+          toast.error("Choose a repeat end date or select Indefinitely.");
+          return;
+        }
+        if (recurringEndDate < startDate) {
+          toast.error("Repeat end date must be on or after the first walk.");
+          return;
+        }
+      }
+    }
+    const durationMinutes = Math.max(
+      15,
+      Math.round((new Date(end).getTime() - new Date(start).getTime()) / 60000)
+    );
     setConfirming(true);
     const result = await createBookingWithPaymentIntent({
       providerSlug: provider.slug,
@@ -170,6 +238,16 @@ export function BookingFlow({ provider, pets, roundupDefaults }: BookingFlowProp
       specialInstructions: specialInstructions.trim() || undefined,
       roundUpEnabled,
       visitsPerDay: serviceType === "drop_in" ? visitsPerDay : undefined,
+      recurring:
+        recurringEnabled && serviceType === "walking"
+          ? {
+              daysOfWeek: recurringDays,
+              timeSlot: startTime.length >= 5 ? startTime.slice(0, 5) : startTime,
+              repeatUntil: recurringRepeatUntil,
+              endDateYmd: recurringRepeatUntil === "until_date" ? recurringEndDate : undefined,
+              durationMinutes,
+            }
+          : undefined,
     });
     setConfirming(false);
     if (result.error) {
@@ -512,6 +590,109 @@ export function BookingFlow({ provider, pets, roundupDefaults }: BookingFlowProp
           </p>
         </div>
       </section>
+
+      {/* Recurring (walking only) */}
+      {serviceType === "walking" && (
+        <section className={sectionClass}>
+          <h2 className="font-normal" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>
+            Repeat weekly?
+          </h2>
+          <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+            Optional. Your first walk is booked and paid as usual. After your provider accepts, we&apos;ll schedule future walks
+            on the days you choose and charge your saved card automatically (no Tinies fee on top of the sitter&apos;s price).
+          </p>
+          <label className="mt-4 flex cursor-pointer items-center gap-3">
+            <input
+              type="checkbox"
+              checked={recurringEnabled}
+              onChange={(e) => setRecurringOn(e.target.checked)}
+              className="h-4 w-4 rounded border-[var(--color-primary)]/30 text-[var(--color-primary)]"
+            />
+            <span className="text-sm font-medium" style={{ color: "var(--color-text)" }}>
+              Make this recurring?
+            </span>
+          </label>
+          {recurringEnabled && (
+            <div className="mt-4 space-y-4">
+              <div>
+                <p className="text-sm font-medium" style={{ color: "var(--color-text)" }}>
+                  Days of week
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((label, d) => (
+                    <label
+                      key={label}
+                      className="flex cursor-pointer items-center gap-2 rounded-[var(--radius-lg)] border px-3 py-2 text-sm"
+                      style={{
+                        borderColor: recurringDays.includes(d) ? "var(--color-primary)" : "var(--color-border)",
+                        backgroundColor: recurringDays.includes(d) ? "rgba(10, 128, 128, 0.08)" : "transparent",
+                        color: "var(--color-text)",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={recurringDays.includes(d)}
+                        onChange={() => toggleRecurringDay(d)}
+                        className="h-4 w-4 rounded border-[var(--color-primary)]/30"
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-sm font-medium" style={{ color: "var(--color-text)" }}>
+                  Time for each visit
+                </p>
+                <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                  Uses your walk start time above: <strong>{startTime}</strong> (change it in Dates &amp; times).
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium" style={{ color: "var(--color-text)" }}>
+                  Repeat until
+                </p>
+                <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <label className="flex cursor-pointer items-center gap-2 text-sm" style={{ color: "var(--color-text)" }}>
+                    <input
+                      type="radio"
+                      name="repeatUntil"
+                      checked={recurringRepeatUntil === "indefinite"}
+                      onChange={() => setRecurringRepeatUntil("indefinite")}
+                      className="h-4 w-4"
+                    />
+                    Indefinitely
+                  </label>
+                  <label className="flex cursor-pointer items-center gap-2 text-sm" style={{ color: "var(--color-text)" }}>
+                    <input
+                      type="radio"
+                      name="repeatUntil"
+                      checked={recurringRepeatUntil === "until_date"}
+                      onChange={() => setRecurringRepeatUntil("until_date")}
+                      className="h-4 w-4"
+                    />
+                    Until date
+                  </label>
+                  {recurringRepeatUntil === "until_date" && (
+                    <input
+                      type="date"
+                      value={recurringEndDate}
+                      onChange={(e) => setRecurringEndDate(e.target.value)}
+                      min={startDate || undefined}
+                      className={inputClass}
+                    />
+                  )}
+                </div>
+              </div>
+              {recurringPriceLine && (
+                <p className="text-sm font-semibold tabular-nums" style={{ color: "var(--color-primary)" }}>
+                  {recurringPriceLine}
+                </p>
+              )}
+            </div>
+          )}
+        </section>
+      )}
 
       {/* 5. Payment */}
       <section className={sectionClass}>

@@ -26,7 +26,15 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { toast } from "sonner";
-import type { ProviderStripeStatus, ProviderBookingCard, ProviderReviewForDashboard, ProviderEarnings } from "@/lib/utils/provider-helpers";
+import type {
+  ProviderStripeStatus,
+  ProviderBookingCard,
+  ProviderReviewForDashboard,
+  ProviderEarnings,
+  ProviderTipLineItem,
+  ProviderRecurringClientRow,
+  ProviderRecurringUpcomingRow,
+} from "@/lib/utils/provider-helpers";
 import type { ProviderMeetAndGreetCard } from "@/lib/meet-and-greet/meet-and-greet-types";
 import {
   getProviderMeetAndGreets,
@@ -41,9 +49,9 @@ import {
   declineBooking,
   respondToReview,
   startNonWalkService,
-  completeNonWalkBooking,
   cancelAcceptedBookingAsProvider,
 } from "./actions";
+import { TiniesCardModal } from "@/components/tinies-card/TiniesCardModal";
 import { ActiveWalkCard } from "./ActiveWalkCard";
 import { SendBookingUpdateModal } from "./SendBookingUpdateModal";
 import { ServiceReportForm } from "./ServiceReportForm";
@@ -158,6 +166,9 @@ export function ProviderDashboardClient({
   initialBookings,
   initialReviews = [],
   initialEarnings = null,
+  initialTipLineItems = [],
+  initialRecurringClients = [],
+  initialRecurringUpcoming = [],
   initialMeetAndGreets = { requested: [], confirmed: [], completed: [] },
   initialDisputes = [],
   initialClaims = [],
@@ -169,6 +180,9 @@ export function ProviderDashboardClient({
   initialBookings: ProviderBookingCard[];
   initialReviews?: ProviderReviewForDashboard[];
   initialEarnings?: ProviderEarnings | null;
+  initialTipLineItems?: ProviderTipLineItem[];
+  initialRecurringClients?: ProviderRecurringClientRow[];
+  initialRecurringUpcoming?: ProviderRecurringUpcomingRow[];
   initialMeetAndGreets?: {
     requested: ProviderMeetAndGreetCard[];
     confirmed: ProviderMeetAndGreetCard[];
@@ -201,7 +215,7 @@ export function ProviderDashboardClient({
   const [respondingDisputeId, setRespondingDisputeId] = useState<string | null>(null);
   const [respondingClaimId, setRespondingClaimId] = useState<string | null>(null);
   const [startingServiceId, setStartingServiceId] = useState<string | null>(null);
-  const [completingBookingId, setCompletingBookingId] = useState<string | null>(null);
+  const [tiniesCardBooking, setTiniesCardBooking] = useState<ProviderBookingCard | null>(null);
   const [cancellingBookingId, setCancellingBookingId] = useState<string | null>(null);
   const [sendUpdateBooking, setSendUpdateBooking] = useState<{ id: string; headline: string } | null>(null);
   const score = profileCompletenessPercentage ?? getCompletenessScore();
@@ -271,22 +285,6 @@ export function ProviderDashboardClient({
     );
     router.refresh();
     toast.success("Service started — the owner has been notified.");
-  }
-
-  async function handleCompleteNonWalk(bookingId: string) {
-    if (completingBookingId) return;
-    setCompletingBookingId(bookingId);
-    const result = await completeNonWalkBooking(bookingId);
-    setCompletingBookingId(null);
-    if (result.error) {
-      toast.error(result.error);
-      return;
-    }
-    setBookings((prev) =>
-      prev.map((b) => (b.id === bookingId ? { ...b, status: "completed" } : b))
-    );
-    router.refresh();
-    toast.success("Booking marked complete.");
   }
 
   async function handleProviderCancelBooking(bookingId: string) {
@@ -559,6 +557,13 @@ export function ProviderDashboardClient({
             headline={`${sendUpdateBooking.headline} — share a moment with their family`}
           />
         )}
+        {tiniesCardBooking ? (
+          <TiniesCardModal
+            booking={tiniesCardBooking}
+            open
+            onClose={() => setTiniesCardBooking(null)}
+          />
+        ) : null}
 
           {tab === "profile" && (
             <section className="rounded-[var(--radius-lg)] border p-8 sm:p-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
@@ -615,6 +620,51 @@ export function ProviderDashboardClient({
             <section className="rounded-[var(--radius-lg)] border p-8 sm:p-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
               <h2 className="font-normal" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>My Bookings</h2>
               <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>Booking requests, active, and completed.</p>
+
+              {(initialRecurringClients.length > 0 || initialRecurringUpcoming.length > 0) && (
+                <div
+                  className="mt-6 rounded-[var(--radius-lg)] border p-4 sm:p-5"
+                  style={{ borderColor: "var(--color-primary)", backgroundColor: "rgba(10, 128, 128, 0.06)" }}
+                >
+                  <p className="font-semibold" style={{ color: "var(--color-text)" }}>
+                    Recurring clients:{" "}
+                    {initialRecurringClients.filter((c) => c.status === "active" || c.status === "paused").length}
+                  </p>
+                  <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                    Weekly repeat walks auto-book after the owner&apos;s first visit is accepted. Upcoming generated visits are highlighted below.
+                  </p>
+                  {initialRecurringClients.length > 0 && (
+                    <ul className="mt-3 space-y-2 text-sm" style={{ color: "var(--color-text)" }}>
+                      {initialRecurringClients.map((c) => (
+                        <li key={c.id}>
+                          <span className="font-medium">{c.ownerName}</span> · {SERVICE_LABELS[c.serviceType] ?? c.serviceType} ·{" "}
+                          {c.daysOfWeek.map((d) => ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][d]).join(", ")} at {c.timeSlot} ·{" "}
+                          {formatEur(c.pricePerSessionCents)}/session · <span style={{ color: "var(--color-text-secondary)" }}>{c.status}</span>
+                          {c.nextBookingDate && (
+                            <span className="block text-xs" style={{ color: "var(--color-text-muted)" }}>
+                              Next scheduled slot: {formatDateTime(c.nextBookingDate)}
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {initialRecurringUpcoming.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--color-primary)" }}>
+                        Upcoming recurring visits
+                      </p>
+                      <ul className="mt-2 space-y-1.5 text-sm font-medium" style={{ color: "var(--color-text)" }}>
+                        {initialRecurringUpcoming.map((u) => (
+                          <li key={u.bookingId} className="rounded-[var(--radius-lg)] border border-[var(--color-primary)]/40 bg-white/80 px-3 py-2">
+                            {u.ownerName} · {formatDateTime(u.startDatetime)}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Booking Requests (pending) */}
               <h3 className="mt-8 font-medium" style={{ color: "var(--color-text)" }}>Booking Requests</h3>
@@ -709,7 +759,6 @@ export function ProviderDashboardClient({
                               onClick={() => handleStartNonWalk(b.id)}
                               disabled={
                                 startingServiceId === b.id ||
-                                completingBookingId === b.id ||
                                 cancellingBookingId === b.id
                               }
                               className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] bg-[var(--color-primary)] px-3 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-70"
@@ -726,7 +775,7 @@ export function ProviderDashboardClient({
                                   headline: `${b.ownerName} · ${b.petNames.join(", ")} · ${SERVICE_LABELS[b.serviceType] ?? b.serviceType}`,
                                 })
                               }
-                              disabled={completingBookingId === b.id || cancellingBookingId === b.id}
+                              disabled={cancellingBookingId === b.id}
                               className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] border border-[var(--color-primary)] px-3 py-2 text-sm font-semibold hover:bg-[var(--color-primary-50)] disabled:opacity-70"
                               style={{ color: "var(--color-primary)" }}
                             >
@@ -736,26 +785,21 @@ export function ProviderDashboardClient({
                           {(b.status === "active" || b.status === "accepted") && (
                             <button
                               type="button"
-                              onClick={() => handleCompleteNonWalk(b.id)}
+                              onClick={() => setTiniesCardBooking(b)}
                               disabled={
-                                completingBookingId === b.id ||
                                 cancellingBookingId === b.id ||
                                 (b.status === "accepted" && startingServiceId === b.id)
                               }
                               className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] border border-[var(--color-border)] px-3 py-2 text-sm font-semibold hover:bg-[var(--color-surface)] disabled:opacity-70"
                               style={{ color: "var(--color-text)" }}
                             >
-                              {completingBookingId === b.id ? "Completing…" : "Mark complete"}
+                              Mark complete
                             </button>
                           )}
                           <button
                             type="button"
                             onClick={() => handleProviderCancelBooking(b.id)}
-                            disabled={
-                              cancellingBookingId === b.id ||
-                              startingServiceId === b.id ||
-                              completingBookingId === b.id
-                            }
+                            disabled={cancellingBookingId === b.id || startingServiceId === b.id}
                             className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] border border-[var(--color-error)]/50 px-3 py-2 text-sm font-semibold text-[var(--color-error)] hover:bg-[var(--color-error)]/10 disabled:opacity-70"
                           >
                             {cancellingBookingId === b.id ? "Cancelling…" : "Cancel booking"}
@@ -814,7 +858,11 @@ export function ProviderDashboardClient({
                           </div>
                         </div>
                       )}
-                      {!b.serviceReport ? (
+                      {b.tiniesCardId ? (
+                        <p className="mt-4 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                          Tinies Card submitted for this booking.
+                        </p>
+                      ) : !b.serviceReport ? (
                         <div className="mt-4 w-full">
                           <ServiceReportForm booking={b} />
                         </div>
@@ -1208,7 +1256,9 @@ export function ProviderDashboardClient({
                     {initialEarnings ? formatEur(initialEarnings.totalEarnedCents) : "€0.00"}
                   </p>
                   {initialEarnings && initialEarnings.tipsTotalCents > 0 && (
-                    <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>Includes {formatEur(initialEarnings.tipsTotalCents)} in tips</p>
+                    <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                      Includes {formatEur(initialEarnings.tipsTotalCents)} in tips (paid out with your next Stripe payout)
+                    </p>
                   )}
                 </div>
                 <div className="rounded-[var(--radius-lg)] border p-4" style={{ backgroundColor: "var(--color-background)", borderColor: "var(--color-border)" }}>
@@ -1216,6 +1266,21 @@ export function ProviderDashboardClient({
                   <p className="mt-1 text-2xl font-bold" style={{ color: "var(--color-primary)" }}>€0.00</p>
                 </div>
               </div>
+              {initialTipLineItems.length > 0 && (
+                <div className="mt-6 rounded-[var(--radius-lg)] border p-4" style={{ backgroundColor: "var(--color-background)", borderColor: "var(--color-border)" }}>
+                  <h3 className="font-medium" style={{ color: "var(--color-text)" }}>Tips</h3>
+                  <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                    100% of each tip goes to you. Amounts are included in your next weekly Stripe Connect payout.
+                  </p>
+                  <ul className="mt-4 space-y-2">
+                    {initialTipLineItems.map((t) => (
+                      <li key={t.bookingId} className="text-sm" style={{ color: "var(--color-text)" }}>
+                        Tip from {t.ownerName} for {t.dateLabel} booking: {formatEur(t.amountCents)}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               <h3 className="mt-6 font-medium" style={{ color: "var(--color-text)" }}>Payout history</h3>
               <p className="mt-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>No payouts yet. Complete a booking to start earning.</p>
             </section>

@@ -14,6 +14,7 @@ import type { PostAdoptionPhase } from "@/lib/email/templates/post-adoption-chec
 import { getStripeServer } from "@/lib/stripe";
 import BookingExpiredEmail from "@/lib/email/templates/booking-expired";
 import MeetAndGreetOwnerUpdateEmail from "@/lib/email/templates/meet-and-greet-owner-update";
+import { cancelRecurringBookingIfPendingSetup } from "@/lib/recurring-bookings/cancel-setup";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
@@ -411,6 +412,7 @@ export async function runExpirePendingBookingsCron(): Promise<CronBatchResult> {
     select: {
       id: true,
       stripePaymentIntentId: true,
+      recurringBookingId: true,
       owner: { select: { email: true, phone: true, phoneVerified: true } },
       provider: { select: { name: true } },
     },
@@ -441,6 +443,8 @@ export async function runExpirePendingBookingsCron(): Promise<CronBatchResult> {
         },
       });
       if (updated.count === 0) continue;
+
+      await cancelRecurringBookingIfPendingSetup(b.recurringBookingId);
 
       processed++;
       try {

@@ -84,6 +84,16 @@ export type ProviderReviewPublic = {
   serviceType: string;
 };
 
+/** Weekly repeat (walking only); first session uses normal checkout with saved card for later charges. */
+export type RecurringBookingDraftInput = {
+  daysOfWeek: number[];
+  timeSlot: string;
+  repeatUntil: "indefinite" | "until_date";
+  /** Required when repeatUntil is until_date (YYYY-MM-DD). */
+  endDateYmd?: string;
+  durationMinutes: number;
+};
+
 export type CreateBookingWithPaymentIntentInput = {
   providerSlug: string;
   serviceType: ServiceType;
@@ -94,6 +104,7 @@ export type CreateBookingWithPaymentIntentInput = {
   roundUpEnabled: boolean;
   /** For drop_in: visits per day (multiplies total by days × visitsPerDay). */
   visitsPerDay?: number;
+  recurring?: RecurringBookingDraftInput;
 };
 
 export type CreateBookingWithPaymentIntentResult = {

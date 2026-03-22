@@ -17,7 +17,10 @@ const SERVICE_LABELS: Record<string, string> = {
  * After a booking is marked completed (walk ended or non-walk complete).
  * Registry: NotificationTrigger.BOOKING_COMPLETED
  */
-export async function sendBookingCompletedNotifications(bookingId: string): Promise<void> {
+export async function sendBookingCompletedNotifications(
+  bookingId: string,
+  options?: { skipOwnerEmail?: boolean }
+): Promise<void> {
   try {
     const booking = await prisma.booking.findUnique({
       where: { id: bookingId },
@@ -38,7 +41,7 @@ export async function sendBookingCompletedNotifications(bookingId: string): Prom
         : [];
     const petName = pets.map((p) => p.name).join(", ") || "your pet";
 
-    if (booking.owner.email) {
+    if (!options?.skipOwnerEmail && booking.owner.email) {
       await sendEmail({
         to: booking.owner.email,
         subject: `How was ${petName}'s ${serviceLabel.toLowerCase()}?`,

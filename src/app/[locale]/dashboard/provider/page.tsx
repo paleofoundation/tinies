@@ -3,6 +3,9 @@ import {
   getProviderBookings,
   getProviderReviews,
   getProviderEarnings,
+  getProviderTipLineItems,
+  getProviderRecurringClients,
+  getProviderRecurringUpcoming,
   expireStaleBookings,
   getProviderProfileCompleteness,
   getProviderAreaPriceGuidance,
@@ -24,6 +27,9 @@ export default async function ProviderDashboardPage() {
   let bookingsResult: Awaited<ReturnType<typeof getProviderBookings>>;
   let reviews: Awaited<ReturnType<typeof getProviderReviews>>;
   let earningsResult: Awaited<ReturnType<typeof getProviderEarnings>>;
+  let tipLineItemsResult: Awaited<ReturnType<typeof getProviderTipLineItems>>;
+  let recurringClientsResult: Awaited<ReturnType<typeof getProviderRecurringClients>>;
+  let recurringUpcomingResult: Awaited<ReturnType<typeof getProviderRecurringUpcoming>>;
   let meetAndGreets: Awaited<ReturnType<typeof getProviderMeetAndGreets>>;
   let disputesResult: Awaited<ReturnType<typeof getDisputesForUser>>;
   let claimsResult: Awaited<ReturnType<typeof getClaimsForUser>>;
@@ -36,6 +42,9 @@ export default async function ProviderDashboardPage() {
       bookingsResult,
       reviews,
       earningsResult,
+      tipLineItemsResult,
+      recurringClientsResult,
+      recurringUpcomingResult,
       meetAndGreets,
       disputesResult,
       claimsResult,
@@ -50,6 +59,9 @@ export default async function ProviderDashboardPage() {
       })(),
       getProviderReviews(),
       getProviderEarnings(),
+      getProviderTipLineItems(),
+      getProviderRecurringClients(),
+      getProviderRecurringUpcoming(),
       getProviderMeetAndGreets(),
       getDisputesForUser().then((r) => (r.error ? { disputes: [] } : r)),
       getClaimsForUser().then((r) => (r.error ? { claims: [] } : r)),
@@ -63,6 +75,9 @@ export default async function ProviderDashboardPage() {
     bookingsResult = { bookings: [] };
     reviews = { reviews: [], error: "Failed to load." };
     earningsResult = { earnings: null };
+    tipLineItemsResult = { items: [] };
+    recurringClientsResult = { clients: [] };
+    recurringUpcomingResult = { upcoming: [] };
     meetAndGreets = { requested: [], confirmed: [], completed: [], error: "Failed to load." };
     disputesResult = { disputes: [] };
     claimsResult = { claims: [] };
@@ -87,6 +102,9 @@ export default async function ProviderDashboardPage() {
 
   const { bookings } = bookingsResult;
   const earnings = earningsResult.earnings ?? null;
+  const tipLineItems = tipLineItemsResult.items ?? [];
+  const recurringClients = recurringClientsResult.clients ?? [];
+  const recurringUpcoming = recurringUpcomingResult.upcoming ?? [];
   const { disputes: disputesList = [] } = disputesResult;
   const { claims: claimsList = [] } = claimsResult;
   const { requested = [], confirmed = [], completed = [] } = meetAndGreets.error ? {} : meetAndGreets;
@@ -118,6 +136,9 @@ export default async function ProviderDashboardPage() {
       initialBookings={bookings}
       initialReviews={reviews.reviews}
       initialEarnings={earnings}
+      initialTipLineItems={tipLineItems}
+      initialRecurringClients={recurringClients}
+      initialRecurringUpcoming={recurringUpcoming}
       initialMeetAndGreets={{ requested, confirmed, completed }}
       initialDisputes={disputesList}
       initialClaims={claimsList}
