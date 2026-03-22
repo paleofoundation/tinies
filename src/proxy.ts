@@ -5,7 +5,11 @@ import { routing } from "@/i18n/routing";
 
 const intlMiddleware = createMiddleware(routing);
 
-/** Strip known locale prefix so auth checks use the logical app path. */
+/**
+ * Strip known locale prefix so auth checks use the logical app path.
+ * Only the first segment is treated as a locale (en|el|ru). Paths like /adopt/splotch
+ * are unchanged here — "splotch" is never interpreted as a locale (that would require /splotch/...).
+ */
 function pathnameWithoutLocale(pathname: string): string {
   const segments = pathname.split("/").filter(Boolean);
   const first = segments[0];

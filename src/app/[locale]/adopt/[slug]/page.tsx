@@ -48,7 +48,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function AdoptionListingProfilePage({ params }: Props) {
-  const { slug } = await params;
+  const resolvedParams = await params;
+  console.log("[adopt/slug] params:", JSON.stringify(resolvedParams));
+  const { slug } = resolvedParams;
   if (RESERVED_ADOPTION_SLUGS.has(slug)) {
     return <TiniesWhoMadeItPageContent />;
   }
