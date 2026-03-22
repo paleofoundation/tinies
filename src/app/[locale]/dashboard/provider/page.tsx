@@ -7,6 +7,10 @@ import {
   getProviderProfileCompleteness,
   getProviderAreaPriceGuidance,
 } from "./actions";
+import {
+  getProviderHasCompletedRequiredTraining,
+  listProviderTrainingCourses,
+} from "@/lib/training/course-actions";
 import { getProviderMeetAndGreets } from "@/lib/meet-and-greet/actions";
 import { getDisputesForUser, getClaimsForUser } from "@/lib/disputes/actions";
 import { ProviderDashboardClient } from "./ProviderDashboardClient";
@@ -23,8 +27,21 @@ export default async function ProviderDashboardPage() {
   let meetAndGreets: Awaited<ReturnType<typeof getProviderMeetAndGreets>>;
   let disputesResult: Awaited<ReturnType<typeof getDisputesForUser>>;
   let claimsResult: Awaited<ReturnType<typeof getClaimsForUser>>;
+  let trainingCourses: Awaited<ReturnType<typeof listProviderTrainingCourses>> = [];
+  let requiredTrainingComplete = true;
   try {
-    [completeness, stripeStatus, bookingsResult, reviews, earningsResult, meetAndGreets, disputesResult, claimsResult] = await Promise.all([
+    [
+      completeness,
+      stripeStatus,
+      bookingsResult,
+      reviews,
+      earningsResult,
+      meetAndGreets,
+      disputesResult,
+      claimsResult,
+      trainingCourses,
+      requiredTrainingComplete,
+    ] = await Promise.all([
       getProviderProfileCompleteness(),
       getProviderStripeStatus(),
       (async () => {
@@ -36,6 +53,8 @@ export default async function ProviderDashboardPage() {
       getProviderMeetAndGreets(),
       getDisputesForUser().then((r) => (r.error ? { disputes: [] } : r)),
       getClaimsForUser().then((r) => (r.error ? { claims: [] } : r)),
+      listProviderTrainingCourses(),
+      getProviderHasCompletedRequiredTraining(),
     ]);
   } catch (e) {
     console.error("ProviderDashboardPage data fetch", e);
@@ -47,6 +66,8 @@ export default async function ProviderDashboardPage() {
     meetAndGreets = { requested: [], confirmed: [], completed: [], error: "Failed to load." };
     disputesResult = { disputes: [] };
     claimsResult = { claims: [] };
+    trainingCourses = [];
+    requiredTrainingComplete = true;
   }
 
   if (completeness.showWizard && completeness.profile) {
@@ -70,6 +91,27 @@ export default async function ProviderDashboardPage() {
   const { claims: claimsList = [] } = claimsResult;
   const { requested = [], confirmed = [], completed = [] } = meetAndGreets.error ? {} : meetAndGreets;
 
+  const trainingForClient = trainingCourses.map((c) => ({
+    id: c.id,
+    slug: c.slug,
+    title: c.title,
+    description: c.description,
+    required: c.required,
+    badgeLabel: c.badgeLabel,
+    badgeColor: c.badgeColor,
+    estimatedMinutes: c.estimatedMinutes,
+    totalSlides: c.totalSlides,
+    passingScore: c.passingScore,
+    certification: c.certification
+      ? {
+          passed: c.certification.passed,
+          score: c.certification.score,
+          completedAt: c.certification.completedAt.toISOString(),
+          certificateId: c.certification.certificateId,
+        }
+      : null,
+  }));
+
   return (
     <ProviderDashboardClient
       stripeStatus={stripeStatus}
@@ -80,6 +122,8 @@ export default async function ProviderDashboardPage() {
       initialDisputes={disputesList}
       initialClaims={claimsList}
       profileCompletenessPercentage={completeness.percentage}
+      trainingCourses={trainingForClient}
+      requiredTrainingComplete={requiredTrainingComplete}
     />
   );
 }

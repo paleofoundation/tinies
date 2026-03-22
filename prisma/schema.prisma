@@ -75,6 +75,7 @@ enum AdoptionListingStatus {
   matched
   in_transit
   adopted
+  memorial
 }
 
 enum ApplicationStatus {
@@ -108,6 +109,7 @@ enum DonationSource {
   one_time
   guardian
   platform_commission
+  campaign
 }
 
 enum GuardianTier {
@@ -190,6 +192,7 @@ model User {
   providerFavoritesAsOwner   ProviderFavorite[] @relation("ProviderFavoriteOwner")
   providerFavoritesAsTarget  ProviderFavorite[] @relation("ProviderFavoriteProvider")
   bookingUpdatesSent         BookingUpdate[]    @relation("BookingUpdateProvider")
+  providerCertifications     ProviderCertification[]
 
   @@index([email])
   @@index([role])
@@ -474,6 +477,7 @@ model RescueOrg {
   listings  AdoptionListing[]
   placements AdoptionPlacement[]
   linkedCharity Charity?
+  campaigns Campaign[]
 
   @@index([userId])
   @@index([verified])
@@ -622,6 +626,50 @@ model AdoptionPlacement {
   @@map("adoption_placements")
 }
 
+model Campaign {
+  id                 String   @id @default(uuid())
+  rescueOrgId        String   @map("rescue_org_id")
+  slug               String   @unique
+  title              String
+  subtitle           String?
+  description        String   @db.Text
+  coverPhotoUrl      String?  @map("cover_photo_url")
+  goalAmountCents    Int?     @map("goal_amount_cents")
+  raisedAmountCents  Int      @default(0) @map("raised_amount_cents")
+  donorCount         Int      @default(0) @map("donor_count")
+  /// active | paused | completed | draft
+  status             String   @default("draft")
+  featured           Boolean  @default(false)
+  milestones         Json?
+  updates            Json?
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  rescueOrg RescueOrg         @relation(fields: [rescueOrgId], references: [id], onDelete: Cascade)
+  donations CampaignDonation[]
+
+  @@index([rescueOrgId])
+  @@index([status])
+  @@index([featured])
+  @@map("campaigns")
+}
+
+model CampaignDonation {
+  id         String   @id @default(uuid())
+  campaignId String   @map("campaign_id")
+  donationId String   @unique @map("donation_id")
+  donorName  String?  @map("donor_name")
+  message    String?  @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  donation Donation @relation(fields: [donationId], references: [id], onDelete: Restrict)
+
+  @@index([campaignId])
+  @@index([createdAt])
+  @@map("campaign_donations")
+}
+
 model TransportProvider {
   id              String   @id @default(uuid())
   name            String
@@ -730,6 +778,7 @@ model Donation {
   user    User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   charity Charity? @relation(fields: [charityId], references: [id], onDelete: SetNull)
   booking Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  campaignLink CampaignDonation?
 
   @@index([userId])
   @@index([charityId])
@@ -922,4 +971,78 @@ model ProcessedWebhookEvent {
   @@index([eventType])
   @@index([processedAt])
   @@map("processed_webhook_events")
+}
+
+// ---------------------------------------------------------------------------
+// Provider training & certifications
+// ---------------------------------------------------------------------------
+
+model Course {
+  id                String   @id @default(uuid())
+  slug              String   @unique
+  title             String
+  description       String
+  /// "essential" | "specialized"
+  category          String
+  required          Boolean  @default(false)
+  badgeLabel        String   @map("badge_label")
+  /// Token mapped to CSS vars in app: primary | secondary | primary-700 | primary-900
+  badgeColor        String?  @map("badge_color")
+  estimatedMinutes  Int      @map("estimated_minutes")
+  totalSlides       Int      @map("total_slides")
+  /// Minimum quiz score percentage to pass (e.g. 80)
+  passingScore      Int      @map("passing_score")
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  slides            CourseSlide[]
+  certifications    ProviderCertification[]
+
+  @@index([active])
+  @@index([required])
+  @@map("courses")
+}
+
+model CourseSlide {
+  id               String   @id @default(uuid())
+  courseId         String   @map("course_id")
+  slideNumber      Int      @map("slide_number")
+  title            String
+  content          String   @db.Text
+  imageUrl         String?  @map("image_url")
+  /// "lesson" | "quiz"
+  slideType        String   @map("slide_type")
+  quizQuestion     String?  @map("quiz_question") @db.Text
+  /// Array of { text: string, isCorrect: boolean }
+  quizOptions      Json?    @map("quiz_options")
+  quizExplanation  String?  @map("quiz_explanation") @db.Text
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, slideNumber])
+  @@index([courseId])
+  @@map("course_slides")
+}
+
+model ProviderCertification {
+  id            String    @id @default(uuid())
+  providerId    String    @map("provider_id")
+  courseId      String    @map("course_id")
+  score         Int
+  passed        Boolean
+  completedAt   DateTime  @map("completed_at")
+  /// Human-readable certificate reference when passed; null if failed attempt
+  certificateId String?   @unique @map("certificate_id")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  provider User   @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, courseId])
+  @@index([providerId])
+  @@index([courseId])
+  @@map("provider_certifications")
 }

@@ -10,6 +10,8 @@ type PeerQuery = {
 export async function getAdoptionListingPeerOptions(query: PeerQuery = {}): Promise<AdoptionListingPeerOption[]> {
   const rows = await prisma.adoptionListing.findMany({
     where: {
+      status: "available",
+      active: true,
       ...(query.excludeListingId ? { id: { not: query.excludeListingId } } : {}),
       ...(query.orgId ? { orgId: query.orgId } : {}),
     },

@@ -46,6 +46,7 @@ export function mapProfileToSearchProviderCard(
     serviceType?: string;
     searchLat?: number | null;
     searchLng?: number | null;
+    certificationDots?: { slug: string; label: string; colorVar: string }[];
   }
 ): SearchProviderCard {
   const raw = p.servicesOffered as unknown;
@@ -107,5 +108,6 @@ export function mapProfileToSearchProviderCard(
     cancellationPolicy: p.cancellationPolicy,
     updatedAt: p.updatedAt.toISOString(),
     confirmedHolidays: p.confirmedHolidays,
+    certificationDots: options.certificationDots ?? [],
   };
 }

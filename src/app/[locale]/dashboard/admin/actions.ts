@@ -65,6 +65,7 @@ export async function getOrCreateGardensRescueOrg(userId: string, userEmail: str
 
 const STATUS_MAP: Record<string, AdoptionListingStatus> = {
   available: AdoptionListingStatus.available,
+  memorial: AdoptionListingStatus.memorial,
   application_pending: AdoptionListingStatus.application_pending,
   matched: AdoptionListingStatus.matched,
   in_transit: AdoptionListingStatus.in_transit,

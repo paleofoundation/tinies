@@ -23,6 +23,7 @@ import {
   Heart,
   CalendarClock,
   AlertCircle,
+  GraduationCap,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { ProviderStripeStatus, ProviderBookingCard, ProviderReviewForDashboard, ProviderEarnings } from "@/lib/utils/provider-helpers";
@@ -47,8 +48,28 @@ import { ActiveWalkCard } from "./ActiveWalkCard";
 import { SendBookingUpdateModal } from "./SendBookingUpdateModal";
 import { ServiceReportForm } from "./ServiceReportForm";
 import { walkActivitySummary } from "@/components/maps/WalkTracker";
+import { badgeColorVar } from "@/lib/training/badge-styles";
 
-type TabId = "profile" | "bookings" | "meetgreet" | "disputes" | "earnings" | "reviews" | "messages";
+export type ProviderDashboardTrainingCourse = {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  required: boolean;
+  badgeLabel: string;
+  badgeColor: string | null;
+  estimatedMinutes: number;
+  totalSlides: number;
+  passingScore: number;
+  certification: {
+    passed: boolean;
+    score: number;
+    completedAt: string;
+    certificateId: string | null;
+  } | null;
+};
+
+type TabId = "profile" | "bookings" | "meetgreet" | "disputes" | "earnings" | "reviews" | "training" | "messages";
 
 const SERVICE_LABELS: Record<string, string> = {
   walking: "Dog walking",
@@ -128,6 +149,7 @@ const TABS: { id: TabId; label: string; icon: typeof User }[] = [
   { id: "disputes", label: "Disputes & Claims", icon: AlertCircle },
   { id: "earnings", label: "Earnings", icon: Wallet },
   { id: "reviews", label: "Reviews", icon: Star },
+  { id: "training", label: "Training", icon: GraduationCap },
   { id: "messages", label: "Messages", icon: MessageSquare },
 ];
 
@@ -140,6 +162,8 @@ export function ProviderDashboardClient({
   initialDisputes = [],
   initialClaims = [],
   profileCompletenessPercentage,
+  trainingCourses = [],
+  requiredTrainingComplete = true,
 }: {
   stripeStatus: ProviderStripeStatus;
   initialBookings: ProviderBookingCard[];
@@ -153,6 +177,8 @@ export function ProviderDashboardClient({
   initialDisputes?: DisputeCard[];
   initialClaims?: ClaimCard[];
   profileCompletenessPercentage?: number;
+  trainingCourses?: ProviderDashboardTrainingCourse[];
+  requiredTrainingComplete?: boolean;
 }) {
   const router = useRouter();
   const [tab, setTab] = useState<TabId>("profile");
@@ -179,6 +205,8 @@ export function ProviderDashboardClient({
   const [cancellingBookingId, setCancellingBookingId] = useState<string | null>(null);
   const [sendUpdateBooking, setSendUpdateBooking] = useState<{ id: string; headline: string } | null>(null);
   const score = profileCompletenessPercentage ?? getCompletenessScore();
+  const firstRequiredCourse = trainingCourses.find((c) => c.required);
+  const showRequiredTrainingBanner = !requiredTrainingComplete && firstRequiredCourse != null;
 
   useEffect(() => {
     setBookings(initialBookings);
@@ -412,6 +440,35 @@ export function ProviderDashboardClient({
       <main className="mx-auto px-4 py-20 sm:px-6 sm:py-20" style={{ maxWidth: "var(--max-width)" }}>
         <h1 className="font-normal" style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-2xl)", color: "var(--color-text)" }}>Provider dashboard</h1>
         <p className="mt-1" style={{ color: "var(--color-text-secondary)" }}>Manage your profile, bookings, and earnings.</p>
+
+        {showRequiredTrainingBanner && firstRequiredCourse ? (
+          <div
+            className="mt-6 flex flex-col gap-3 rounded-[var(--radius-lg)] border px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
+            style={{ borderColor: "var(--color-primary-200)", backgroundColor: "rgba(10, 128, 128, 0.06)" }}
+            role="status"
+          >
+            <div className="flex gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: "var(--color-primary-100)", color: "var(--color-primary)" }}>
+                <GraduationCap className="h-5 w-5" aria-hidden />
+              </div>
+              <div>
+                <p className="font-semibold text-sm" style={{ color: "var(--color-text)", fontFamily: "var(--font-body), sans-serif" }}>
+                  Complete {firstRequiredCourse.title} to appear in search
+                </p>
+                <p className="mt-0.5 text-sm" style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-body), sans-serif" }}>
+                  Finish required training so verified pet owners can find you.
+                </p>
+              </div>
+            </div>
+            <Link
+              href={`/dashboard/provider/courses/${firstRequiredCourse.slug}`}
+              className="inline-flex h-10 shrink-0 items-center justify-center rounded-[var(--radius-pill)] px-5 text-sm font-semibold text-white sm:self-center"
+              style={{ backgroundColor: "var(--color-primary)", fontFamily: "var(--font-body), sans-serif" }}
+            >
+              {!firstRequiredCourse.certification ? "Start course" : "Retake course"}
+            </Link>
+          </div>
+        ) : null}
 
         {/* Profile completeness */}
         <section className="mt-8 rounded-[var(--radius-lg)] border p-8 sm:p-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
@@ -1224,6 +1281,94 @@ export function ProviderDashboardClient({
                     </li>
                   ))}
                 </ul>
+              )}
+            </section>
+          )}
+
+          {tab === "training" && (
+            <section className="rounded-[var(--radius-lg)] border p-8 sm:p-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <h2 className="font-normal" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>Training & certifications</h2>
+                  <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                    Earn badges on your public profile. Required courses keep the marketplace safe.
+                  </p>
+                </div>
+                <Link
+                  href="/dashboard/provider/courses"
+                  className="inline-flex h-10 items-center justify-center rounded-[var(--radius-pill)] px-5 text-sm font-semibold text-white"
+                  style={{ backgroundColor: "var(--color-primary)" }}
+                >
+                  Open courses
+                </Link>
+              </div>
+              {trainingCourses.length === 0 ? (
+                <p className="mt-8 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                  No courses are available yet.
+                </p>
+              ) : (
+                <>
+                  <p className="mt-6 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                    {trainingCourses.length} course{trainingCourses.length !== 1 ? "s" : ""} available ·{" "}
+                    {trainingCourses.filter((c) => c.certification?.passed).length} completed ·{" "}
+                    {trainingCourses.filter((c) => c.certification?.passed).length} badge
+                    {trainingCourses.filter((c) => c.certification?.passed).length !== 1 ? "s" : ""} earned
+                  </p>
+                  <ul className="mt-6 space-y-3">
+                    {trainingCourses.map((c) => {
+                      const done = c.certification?.passed === true;
+                      const failed = c.certification && !c.certification.passed;
+                      const dot = badgeColorVar(c.badgeColor);
+                      return (
+                        <li
+                          key={c.id}
+                          className="flex flex-col gap-3 rounded-[var(--radius-lg)] border p-4 sm:flex-row sm:items-center sm:justify-between"
+                          style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}
+                        >
+                          <div className="flex min-w-0 gap-3">
+                            <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: dot }} title={c.badgeLabel} aria-hidden />
+                            <div className="min-w-0">
+                              <p className="font-semibold" style={{ color: "var(--color-text)", fontFamily: "var(--font-body), sans-serif" }}>
+                                {c.title}
+                                {c.required ? (
+                                  <span className="ml-2 text-xs font-normal" style={{ color: "var(--color-primary)" }}>
+                                    (required for search)
+                                  </span>
+                                ) : null}
+                              </p>
+                              <p className="mt-0.5 line-clamp-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                                {c.description}
+                              </p>
+                              <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
+                                ~{c.estimatedMinutes} min · Badge: {c.badgeLabel}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
+                            {done ? (
+                              <span className="text-sm font-semibold" style={{ color: "var(--color-success)" }}>
+                                Completed · {c.certification!.score}%
+                              </span>
+                            ) : failed ? (
+                              <span className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                                Last score {c.certification!.score}% — try again
+                              </span>
+                            ) : (
+                              <span className="text-sm" style={{ color: "var(--color-text-muted)" }}>Not started</span>
+                            )}
+                            <Link
+                              href={`/dashboard/provider/courses/${c.slug}`}
+                              className="inline-flex h-9 items-center justify-center rounded-[var(--radius-lg)] px-4 text-sm font-semibold text-white"
+                              style={{ backgroundColor: "var(--color-primary)" }}
+                            >
+                              {done ? "Review badge" : failed ? "Retake" : "Start"}
+                            </Link>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </>
               )}
             </section>
           )}

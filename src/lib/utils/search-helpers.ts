@@ -24,6 +24,8 @@ export type SearchProviderCard = {
   cancellationPolicy: string;
   updatedAt: string;
   confirmedHolidays: string[];
+  /** Small trust dots next to name on search cards (passed courses). */
+  certificationDots: { slug: string; label: string; colorVar: string }[];
 };
 
 export type SortOption =

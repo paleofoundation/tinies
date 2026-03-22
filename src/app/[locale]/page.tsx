@@ -13,6 +13,7 @@ import { HomeSearchBar } from "@/components/layout/HomeSearchBar";
 import { getHomepageData } from "@/lib/home/get-homepage-data";
 import { getBlogPostSummaries } from "@/lib/blog/load-posts";
 import { BlogCard } from "@/components/blog/BlogCard";
+import { FaqEntry } from "@/components/faq/FaqEntry";
 import { formatPrice } from "@/lib/utils";
 
 export const revalidate = 300;
@@ -38,6 +39,52 @@ const websiteJsonLd = {
     },
     "query-input": "required name=search_term_string",
   },
+};
+
+const HOMEPAGE_FAQ_ITEMS = [
+  {
+    question: "How much does it cost?",
+    answer:
+      "Providers set their own rates. Tinies adds a 12% service fee — and 90% of that fee goes directly to animal rescue. You're not just paying for pet care, you're funding the care of rescue animals across Cyprus.",
+  },
+  {
+    question: "Is my pet safe?",
+    answer:
+      "Every provider is identity-verified and reviewed by real pet owners. Plus, every booking is covered by the Tinies Guarantee — up to EUR 2,000 for veterinary costs if anything goes wrong.",
+  },
+  {
+    question: "How does international adoption work?",
+    answer:
+      "We coordinate everything: vet preparation, EU pet passport, transport, and customs documentation. You pay one transparent fee, and your new family member arrives at your door. Typically 4-8 weeks from approval to arrival.",
+  },
+  {
+    question: "Where does the money go?",
+    answer:
+      "90% of our commission goes directly to rescue animal care — food, vet bills, shelter. Every euro is tracked on our giving page. This isn't charity on the side. The business exists to fund the rescue.",
+  },
+  {
+    question: "Can I meet the provider before booking?",
+    answer:
+      "Yes. Request a free meet-and-greet from any provider's profile. Meet in person or by video call before you commit.",
+  },
+  {
+    question: "What if I need to cancel?",
+    answer:
+      "Each provider sets their cancellation policy — Flexible, Moderate, or Strict. The policy is shown before you book so there are no surprises. Provider cancellations always mean a full refund.",
+  },
+] as const;
+
+const homepageFaqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: HOMEPAGE_FAQ_ITEMS.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: item.answer,
+    },
+  })),
 };
 
 function formatSpecies(species: string): string {
@@ -88,6 +135,7 @@ export default async function Home() {
     featuredProviders,
     featuredListings,
     recentReviews,
+    featuredCampaign,
   } = homeData;
 
   const donationDisplay = formatPrice(donationsTotalCents, { useSymbol: false });
@@ -95,6 +143,7 @@ export default async function Home() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageFaqJsonLd) }} />
 
       {/* Hero */}
       <header className="relative min-h-[min(88vh,720px)] overflow-hidden">
@@ -158,6 +207,36 @@ export default async function Home() {
           </div>
         </div>
       </header>
+
+      {featuredCampaign ? (
+        <section className="border-b px-4 py-4 sm:px-6 lg:px-8" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}>
+          <div className="mx-auto flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between" style={{ maxWidth: "var(--max-width)" }}>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--color-primary)", fontFamily: "var(--font-body), sans-serif" }}>
+                Featured campaign
+              </p>
+              <p className="mt-1 font-normal text-lg sm:text-xl" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>
+                {featuredCampaign.title}
+              </p>
+              {featuredCampaign.subtitle ? (
+                <p className="mt-1 line-clamp-2 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+                  {featuredCampaign.subtitle}
+                </p>
+              ) : null}
+              <p className="mt-2 text-xs" style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-body), sans-serif" }}>
+                {featuredCampaign.orgName} · {formatPrice(featuredCampaign.raisedAmountCents, { useSymbol: true })} raised
+              </p>
+            </div>
+            <Link
+              href={`/rescue/${featuredCampaign.orgSlug}/campaign/${featuredCampaign.slug}`}
+              className="inline-flex h-11 shrink-0 items-center justify-center rounded-[var(--radius-pill)] px-6 text-sm font-semibold text-white transition-opacity hover:opacity-90 sm:self-center"
+              style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-primary)" }}
+            >
+              Support this campaign
+            </Link>
+          </div>
+        </section>
+      ) : null}
 
       {/* Social proof bar */}
       <section
@@ -555,6 +634,50 @@ export default async function Home() {
           </div>
         </section>
       ) : null}
+
+      {/* Common questions */}
+      <section
+        className="border-t px-4 py-20 sm:px-6 lg:px-8"
+        style={{
+          borderColor: "var(--color-border)",
+          paddingTop: "var(--space-section)",
+          paddingBottom: "var(--space-section)",
+          backgroundColor: "var(--color-background)",
+        }}
+        aria-labelledby="homepage-faq-heading"
+      >
+        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
+          <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+            <h2
+              id="homepage-faq-heading"
+              className="font-normal"
+              style={{
+                fontFamily: "var(--font-heading), serif",
+                fontSize: "var(--text-3xl)",
+                color: "var(--color-text)",
+              }}
+            >
+              Common questions
+            </h2>
+            <Link
+              href="/faq"
+              className="shrink-0 text-sm font-semibold hover:underline"
+              style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-primary)" }}
+            >
+              See all FAQs →
+            </Link>
+          </div>
+          <ul className="mt-10 flex list-none flex-col gap-3 sm:mt-12">
+            {HOMEPAGE_FAQ_ITEMS.map((item) => (
+              <li key={item.question}>
+                <FaqEntry question={item.question}>
+                  <p>{item.answer}</p>
+                </FaqEntry>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
 
       {/* Gardens of St Gertrude */}
       <section className="relative min-h-[420px] overflow-hidden sm:min-h-[480px]">

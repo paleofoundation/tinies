@@ -18,6 +18,8 @@ export type PublicListingFamilySibling = {
 export type PublicAdoptionListing = {
   id: string;
   slug: string;
+  /** Memorial pages are public by URL but excluded from adoption browse. */
+  isMemorial: boolean;
   name: string;
   alternateNames: string[];
   nameStory: string | null;
@@ -57,7 +59,7 @@ function parentFromRow(
   return null;
 }
 
-/** Public animal profile: available + active listings only (org verification does not hide listings). */
+/** Public animal profile: active listings with status `available` or `memorial` (direct URL). */
 export async function getPublicAdoptionListingBySlug(
   slug: string
 ): Promise<PublicAdoptionListing | null> {
@@ -68,12 +70,13 @@ export async function getPublicAdoptionListingBySlug(
     const listing = await prisma.adoptionListing.findFirst({
       where: {
         slug: { equals: normalized, mode: "insensitive" },
-        status: "available",
+        status: { in: ["available", "memorial"] },
         active: true,
       },
       select: {
         id: true,
         slug: true,
+        status: true,
         name: true,
         alternateNames: true,
         nameStory: true,
@@ -109,7 +112,7 @@ export async function getPublicAdoptionListingBySlug(
       if (process.env.NODE_ENV === "development") {
         console.warn("[getPublicAdoptionListingBySlug] no row", {
           slug: normalized,
-          hint: "Expect status=available, active=true; slug match is case-insensitive",
+          hint: "Expect status=available|memorial, active=true; slug match is case-insensitive",
         });
       }
       return null;
@@ -121,7 +124,7 @@ export async function getPublicAdoptionListingBySlug(
         ? await prisma.adoptionListing.findMany({
             where: {
               id: { in: siblingIds },
-              status: "available",
+              status: { in: ["available", "memorial"] },
               active: true,
             },
             select: { id: true, slug: true, name: true, photos: true },
@@ -140,6 +143,7 @@ export async function getPublicAdoptionListingBySlug(
     return {
       id: listing.id,
       slug: listing.slug,
+      isMemorial: listing.status === "memorial",
       name: listing.name,
       alternateNames: asStringList(listing.alternateNames),
       nameStory: listing.nameStory,

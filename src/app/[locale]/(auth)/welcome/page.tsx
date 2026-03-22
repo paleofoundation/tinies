@@ -5,7 +5,9 @@ import { WelcomeExperience } from "./WelcomeExperience";
 
 export const dynamic = "force-dynamic";
 
-type Props = { searchParams: Promise<{ next?: string }> };
+type Props = {
+  searchParams: Promise<{ next?: string; donated?: string; session_id?: string }>;
+};
 
 function WelcomeFallback() {
   return (
@@ -21,7 +23,15 @@ async function WelcomeInner({ searchParams }: Props) {
   if (state.status === "redirect") {
     redirect(state.path);
   }
-  return <WelcomeExperience charities={state.charities} nextPath={state.nextPath} />;
+  const donatedReturn = sp.donated === "true" || sp.donated === "1";
+  return (
+    <WelcomeExperience
+      charities={state.charities}
+      nextPath={state.nextPath}
+      donatedReturn={donatedReturn}
+      checkoutSessionId={sp.session_id ?? null}
+    />
+  );
 }
 
 export default function WelcomePage(props: Props) {

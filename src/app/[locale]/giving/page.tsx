@@ -8,6 +8,7 @@ import {
   getGivingRescuePartnerCards,
   getAnimalsSupportedCount,
 } from "@/lib/giving/actions";
+import { getFeaturedCampaignsForMarketing } from "@/lib/campaign/campaign-public";
 import { GivingAnimatedTotal } from "@/components/giving/GivingAnimatedTotal";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
@@ -45,11 +46,12 @@ function formatEurCents(cents: number): string {
 }
 
 export default async function GivingPage() {
-  const [stats, monthlyRows, partners, animalsSupported] = await Promise.all([
+  const [stats, monthlyRows, partners, animalsSupported, featuredCampaigns] = await Promise.all([
     getGivingStats(),
     getGivingMonthlyTransparencyRows(),
     getGivingRescuePartnerCards(),
     getAnimalsSupportedCount(),
+    getFeaturedCampaignsForMarketing(6),
   ]);
 
   const donateActionJsonLd = {
@@ -102,6 +104,55 @@ export default async function GivingPage() {
           </div>
         </div>
       </section>
+
+      {featuredCampaigns.length > 0 ? (
+        <section className="border-t px-4 py-14 sm:px-6 lg:px-8" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}>
+          <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
+            <h2
+              className="text-center font-normal"
+              style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-2xl)", color: "var(--color-text)" }}
+            >
+              Featured rescue campaigns
+            </h2>
+            <p className="mx-auto mt-2 max-w-2xl text-center text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+              Direct gifts toward a specific goal — land, medical funds, or the next chapter for animals in care.
+            </p>
+            <ul className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {featuredCampaigns.map((c) => (
+                <li
+                  key={`${c.orgSlug}-${c.slug}`}
+                  className="overflow-hidden rounded-[var(--radius-xl)] border transition-shadow hover:shadow-[var(--shadow-md)]"
+                  style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)", boxShadow: "var(--shadow-sm)" }}
+                >
+                  <Link href={`/rescue/${c.orgSlug}/campaign/${c.slug}`} className="block">
+                    <div className="relative aspect-[16/10] w-full" style={{ backgroundColor: "rgba(10, 128, 128, 0.06)" }}>
+                      {c.coverPhotoUrl ? (
+                        <Image src={c.coverPhotoUrl} alt="" fill className="object-cover" sizes="(max-width: 1024px) 100vw, 33vw" />
+                      ) : null}
+                    </div>
+                    <div className="p-5">
+                      <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--color-text-muted)" }}>
+                        {c.orgName}
+                      </p>
+                      <p className="mt-2 font-normal text-lg" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>
+                        {c.title}
+                      </p>
+                      {c.subtitle ? (
+                        <p className="mt-1 line-clamp-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                          {c.subtitle}
+                        </p>
+                      ) : null}
+                      <p className="mt-3 text-sm font-medium tabular-nums" style={{ color: "var(--color-primary)" }}>
+                        {formatEurCents(c.raisedAmountCents)} raised · {c.donorCount} supporters
+                      </p>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      ) : null}
 
       {/* Section 2 — How it works */}
       <section className="px-4 pb-16 sm:px-6 lg:px-8" style={{ paddingBottom: "var(--space-section)" }}>

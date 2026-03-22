@@ -8,6 +8,7 @@ import {
   mapProfileToSearchProviderCard,
   type ProfileRowForSearchCard,
 } from "@/lib/providers/search-provider-card-map";
+import { fetchCertificationDotsByProviderUserIds } from "@/lib/providers/search-certifications";
 import type { SearchProviderCard } from "@/lib/utils/search-helpers";
 import type { FavoriteViewerKind } from "@/lib/providers/favorite-actions-types";
 
@@ -134,11 +135,11 @@ export async function getOwnerFavoriteProviderCards(): Promise<SearchProviderCar
     },
   });
 
-  const cards: SearchProviderCard[] = [];
+  const rows: ProfileRowForSearchCard[] = [];
   for (const fav of favorites) {
     const prof = fav.provider.providerProfile;
     if (!prof || !prof.verified) continue;
-    const row: ProfileRowForSearchCard = {
+    rows.push({
       slug: prof.slug,
       userId: prof.userId,
       bio: prof.bio,
@@ -153,14 +154,15 @@ export async function getOwnerFavoriteProviderCards(): Promise<SearchProviderCar
       confirmedHolidays: prof.confirmedHolidays,
       user: prof.user,
       reviews: prof.reviews,
-    };
-    cards.push(
-      mapProfileToSearchProviderCard(row, {
-        serviceType: undefined,
-        searchLat: null,
-        searchLng: null,
-      })
-    );
+    });
   }
-  return cards;
+  const certDotsByUser = await fetchCertificationDotsByProviderUserIds(rows.map((r) => r.userId));
+  return rows.map((row) =>
+    mapProfileToSearchProviderCard(row, {
+      serviceType: undefined,
+      searchLat: null,
+      searchLng: null,
+      certificationDots: certDotsByUser.get(row.userId) ?? [],
+    })
+  );
 }

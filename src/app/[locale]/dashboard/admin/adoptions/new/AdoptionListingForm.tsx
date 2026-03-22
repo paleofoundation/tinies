@@ -16,6 +16,7 @@ const SPECIES = ["Cat", "Dog", "Other"] as const;
 const SEX = ["Male", "Female", "Unknown"] as const;
 const STATUS_OPTIONS = [
   { value: "available", label: "Available" },
+  { value: "memorial", label: "Memorial (not in browse)" },
   { value: "application_pending", label: "Application Pending" },
   { value: "matched", label: "Matched" },
   { value: "in_transit", label: "In Transit" },

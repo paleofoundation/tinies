@@ -13,6 +13,7 @@ import {
   Pencil,
   ExternalLink,
   Coins,
+  Megaphone,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { OrgApplicationRow, OrgListingRow } from "@/lib/rescue/rescue-org-dashboard-types";
@@ -280,6 +281,17 @@ export function RescueDashboardClient({
           )}
         </div>
       )}
+
+      <div className="mb-4 flex flex-wrap gap-3">
+        <Link
+          href="/dashboard/rescue/campaigns"
+          className="inline-flex h-10 items-center gap-2 rounded-[var(--radius-pill)] border px-4 text-sm font-semibold transition-colors hover:bg-[var(--color-primary-50)]"
+          style={{ borderColor: "var(--color-border)", color: "var(--color-primary)" }}
+        >
+          <Megaphone className="h-4 w-4" aria-hidden />
+          Fundraising campaigns
+        </Link>
+      </div>
 
       <div className="flex flex-wrap gap-2 border-b" style={{ borderColor: "var(--color-border)" }}>
         {tabs.map((t) => (

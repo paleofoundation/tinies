@@ -31,6 +31,16 @@ export type HomepageRecentReview = {
   createdAt: Date;
 };
 
+export type HomepageFeaturedCampaign = {
+  slug: string;
+  title: string;
+  subtitle: string | null;
+  coverPhotoUrl: string | null;
+  raisedAmountCents: number;
+  orgSlug: string;
+  orgName: string;
+};
+
 export type HomepageData = {
   completedBookingsCount: number;
   fiveStarReviewsCount: number;
@@ -41,6 +51,7 @@ export type HomepageData = {
   featuredProviders: HomepageFeaturedProvider[];
   featuredListings: HomepageFeaturedListing[];
   recentReviews: HomepageRecentReview[];
+  featuredCampaign: HomepageFeaturedCampaign | null;
 };
 
 const LISTING_SELECT = {
@@ -188,6 +199,7 @@ export async function getHomepageData(): Promise<HomepageData> {
       featuredProviders,
       featuredListings,
       reviewRows,
+      featuredCampaignRow,
     ] = await Promise.all([
       prisma.booking.count({ where: { status: "completed" } }),
       prisma.review.count({ where: { rating: 5 } }),
@@ -217,7 +229,31 @@ export async function getHomepageData(): Promise<HomepageData> {
           },
         },
       }),
+      prisma.campaign.findFirst({
+        where: { status: "active", featured: true },
+        orderBy: { updatedAt: "desc" },
+        select: {
+          slug: true,
+          title: true,
+          subtitle: true,
+          coverPhotoUrl: true,
+          raisedAmountCents: true,
+          rescueOrg: { select: { slug: true, name: true } },
+        },
+      }),
     ]);
+
+    const featuredCampaign: HomepageFeaturedCampaign | null = featuredCampaignRow
+      ? {
+          slug: featuredCampaignRow.slug,
+          title: featuredCampaignRow.title,
+          subtitle: featuredCampaignRow.subtitle,
+          coverPhotoUrl: featuredCampaignRow.coverPhotoUrl,
+          raisedAmountCents: featuredCampaignRow.raisedAmountCents,
+          orgSlug: featuredCampaignRow.rescueOrg.slug,
+          orgName: featuredCampaignRow.rescueOrg.name,
+        }
+      : null;
 
     const recentReviews: HomepageRecentReview[] = reviewRows.map((r) => {
       const excerpt =
@@ -243,6 +279,7 @@ export async function getHomepageData(): Promise<HomepageData> {
       featuredProviders,
       featuredListings,
       recentReviews,
+      featuredCampaign,
     };
   } catch (e) {
     console.error("getHomepageData", e);
@@ -256,6 +293,7 @@ export async function getHomepageData(): Promise<HomepageData> {
       featuredProviders: [],
       featuredListings: [],
       recentReviews: [],
+      featuredCampaign: null,
     };
   }
 }

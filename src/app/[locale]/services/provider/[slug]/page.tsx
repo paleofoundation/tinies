@@ -21,6 +21,7 @@ import { getFavoriteViewerState } from "@/lib/providers/favorite-actions";
 import { ProviderFavoriteButton } from "@/components/providers/ProviderFavoriteButton";
 import { ProviderProfileShareRow } from "@/components/providers/ProviderProfileShareRow";
 import { ProviderProfileReviews } from "@/components/providers/ProviderProfileReviews";
+import { ProviderCertificationsSection } from "@/components/providers/ProviderCertificationsSection";
 import { ProviderVideoIntro } from "@/components/providers/ProviderVideoIntro";
 import { MeetAndGreetRequestModal } from "./MeetAndGreetRequestModal";
 
@@ -726,6 +727,10 @@ export default async function ProviderProfilePage({ params }: Props) {
                 </div>
               </section>
             )}
+
+            {provider && provider.certifications.length > 0 ? (
+              <ProviderCertificationsSection certifications={provider.certifications} />
+            ) : null}
 
             <section aria-labelledby="reviews-heading">
               <h2 id="reviews-heading" className="font-normal" style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-xl)", color: "var(--color-text)" }}>

@@ -21,6 +21,7 @@ const SOURCE_LABELS: Record<DonationSource, string> = {
   one_time: "One-time",
   guardian: "Guardian subscription",
   platform_commission: "Platform commission (90% to rescue)",
+  campaign: "Rescue campaign",
 };
 
 /** Get the charity linked to the current user, if any. Used for nav and dashboard access. */

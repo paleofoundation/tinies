@@ -4,7 +4,8 @@
  * Ensure migrations are applied first: npx prisma migrate deploy
  */
 
-import { Prisma, PrismaClient } from "@prisma/client";
+import { AdoptionListingStatus, Prisma, PrismaClient } from "@prisma/client";
+import { seedTrainingCourses } from "./seed-training-courses";
 
 const prisma = new PrismaClient();
 
@@ -206,6 +207,8 @@ const GARDENS_DESTINATIONS = ["UK", "Germany", "Netherlands", "Sweden", "Austria
 
 type GardensCatSeed = {
   name: string;
+  /** Memorial listings stay public by URL but are excluded from adoption browse. */
+  memorial?: boolean;
   breed: string;
   sex: string;
   estimatedAge: string;
@@ -214,7 +217,7 @@ type GardensCatSeed = {
   specialNeeds: string | null;
   backstory: string;
   personality: string;
-  idealHome: string;
+  idealHome: string | null;
   goodWith: string[];
   notGoodWith: string[];
   /** YouTube or direct URL; omit for null */
@@ -270,18 +273,18 @@ const GARDENS_CATS: GardensCatSeed[] = [
   },
   {
     name: "Oliver",
+    memorial: true,
     breed: "Domestic Shorthair",
     sex: "male",
     estimatedAge: "5 years",
-    temperament: "Resilient, affectionate, gentle lap cat",
-    medicalHistory: "Hit by a car near Parekklisia; pelvic fracture, surgery, and three months' recovery — now fully mobile per vet.",
-    specialNeeds: "Recovered from pelvic surgery. Occasional vet checkups recommended.",
+    temperament: "Gentle, resilient, endlessly affectionate",
+    medicalHistory: null,
+    specialNeeds: null,
     backstory:
-      "Oliver was hit by a car on the highway near Parekklisia. His pelvis was shattered. After surgery and three months of recovery at the sanctuary, he made a full recovery.",
+      "Oliver was hit by a car on the highway near Parekklisia. His pelvis was shattered. After surgery and months of recovery at the sanctuary, he fought hard. Oliver passed away in January 2026. He was the most affectionate cat at the sanctuary — he'd curl up in your lap and purr for hours. He never stopped trusting people, even after everything. Oliver is why we do this.",
     personality:
-      "Despite everything, Oliver is the most affectionate cat here. He'll curl up in your lap and purr for hours. Resilient and gentle.",
-    idealHome:
-      "A calm, indoor home. Oliver shouldn't be near busy roads again. He needs a quiet space where he feels safe.",
+      "Gentle, resilient, endlessly affectionate. Oliver would claim your lap the moment you sat down. He purred through everything — even his recovery.",
+    idealHome: null,
     goodWith: ["seniors", "single people"],
     notGoodWith: ["small children", "dogs"],
     fosterLocation: "Gardens of St Gertrude, Parekklisia",
@@ -567,6 +570,11 @@ async function main() {
     });
   }
 
+  await prisma.charity.updateMany({
+    where: { slug: "gardens-of-st-gertrude" },
+    data: { rescueOrgId: gardensOrg.id },
+  });
+
   gardensOrg = await prisma.rescueOrg.update({
     where: { id: gardensOrg.id },
     data: {
@@ -604,7 +612,7 @@ async function main() {
       specialNeeds: cat.specialNeeds,
       backstory: cat.backstory,
       personality: cat.personality,
-      idealHome: cat.idealHome,
+      idealHome: cat.idealHome ?? null,
       goodWith: [...cat.goodWith],
       notGoodWith: [...cat.notGoodWith],
       videoUrl: cat.videoUrl ?? null,
@@ -619,7 +627,7 @@ async function main() {
       internationalEligible: true,
       destinationCountries: [...GARDENS_DESTINATIONS],
       photos: [cat.photo],
-      status: "available" as const,
+      status: cat.memorial ? AdoptionListingStatus.memorial : AdoptionListingStatus.available,
       active: true,
     };
     await prisma.adoptionListing.upsert({
@@ -648,7 +656,85 @@ async function main() {
     });
   }
 
-  console.log("Ensured Gardens of St Gertrude org and 6 cat adoption listings with rich profiles.");
+  const safeLandMilestones = [
+    {
+      title: "Campaign launched",
+      description: "Telling our story and rallying support",
+      targetCents: null,
+      reached: true,
+      reachedAt: "2026-03-22",
+    },
+    {
+      title: "Research phase",
+      description: "Identifying suitable land in the Limassol district",
+      targetCents: null,
+      reached: false,
+    },
+    {
+      title: "Land identified",
+      description: "Found the right piece of land for our cats",
+      targetCents: null,
+      reached: false,
+    },
+    {
+      title: "Legal and permits",
+      description: "Zoning verification and purchase preparation",
+      targetCents: null,
+      reached: false,
+    },
+    {
+      title: "Land secured",
+      description: "Purchase or lease signed",
+      targetCents: null,
+      reached: false,
+    },
+    {
+      title: "Sanctuary built",
+      description: "Enclosures, shelters, and garden spaces ready",
+      targetCents: null,
+      reached: false,
+    },
+    {
+      title: "92 cats relocated",
+      description: "Every cat safe in their new home",
+      targetCents: null,
+      reached: false,
+    },
+  ];
+
+  const safeLandDescription =
+    "Gardens of St Gertrude cares for 92 rescue cats in Parekklisia, Cyprus. These cats were abandoned, injured, or born on the streets. We gave them a home — food, vet care, shelter, love.\n\nBut they need more than a home. They need a safe one.\n\nWe're searching for land where we can build a proper sanctuary — open garden spaces for the cats to roam, secure enclosures so they're protected, room to grow as we rescue more animals. A place where every cat has space, safety, and a future.\n\nYour donation goes directly to the land fund. Every euro is tracked on our transparency page. When we find the right piece of land, you'll be the first to know.\n\n92 cats are counting on us. And we're counting on you.";
+
+  await prisma.campaign.upsert({
+    where: { slug: "safe-land-for-92-cats" },
+    create: {
+      rescueOrgId: gardensOrg.id,
+      slug: "safe-land-for-92-cats",
+      title: "Safe Land for 92 Cats",
+      subtitle: "Help us find and secure safe land where our cats can live without fear.",
+      description: safeLandDescription,
+      coverPhotoUrl: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_cats_v2.jpg",
+      goalAmountCents: null,
+      raisedAmountCents: 0,
+      donorCount: 0,
+      status: "active",
+      featured: true,
+      milestones: safeLandMilestones,
+      updates: [],
+    },
+    update: {
+      title: "Safe Land for 92 Cats",
+      subtitle: "Help us find and secure safe land where our cats can live without fear.",
+      description: safeLandDescription,
+      coverPhotoUrl: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_cats_v2.jpg",
+      goalAmountCents: null,
+      status: "active",
+      featured: true,
+      milestones: safeLandMilestones,
+    },
+  });
+
+  console.log("Ensured Gardens of St Gertrude org, 6 cat adoption listings, Safe Land campaign, and charity link.");
 
   // ----- 4. Owner user + pets (for bookings and reviews) -----
   const ownerUser = await prisma.user.upsert({
@@ -837,6 +923,8 @@ async function main() {
     });
   }
   console.log("Created 6 completed bookings and 6 reviews.");
+
+  await seedTrainingCourses(prisma);
 
   console.log("\nSeed complete.");
 }

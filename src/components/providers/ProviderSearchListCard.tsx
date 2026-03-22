@@ -94,6 +94,18 @@ export function ProviderSearchListCard({
             <h2 className="font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
               {provider.name}
             </h2>
+            {provider.certificationDots.length > 0 ? (
+              <span className="flex items-center gap-1" aria-label="Certifications">
+                {provider.certificationDots.map((d) => (
+                  <span
+                    key={d.slug}
+                    className="inline-block h-2 w-2 shrink-0 rounded-full"
+                    style={{ backgroundColor: d.colorVar }}
+                    title={d.label}
+                  />
+                ))}
+              </span>
+            ) : null}
             <span className="flex items-center gap-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
               <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
               {provider.rating != null ? Number(provider.rating.toFixed(1)) : "—"}

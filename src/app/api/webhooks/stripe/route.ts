@@ -14,12 +14,13 @@ import {
   TINIES_GUARDIAN_CHECKOUT_TYPE,
   guardianTierFromAmountCents,
 } from "@/lib/giving/guardian-stripe";
-import SignupDonationThankYouEmail from "@/lib/email/templates/signup-donation-thank-you";
+import { recordSignupDonationIfNew } from "@/lib/giving/signup-donation-webhook";
 import {
   notifyGuardianSubscriptionStarted,
   notifyGuardianInvoicePaid,
 } from "@/lib/notifications/guardian-notifications";
 import type { GuardianTier } from "@prisma/client";
+import { recordCampaignDonationIfNew } from "@/lib/campaign/record-campaign-donation";
 
 const HANDLED_TYPES = [
   "payment_intent.succeeded",
@@ -104,6 +105,10 @@ export async function POST(request: NextRequest) {
             bookingId?: string;
             roundUpCents?: string;
             ownerId?: string;
+            campaignId?: string;
+            anonymous?: string;
+            donorDisplayName?: string;
+            donorMessage?: string;
           };
         };
         const type = pi.metadata?.type;
@@ -113,48 +118,13 @@ export async function POST(request: NextRequest) {
           const charityId = pi.metadata?.charityId || null;
           const amountCents = parseInt(pi.metadata?.amountCents ?? "0", 10);
           if (userId && amountCents > 0) {
-            await prisma.donation.create({
-              data: {
-                userId,
-                charityId: charityId || undefined,
-                source: DonationSource.signup,
-                amount: amountCents,
-                stripePaymentIntentId: pi.id,
-              },
+            await recordSignupDonationIfNew({
+              userId,
+              charityId: charityId && charityId.length > 0 ? charityId : null,
+              amountCents,
+              stripePaymentIntentId: pi.id,
+              showOnLeaderboard,
             });
-            await prisma.userGivingPreference.upsert({
-              where: { userId },
-              create: { userId, showOnLeaderboard },
-              update: { showOnLeaderboard },
-            });
-            try {
-              const [userRow, charityRow] = await Promise.all([
-                prisma.user.findUnique({
-                  where: { id: userId },
-                  select: { email: true },
-                }),
-                charityId
-                  ? prisma.charity.findUnique({
-                      where: { id: charityId },
-                      select: { name: true },
-                    })
-                  : Promise.resolve(null),
-              ]);
-              const charityName = charityRow?.name ?? "our charity partners";
-              const amountEur = (amountCents / 100).toFixed(2);
-              if (userRow?.email) {
-                await sendEmail({
-                  to: userRow.email,
-                  subject: `Thank you for EUR ${amountEur} to ${charityName}`,
-                  react: SignupDonationThankYouEmail({
-                    amountEur,
-                    charityName,
-                  }),
-                });
-              }
-            } catch (thankErr) {
-              console.error("Stripe webhook: signup donation thank-you email failed", thankErr);
-            }
           }
         }
         if (type === "one_time_donation" || type === "quick_donation") {
@@ -178,6 +148,32 @@ export async function POST(request: NextRequest) {
                 update: { showOnLeaderboard },
               });
             }
+          }
+        }
+        if (type === "campaign_donation") {
+          const campaignId = pi.metadata?.campaignId ?? "";
+          const amountCents =
+            typeof pi.amount === "number" && pi.amount > 0
+              ? pi.amount
+              : parseInt(pi.metadata?.amountCents ?? "0", 10);
+          const userId = pi.metadata?.userId ?? "";
+          const charityId = pi.metadata?.charityId && pi.metadata.charityId.length > 0 ? pi.metadata.charityId : null;
+          const anonymous = pi.metadata?.anonymous === "1";
+          const donorDisplay = (pi.metadata?.donorDisplayName ?? "").trim();
+          const donorName = anonymous || !donorDisplay ? "Anonymous" : donorDisplay.slice(0, 120);
+          const donorMessage = pi.metadata?.donorMessage?.trim()
+            ? pi.metadata.donorMessage.trim().slice(0, 2000)
+            : null;
+          if (campaignId && amountCents >= 100) {
+            await recordCampaignDonationIfNew({
+              campaignId,
+              paymentIntentId: pi.id,
+              amountCents,
+              userId: userId || null,
+              charityId,
+              donorName,
+              message: donorMessage,
+            });
           }
         }
         if (type === "booking_tip") {
@@ -297,14 +293,86 @@ export async function POST(request: NextRequest) {
       }
       case "checkout.session.completed": {
         const session = event.data.object as {
+          id?: string;
           mode?: string;
+          payment_status?: string;
+          amount_total?: number | null;
+          payment_intent?: string | { id?: string } | null;
           metadata?: Record<string, string>;
           subscription?: string | { id?: string } | null;
           customer?: string | { id?: string } | null;
           client_reference_id?: string | null;
         };
-        if (session.mode !== "subscription") break;
         const meta = session.metadata ?? {};
+        if (session.mode === "payment" && meta.type === "signup_donation") {
+          const userId = meta.userId || session.client_reference_id || "";
+          const charityId = meta.charityId && meta.charityId.length > 0 ? meta.charityId : null;
+          const amountCents =
+            typeof session.amount_total === "number" && session.amount_total > 0
+              ? session.amount_total
+              : parseInt(meta.amountCents ?? "0", 10);
+          const piRaw = session.payment_intent;
+          const piId =
+            typeof piRaw === "string"
+              ? piRaw
+              : piRaw && typeof piRaw === "object"
+                ? piRaw.id ?? ""
+                : "";
+          const showOnLeaderboard = meta.showOnLeaderboard === "1";
+          if (
+            userId &&
+            amountCents >= 100 &&
+            piId &&
+            session.payment_status === "paid"
+          ) {
+            await recordSignupDonationIfNew({
+              userId,
+              charityId,
+              amountCents,
+              stripePaymentIntentId: piId,
+              showOnLeaderboard,
+            });
+          }
+          break;
+        }
+        if (session.mode === "payment" && meta.type === "campaign_donation") {
+          const campaignId = meta.campaignId ?? "";
+          const amountCents =
+            typeof session.amount_total === "number" && session.amount_total > 0
+              ? session.amount_total
+              : parseInt(meta.amountCents ?? "0", 10);
+          const piRaw = session.payment_intent;
+          const piId =
+            typeof piRaw === "string"
+              ? piRaw
+              : piRaw && typeof piRaw === "object"
+                ? piRaw.id ?? ""
+                : "";
+          const userId = meta.userId || session.client_reference_id || "";
+          const charityId = meta.charityId && meta.charityId.length > 0 ? meta.charityId : null;
+          const anonymous = meta.anonymous === "1";
+          const donorDisplay = (meta.donorDisplayName ?? "").trim();
+          const donorName = anonymous || !donorDisplay ? "Anonymous" : donorDisplay.slice(0, 120);
+          const donorMessage = meta.donorMessage?.trim() ? meta.donorMessage.trim().slice(0, 2000) : null;
+          if (
+            campaignId &&
+            amountCents >= 100 &&
+            piId &&
+            session.payment_status === "paid"
+          ) {
+            await recordCampaignDonationIfNew({
+              campaignId,
+              paymentIntentId: piId,
+              amountCents,
+              userId: userId || null,
+              charityId,
+              donorName,
+              message: donorMessage,
+            });
+          }
+          break;
+        }
+        if (session.mode !== "subscription") break;
         if (meta.checkout_type !== TINIES_GUARDIAN_CHECKOUT_TYPE) break;
         const userId = meta.userId || session.client_reference_id || "";
         if (!userId) break;

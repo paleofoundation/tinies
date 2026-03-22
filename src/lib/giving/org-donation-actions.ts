@@ -13,6 +13,7 @@ const SOURCE_LABELS: Record<DonationSource, string> = {
   one_time: "One-time",
   signup: "Signup",
   platform_commission: "Platform commission (Giving Fund)",
+  campaign: "Rescue campaign",
 };
 
 type PerCharityEntry = { charity_id?: string; charityId?: string; amount: number };

@@ -6,14 +6,12 @@ import { prisma } from "@/lib/prisma";
 import { getStripeServer } from "@/lib/stripe";
 import { UserRole } from "@prisma/client";
 import { safePostWelcomePath } from "./signup-donation-helpers";
+import {
+  upsertPrismaUserFromSupabaseAuthUser,
+  roleFromSupabaseMetadata,
+} from "@/lib/auth/upsert-prisma-user";
 
-function roleFromMetadata(raw: unknown): UserRole {
-  const s = String(raw ?? "owner");
-  if (s === "provider" || s === "rescue" || s === "adopter" || s === "admin") {
-    return s as UserRole;
-  }
-  return UserRole.owner;
-}
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
 export type WelcomeCharityOption = { id: string; name: string; slug: string };
 
@@ -34,23 +32,7 @@ export async function ensureAuthUserInPrisma(): Promise<{ ok: boolean; error?: s
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Not signed in." };
-  const email = (user.email ?? "").trim().toLowerCase();
-  const name =
-    (typeof user.user_metadata?.name === "string" && user.user_metadata.name.trim()) ||
-    email.split("@")[0] ||
-    "Member";
-  const role = roleFromMetadata(user.user_metadata?.role);
-  await prisma.user.upsert({
-    where: { id: user.id },
-    create: {
-      id: user.id,
-      email: email || `${user.id}@placeholder.local`,
-      name: name.slice(0, 200),
-      passwordHash: "supabase-auth-placeholder",
-      role,
-    },
-    update: {},
-  });
+  await upsertPrismaUserFromSupabaseAuthUser(user);
   return { ok: true };
 }
 
@@ -76,7 +58,7 @@ export async function getWelcomePageState(nextQuery: string | null): Promise<Wel
     return { status: "redirect", path: `/login?next=${encodeURIComponent(welcomeTarget)}` };
   }
 
-  await ensureAuthUserInPrisma();
+  await upsertPrismaUserFromSupabaseAuthUser(user);
 
   const dbUser = await prisma.user.findUnique({
     where: { id: user.id },
@@ -102,43 +84,143 @@ export async function getWelcomePageState(nextQuery: string | null): Promise<Wel
   };
 }
 
-/**
- * Creates a Stripe PaymentIntent for the post-signup donation.
- * Recording uses the same webhook path as today (`type: signup_donation`, source signup in DB).
- */
-export async function createSignupDonation(params: {
+export type SignupDonationCheckoutInput = {
   amountCents: number;
   charityId: string | null;
+  /** Open-redirect-safe path from `safePostWelcomePath` (e.g. /dashboard/owner). */
+  returnNextPath: string;
   showOnLeaderboard?: boolean;
-}): Promise<{ clientSecret: string | null; error?: string }> {
+};
+
+/**
+ * Stripe Checkout (payment mode) for the post-signup optional donation.
+ * Success returns to `/welcome?donated=true&session_id={CHECKOUT_SESSION_ID}&next=...`.
+ */
+export async function createSignupDonationCheckout(
+  input: SignupDonationCheckoutInput
+): Promise<{ checkoutUrl: string | null; error?: string }> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { clientSecret: null, error: "You must be signed in." };
-  if (params.amountCents < 100) return { clientSecret: null, error: "Minimum donation is €1." };
-  await ensureAuthUserInPrisma();
+  if (!user) return { checkoutUrl: null, error: "You must be signed in." };
+  if (input.amountCents < 100) return { checkoutUrl: null, error: "Minimum donation is EUR 1." };
+
+  await upsertPrismaUserFromSupabaseAuthUser(user);
+
+  const charityIdStr = input.charityId?.trim() || "";
+  let productName = "Donation — Tinies Giving Fund";
+  if (charityIdStr) {
+    const ch = await prisma.charity.findUnique({
+      where: { id: charityIdStr },
+      select: { name: true, verified: true, active: true },
+    });
+    if (!ch?.verified || !ch.active) {
+      return { checkoutUrl: null, error: "Please choose a valid charity." };
+    }
+    productName = `Donation — ${ch.name}`;
+  }
+
+  const nextEnc = encodeURIComponent(input.returnNextPath);
+  const successUrl = `${APP_URL}/welcome?donated=true&session_id={CHECKOUT_SESSION_ID}&next=${nextEnc}`;
+  const cancelUrl = `${APP_URL}/welcome?next=${nextEnc}`;
+
   try {
     const stripe = getStripeServer();
-    const pi = await stripe.paymentIntents.create({
-      amount: params.amountCents,
-      currency: "eur",
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      client_reference_id: user.id,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      line_items: [
+        {
+          price_data: {
+            currency: "eur",
+            product_data: {
+              name: productName,
+              description: "One-time gift to support rescue animals in Cyprus",
+            },
+            unit_amount: input.amountCents,
+          },
+          quantity: 1,
+        },
+      ],
       metadata: {
         type: "signup_donation",
         userId: user.id,
-        charityId: params.charityId ?? "",
-        amountCents: String(params.amountCents),
-        showOnLeaderboard: params.showOnLeaderboard ? "1" : "0",
+        charityId: charityIdStr,
+        amountCents: String(input.amountCents),
+        showOnLeaderboard: input.showOnLeaderboard ? "1" : "0",
       },
-      automatic_payment_methods: { enabled: true },
     });
-    return { clientSecret: pi.client_secret ?? null };
+    const url = session.url;
+    if (!url) return { checkoutUrl: null, error: "Checkout could not be started." };
+    return { checkoutUrl: url };
   } catch (e) {
-    console.error("createSignupDonation", e);
+    console.error("createSignupDonationCheckout", e);
     return {
-      clientSecret: null,
-      error: e instanceof Error ? e.message : "Failed to create payment.",
+      checkoutUrl: null,
+      error: e instanceof Error ? e.message : "Failed to start checkout.",
     };
+  }
+}
+
+/**
+ * After Checkout success: verify session, mark welcome complete, return amount for the thank-you UI.
+ */
+export async function completeWelcomeAfterSignupCheckout(
+  sessionId: string,
+  nextPathFromUrl: string | null
+): Promise<{ ok: true; amountEur: string; nextPath: string } | { ok: false; error: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not signed in." };
+
+  await upsertPrismaUserFromSupabaseAuthUser(user);
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  });
+  if (!dbUser) return { ok: false, error: "Account not found." };
+
+  const safeNext = safePostWelcomePath(nextPathFromUrl, dbUser.role);
+
+  try {
+    const stripe = getStripeServer();
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ["payment_intent"],
+    });
+
+    if (session.payment_status !== "paid") {
+      return { ok: false, error: "Payment not completed." };
+    }
+    const meta = session.metadata ?? {};
+    if (meta.type !== "signup_donation" || meta.userId !== user.id) {
+      return { ok: false, error: "Invalid session." };
+    }
+
+    const total = session.amount_total ?? 0;
+    if (total < 100) return { ok: false, error: "Invalid amount." };
+
+    const piRef = session.payment_intent;
+    const piId =
+      typeof piRef === "string" ? piRef : piRef && typeof piRef === "object" && "id" in piRef ? String(piRef.id) : "";
+    if (!piId) return { ok: false, error: "Missing payment reference." };
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { welcomeFlowCompletedAt: new Date() },
+    });
+    revalidatePath("/welcome");
+
+    const amountEur = (total / 100).toFixed(2);
+    return { ok: true, amountEur, nextPath: safeNext };
+  } catch (e) {
+    console.error("completeWelcomeAfterSignupCheckout", e);
+    return { ok: false, error: "Could not confirm your payment." };
   }
 }
 
@@ -149,7 +231,7 @@ export async function markWelcomeShown(): Promise<{ ok: boolean; error?: string 
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Not signed in." };
-  await ensureAuthUserInPrisma();
+  await upsertPrismaUserFromSupabaseAuthUser(user);
   try {
     await prisma.user.update({
       where: { id: user.id },

@@ -33,6 +33,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
 const STATUS_MAP: Record<string, AdoptionListingStatus> = {
   available: AdoptionListingStatus.available,
+  memorial: AdoptionListingStatus.memorial,
   application_pending: AdoptionListingStatus.application_pending,
   matched: AdoptionListingStatus.matched,
   in_transit: AdoptionListingStatus.in_transit,

@@ -26,6 +26,7 @@ import {
   getPublicRescueOrgBySlug,
   normalizeExternalUrl,
 } from "@/lib/rescue/public-profile";
+import { getActiveCampaignsForRescueOrg, getMemorialListingsForRescueOrg } from "@/lib/campaign/campaign-public";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
@@ -79,9 +80,11 @@ export default async function PublicRescueOrgPage({ params }: Props) {
   const org = await getPublicRescueOrgBySlug(slug);
   if (!org) notFound();
 
-  const [donationSummary, recentDonations] = await Promise.all([
+  const [donationSummary, recentDonations, activeCampaigns, memorialListings] = await Promise.all([
     getOrgDonationSummary(org.id),
     getOrgRecentDonations(org.id, 5),
+    getActiveCampaignsForRescueOrg(org.id),
+    getMemorialListingsForRescueOrg(org.id),
   ]);
 
   const fb = normalizeExternalUrl(org.socialLinks.facebook);
@@ -506,6 +509,53 @@ export default async function PublicRescueOrgPage({ params }: Props) {
           </section>
         ) : null}
 
+        {/* Active campaigns */}
+        {activeCampaigns.length > 0 ? (
+          <section className="mt-16" aria-labelledby="campaigns-heading">
+            <h2
+              id="campaigns-heading"
+              className="font-normal"
+              style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-xl)", color: "var(--color-text)" }}
+            >
+              Active campaigns
+            </h2>
+            <p className="mt-2 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+              Help {org.name} reach their next goal — every contribution is tracked transparently.
+            </p>
+            <ul className="mt-8 grid gap-6 sm:grid-cols-2">
+              {activeCampaigns.map((c) => (
+                <li
+                  key={c.slug}
+                  className="overflow-hidden rounded-[var(--radius-xl)] border transition-shadow hover:shadow-[var(--shadow-md)]"
+                  style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)", boxShadow: "var(--shadow-sm)" }}
+                >
+                  <Link href={`/rescue/${org.slug}/campaign/${c.slug}`} className="block">
+                    <div className="relative aspect-[16/9] w-full" style={{ backgroundColor: "rgba(10, 128, 128, 0.08)" }}>
+                      {c.coverPhotoUrl ? (
+                        <Image src={c.coverPhotoUrl} alt="" fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
+                      ) : null}
+                    </div>
+                    <div className="p-5">
+                      <p className="font-normal text-lg" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>
+                        {c.title}
+                      </p>
+                      {c.subtitle ? (
+                        <p className="mt-1 line-clamp-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                          {c.subtitle}
+                        </p>
+                      ) : null}
+                      <p className="mt-3 text-xs font-medium uppercase tracking-wide" style={{ color: "var(--color-primary)" }}>
+                        {formatEur(c.raisedAmountCents)} raised · {c.donorCount} supporters
+                        {c.goalAmountCents != null ? ` · goal ${formatEur(c.goalAmountCents)}` : ""}
+                      </p>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
         {/* Animals */}
         <section className="mt-16" id="our-animals" aria-labelledby="animals-heading">
           <div className="flex flex-wrap items-end justify-between gap-4">
@@ -618,6 +668,55 @@ export default async function PublicRescueOrgPage({ params }: Props) {
             <p className="mt-3 max-w-3xl whitespace-pre-wrap leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
               {org.howDonationsUsed}
             </p>
+          </section>
+        ) : null}
+
+        {/* In memoriam */}
+        {memorialListings.length > 0 ? (
+          <section className="mt-16" aria-labelledby="memoriam-heading">
+            <h2
+              id="memoriam-heading"
+              className="font-normal"
+              style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-xl)", color: "var(--color-text)" }}
+            >
+              In memoriam
+            </h2>
+            <p className="mt-2 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+              Remembering the animals who left a mark on us. Their stories stay with Tinies.
+            </p>
+            <ul className="mt-8 flex flex-wrap gap-6">
+              {memorialListings.map((m) => {
+                const thumb = m.photos[0];
+                return (
+                  <li key={m.slug}>
+                    <Link
+                      href={`/adopt/${m.slug}`}
+                      className="group block w-36 text-center sm:w-40"
+                      style={{ fontFamily: "var(--font-body), sans-serif" }}
+                    >
+                      <div
+                        className="relative mx-auto aspect-square w-full overflow-hidden rounded-[var(--radius-xl)] border transition-opacity group-hover:opacity-95"
+                        style={{ borderColor: "var(--color-border)", backgroundColor: "rgba(10, 128, 128, 0.06)" }}
+                      >
+                        {thumb ? (
+                          <Image src={thumb} alt="" fill className="object-cover opacity-90" sizes="160px" />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-3xl" aria-hidden>
+                            🐾
+                          </div>
+                        )}
+                      </div>
+                      <p className="mt-2 text-sm font-semibold" style={{ color: "var(--color-text)" }}>
+                        {m.name}
+                      </p>
+                      <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+                        Remember
+                      </p>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
           </section>
         ) : null}
 

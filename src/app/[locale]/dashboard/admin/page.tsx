@@ -160,6 +160,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
 
   const statusLabel: Record<string, string> = {
     available: "Available",
+    memorial: "Memorial",
     application_pending: "Application Pending",
     matched: "Matched",
     in_transit: "In Transit",
@@ -212,6 +213,13 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
         ) : null}
 
         <div className="mt-6 flex flex-wrap gap-4">
+          <Link
+            href="/dashboard/admin/campaigns"
+            className="inline-flex h-10 items-center rounded-[var(--radius-pill)] border px-4 text-sm font-semibold hover:bg-[var(--color-primary-50)]"
+            style={{ borderColor: "var(--color-border)", color: "var(--color-primary)" }}
+          >
+            Rescue campaigns
+          </Link>
           <Link
             href="/dashboard/admin/invite-charity"
             className="inline-flex h-12 items-center justify-center rounded-[var(--radius-pill)] border-2 px-6 font-semibold transition-opacity hover:opacity-90"

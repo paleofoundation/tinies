@@ -21,6 +21,7 @@ import type {
   ServiceOffer,
 } from "@/app/[locale]/services/book/booking-action-types";
 import { qualificationsFromPrismaJson } from "@/lib/validations/provider-rich-profile";
+import { getPublicCertificationsForProviderUserId } from "@/lib/training/course-actions";
 
 const SERVICE_TYPE_LABELS: Record<string, string> = {
   walking: "Dog walking",
@@ -45,6 +46,8 @@ export async function getProviderBySlug(
   const completedBookingsCount = await prisma.booking.count({
     where: { providerId: profile.userId, status: "completed" },
   });
+
+  const certifications = await getPublicCertificationsForProviderUserId(profile.userId);
 
   const raw = profile.servicesOffered as unknown;
   const services: ServiceOffer[] = Array.isArray(raw)
@@ -110,6 +113,7 @@ export async function getProviderBySlug(
     typicalDay: profile.typicalDay,
     infoWantedAboutPet: profile.infoWantedAboutPet,
     confirmedHolidays: profile.confirmedHolidays,
+    certifications,
   };
 }
 

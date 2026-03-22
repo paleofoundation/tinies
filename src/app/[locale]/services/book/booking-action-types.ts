@@ -59,6 +59,15 @@ export type ProviderForBooking = {
   typicalDay: string | null;
   infoWantedAboutPet: string | null;
   confirmedHolidays: string[];
+  certifications: {
+    courseTitle: string;
+    courseSlug: string;
+    badgeLabel: string;
+    badgeColor: string | null;
+    score: number;
+    completedAt: Date;
+    certificateId: string | null;
+  }[];
 };
 
 export type ProviderReviewPublic = {

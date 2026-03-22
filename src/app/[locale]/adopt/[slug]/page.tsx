@@ -8,6 +8,10 @@ import {
   parseFromCyprusToAdoptionCountrySegment,
 } from "@/lib/adoption/country-requirements";
 import { getPublicAdoptionListingBySlug, type PublicAdoptionListing } from "@/lib/adoption/public-listing";
+import {
+  MemorialAdoptionListingPage,
+  memorialListingMetadata,
+} from "@/components/adoption/MemorialAdoptionListingPage";
 import { resolveListingVideoUrl } from "@/lib/adoption/listing-video";
 import { FromCyprusToCountryPageContent } from "../FromCyprusToCountryPageContent";
 import TiniesWhoMadeItPageContent, {
@@ -103,6 +107,10 @@ export default async function AdoptionListingProfilePage({ params }: Props) {
   }
   const listing = await getPublicAdoptionListingBySlug(slug);
   if (!listing) notFound();
+
+  if (listing.isMemorial) {
+    return <MemorialAdoptionListingPage listing={listing} />;
+  }
 
   const gallery = listing.photos.filter(Boolean).slice(0, 10);
   const hero = gallery[0];

@@ -1,88 +1,45 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname } from "next/navigation";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { toast } from "sonner";
-import { createSignupDonation } from "@/lib/giving/signup-donation-actions";
+import { Loader2 } from "lucide-react";
+import { createSignupDonationCheckout } from "@/lib/giving/signup-donation-actions";
 import type { WelcomeCharityOption } from "@/lib/giving/signup-donation-actions";
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "");
-
-const PRESET_EUR = [5, 10, 25];
+const PRESET_EUR = [5, 10, 25] as const;
 
 type Props = {
   charities: WelcomeCharityOption[];
   nextPath: string;
 };
 
-function DonationPaymentForm({
-  amountCents,
-  returnUrl,
-  onError,
-}: {
-  amountCents: number;
-  returnUrl: string;
-  onError: () => void;
-}) {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [loading, setLoading] = useState(false);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!stripe || !elements) return;
-    setLoading(true);
-    const { error } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: returnUrl,
-      },
-    });
-    setLoading(false);
-    if (error) {
-      toast.error(error.message ?? "Payment failed.");
-      onError();
-    }
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="mt-6">
-      <PaymentElement options={{ layout: "tabs" }} />
-      <button
-        type="submit"
-        disabled={!stripe || !elements || loading}
-        className="mt-4 h-12 w-full rounded-[var(--radius-pill)] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-70"
-        style={{ backgroundColor: "var(--color-secondary)", fontFamily: "var(--font-body), sans-serif" }}
-      >
-        {loading ? "Processing…" : `Donate €${(amountCents / 100).toFixed(2)}`}
-      </button>
-    </form>
-  );
-}
-
 export function WelcomeDonationForm({ charities, nextPath }: Props) {
-  const pathname = usePathname();
   const [selectedCharityId, setSelectedCharityId] = useState<string | "">("");
-  const [amountCents, setAmountCents] = useState<number | null>(null);
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [selectedPresetEur, setSelectedPresetEur] = useState<number | null>(null);
   const [customEur, setCustomEur] = useState("");
   const [loading, setLoading] = useState(false);
   const [showOnLeaderboard, setShowOnLeaderboard] = useState(false);
 
-  const charityIdForPi: string | null = selectedCharityId === "" ? null : selectedCharityId;
+  const charityIdForCheckout: string | null = selectedCharityId === "" ? null : selectedCharityId;
 
-  const returnUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}${pathname}?donation_return=1&next=${encodeURIComponent(nextPath)}`
-      : "";
+  function resolveAmountCents(): number | null {
+    if (selectedPresetEur != null) return selectedPresetEur * 100;
+    const n = parseFloat(customEur);
+    if (Number.isFinite(n) && n >= 1) return Math.round(n * 100);
+    return null;
+  }
 
-  async function startPayment(cents: number) {
+  async function handleDonate() {
+    const cents = resolveAmountCents();
+    if (cents == null || cents < 100) {
+      toast.error("Choose EUR 5, 10, 25 or enter at least EUR 1.");
+      return;
+    }
     setLoading(true);
-    const { clientSecret: secret, error } = await createSignupDonation({
-      charityId: charityIdForPi,
+    const { checkoutUrl, error } = await createSignupDonationCheckout({
       amountCents: cents,
+      charityId: charityIdForCheckout,
+      returnNextPath: nextPath,
       showOnLeaderboard,
     });
     setLoading(false);
@@ -90,31 +47,9 @@ export function WelcomeDonationForm({ charities, nextPath }: Props) {
       toast.error(error);
       return;
     }
-    if (secret) {
-      setAmountCents(cents);
-      setClientSecret(secret);
+    if (checkoutUrl) {
+      window.location.href = checkoutUrl;
     }
-  }
-
-  if (clientSecret && amountCents != null && returnUrl) {
-    return (
-      <div className="mt-2">
-        <p className="text-sm font-medium" style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-body), sans-serif" }}>
-          Donating €{(amountCents / 100).toFixed(2)}
-          {charityIdForPi ? ` to ${charities.find((c) => c.id === charityIdForPi)?.name ?? "charity"}` : " to Tinies Giving Fund"}
-        </p>
-        <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: "stripe" } }}>
-          <DonationPaymentForm
-            amountCents={amountCents}
-            returnUrl={returnUrl}
-            onError={() => {
-              setClientSecret(null);
-              setAmountCents(null);
-            }}
-          />
-        </Elements>
-      </div>
-    );
   }
 
   return (
@@ -127,7 +62,12 @@ export function WelcomeDonationForm({ charities, nextPath }: Props) {
         value={selectedCharityId}
         onChange={(e) => setSelectedCharityId(e.target.value)}
         className="mt-2 w-full rounded-[var(--radius-lg)] border px-3 py-2.5 text-sm focus:outline-none focus:ring-2"
-        style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)", color: "var(--color-text)", fontFamily: "var(--font-body), sans-serif" }}
+        style={{
+          borderColor: "var(--color-border)",
+          backgroundColor: "var(--color-background)",
+          color: "var(--color-text)",
+          fontFamily: "var(--font-body), sans-serif",
+        }}
       >
         <option value="">Tinies Giving Fund (default)</option>
         {charities.map((c) => (
@@ -138,54 +78,55 @@ export function WelcomeDonationForm({ charities, nextPath }: Props) {
       </select>
 
       <p className="mb-3 mt-6 text-sm font-medium" style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-body), sans-serif" }}>
-        Choose amount (EUR)
+        Amount (EUR)
       </p>
       <div className="flex flex-wrap gap-2">
-        {PRESET_EUR.map((eur) => (
-          <button
-            key={eur}
-            type="button"
-            onClick={() => void startPayment(eur * 100)}
-            disabled={loading}
-            className="rounded-[var(--radius-lg)] border-2 px-4 py-2 text-sm font-semibold transition-colors hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-50)] disabled:opacity-50"
-            style={{ borderColor: "var(--color-border)", color: "var(--color-text)", fontFamily: "var(--font-body), sans-serif" }}
-          >
-            €{eur}
-          </button>
-        ))}
+        {PRESET_EUR.map((eur) => {
+          const active = selectedPresetEur === eur;
+          return (
+            <button
+              key={eur}
+              type="button"
+              onClick={() => {
+                setSelectedPresetEur(eur);
+                setCustomEur("");
+              }}
+              disabled={loading}
+              className="rounded-[var(--radius-lg)] border-2 px-4 py-2.5 text-sm font-semibold transition-colors disabled:opacity-50"
+              style={{
+                borderColor: active ? "var(--color-primary)" : "var(--color-border)",
+                backgroundColor: active ? "rgba(10, 128, 128, 0.08)" : "transparent",
+                color: "var(--color-text)",
+                fontFamily: "var(--font-body), sans-serif",
+              }}
+            >
+              EUR {eur}
+            </button>
+          );
+        })}
       </div>
-      <div className="mt-4 flex flex-wrap items-end gap-2">
-        <div>
-          <label htmlFor="welcome-custom-eur" className="sr-only">
-            Custom amount in EUR
-          </label>
-          <input
-            id="welcome-custom-eur"
-            type="number"
-            min="1"
-            step="0.01"
-            placeholder="Custom (min €1)"
-            value={customEur}
-            onChange={(e) => setCustomEur(e.target.value)}
-            className="w-40 rounded-[var(--radius-lg)] border px-3 py-2 text-sm"
-            style={{ borderColor: "var(--color-border)", color: "var(--color-text)", fontFamily: "var(--font-body), sans-serif" }}
-          />
-        </div>
-        <button
-          type="button"
-          onClick={() => {
-            const n = parseFloat(customEur);
-            if (Number.isFinite(n) && n >= 1) void startPayment(Math.round(n * 100));
-            else toast.error("Minimum €1");
+      <div className="mt-4">
+        <label htmlFor="welcome-custom-eur" className="block text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+          Or custom amount (min EUR 1)
+        </label>
+        <input
+          id="welcome-custom-eur"
+          type="number"
+          min="1"
+          step="0.01"
+          placeholder="e.g. 15"
+          value={customEur}
+          onChange={(e) => {
+            setCustomEur(e.target.value);
+            setSelectedPresetEur(null);
           }}
           disabled={loading}
-          className="rounded-[var(--radius-lg)] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-          style={{ backgroundColor: "var(--color-primary)", fontFamily: "var(--font-body), sans-serif" }}
-        >
-          Continue
-        </button>
+          className="mt-1.5 w-full max-w-xs rounded-[var(--radius-lg)] border px-3 py-2.5 text-sm disabled:opacity-50"
+          style={{ borderColor: "var(--color-border)", color: "var(--color-text)", fontFamily: "var(--font-body), sans-serif" }}
+        />
       </div>
-      <label className="mt-5 flex cursor-pointer items-center gap-2">
+
+      <label className="mt-6 flex cursor-pointer items-center gap-2">
         <input
           type="checkbox"
           checked={showOnLeaderboard}
@@ -196,6 +137,17 @@ export function WelcomeDonationForm({ charities, nextPath }: Props) {
           Show my name on the Tinies supporters page
         </span>
       </label>
+
+      <button
+        type="button"
+        onClick={() => void handleDonate()}
+        disabled={loading}
+        className="mt-8 flex h-12 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+        style={{ backgroundColor: "var(--color-secondary)", fontFamily: "var(--font-body), sans-serif" }}
+      >
+        {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : null}
+        Donate
+      </button>
     </div>
   );
 }

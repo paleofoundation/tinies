@@ -3,96 +3,78 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
-import { loadStripe } from "@stripe/stripe-js";
 import { toast } from "sonner";
-import { markWelcomeShown } from "@/lib/giving/signup-donation-actions";
+import { markWelcomeShown, completeWelcomeAfterSignupCheckout } from "@/lib/giving/signup-donation-actions";
 import type { WelcomeCharityOption } from "@/lib/giving/signup-donation-actions";
 import { WelcomeDonationForm } from "./WelcomeDonationForm";
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "");
-
-const ROTATING_RESCUE_PHOTOS = [
-  "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_cats_v2.jpg",
-  "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_garden_cat.jpg",
-  "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_volunteer.jpg",
-  "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/story_portrait_new.jpg",
-] as const;
+const RESCUE_CAT_URL = "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_garden_cat.jpg";
 
 type Props = {
   charities: WelcomeCharityOption[];
   nextPath: string;
+  /** From `?donated=true` after Stripe Checkout success */
+  donatedReturn: boolean;
+  checkoutSessionId: string | null;
 };
 
-export function WelcomeExperience({ charities, nextPath }: Props) {
+export function WelcomeExperience({ charities, nextPath, donatedReturn, checkoutSessionId }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [photoIndex, setPhotoIndex] = useState(0);
   const [thanksEur, setThanksEur] = useState<string | null>(null);
-  const paymentReturnStarted = useRef(false);
-
-  useEffect(() => {
-    const t = setInterval(() => {
-      setPhotoIndex((i) => (i + 1) % ROTATING_RESCUE_PHOTOS.length);
-    }, 4500);
-    return () => clearInterval(t);
-  }, []);
+  const [confirmingCheckout, setConfirmingCheckout] = useState(Boolean(donatedReturn && checkoutSessionId));
+  const checkoutHandled = useRef(false);
 
   async function proceedAfterWelcome() {
-    await markWelcomeShown();
+    const r = await markWelcomeShown();
+    if (!r.ok) {
+      toast.error(r.error ?? "Something went wrong.");
+      return;
+    }
     router.push(nextPath);
     router.refresh();
   }
 
   useEffect(() => {
-    if (paymentReturnStarted.current) return;
-    const clientSecret = searchParams.get("payment_intent_client_secret");
-    const donationReturn = searchParams.get("donation_return");
-    if (!clientSecret || donationReturn !== "1") return;
+    if (!donatedReturn || !checkoutSessionId) return;
+    if (checkoutHandled.current) return;
+    checkoutHandled.current = true;
 
-    paymentReturnStarted.current = true;
+    const nextFromQuery = searchParams.get("next");
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
-    (async () => {
-      try {
-        const stripe = await stripePromise;
-        if (!stripe) {
-          paymentReturnStarted.current = false;
-          return;
-        }
-        const { paymentIntent } = await stripe.retrievePaymentIntent(clientSecret);
-        if (paymentIntent?.status === "succeeded" && typeof paymentIntent.amount === "number") {
-          const eur = (paymentIntent.amount / 100).toFixed(2);
-          await markWelcomeShown();
-          setThanksEur(eur);
-          timeoutId = setTimeout(() => {
-            router.push(nextPath);
-            router.refresh();
-          }, 3200);
-          return;
-        }
-        if (paymentIntent?.status === "requires_payment_method") {
-          toast.error("Payment was not completed. You can try again or skip for now.");
-        }
-        paymentReturnStarted.current = false;
-      } catch (e) {
-        console.error("Welcome payment return", e);
-        toast.error("Could not confirm payment status.");
-        paymentReturnStarted.current = false;
+    void (async () => {
+      const result = await completeWelcomeAfterSignupCheckout(checkoutSessionId, nextFromQuery);
+      setConfirmingCheckout(false);
+      if (!result.ok) {
+        checkoutHandled.current = false;
+        toast.error(result.error);
+        return;
       }
+      setThanksEur(result.amountEur);
+      timeoutId = setTimeout(() => {
+        router.push(result.nextPath);
+        router.refresh();
+      }, 3000);
     })();
 
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [searchParams, nextPath, router]);
+  }, [donatedReturn, checkoutSessionId, searchParams, router]);
+
+  if (confirmingCheckout && !thanksEur) {
+    return (
+      <div className="mx-auto flex min-h-[40vh] max-w-md flex-col items-center justify-center px-4 py-16 text-center">
+        <p style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>Confirming your gift…</p>
+      </div>
+    );
+  }
 
   if (thanksEur) {
     return (
       <div className="mx-auto max-w-md px-4 py-16 text-center sm:px-6">
-        <p
-          className="text-lg leading-relaxed"
-          style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}
-        >
+        <p className="text-lg leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
           Thank you! Your EUR {thanksEur} donation helps rescue animals in Cyprus.
         </p>
         <p className="mt-4 text-sm" style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-body), sans-serif" }}>
@@ -109,11 +91,10 @@ export function WelcomeExperience({ charities, nextPath }: Props) {
         style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}
       >
         <Image
-          key={ROTATING_RESCUE_PHOTOS[photoIndex]}
-          src={ROTATING_RESCUE_PHOTOS[photoIndex]}
+          src={RESCUE_CAT_URL}
           alt="A rescue cat cared for through Tinies partner sanctuaries in Cyprus"
           fill
-          className="object-cover transition-opacity duration-700"
+          className="object-cover"
           sizes="(max-width: 768px) 100vw, 448px"
           priority
         />
@@ -141,16 +122,16 @@ export function WelcomeExperience({ charities, nextPath }: Props) {
         <WelcomeDonationForm charities={charities} nextPath={nextPath} />
       </div>
 
-      <p className="mt-8 text-center">
+      <div className="mt-10 flex justify-center border-t pt-8" style={{ borderColor: "var(--color-border)" }}>
         <button
           type="button"
           onClick={() => void proceedAfterWelcome()}
-          className="text-sm font-semibold underline-offset-4 hover:underline"
+          className="text-base font-semibold underline-offset-4 hover:underline"
           style={{ color: "var(--color-primary)", fontFamily: "var(--font-body), sans-serif" }}
         >
           Skip for now
         </button>
-      </p>
+      </div>
     </div>
   );
 }

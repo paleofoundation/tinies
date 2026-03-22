@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { geocodeAddress } from "@/lib/utils/geocoding";
 import type { SearchProviderCard, SearchFilters } from "@/lib/utils/search-helpers";
 import { mapProfileToSearchProviderCard } from "@/lib/providers/search-provider-card-map";
+import { fetchCertificationDotsByProviderUserIds } from "@/lib/providers/search-certifications";
 
 /** Geocode an address for search; returns lat/lng or null. */
 export async function geocodeSearchLocation(
@@ -17,12 +18,28 @@ export async function getSearchProviders(
   filters: SearchFilters = {}
 ): Promise<SearchProviderCard[]> {
   try {
+  const requiredCourses = await prisma.course.findMany({
+    where: { active: true, required: true },
+    select: { id: true },
+  });
+
   const profiles = await prisma.providerProfile.findMany({
     where: {
       verified: true,
       ...(filters.homeType ? { homeType: filters.homeType } : {}),
       ...(filters.hasYard === true ? { hasYard: true } : {}),
       ...(filters.holiday ? { confirmedHolidays: { has: filters.holiday } } : {}),
+      ...(requiredCourses.length > 0
+        ? {
+            user: {
+              AND: requiredCourses.map((rc) => ({
+                providerCertifications: {
+                  some: { courseId: rc.id, passed: true },
+                },
+              })),
+            },
+          }
+        : {}),
     },
     include: {
       user: { select: { name: true, avatarUrl: true, district: true } },
@@ -34,6 +51,8 @@ export async function getSearchProviders(
       },
     },
   });
+
+  const certDotsByUser = await fetchCertificationDotsByProviderUserIds(profiles.map((p) => p.userId));
 
   const searchLat = filters.lat;
   const searchLng = filters.lng;
@@ -62,6 +81,7 @@ export async function getSearchProviders(
         serviceType: filters.serviceType,
         searchLat,
         searchLng,
+        certificationDots: certDotsByUser.get(p.userId) ?? [],
       }
     )
   );
