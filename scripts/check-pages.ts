@@ -23,7 +23,7 @@ const PAGES = [
   "/giving/become-a-guardian",
   // Provider profiles
   "/services/provider/maria-georgiou",
-  "/services/provider/sophie-williams",
+  "/services/provider/sofia-andreou",
   // Adoption
   "/adopt/luna-european-shorthair",
   // Giving

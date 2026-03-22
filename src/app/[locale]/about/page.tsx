@@ -83,6 +83,29 @@ export default async function AboutPage() {
               className="mt-8 space-y-6 leading-relaxed"
               style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", color: "var(--color-text)" }}
             >
+              <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
+                <div
+                  className="min-w-0 flex-1 rounded-[var(--radius-lg)] border-l-4 py-4 pl-4 pr-4"
+                  style={{
+                    borderColor: "var(--color-secondary)",
+                    backgroundColor: "var(--color-secondary-50)",
+                  }}
+                >
+                  <p>
+                    Tinies was founded by someone who lost a 24-year-old cat named Flip in Cyprus — and decided the grief had
+                    to become something useful. Since 2017, the founders have personally invested over EUR 460,000 in animal
+                    rescue across the island, funding vet bills for multiple rescue organisations. Tinies exists to make that
+                    kind of support sustainable.
+                  </p>
+                </div>
+                {/* TODO: Add Flip's photo — replace placeholder below with <Image src="..." alt="Flip — the cat who started it all." width={300} height={200} ... /> */}
+                <div
+                  className="mx-auto h-[200px] w-full max-w-[300px] shrink-0 rounded-[var(--radius-xl)] sm:mx-0"
+                  style={{ backgroundColor: "var(--color-primary-50)" }}
+                  role="img"
+                  aria-label="Flip — the cat who started it all."
+                />
+              </div>
               <p className="text-xl font-medium sm:text-2xl" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>
                 Tinies started with 92 cats.
               </p>

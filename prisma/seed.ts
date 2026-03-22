@@ -27,34 +27,34 @@ const RICH_PROVIDER_BY_SLUG: Record<
   }
 > = {
   "maria-georgiou": {
-    headline: "Experienced dog walker and cat sitter in Limassol",
+    headline: "Boarding and daycare with a spacious garden in Nicosia",
     whyIDoThis:
       "I grew up surrounded by animals on my family's farm. Now I channel that love into professional pet care. Every animal deserves to feel safe and loved.",
-    experienceTags: ["senior dogs", "puppies", "cats", "multiple pets", "medical needs"],
+    experienceTags: ["dogs", "puppies", "large breeds", "multiple pets", "medical needs"],
     qualifications: [
       { title: "Pet First Aid Certificate", issuer: "Cyprus Red Cross", year: 2023 },
     ],
     languages: ["English", "Greek"],
     homeDescription:
-      "Detached house with enclosed garden in a quiet residential area. Separate pet room with beds, toys, and water stations.",
-    previousExperience: "5 years professional pet sitting. Previously volunteered at Limassol Animal Welfare.",
+      "Detached house with enclosed garden in a quiet Nicosia neighbourhood. Separate pet room with beds, toys, and water stations.",
+    previousExperience: "5 years professional boarding and daycare. Previously volunteered at local animal welfare groups.",
     emergencyProtocol:
-      "Pet first aid kit always ready. Nearest emergency vet is Limassol Veterinary Clinic, 5 minutes away.",
+      "Pet first aid kit always ready. Nearest emergency vet is a short drive away; I keep owner and vet contacts on hand.",
     responseTimeMinutes: 90,
     repeatClientRate: 85,
     backgroundCheckPassed: true,
   },
   "andreas-christou": {
-    headline: "Dog boarding specialist with a big garden in Nicosia",
+    headline: "Trusted dog walking and pet sitting in Limassol",
     whyIDoThis:
-      "Dogs are family. When you leave your dog with me, they get the same love and attention as my own two dogs.",
-    experienceTags: ["dogs", "puppies", "large breeds", "active breeds"],
+      "Dogs are family. Whether I am walking your dog or staying in your home, they get calm, consistent care and the attention they deserve.",
+    experienceTags: ["dogs", "puppies", "active breeds", "leash skills"],
     qualifications: [{ title: "Canine Behavior Certificate", issuer: "Online Academy", year: 2024 }],
     languages: ["English", "Greek", "Russian"],
     homeDescription:
-      "Large house with 200sqm enclosed garden. Two resident dogs (friendly, socialized). Covered patio for shade.",
-    previousExperience: "3 years dog boarding. Dog owner for 15 years.",
-    emergencyProtocol: "Pet first aid kit on hand. I know the nearest 24-hour vet in Nicosia.",
+      "House with secure garden in Limassol. Quiet area for drop-offs; I also travel to your home for sitting as agreed.",
+    previousExperience: "Years of daily dog walking and home sits across Limassol.",
+    emergencyProtocol: "Pet first aid kit on hand. I know the nearest 24-hour vet in Limassol.",
     responseTimeMinutes: 120,
     repeatClientRate: 78,
     backgroundCheckPassed: true,
@@ -74,92 +74,121 @@ function slugify(name: string): string {
     .replace(/[^a-z0-9-]/g, "");
 }
 
+/** Weekdays ~8am–6pm: Morning + Afternoon Mon–Fri (matches provider dashboard slot keys). */
+function seedWeekdayAvailability(): Record<string, boolean> {
+  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const slots = ["Morning", "Afternoon", "Evening"];
+  const out: Record<string, boolean> = {};
+  days.forEach((d) =>
+    slots.forEach((s) => {
+      out[`${d}-${s}`] = d !== "Sat" && d !== "Sun" && (s === "Morning" || s === "Afternoon");
+    })
+  );
+  return out;
+}
+
 // ---------------------------------------------------------------------------
-// 1. Five service providers (User + ProviderProfile)
+// 1. Six verified service providers (User + ProviderProfile)
 // ---------------------------------------------------------------------------
 
 const PROVIDERS = [
   {
-    name: "Maria Georgiou",
-    email: "maria@test.tinies.app",
-    slug: "maria-georgiou",
+    name: "Andreas Christou",
+    email: "andreas@test.tinies.app",
+    slug: "andreas-christou",
     district: "Limassol",
-    bio: "I've loved animals my whole life. Five years of experience walking and sitting for dogs and cats in Limassol. I work from home and have a calm, friendly environment. Happy to send photo updates and follow any care instructions. I only take a few clients at a time so your pet gets plenty of attention.",
+    bio: "Reliable dog walker and pet sitter based in Limassol. I grew up with dogs and know how much routine matters when you are away. I send photo updates, stick to feeding instructions, and keep walks calm and safe in your neighbourhood.",
     lat: 34.6786,
     lng: 33.0413,
     homeType: "house",
     hasYard: true,
     yardFenced: true,
     services: [
-      { type: "walking", base_price: 1500, additional_pet_price: 800, price_unit: "per_visit", max_pets: 3 },
+      { type: "walking", base_price: 1500, additional_pet_price: 700, price_unit: "per_visit", max_pets: 3 },
       { type: "sitting", base_price: 2500, additional_pet_price: 1000, price_unit: "per_day", max_pets: 2 },
     ],
   },
   {
-    name: "Andreas Christou",
-    email: "andreas@test.tinies.app",
-    slug: "andreas-christou",
+    name: "Maria Georgiou",
+    email: "maria@test.tinies.app",
+    slug: "maria-georgiou",
     district: "Nicosia",
-    bio: "Large garden and years of experience with big dogs. I offer boarding and daycare in a safe, spacious home in Nicosia. All dogs get supervised playtime and plenty of shade. I can administer medication and stick to any feeding schedule.",
+    bio: "Home boarding and daycare in a quiet Nicosia neighbourhood. Your dog joins a small, supervised group with plenty of garden time. I am experienced with anxious dogs and happy to follow vet diets or medication schedules.",
     lat: 35.1856,
     lng: 33.3823,
     homeType: "house",
     hasYard: true,
     yardFenced: true,
     services: [
-      { type: "boarding", base_price: 3500, additional_pet_price: 1500, price_unit: "per_night", max_pets: 2 },
+      { type: "boarding", base_price: 3000, additional_pet_price: 1200, price_unit: "per_night", max_pets: 2 },
       { type: "daycare", base_price: 2000, additional_pet_price: 800, price_unit: "per_day", max_pets: 3 },
     ],
   },
   {
-    name: "Elena Pavlou",
+    name: "Elena Papadopoulou",
     email: "elena@test.tinies.app",
-    slug: "elena-pavlou",
+    slug: "elena-papadopoulou",
     district: "Paphos",
-    bio: "I specialise in cats. Drop-in visits and cat sitting in Paphos. I know how stressful it is to leave your cat at home — I'll keep their routine, play with them, and send you updates. Medication and special diets no problem.",
+    bio: "Dog walking and drop-in visits across Paphos. I focus on consistent timing, fresh water, and gentle handling for nervous pets. Great for working owners who need someone trustworthy during the day.",
     lat: 34.7754,
     lng: 32.4218,
     homeType: "apartment",
     hasYard: false,
     yardFenced: false,
     services: [
-      { type: "drop_in", base_price: 1200, additional_pet_price: 500, price_unit: "per_visit", max_pets: 4 },
-      { type: "sitting", base_price: 2000, additional_pet_price: 800, price_unit: "per_day", max_pets: 2 },
+      { type: "walking", base_price: 1200, additional_pet_price: 600, price_unit: "per_visit", max_pets: 3 },
+      { type: "drop_in", base_price: 1000, additional_pet_price: 400, price_unit: "per_visit", max_pets: 4 },
     ],
   },
   {
-    name: "Nikos Demetriou",
+    name: "Nikos Stavrou",
     email: "nikos@test.tinies.app",
-    slug: "nikos-demetriou",
+    slug: "nikos-stavrou",
     district: "Larnaca",
-    bio: "Active lifestyle and beach walks. I offer dog walking and boarding in Larnaca. Your dog will get plenty of exercise and company. Fenced yard for safe off-lead time. Great with high-energy breeds.",
+    bio: "Full-service pet care near the Larnaca coast — walks, stays, drop-ins, and daycare. I enjoy high-energy dogs and multi-pet homes. Fenced outdoor space, clear communication, and flexible pickup windows when we agree them in advance.",
     lat: 34.9229,
     lng: 33.6233,
     homeType: "house",
     hasYard: true,
     yardFenced: true,
     services: [
-      { type: "walking", base_price: 1200, additional_pet_price: 600, price_unit: "per_visit", max_pets: 3 },
-      { type: "boarding", base_price: 3000, additional_pet_price: 1200, price_unit: "per_night", max_pets: 2 },
+      { type: "walking", base_price: 1500, additional_pet_price: 700, price_unit: "per_visit", max_pets: 3 },
+      { type: "sitting", base_price: 2200, additional_pet_price: 900, price_unit: "per_day", max_pets: 2 },
+      { type: "boarding", base_price: 2800, additional_pet_price: 1100, price_unit: "per_night", max_pets: 2 },
+      { type: "drop_in", base_price: 1200, additional_pet_price: 500, price_unit: "per_visit", max_pets: 4 },
+      { type: "daycare", base_price: 1800, additional_pet_price: 700, price_unit: "per_day", max_pets: 3 },
     ],
   },
   {
-    name: "Sophie Williams",
-    email: "sophie@test.tinies.app",
-    slug: "sophie-williams",
+    name: "Sofia Andreou",
+    email: "sofia@test.tinies.app",
+    slug: "sofia-andreou",
     district: "Limassol",
-    bio: "British expat, professional pet care. I offer all services in Limassol — walking, sitting, boarding, drop-ins, and daycare. Large garden, calm home, and years of experience with dogs and cats. Fully insured and dedicated to your pet's comfort.",
-    lat: 34.6786,
-    lng: 33.0413,
+    bio: "Cat-focused sitting and drop-in visits in Limassol. I respect shy cats, keep litter tidy, and watch for appetite changes. Dogs welcome too for drop-ins if we have met them first — I prioritise calm, low-stress visits.",
+    lat: 34.704,
+    lng: 33.045,
+    homeType: "apartment",
+    hasYard: false,
+    yardFenced: false,
+    services: [
+      { type: "sitting", base_price: 2000, additional_pet_price: 800, price_unit: "per_day", max_pets: 2 },
+      { type: "drop_in", base_price: 1200, additional_pet_price: 500, price_unit: "per_visit", max_pets: 4 },
+    ],
+  },
+  {
+    name: "Yiannis Konstantinou",
+    email: "yiannis@test.tinies.app",
+    slug: "yiannis-konstantinou",
+    district: "Nicosia",
+    bio: "Dog walking and overnight boarding in central Nicosia. Your dog sleeps indoors, gets two walks a day when boarding, and I only take compatible dogs together. Transparent updates and a stress-free handover every time.",
+    lat: 35.172,
+    lng: 33.365,
     homeType: "house",
     hasYard: true,
     yardFenced: true,
     services: [
-      { type: "walking", base_price: 1800, additional_pet_price: 900, price_unit: "per_visit", max_pets: 3 },
-      { type: "sitting", base_price: 3000, additional_pet_price: 1200, price_unit: "per_day", max_pets: 2 },
-      { type: "boarding", base_price: 4000, additional_pet_price: 1500, price_unit: "per_night", max_pets: 2 },
-      { type: "drop_in", base_price: 1500, additional_pet_price: 600, price_unit: "per_visit", max_pets: 4 },
-      { type: "daycare", base_price: 2500, additional_pet_price: 1000, price_unit: "per_day", max_pets: 3 },
+      { type: "walking", base_price: 1400, additional_pet_price: 650, price_unit: "per_visit", max_pets: 3 },
+      { type: "boarding", base_price: 2500, additional_pet_price: 1000, price_unit: "per_night", max_pets: 2 },
     ],
   },
 ];
@@ -376,13 +405,42 @@ async function ensureUniqueListingSlug(baseSlug: string): Promise<string> {
 // ---------------------------------------------------------------------------
 
 const REVIEW_TEXTS = [
-  { rating: 5, text: "Maria was fantastic. Our dog came back happy and tired. She sent photos during the walk and was very professional. Will definitely book again." },
-  { rating: 5, text: "Andreas looked after our two dogs for a week. His garden is perfect for them and he kept us updated every day. Couldn't ask for more." },
+  { rating: 5, text: "Andreas was fantastic. Our dog came back happy and tired. He sent photos during the walk and was very professional. Will definitely book again." },
+  { rating: 5, text: "Maria looked after our two dogs for a week. Her setup is perfect for them and she kept us updated every day. Couldn't ask for more." },
   { rating: 4, text: "Elena was great with our cat. She followed all our instructions and left the flat spotless. Our cat was relaxed when we got home." },
   { rating: 5, text: "Nikos took our dog on amazing beach walks. You can tell he really cares. Highly recommend for active dogs." },
-  { rating: 5, text: "Sophie is a total pro. She did a meet-and-greet first and put us at ease. Our dog had a brilliant time at her place." },
-  { rating: 4, text: "Very reliable and kind. Maria was flexible with timing when our flight was delayed. Thank you!" },
+  { rating: 5, text: "Sofia is a total pro. She did a meet-and-greet first and put us at ease. Our cats had a calm week while we were away." },
+  { rating: 4, text: "Very reliable and kind. Yiannis was flexible with timing when our flight was delayed. Thank you!" },
 ];
+
+/** Search only returns providers who passed every active *required* course — seed passes for dev/staging. */
+async function certifyAllProvidersForRequiredCourses(client: PrismaClient): Promise<void> {
+  const requiredCourses = await client.course.findMany({
+    where: { active: true, required: true },
+    select: { id: true },
+  });
+  if (requiredCourses.length === 0) return;
+
+  const profiles = await client.providerProfile.findMany({ select: { userId: true } });
+  for (const { userId } of profiles) {
+    for (const { id: courseId } of requiredCourses) {
+      const certificateId = `seed-cert-${userId}-${courseId}`;
+      await client.providerCertification.upsert({
+        where: { providerId_courseId: { providerId: userId, courseId } },
+        create: {
+          providerId: userId,
+          courseId,
+          score: 95,
+          passed: true,
+          completedAt: new Date(),
+          certificateId,
+        },
+        update: { passed: true, score: 95 },
+      });
+    }
+  }
+  console.log(`Certified ${profiles.length} provider(s) for ${requiredCourses.length} required course(s).`);
+}
 
 async function main() {
   console.log("Seeding Tinies database (Cyprus test data)...\n");
@@ -433,6 +491,7 @@ async function main() {
         dogsOnFurniture: true,
         typicalDay: "Morning walks or drop-ins, then home for admin. Afternoon visits. I keep a calm routine for boarding pets.",
         infoWantedAboutPet: "Diet, medication, vet contact, and how they get on with other animals.",
+        availability: seedWeekdayAvailability() as object,
         ...(rich
           ? {
               headline: rich.headline,
@@ -459,6 +518,7 @@ async function main() {
         homeType: p.homeType,
         hasYard: p.hasYard,
         yardFenced: p.yardFenced ?? false,
+        availability: seedWeekdayAvailability() as object,
         ...(rich
           ? {
               headline: rich.headline,
@@ -477,7 +537,7 @@ async function main() {
       },
     });
   }
-  console.log("Created 5 provider users and profiles.");
+  console.log("Created 6 provider users and profiles.");
 
   // ----- 2. Charities -----
   const charityIds: string[] = [];
@@ -1020,32 +1080,30 @@ async function main() {
     create: {
       id: "seed-booking-6",
       ownerId: ownerUser.id,
-      providerId: providerUserIds[0],
+      providerId: providerUserIds[5],
       petIds: [pet1.id],
       serviceType: "walking",
       startDatetime: new Date(pastStart.getTime() - 14 * 24 * 60 * 60 * 1000),
       endDatetime: new Date(pastStart.getTime() - 14 * 24 * 60 * 60 * 1000 + 90 * 60 * 1000),
       status: "completed",
-      totalPrice: 1500,
-      commissionAmount: 180,
+      totalPrice: 1400,
+      commissionAmount: 168,
     },
-    update: { status: "completed" },
+    update: { status: "completed", providerId: providerUserIds[5] },
   });
 
   const bookings = [booking1, booking2, booking3, booking4, booking5, booking6];
-  const providerIdsForReviews = [providerUserIds[0], providerUserIds[1], providerUserIds[2], providerUserIds[3], providerUserIds[4], providerUserIds[0]];
 
   // ----- 6. Reviews -----
   for (let i = 0; i < REVIEW_TEXTS.length; i++) {
     const r = REVIEW_TEXTS[i];
     const booking = bookings[i];
-    const providerId = providerIdsForReviews[i];
     await prisma.review.upsert({
       where: { bookingId: booking.id },
       create: {
         bookingId: booking.id,
         reviewerId: ownerUser.id,
-        providerId,
+        providerId: booking.providerId,
         rating: r.rating,
         text: r.text,
         photos: [],
@@ -1068,6 +1126,7 @@ async function main() {
   console.log("Created 6 completed bookings and 6 reviews.");
 
   await seedTrainingCourses(prisma);
+  await certifyAllProvidersForRequiredCourses(prisma);
 
   console.log("\nSeed complete.");
 }

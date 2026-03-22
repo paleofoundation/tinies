@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 
+/**
+ * Route group `(site)` keeps this tree sorted before `[serviceType]/[district]`.
+ * Otherwise `/en/blog/my-post` is captured as serviceType=blog and shows a soft 404.
+ */
+
 export const metadata: Metadata = {
   title: "Blog | Tinies",
   description:
