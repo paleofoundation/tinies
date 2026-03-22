@@ -196,6 +196,15 @@ const CHARITIES = [
     district: null,
     animalsInCare: null,
   },
+  {
+    name: "Patch of Heaven Animal Haven",
+    slug: "patch-of-heaven",
+    mission: "A safe home for abused, abandoned, senior, and disabled cats in Limassol.",
+    website: "https://patchofheavencats.com",
+    featured: true,
+    district: "Limassol",
+    animalsInCare: 100,
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -498,7 +507,7 @@ async function main() {
     });
     charityIds.push(charity.id);
   }
-  console.log("Created 3 charities.");
+  console.log(`Created ${CHARITIES.length} charities.`);
 
   // ----- 3. Remove placeholder Paws listings (empty photos / old seed data) -----
   const pawsOrg = await prisma.rescueOrg.findUnique({
