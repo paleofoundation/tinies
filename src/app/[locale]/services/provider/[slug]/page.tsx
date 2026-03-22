@@ -793,7 +793,12 @@ export default async function ProviderProfilePage({ params }: Props) {
                 </li>
                 {rrLabel ? <li>{rrLabel}</li> : null}
                 {repeatLine ? <li>{repeatLine}</li> : null}
-                <li>{provider?.completedBookingsCount ?? 0} completed bookings</li>
+                <li className="flex flex-wrap items-baseline gap-x-1.5">
+                  <span className="font-semibold tabular-nums" style={{ color: "var(--color-text)" }}>
+                    {(provider?.completedBookingsCount ?? 0).toLocaleString("en-GB")}
+                  </span>
+                  <span>completed bookings</span>
+                </li>
                 {provider?.languages && provider.languages.length > 0 ? <li>Languages: {provider.languages.join(", ")}</li> : null}
                 {provider?.emergencyProtocol?.trim() ? (
                   <li className="border-t pt-3" style={{ borderColor: "var(--color-border)" }}>

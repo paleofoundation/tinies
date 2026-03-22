@@ -6,7 +6,7 @@ import { getStripeServer } from "@/lib/stripe";
 import { sendEmail } from "@/lib/email";
 import BookingRequestEmail from "@/lib/email/templates/booking-request";
 import { sendSMS, buildBookingRequestSMS } from "@/lib/sms";
-import type { ServiceType } from "@prisma/client";
+import { BookingStatus, type ServiceType } from "@prisma/client";
 import type { GivingTier } from "@/lib/utils/giving-helpers";
 import {
   computeBookingTotalCents,
@@ -44,7 +44,7 @@ export async function getProviderBySlug(
   if (!profile) return null;
 
   const completedBookingsCount = await prisma.booking.count({
-    where: { providerId: profile.userId, status: "completed" },
+    where: { providerId: profile.userId, status: BookingStatus.completed },
   });
 
   const certifications = await getPublicCertificationsForProviderUserId(profile.userId);

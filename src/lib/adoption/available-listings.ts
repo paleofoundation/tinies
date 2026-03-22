@@ -65,9 +65,18 @@ export async function getAllAvailableAdoptionListings(
       },
     });
 
-    if (filters.age == null) return rows;
+    const deduped: typeof rows = [];
+    const seenOrgName = new Set<string>();
+    for (const row of rows) {
+      const key = `${row.org.slug}::${row.name.trim().toLowerCase()}`;
+      if (seenOrgName.has(key)) continue;
+      seenOrgName.add(key);
+      deduped.push(row);
+    }
 
-    return rows.filter((row) => {
+    if (filters.age == null) return deduped;
+
+    return deduped.filter((row) => {
       const years = parseEstimatedAgeToYears(row.estimatedAge);
       return ageYearsMatchesBand(years, filters.age!);
     });

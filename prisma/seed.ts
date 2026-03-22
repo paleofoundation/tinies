@@ -665,8 +665,18 @@ async function main() {
   });
 
   for (const cat of GARDENS_CATS) {
+    const sameName = await prisma.adoptionListing.findMany({
+      where: { orgId: gardensOrg.id, name: cat.name },
+      orderBy: { createdAt: "asc" },
+      select: { id: true, slug: true },
+    });
+    if (sameName.length > 1) {
+      await prisma.adoptionListing.deleteMany({
+        where: { id: { in: sameName.slice(1).map((r) => r.id) } },
+      });
+    }
     const baseSlug = slugify(cat.name);
-    const slug = await ensureUniqueListingSlug(baseSlug);
+    const slug = sameName[0]?.slug ?? (await ensureUniqueListingSlug(baseSlug));
     // Same payload on create + update so re-seeding refreshes every seeded column (including rich-profile fields).
     const listingBody = {
       orgId: gardensOrg.id,
@@ -917,7 +927,7 @@ async function main() {
       subtitle: "Food, litter, and vet care for 100+ cats at Patch of Heaven.",
       description: patchCampaignDescription,
       coverPhotoUrl: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_cats_v2.jpg",
-      goalAmountCents: null,
+      goalAmountCents: 500_000,
       raisedAmountCents: 0,
       donorCount: 0,
       status: "active",
@@ -930,7 +940,7 @@ async function main() {
       subtitle: "Food, litter, and vet care for 100+ cats at Patch of Heaven.",
       description: patchCampaignDescription,
       coverPhotoUrl: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_cats_v2.jpg",
-      goalAmountCents: null,
+      goalAmountCents: 500_000,
       status: "active",
       featured: true,
       milestones: patchMilestones,

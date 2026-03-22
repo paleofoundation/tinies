@@ -174,12 +174,20 @@ export default async function PublicCampaignPage({ params, searchParams }: Props
                     </p>
                   </>
                 ) : (
-                  <p className="text-lg font-semibold tabular-nums" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>
-                    {formatEurCents(data.raisedAmountCents)} raised
-                  </p>
+                  <>
+                    <p className="text-lg font-semibold tabular-nums" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>
+                      {formatEurCents(data.raisedAmountCents)} raised
+                    </p>
+                    <p className="mt-2 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-muted)" }}>
+                      No goal set for this campaign yet.
+                    </p>
+                  </>
                 )}
                 <p className="mt-2 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-                  {data.donorCount} supporter{data.donorCount !== 1 ? "s" : ""}
+                  <span className="font-semibold tabular-nums" style={{ color: "var(--color-text)" }}>
+                    {data.donorCount.toLocaleString("en-GB")}
+                  </span>{" "}
+                  supporter{data.donorCount !== 1 ? "s" : ""}
                 </p>
               </div>
             </section>

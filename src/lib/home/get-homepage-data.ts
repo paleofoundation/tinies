@@ -1,3 +1,4 @@
+import { AdoptionListingStatus, BookingStatus, GuardianStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export type HomepageFeaturedProvider = {
@@ -186,114 +187,127 @@ async function featuredListingsForHome(limit = 4): Promise<HomepageFeaturedListi
 /**
  * Single fetch for homepage metrics and featured content.
  * Pair with `export const revalidate = 300` on the home page for 5-minute ISR.
+ *
+ * Core stats are fetched in isolation so a failure in featured/reviews queries
+ * does not zero out the whole metrics row.
  */
 export async function getHomepageData(): Promise<HomepageData> {
+  let completedBookingsCount = 0;
+  let fiveStarReviewsCount = 0;
+  let completedAdoptionsCount = 0;
+  let donationsTotalCents = 0;
+  let activeGuardiansCount = 0;
+  let verifiedProvidersCount = 0;
+
   try {
-    const [
-      completedBookingsCount,
-      fiveStarReviewsCount,
-      completedAdoptionsCount,
-      donationAgg,
-      activeGuardiansCount,
-      verifiedProvidersCount,
-      featuredProviders,
-      featuredListings,
-      reviewRows,
-      featuredCampaignRow,
-    ] = await Promise.all([
-      prisma.booking.count({ where: { status: "completed" } }),
+    const [b, r5, adoptedListings, don, guardians, verified] = await Promise.all([
+      prisma.booking.count({ where: { status: BookingStatus.completed } }),
       prisma.review.count({ where: { rating: 5 } }),
-      prisma.adoptionPlacement.count({
-        where: { status: { in: ["delivered", "completed"] } },
-      }),
+      prisma.adoptionListing.count({ where: { status: AdoptionListingStatus.adopted } }),
       prisma.donation.aggregate({ _sum: { amount: true } }),
-      prisma.guardianSubscription.count({ where: { status: "active" } }),
+      prisma.guardianSubscription.count({ where: { status: GuardianStatus.active } }),
       prisma.providerProfile.count({ where: { verified: true } }),
-      featuredProvidersForHome(),
-      featuredListingsForHome(4),
-      prisma.review.findMany({
-        where: { rating: { gte: 4 } },
-        orderBy: { createdAt: "desc" },
-        take: 4,
-        select: {
-          id: true,
-          rating: true,
-          text: true,
-          createdAt: true,
-          reviewer: { select: { name: true } },
-          providerProfile: {
-            select: {
-              slug: true,
-              user: { select: { name: true } },
-            },
+    ]);
+    completedBookingsCount = b;
+    fiveStarReviewsCount = r5;
+    completedAdoptionsCount = adoptedListings;
+    donationsTotalCents = don._sum.amount ?? 0;
+    activeGuardiansCount = guardians;
+    verifiedProvidersCount = verified;
+  } catch (e) {
+    console.error("getHomepageData (core metrics)", e);
+  }
+
+  let featuredProviders: HomepageFeaturedProvider[] = [];
+  try {
+    featuredProviders = await featuredProvidersForHome();
+  } catch (e) {
+    console.error("getHomepageData (featuredProviders)", e);
+  }
+
+  let featuredListings: HomepageFeaturedListing[] = [];
+  try {
+    featuredListings = await featuredListingsForHome(4);
+  } catch (e) {
+    console.error("getHomepageData (featuredListings)", e);
+  }
+
+  let recentReviews: HomepageRecentReview[] = [];
+  try {
+    const reviewRows = await prisma.review.findMany({
+      where: { rating: { gte: 4 } },
+      orderBy: { createdAt: "desc" },
+      take: 4,
+      select: {
+        id: true,
+        rating: true,
+        text: true,
+        createdAt: true,
+        reviewer: { select: { name: true } },
+        providerProfile: {
+          select: {
+            slug: true,
+            user: { select: { name: true } },
           },
         },
-      }),
-      prisma.campaign.findFirst({
-        where: { status: "active", featured: true },
-        orderBy: { updatedAt: "desc" },
-        select: {
-          slug: true,
-          title: true,
-          subtitle: true,
-          coverPhotoUrl: true,
-          raisedAmountCents: true,
-          rescueOrg: { select: { slug: true, name: true } },
-        },
-      }),
-    ]);
-
-    const featuredCampaign: HomepageFeaturedCampaign | null = featuredCampaignRow
-      ? {
-          slug: featuredCampaignRow.slug,
-          title: featuredCampaignRow.title,
-          subtitle: featuredCampaignRow.subtitle,
-          coverPhotoUrl: featuredCampaignRow.coverPhotoUrl,
-          raisedAmountCents: featuredCampaignRow.raisedAmountCents,
-          orgSlug: featuredCampaignRow.rescueOrg.slug,
-          orgName: featuredCampaignRow.rescueOrg.name,
-        }
-      : null;
-
-    const recentReviews: HomepageRecentReview[] = reviewRows.map((r) => {
+      },
+    });
+    recentReviews = reviewRows.map((row) => {
       const excerpt =
-        r.text.length <= 150 ? r.text : `${r.text.slice(0, 147).trim()}…`;
+        row.text.length <= 150 ? row.text : `${row.text.slice(0, 147).trim()}…`;
       return {
-        id: r.id,
-        rating: r.rating,
+        id: row.id,
+        rating: row.rating,
         textExcerpt: excerpt,
-        reviewerFirstName: firstName(r.reviewer.name),
-        providerName: r.providerProfile.user.name ?? "Provider",
-        providerSlug: r.providerProfile.slug,
-        createdAt: r.createdAt,
+        reviewerFirstName: firstName(row.reviewer.name),
+        providerName: row.providerProfile.user.name ?? "Provider",
+        providerSlug: row.providerProfile.slug,
+        createdAt: row.createdAt,
       };
     });
-
-    return {
-      completedBookingsCount,
-      fiveStarReviewsCount,
-      completedAdoptionsCount,
-      donationsTotalCents: donationAgg._sum.amount ?? 0,
-      verifiedProvidersCount,
-      activeGuardiansCount,
-      featuredProviders,
-      featuredListings,
-      recentReviews,
-      featuredCampaign,
-    };
   } catch (e) {
-    console.error("getHomepageData", e);
-    return {
-      completedBookingsCount: 0,
-      fiveStarReviewsCount: 0,
-      completedAdoptionsCount: 0,
-      donationsTotalCents: 0,
-      verifiedProvidersCount: 0,
-      activeGuardiansCount: 0,
-      featuredProviders: [],
-      featuredListings: [],
-      recentReviews: [],
-      featuredCampaign: null,
-    };
+    console.error("getHomepageData (recentReviews)", e);
   }
+
+  let featuredCampaign: HomepageFeaturedCampaign | null = null;
+  try {
+    const featuredCampaignRow = await prisma.campaign.findFirst({
+      where: { status: "active", featured: true },
+      orderBy: { updatedAt: "desc" },
+      select: {
+        slug: true,
+        title: true,
+        subtitle: true,
+        coverPhotoUrl: true,
+        raisedAmountCents: true,
+        rescueOrg: { select: { slug: true, name: true } },
+      },
+    });
+    if (featuredCampaignRow) {
+      featuredCampaign = {
+        slug: featuredCampaignRow.slug,
+        title: featuredCampaignRow.title,
+        subtitle: featuredCampaignRow.subtitle,
+        coverPhotoUrl: featuredCampaignRow.coverPhotoUrl,
+        raisedAmountCents: featuredCampaignRow.raisedAmountCents,
+        orgSlug: featuredCampaignRow.rescueOrg.slug,
+        orgName: featuredCampaignRow.rescueOrg.name,
+      };
+    }
+  } catch (e) {
+    console.error("getHomepageData (featuredCampaign)", e);
+  }
+
+  return {
+    completedBookingsCount,
+    fiveStarReviewsCount,
+    completedAdoptionsCount,
+    donationsTotalCents,
+    verifiedProvidersCount,
+    activeGuardiansCount,
+    featuredProviders,
+    featuredListings,
+    recentReviews,
+    featuredCampaign,
+  };
 }

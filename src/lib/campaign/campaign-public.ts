@@ -68,10 +68,22 @@ export async function getPublicCampaignByOrgAndSlug(
     });
     if (!row) return null;
 
-    const charity = await prisma.charity.findFirst({
-      where: { rescueOrgId: row.rescueOrg.id, active: true, verified: true },
-      select: { id: true },
-    });
+    const [charity, donationSum, campaignDonationCount] = await Promise.all([
+      prisma.charity.findFirst({
+        where: { rescueOrgId: row.rescueOrg.id, active: true, verified: true },
+        select: { id: true },
+      }),
+      prisma.donation.aggregate({
+        where: { campaignLink: { campaignId: row.id } },
+        _sum: { amount: true },
+      }),
+      prisma.campaignDonation.count({ where: { campaignId: row.id } }),
+    ]);
+
+    const raisedFromDonations = donationSum._sum.amount ?? 0;
+    const raisedAmountCents =
+      campaignDonationCount > 0 ? raisedFromDonations : row.raisedAmountCents;
+    const donorCount = campaignDonationCount > 0 ? campaignDonationCount : row.donorCount;
 
     return {
       id: row.id,
@@ -81,8 +93,8 @@ export async function getPublicCampaignByOrgAndSlug(
       description: row.description,
       coverPhotoUrl: row.coverPhotoUrl,
       goalAmountCents: row.goalAmountCents,
-      raisedAmountCents: row.raisedAmountCents,
-      donorCount: row.donorCount,
+      raisedAmountCents,
+      donorCount,
       status: row.status,
       milestones: parseCampaignMilestones(row.milestones),
       updates: parseCampaignUpdates(row.updates),
