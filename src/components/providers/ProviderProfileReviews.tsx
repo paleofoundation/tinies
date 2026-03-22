@@ -46,7 +46,9 @@ export function ProviderProfileReviews({ reviews, featuredId, avgRating, reviewC
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-            {avgRating != null ? `${Number(avgRating.toFixed(1))} stars` : "Reviews"}
+            {typeof avgRating === "number" && Number.isFinite(avgRating)
+              ? `${avgRating.toFixed(1)} stars`
+              : "Reviews"}
             {reviewCount > 0 ? ` from ${reviewCount} ${reviewCount === 1 ? "review" : "reviews"}` : ""}
           </p>
         </div>
@@ -134,7 +136,7 @@ function ReviewCard({ review }: { review: ProviderReviewPublic }) {
       <p className="mt-2 leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
         {review.text}
       </p>
-      {review.photos.length > 0 && (
+      {Array.isArray(review.photos) && review.photos.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
           {review.photos.map((url, i) => (
             <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="relative block h-20 w-20 overflow-hidden rounded-lg">

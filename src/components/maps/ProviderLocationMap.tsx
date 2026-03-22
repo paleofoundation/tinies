@@ -56,6 +56,8 @@ export function ProviderLocationMap({
     ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.trim()
     : "";
   const center = useMemo(() => ({ lat, lng }), [lat, lng]);
+  const safeRadiusKm = Math.max(0.25, Number.isFinite(radiusKm) ? radiusKm : 0.25);
+  const defaultZoom = Math.max(9, Math.min(15, 12 - Math.log2(safeRadiusKm)));
 
   if (!apiKey) {
     return (
@@ -75,11 +77,11 @@ export function ProviderLocationMap({
       <APIProvider apiKey={apiKey}>
         <Map
           defaultCenter={center}
-          defaultZoom={Math.max(9, 12 - Math.log2(radiusKm))}
+          defaultZoom={defaultZoom}
           style={{ width: "100%", height: "100%", minHeight: "280px" }}
           gestureHandling="cooperative"
         >
-          <ServiceAreaCircle center={center} radiusKm={radiusKm} />
+          <ServiceAreaCircle center={center} radiusKm={safeRadiusKm} />
         </Map>
       </APIProvider>
     </div>

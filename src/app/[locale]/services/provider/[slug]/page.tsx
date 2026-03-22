@@ -25,8 +25,21 @@ import { ProviderCertificationsSection } from "@/components/providers/ProviderCe
 import { ProviderVideoIntro } from "@/components/providers/ProviderVideoIntro";
 import { MeetAndGreetRequestModal } from "./MeetAndGreetRequestModal";
 
-function formatMemberSinceLabel(value: Date | string): string {
-  return new Date(value).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+function formatMemberSinceLabel(value: Date | string | number): string {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+}
+
+/** Coerce Prisma/serialized values so .toFixed and client props never throw. */
+function asDisplayRating(v: unknown): number | null {
+  if (v == null) return null;
+  if (typeof v === "number" && Number.isFinite(v)) return v;
+  if (typeof v === "string" && v.trim() !== "") {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
 }
 
 export const dynamic = "force-dynamic";
@@ -159,7 +172,7 @@ export default async function ProviderProfilePage({ params }: Props) {
     provider != null &&
     favoriteViewer.kind === "owner" &&
     favoriteViewer.favoritedProviderUserIds.includes(provider.providerId);
-  const avgRating = provider?.avgRating ?? null;
+  const avgRating = asDisplayRating(provider?.avgRating ?? null);
   const reviewCount = provider?.reviewCount ?? 0;
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
@@ -281,7 +294,7 @@ export default async function ProviderProfilePage({ params }: Props) {
                 </span>
                 <span className="inline-flex items-center gap-1">
                   <Calendar className="h-4 w-4 shrink-0" aria-hidden />
-                  Member since {formatMemberSinceLabel(provider?.memberSince ?? Date.now())}
+                  Member since {formatMemberSinceLabel(provider?.memberSince ?? new Date())}
                 </span>
               </div>
 
@@ -793,7 +806,7 @@ export default async function ProviderProfilePage({ params }: Props) {
                 ) : null}
                 <li className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 shrink-0" style={{ color: "var(--color-primary)" }} aria-hidden />
-                  Member since {formatMemberSinceLabel(provider?.memberSince ?? Date.now())}
+                  Member since {formatMemberSinceLabel(provider?.memberSince ?? new Date())}
                 </li>
                 {rrLabel ? <li>{rrLabel}</li> : null}
                 {repeatLine ? <li>{repeatLine}</li> : null}

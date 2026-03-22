@@ -150,11 +150,11 @@ export async function getProviderReviewsBySlug(
     reviewerGivingTier: tiers.get(r.reviewer.id) ?? null,
     rating: r.rating,
     text: r.text,
-    photos: r.photos,
+    photos: Array.isArray(r.photos) ? r.photos : [],
     createdAt: r.createdAt,
     providerResponse: r.providerResponse,
     responseAt: r.responseAt,
-    serviceType: r.booking.serviceType,
+    serviceType: r.booking?.serviceType ?? "walking",
   }));
 }
 
