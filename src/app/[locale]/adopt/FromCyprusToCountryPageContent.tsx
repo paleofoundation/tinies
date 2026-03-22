@@ -1,56 +1,13 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { ArrowRight, CheckCircle } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import {
-  ADOPTION_COUNTRY_SLUGS,
-  getCountryAdoptionSeo,
-} from "@/lib/adoption/country-requirements";
+import type { CountryAdoptionSeo } from "@/lib/adoption/country-requirements";
 import { getApprovedSuccessStoriesForDestinationMatchers } from "@/lib/adoption/success-stories";
 import { AdoptionListingCard } from "@/components/adoption/AdoptionListingCard";
 import type { AdoptBrowseListing } from "@/lib/adoption/available-listings";
 
-export const revalidate = 3600;
-
 const BASE_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app").replace(/\/$/, "");
-
-type Props = {
-  params: Promise<{ country: string }>;
-};
-
-export function generateStaticParams() {
-  return ADOPTION_COUNTRY_SLUGS.map((country) => ({ country }));
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { country } = await params;
-  const seo = getCountryAdoptionSeo(country);
-  if (!seo) {
-    return { title: "International adoption | Tinies" };
-  }
-  const title = `Adopt a Rescue Animal from Cyprus to ${seo.seoTitleCountry} | Tinies`;
-  const description = `Adopt a rescue dog or cat from Cyprus to ${seo.seoTitleCountry}. EU pet passport, vet preparation, transport, and Tinies coordination — one transparent fee, no hidden costs.`;
-  const url = `${BASE_URL}/adopt/from-cyprus-to-${country}`;
-  return {
-    title,
-    description,
-    alternates: { canonical: url },
-    openGraph: {
-      title,
-      description,
-      url,
-      siteName: "Tinies",
-      type: "website",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-    },
-  };
-}
 
 function formatStoryDate(d: Date): string {
   return new Intl.DateTimeFormat("en-GB", {
@@ -60,10 +17,11 @@ function formatStoryDate(d: Date): string {
   }).format(d);
 }
 
-export default async function CountryAdoptionPage({ params }: Props) {
-  const { country } = await params;
-  const seo = getCountryAdoptionSeo(country);
-  if (!seo) notFound();
+type Props = { seo: CountryAdoptionSeo };
+
+/** SEO country landing: /adopt/from-cyprus-to-{slug} — rendered from unified [slug] route. */
+export async function FromCyprusToCountryPageContent({ seo }: Props) {
+  const country = seo.slug;
 
   const [listingsRaw, stories] = await Promise.all([
     prisma.adoptionListing.findMany({
@@ -72,7 +30,6 @@ export default async function CountryAdoptionPage({ params }: Props) {
         active: true,
         internationalEligible: true,
         destinationCountries: { hasSome: seo.listingDestinationValues },
-        org: { verified: true },
       },
       select: {
         slug: true,
@@ -160,7 +117,6 @@ export default async function CountryAdoptionPage({ params }: Props) {
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      {/* Hero */}
       <section className="relative overflow-hidden px-4 pt-10 pb-12 sm:px-6 sm:pt-14 sm:pb-16 lg:px-8">
         <div className="absolute inset-0 rounded-b-[3rem] sm:rounded-b-[4rem]" style={{ backgroundColor: "rgba(10, 128, 128, 0.06)" }} />
         <div className="relative mx-auto" style={{ maxWidth: "var(--max-width)" }}>
@@ -180,7 +136,6 @@ export default async function CountryAdoptionPage({ params }: Props) {
       </section>
 
       <div className="mx-auto px-4 pb-20 sm:px-6 lg:px-8" style={{ maxWidth: "var(--max-width)", paddingBottom: "var(--space-section)" }}>
-        {/* How it works */}
         <section aria-labelledby="how-heading">
           <h2
             id="how-heading"
@@ -213,7 +168,6 @@ export default async function CountryAdoptionPage({ params }: Props) {
           </ol>
         </section>
 
-        {/* Requirements */}
         <section className="mt-16" aria-labelledby="req-heading">
           <h2
             id="req-heading"
@@ -252,7 +206,6 @@ export default async function CountryAdoptionPage({ params }: Props) {
           </div>
         </section>
 
-        {/* Eligible animals */}
         <section className="mt-16" aria-labelledby="eligible-heading">
           <h2
             id="eligible-heading"
@@ -277,7 +230,6 @@ export default async function CountryAdoptionPage({ params }: Props) {
           )}
         </section>
 
-        {/* Fee breakdown */}
         <section className="mt-16" aria-labelledby="fee-heading">
           <h2
             id="fee-heading"
@@ -304,7 +256,6 @@ export default async function CountryAdoptionPage({ params }: Props) {
           </div>
         </section>
 
-        {/* Testimonials */}
         <section className="mt-16" aria-labelledby="stories-heading">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <h2
@@ -387,7 +338,6 @@ export default async function CountryAdoptionPage({ params }: Props) {
           )}
         </section>
 
-        {/* CTA */}
         <section className="mt-16">
           <div
             className="rounded-[var(--radius-xl)] border px-6 py-10 text-center sm:px-10"

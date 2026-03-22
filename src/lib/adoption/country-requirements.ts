@@ -152,3 +152,13 @@ export function getCountryAdoptionSeo(slug: string): CountryAdoptionSeo | null {
   if (!isAdoptionCountrySlug(slug)) return null;
   return ADOPTION_COUNTRY_SEO[slug];
 }
+
+/** Full path segment after `/adopt/`, e.g. `from-cyprus-to-uk`. */
+export const FROM_CYPRUS_TO_ADOPTION_PREFIX = "from-cyprus-to-";
+
+/** If `slug` is `from-cyprus-to-{country}`, returns the `{country}` segment (may be unknown). */
+export function parseFromCyprusToAdoptionCountrySegment(slug: string): string | null {
+  if (!slug.startsWith(FROM_CYPRUS_TO_ADOPTION_PREFIX)) return null;
+  const rest = slug.slice(FROM_CYPRUS_TO_ADOPTION_PREFIX.length).trim();
+  return rest.length > 0 ? rest : null;
+}

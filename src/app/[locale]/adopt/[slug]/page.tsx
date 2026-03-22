@@ -3,12 +3,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Heart, MapPin } from "lucide-react";
+import {
+  getCountryAdoptionSeo,
+  parseFromCyprusToAdoptionCountrySegment,
+} from "@/lib/adoption/country-requirements";
 import { getPublicAdoptionListingBySlug } from "@/lib/adoption/public-listing";
+import { FromCyprusToCountryPageContent } from "../FromCyprusToCountryPageContent";
 import TiniesWhoMadeItPageContent, {
   tiniesWhoMadeItMetadata,
 } from "../tinies-who-made-it/TiniesWhoMadeItPageContent";
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+const BASE_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app").replace(/\/$/, "");
 
 /** If the dynamic segment wins over the static `tinies-who-made-it` route, still show the gallery (not a listing 404). */
 const RESERVED_ADOPTION_SLUGS = new Set(["tinies-who-made-it"]);
@@ -26,6 +31,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   if (RESERVED_ADOPTION_SLUGS.has(slug)) {
     return tiniesWhoMadeItMetadata;
+  }
+  const countrySegment = parseFromCyprusToAdoptionCountrySegment(slug);
+  if (countrySegment !== null) {
+    const seo = getCountryAdoptionSeo(countrySegment);
+    if (!seo) {
+      return { title: "International adoption | Tinies" };
+    }
+    const title = `Adopt a Rescue Animal from Cyprus to ${seo.seoTitleCountry} | Tinies`;
+    const description = `Adopt a rescue dog or cat from Cyprus to ${seo.seoTitleCountry}. EU pet passport, vet preparation, transport, and Tinies coordination — one transparent fee, no hidden costs.`;
+    const url = `${BASE_URL}/adopt/from-cyprus-to-${countrySegment}`;
+    return {
+      title,
+      description,
+      alternates: { canonical: url },
+      openGraph: {
+        title,
+        description,
+        url,
+        siteName: "Tinies",
+        type: "website",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description,
+      },
+    };
   }
   const listing = await getPublicAdoptionListingBySlug(slug);
   if (!listing) return { title: "Adopt | Tinies" };
@@ -48,11 +80,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function AdoptionListingProfilePage({ params }: Props) {
-  const resolvedParams = await params;
-  console.log("[adopt/slug] params:", JSON.stringify(resolvedParams));
-  const { slug } = resolvedParams;
+  const { slug } = await params;
   if (RESERVED_ADOPTION_SLUGS.has(slug)) {
     return <TiniesWhoMadeItPageContent />;
+  }
+  const countrySegment = parseFromCyprusToAdoptionCountrySegment(slug);
+  if (countrySegment !== null) {
+    const seo = getCountryAdoptionSeo(countrySegment);
+    if (!seo) notFound();
+    return <FromCyprusToCountryPageContent seo={seo} />;
   }
   const listing = await getPublicAdoptionListingBySlug(slug);
   if (!listing) notFound();
