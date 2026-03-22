@@ -1146,3 +1146,24 @@ model ProviderCertification {
   @@index([courseId])
   @@map("provider_certifications")
 }
+
+// ---------------------------------------------------------------------------
+// Site-wide images (admin-managed; URLs typically Supabase Storage `site-images`)
+// ---------------------------------------------------------------------------
+
+model SiteImage {
+  id        String   @id @default(uuid())
+  /// Stable id e.g. logo, blog-my-post, provider-andreas-christou
+  imageKey  String   @unique @map("key")
+  category  String
+  label     String
+  url       String   @db.Text
+  alt       String   @default("")
+  width     Int?
+  height    Int?
+  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([category])
+  @@map("site_images")
+}
