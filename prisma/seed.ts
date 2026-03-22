@@ -193,6 +193,53 @@ const PROVIDERS = [
   },
 ];
 
+const PROVIDER_SEED_EMAILS = PROVIDERS.map((p) => p.email);
+
+/**
+ * Drops legacy / duplicate test providers (e.g. old "Sophie Williams") so search only shows the six canonical seed providers.
+ * Only targets accounts that are clearly non-canonical: wrong @test.tinies.app email, sophie-williams slug, or name "Sophie Williams".
+ */
+async function removeStaleSeedProviderAccounts(): Promise<void> {
+  const whitelist = new Set(PROVIDER_SEED_EMAILS);
+  const candidates = await prisma.user.findMany({
+    where: {
+      role: "provider",
+      providerProfile: { isNot: null },
+      AND: [
+        { email: { notIn: [...whitelist] } },
+        {
+          OR: [
+            { email: { endsWith: "@test.tinies.app" } },
+            { providerProfile: { is: { slug: { equals: "sophie-williams", mode: "insensitive" } } } },
+            { name: { contains: "Sophie Williams", mode: "insensitive" } },
+          ],
+        },
+      ],
+    },
+    select: { id: true, email: true },
+  });
+
+  for (const { id, email } of candidates) {
+    try {
+      await prisma.review.deleteMany({ where: { providerId: id } });
+      await prisma.payout.deleteMany({ where: { providerId: id } });
+      await prisma.tiniesCard.deleteMany({ where: { providerId: id } });
+      await prisma.booking.deleteMany({ where: { providerId: id } });
+      await prisma.recurringBooking.deleteMany({ where: { OR: [{ providerId: id }, { ownerId: id }] } });
+      await prisma.bookingUpdate.deleteMany({ where: { providerId: id } });
+      await prisma.meetAndGreet.deleteMany({ where: { OR: [{ providerId: id }, { ownerId: id }] } });
+      await prisma.message.deleteMany({ where: { OR: [{ senderId: id }, { recipientId: id }] } });
+      await prisma.providerCertification.deleteMany({ where: { providerId: id } });
+      await prisma.providerFavorite.deleteMany({ where: { OR: [{ providerId: id }, { ownerId: id }] } });
+      await prisma.providerProfile.delete({ where: { userId: id } });
+      await prisma.user.delete({ where: { id } });
+      console.log(`Removed stale provider account: ${email}`);
+    } catch (e) {
+      console.warn(`Could not fully remove stale provider ${email}:`, e);
+    }
+  }
+}
+
 // ---------------------------------------------------------------------------
 // 2. Three charities
 // ---------------------------------------------------------------------------
@@ -444,6 +491,8 @@ async function certifyAllProvidersForRequiredCourses(client: PrismaClient): Prom
 
 async function main() {
   console.log("Seeding Tinies database (Cyprus test data)...\n");
+
+  await removeStaleSeedProviderAccounts();
 
   // ----- 1. Providers: User + ProviderProfile -----
   const providerUserIds: string[] = [];

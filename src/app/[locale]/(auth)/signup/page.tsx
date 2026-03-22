@@ -3,8 +3,18 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+
+function RequiredMark() {
+  return (
+    <span style={{ color: "var(--color-error)" }} aria-hidden>
+      {" "}
+      *
+    </span>
+  );
+}
 
 const ROLES = [
   { value: "owner", label: "Pet Owner" },
@@ -25,6 +35,7 @@ export default function SignupPage() {
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState<string>("owner");
   const [district, setDistrict] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const showDistrict = CYPRUS_ROLES.includes(role);
@@ -33,6 +44,10 @@ export default function SignupPage() {
     e.preventDefault();
     if (!name.trim() || !email.trim() || !password) {
       toast.error("Please fill in name, email, and password.");
+      return;
+    }
+    if (showDistrict && !district.trim()) {
+      toast.error("Please select your district.");
       return;
     }
     if (password.length < 6) {
@@ -80,11 +95,13 @@ export default function SignupPage() {
             <div>
               <label htmlFor="name" className="block text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
                 Name
+                <RequiredMark />
               </label>
               <input
                 id="name"
                 type="text"
                 autoComplete="name"
+                required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="mt-1.5 block w-full rounded-[var(--radius-lg)] border px-4 py-2.5 focus:outline-none focus:ring-2"
@@ -95,11 +112,13 @@ export default function SignupPage() {
             <div>
               <label htmlFor="email" className="block text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
                 Email
+                <RequiredMark />
               </label>
               <input
                 id="email"
                 type="email"
                 autoComplete="email"
+                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="mt-1.5 block w-full rounded-[var(--radius-lg)] border px-4 py-2.5 focus:outline-none focus:ring-2"
@@ -110,17 +129,31 @@ export default function SignupPage() {
             <div>
               <label htmlFor="password" className="block text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
                 Password
+                <RequiredMark />
               </label>
-              <input
-                id="password"
-                type="password"
-                autoComplete="new-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1.5 block w-full rounded-[var(--radius-lg)] border px-4 py-2.5 focus:outline-none focus:ring-2"
-                style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-background)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
-                placeholder="At least 6 characters"
-              />
+              <div className="relative mt-1.5">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  required
+                  minLength={6}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="block w-full rounded-[var(--radius-lg)] border py-2.5 pl-4 pr-12 focus:outline-none focus:ring-2"
+                  style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-background)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
+                  placeholder="At least 6 characters"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-1 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-md transition-opacity hover:opacity-80"
+                  style={{ color: "var(--color-text-secondary)" }}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" strokeWidth={1.75} aria-hidden /> : <Eye className="h-4 w-4" strokeWidth={1.75} aria-hidden />}
+                </button>
+              </div>
             </div>
             <div>
               <label htmlFor="phone" className="block text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
@@ -141,6 +174,7 @@ export default function SignupPage() {
             <div>
               <span className="block text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
                 I am a
+                <RequiredMark />
               </span>
               <div className="mt-2 space-y-2">
                 {ROLES.map((r) => (
@@ -167,11 +201,13 @@ export default function SignupPage() {
               <div>
                 <label htmlFor="district" className="block text-sm font-medium" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
                   District
+                  <RequiredMark />
                 </label>
                 <select
                   id="district"
                   value={district}
                   onChange={(e) => setDistrict(e.target.value)}
+                  required
                   className="mt-1.5 block w-full rounded-[var(--radius-lg)] border px-4 py-2.5 focus:outline-none focus:ring-2"
                   style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-background)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
                 >

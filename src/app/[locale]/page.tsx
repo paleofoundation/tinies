@@ -173,6 +173,33 @@ export default async function Home() {
 
             <div className="mt-8 flex flex-col items-center gap-4">
               <HomeSearchBar variant="hero" />
+              {featuredCampaign ? (
+                <div
+                  className="mx-auto flex max-w-2xl flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-[var(--radius-pill)] border px-4 py-2.5 text-center text-sm shadow-sm backdrop-blur-sm sm:text-base"
+                  style={{
+                    fontFamily: "var(--font-body), sans-serif",
+                    borderColor: "var(--color-secondary)",
+                    backgroundColor: "rgba(0, 0, 0, 0.28)",
+                    color: "rgba(255,255,255,0.95)",
+                  }}
+                >
+                  <span className="font-medium" style={{ color: "rgba(255,255,255,0.98)" }}>
+                    Right now:{" "}
+                    <span className="font-normal">
+                      {(featuredCampaign.subtitle?.trim() || featuredCampaign.title).length > 120
+                        ? `${(featuredCampaign.subtitle?.trim() || featuredCampaign.title).slice(0, 117)}…`
+                        : featuredCampaign.subtitle?.trim() || featuredCampaign.title}
+                    </span>
+                  </span>
+                  <Link
+                    href={`/rescue/${featuredCampaign.orgSlug}/campaign/${featuredCampaign.slug}`}
+                    className="inline-flex shrink-0 items-center font-semibold underline-offset-2 transition-opacity hover:opacity-90"
+                    style={{ color: "var(--color-secondary)" }}
+                  >
+                    Learn more
+                  </Link>
+                </div>
+              ) : null}
               <div
                 className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm sm:text-base"
                 style={{ fontFamily: "var(--font-body), sans-serif", color: "rgba(255,255,255,0.92)" }}
@@ -207,36 +234,6 @@ export default async function Home() {
           </div>
         </div>
       </header>
-
-      {featuredCampaign ? (
-        <section className="border-b px-4 py-4 sm:px-6 lg:px-8" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}>
-          <div className="mx-auto flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between" style={{ maxWidth: "var(--max-width)" }}>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--color-primary)", fontFamily: "var(--font-body), sans-serif" }}>
-                Featured campaign
-              </p>
-              <p className="mt-1 font-normal text-lg sm:text-xl" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>
-                {featuredCampaign.title}
-              </p>
-              {featuredCampaign.subtitle ? (
-                <p className="mt-1 line-clamp-2 text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-                  {featuredCampaign.subtitle}
-                </p>
-              ) : null}
-              <p className="mt-2 text-xs" style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-body), sans-serif" }}>
-                {featuredCampaign.orgName} · {formatPrice(featuredCampaign.raisedAmountCents, { useSymbol: true })} raised
-              </p>
-            </div>
-            <Link
-              href={`/rescue/${featuredCampaign.orgSlug}/campaign/${featuredCampaign.slug}`}
-              className="inline-flex h-11 shrink-0 items-center justify-center rounded-[var(--radius-pill)] px-6 text-sm font-semibold text-white transition-opacity hover:opacity-90 sm:self-center"
-              style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-primary)" }}
-            >
-              Support this campaign
-            </Link>
-          </div>
-        </section>
-      ) : null}
 
       {/* Social proof bar */}
       <section

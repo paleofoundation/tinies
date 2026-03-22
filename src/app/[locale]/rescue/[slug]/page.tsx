@@ -233,7 +233,14 @@ export default async function PublicRescueOrgPage({ params }: Props) {
               aria-hidden
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-transparent" aria-hidden />
+          {/* Strong bottom-weighted scrim so white hero text stays readable on light photos */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background: "linear-gradient(to bottom, transparent 0%, transparent 40%, rgba(0, 0, 0, 0.55) 100%)",
+            }}
+            aria-hidden
+          />
         </div>
 
         <div className="relative mx-auto px-4 sm:px-6" style={{ maxWidth: "var(--max-width)" }}>
