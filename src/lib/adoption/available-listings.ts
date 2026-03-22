@@ -20,15 +20,17 @@ export async function getAllAvailableAdoptionListings(
 ): Promise<AdoptBrowseListing[]> {
   try {
     const orgWhere =
-      filters.district != null
-        ? {
-            verified: true as const,
-            location: {
-              contains: districtSlugToLocationToken(filters.district),
-              mode: "insensitive" as const,
-            },
-          }
-        : { verified: true as const };
+      filters.rescueOrgSlug != null && filters.rescueOrgSlug.length > 0
+        ? { verified: true as const, slug: filters.rescueOrgSlug }
+        : filters.district != null
+          ? {
+              verified: true as const,
+              location: {
+                contains: districtSlugToLocationToken(filters.district),
+                mode: "insensitive" as const,
+              },
+            }
+          : { verified: true as const };
 
     const rows = await prisma.adoptionListing.findMany({
       where: {

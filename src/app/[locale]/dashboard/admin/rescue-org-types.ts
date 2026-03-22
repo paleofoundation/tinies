@@ -8,6 +8,8 @@ export type RescueOrgRow = {
   slug: string;
 };
 
+import type { ParsedRescueTeamMember } from "@/lib/validations/rescue-org-showcase";
+
 export type RescueOrgDetail = {
   id: string;
   userId: string;
@@ -21,5 +23,20 @@ export type RescueOrgDetail = {
   bankIban: string | null;
   verified: boolean;
   slug: string;
-  contactEmail: string;
+  /** Login email (User.email) */
+  accountEmail: string;
+  description: string | null;
+  foundedYear: number | null;
+  teamMembers: ParsedRescueTeamMember[];
+  facilityPhotos: string[];
+  facilityVideoUrl: string | null;
+  operatingHours: string | null;
+  volunteerInfo: string | null;
+  donationNeeds: string | null;
+  totalAnimalsRescued: number | null;
+  totalAnimalsAdopted: number | null;
+  contactPhone: string | null;
+  publicContactEmail: string | null;
+  district: string | null;
+  coverPhotoUrl: string | null;
 };

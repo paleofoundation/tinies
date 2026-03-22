@@ -423,6 +423,23 @@ model RescueOrg {
   userId              String    @unique @map("user_id")
   name                String
   mission             String?
+  /// Long-form about text for public profile (app layer max 2000 chars)
+  description         String?   @db.Text
+  foundedYear         Int?      @map("founded_year")
+  /// Array of { name, role, photo?, bio? }
+  teamMembers         Json?     @map("team_members")
+  facilityPhotos      String[]  @default([]) @map("facility_photos")
+  facilityVideoUrl    String?   @map("facility_video_url")
+  operatingHours      String?   @map("operating_hours")
+  volunteerInfo       String?   @map("volunteer_info")
+  donationNeeds       String?   @map("donation_needs")
+  totalAnimalsRescued Int?      @map("total_animals_rescued")
+  totalAnimalsAdopted Int?      @map("total_animals_adopted")
+  contactPhone        String?   @map("contact_phone")
+  /// Public-facing contact email (separate from login email on User)
+  contactEmail        String?   @map("contact_email")
+  district            String?
+  coverPhotoUrl       String?   @map("cover_photo_url")
   location            String?
   charityRegistration String?   @map("charity_registration")
   website             String?

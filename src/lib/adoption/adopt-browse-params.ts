@@ -15,6 +15,8 @@ export type AdoptBrowseQuery = {
   age?: AdoptAgeBand;
   /** When true, only internationally eligible listings with at least one destination. */
   international?: boolean;
+  /** Filter to listings from this verified rescue org (public slug). */
+  rescueOrgSlug?: string;
 };
 
 const SPECIES_VALUES: AdoptBrowseSpecies[] = ["dog", "cat"];
@@ -50,16 +52,21 @@ export function parseAdoptBrowseQuery(
   const intlRaw = firstParam(raw.international)?.toLowerCase();
   const international = intlRaw === "true" || intlRaw === "1" || intlRaw === "yes";
 
+  const rescueRaw = firstParam(raw.rescue)?.toLowerCase();
+  const rescueOrgSlug =
+    rescueRaw && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(rescueRaw) ? rescueRaw : undefined;
+
   const out: AdoptBrowseQuery = {};
   if (species) out.species = species;
   if (district) out.district = district;
   if (age) out.age = age;
   if (international) out.international = true;
+  if (rescueOrgSlug) out.rescueOrgSlug = rescueOrgSlug;
   return out;
 }
 
 export function adoptBrowseQueryHasFilters(q: AdoptBrowseQuery): boolean {
-  return !!(q.species || q.district || q.age || q.international);
+  return !!(q.species || q.district || q.age || q.international || q.rescueOrgSlug);
 }
 
 /** Substring matched case-insensitively against rescue org `location`. */
@@ -75,6 +82,7 @@ export function buildAdoptBrowseSearchParams(
   if (q.district) params.set("district", q.district);
   if (q.age) params.set("age", q.age);
   if (q.international) params.set("international", "true");
+  if (q.rescueOrgSlug) params.set("rescue", q.rescueOrgSlug);
   return params;
 }
 

@@ -5,6 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createRescueOrg, updateRescueOrg } from "../rescue-org-actions";
+import {
+  RescueOrgShowcaseFields,
+  type RescueOrgShowcaseInitial,
+} from "@/components/rescue/RescueOrgShowcaseFields";
 
 const inputClass =
   "mt-2 w-full rounded-[var(--radius-lg)] border px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]";
@@ -30,13 +34,63 @@ type Props = {
     bankIban: string | null;
     socialLinks: unknown;
     verified: boolean;
-    contactEmail: string;
+    accountEmail: string;
+    description: string | null;
+    foundedYear: number | null;
+    teamMembers: RescueOrgShowcaseInitial["teamMembers"];
+    facilityPhotos: string[];
+    facilityVideoUrl: string | null;
+    operatingHours: string | null;
+    volunteerInfo: string | null;
+    donationNeeds: string | null;
+    totalAnimalsRescued: number | null;
+    totalAnimalsAdopted: number | null;
+    contactPhone: string | null;
+    publicContactEmail: string | null;
+    district: string | null;
+    coverPhotoUrl: string | null;
   };
 };
 
 export function RescueOrgForm({ mode, orgId, initial }: Props) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
+
+  const emptyShowcase: RescueOrgShowcaseInitial = {
+    description: null,
+    foundedYear: null,
+    teamMembers: [],
+    facilityPhotos: [],
+    facilityVideoUrl: null,
+    operatingHours: null,
+    volunteerInfo: null,
+    donationNeeds: null,
+    totalAnimalsRescued: null,
+    totalAnimalsAdopted: null,
+    contactPhone: null,
+    publicContactEmail: null,
+    district: null,
+    coverPhotoUrl: null,
+  };
+
+  const showcaseInitial: RescueOrgShowcaseInitial = initial
+    ? {
+        description: initial.description,
+        foundedYear: initial.foundedYear,
+        teamMembers: initial.teamMembers,
+        facilityPhotos: initial.facilityPhotos,
+        facilityVideoUrl: initial.facilityVideoUrl,
+        operatingHours: initial.operatingHours,
+        volunteerInfo: initial.volunteerInfo,
+        donationNeeds: initial.donationNeeds,
+        totalAnimalsRescued: initial.totalAnimalsRescued,
+        totalAnimalsAdopted: initial.totalAnimalsAdopted,
+        contactPhone: initial.contactPhone,
+        publicContactEmail: initial.publicContactEmail,
+        district: initial.district,
+        coverPhotoUrl: initial.coverPhotoUrl,
+      }
+    : emptyShowcase;
 
   const social = (initial?.socialLinks && typeof initial.socialLinks === "object"
     ? (initial.socialLinks as SocialShape)
@@ -200,16 +254,16 @@ export function RescueOrgForm({ mode, orgId, initial }: Props) {
       </div>
 
       <div>
-        <label htmlFor="contactEmail" className={labelClass} style={{ color: "var(--color-text)" }}>
-          Contact email <span style={{ color: "var(--color-error)" }}>*</span>
+        <label htmlFor="loginEmail" className={labelClass} style={{ color: "var(--color-text)" }}>
+          Account (login) email <span style={{ color: "var(--color-error)" }}>*</span>
         </label>
         <input
-          id="contactEmail"
-          name="contactEmail"
+          id="loginEmail"
+          name="loginEmail"
           type="email"
           required={mode === "create"}
           readOnly={mode === "edit"}
-          defaultValue={initial?.contactEmail}
+          defaultValue={initial?.accountEmail}
           className={inputClass}
           style={{
             ...boxStyle,
@@ -218,7 +272,7 @@ export function RescueOrgForm({ mode, orgId, initial }: Props) {
         />
         {mode === "edit" && (
           <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
-            Linked account email. To change it, contact engineering — it affects login identity.
+            Login identity. To change it, contact engineering.
           </p>
         )}
       </div>
@@ -237,6 +291,12 @@ export function RescueOrgForm({ mode, orgId, initial }: Props) {
           style={boxStyle}
         />
       </div>
+
+      <RescueOrgShowcaseFields
+        orgId={mode === "edit" && orgId ? orgId : null}
+        allowPhotoUpload={mode === "edit"}
+        initial={showcaseInitial}
+      />
 
       {mode === "edit" && (
         <div className="flex items-center gap-3 rounded-[var(--radius-lg)] border p-4" style={{ borderColor: "var(--color-border)" }}>

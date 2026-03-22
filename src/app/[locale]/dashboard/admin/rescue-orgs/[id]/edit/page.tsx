@@ -55,7 +55,21 @@ export default async function EditRescueOrgPage({ params }: Props) {
             bankIban: org.bankIban,
             socialLinks: org.socialLinks,
             verified: org.verified,
-            contactEmail: org.contactEmail,
+            accountEmail: org.accountEmail,
+            description: org.description,
+            foundedYear: org.foundedYear,
+            teamMembers: org.teamMembers,
+            facilityPhotos: org.facilityPhotos,
+            facilityVideoUrl: org.facilityVideoUrl,
+            operatingHours: org.operatingHours,
+            volunteerInfo: org.volunteerInfo,
+            donationNeeds: org.donationNeeds,
+            totalAnimalsRescued: org.totalAnimalsRescued,
+            totalAnimalsAdopted: org.totalAnimalsAdopted,
+            contactPhone: org.contactPhone,
+            publicContactEmail: org.publicContactEmail,
+            district: org.district,
+            coverPhotoUrl: org.coverPhotoUrl,
           }}
         />
       </main>

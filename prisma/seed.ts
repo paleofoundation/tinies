@@ -483,6 +483,24 @@ async function main() {
     });
   }
 
+  gardensOrg = await prisma.rescueOrg.update({
+    where: { id: gardensOrg.id },
+    data: {
+      description:
+        "Gardens of St Gertrude is a cat sanctuary in Parekklisia, Cyprus, caring for 92 rescue cats. Founded by the creator of Tinies, the sanctuary provides daily feeding, veterinary care, spaying/neutering, and shelter for cats who were abandoned, injured, or born on the streets of Cyprus. Every cat here has a name, a story, and a warm place to sleep. The sanctuary is open to visitors and always needs volunteers and donations to keep going.",
+      foundedYear: 2023,
+      operatingHours: "Open to visitors daily, 9am-1pm",
+      volunteerInfo:
+        "We welcome volunteers for morning feeding (8am-10am) and afternoon socialisation (2pm-4pm). Contact us to arrange a visit.",
+      donationNeeds:
+        "We always need: dry and wet cat food, flea and tick treatments, cat litter, blankets, and funds for veterinary emergencies.",
+      totalAnimalsRescued: 92,
+      contactEmail: "hello@tinies.app",
+      district: "Limassol",
+      coverPhotoUrl: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_cats_v2.jpg",
+    },
+  });
+
   for (const cat of GARDENS_CATS) {
     const baseSlug = slugify(cat.name);
     const slug = await ensureUniqueListingSlug(baseSlug);

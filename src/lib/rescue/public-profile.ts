@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { teamMembersFromPrismaJson } from "@/lib/validations/rescue-org-showcase";
 
 function asStringList(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
@@ -20,10 +21,32 @@ export type PublicRescueListing = {
   photos: string[];
 };
 
+export type RescueTeamMemberPublic = {
+  name: string;
+  role: string;
+  photo?: string;
+  bio?: string;
+};
+
 export type PublicRescueOrgProfile = {
+  id: string;
   slug: string;
   name: string;
   mission: string | null;
+  description: string | null;
+  foundedYear: number | null;
+  teamMembers: RescueTeamMemberPublic[];
+  facilityPhotos: string[];
+  facilityVideoUrl: string | null;
+  operatingHours: string | null;
+  volunteerInfo: string | null;
+  donationNeeds: string | null;
+  totalAnimalsRescued: number | null;
+  totalAnimalsAdopted: number | null;
+  contactPhone: string | null;
+  contactEmail: string | null;
+  district: string | null;
+  coverPhotoUrl: string | null;
   location: string | null;
   website: string | null;
   websiteHref: string | null;
@@ -33,7 +56,10 @@ export type PublicRescueOrgProfile = {
   socialLinks: RescueSocialLinks;
   /** From linked charity row when present; otherwise use mission in the UI */
   howDonationsUsed: string | null;
+  /** Giving page slug when a linked charity exists */
+  charityGiveSlug: string | null;
   listings: PublicRescueListing[];
+  completedPlacementsCount: number;
 };
 
 function parseSocialLinks(json: unknown): RescueSocialLinks {
@@ -67,9 +93,7 @@ export function normalizeExternalUrl(url: string | null | undefined): string | n
 /**
  * Verified rescue orgs only, with active available listings for public profile.
  */
-export async function getPublicRescueOrgBySlug(
-  slug: string
-): Promise<PublicRescueOrgProfile | null> {
+export async function getPublicRescueOrgBySlug(slug: string): Promise<PublicRescueOrgProfile | null> {
   try {
     const org = await prisma.rescueOrg.findFirst({
       where: { slug, verified: true },
@@ -79,6 +103,20 @@ export async function getPublicRescueOrgBySlug(
         slug: true,
         name: true,
         mission: true,
+        description: true,
+        foundedYear: true,
+        teamMembers: true,
+        facilityPhotos: true,
+        facilityVideoUrl: true,
+        operatingHours: true,
+        volunteerInfo: true,
+        donationNeeds: true,
+        totalAnimalsRescued: true,
+        totalAnimalsAdopted: true,
+        contactPhone: true,
+        contactEmail: true,
+        district: true,
+        coverPhotoUrl: true,
         location: true,
         website: true,
         logoUrl: true,
@@ -90,31 +128,35 @@ export async function getPublicRescueOrgBySlug(
 
     if (!org) return null;
 
-    const charity = await prisma.charity.findFirst({
-      where: {
-        active: true,
-        OR: [{ slug: org.slug }, { userId: org.userId }],
-      },
-      select: { howFundsUsed: true },
-    });
-
-    const listings = await prisma.adoptionListing.findMany({
-      where: {
-        orgId: org.id,
-        status: "available",
-        active: true,
-      },
-      orderBy: { createdAt: "desc" },
-      select: {
-        slug: true,
-        name: true,
-        species: true,
-        breed: true,
-        estimatedAge: true,
-        sex: true,
-        photos: true,
-      },
-    });
+    const [charity, listings, completedPlacementsCount] = await Promise.all([
+      prisma.charity.findFirst({
+        where: {
+          active: true,
+          OR: [{ slug: org.slug }, { userId: org.userId }, { rescueOrgId: org.id }],
+        },
+        select: { howFundsUsed: true, slug: true },
+      }),
+      prisma.adoptionListing.findMany({
+        where: {
+          orgId: org.id,
+          status: "available",
+          active: true,
+        },
+        orderBy: { createdAt: "desc" },
+        select: {
+          slug: true,
+          name: true,
+          species: true,
+          breed: true,
+          estimatedAge: true,
+          sex: true,
+          photos: true,
+        },
+      }),
+      prisma.adoptionPlacement.count({
+        where: { rescueOrgId: org.id, status: "completed" },
+      }),
+    ]);
 
     const howDonationsUsed =
       charity?.howFundsUsed && charity.howFundsUsed.trim().length > 0
@@ -122,9 +164,24 @@ export async function getPublicRescueOrgBySlug(
         : null;
 
     return {
+      id: org.id,
       slug: org.slug,
       name: org.name,
       mission: org.mission,
+      description: org.description,
+      foundedYear: org.foundedYear,
+      teamMembers: teamMembersFromPrismaJson(org.teamMembers),
+      facilityPhotos: [...org.facilityPhotos],
+      facilityVideoUrl: org.facilityVideoUrl,
+      operatingHours: org.operatingHours,
+      volunteerInfo: org.volunteerInfo,
+      donationNeeds: org.donationNeeds,
+      totalAnimalsRescued: org.totalAnimalsRescued,
+      totalAnimalsAdopted: org.totalAnimalsAdopted,
+      contactPhone: org.contactPhone,
+      contactEmail: org.contactEmail,
+      district: org.district,
+      coverPhotoUrl: org.coverPhotoUrl,
       location: org.location,
       website: org.website,
       websiteHref: normalizeExternalUrl(org.website),
@@ -133,10 +190,12 @@ export async function getPublicRescueOrgBySlug(
       verified: true,
       socialLinks: parseSocialLinks(org.socialLinks),
       howDonationsUsed,
+      charityGiveSlug: charity?.slug ?? null,
       listings: listings.map((l) => ({
         ...l,
         photos: asStringList(l.photos),
       })),
+      completedPlacementsCount,
     };
   } catch (e) {
     console.error("getPublicRescueOrgBySlug", e);

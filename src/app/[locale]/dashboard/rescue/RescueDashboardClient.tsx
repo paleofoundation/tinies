@@ -25,6 +25,8 @@ import {
 import type { OrgDonationSummary } from "@/lib/giving/org-donation-types";
 import { markRescueDonationsTabSeen } from "@/lib/giving/org-donation-actions";
 import { approveAdoptionSuccessStory } from "@/lib/adoption/success-stories-actions";
+import { RescueOrgShowcaseFields } from "@/components/rescue/RescueOrgShowcaseFields";
+import { teamMembersFromPrismaJson } from "@/lib/validations/rescue-org-showcase";
 
 type TabId = "listings" | "inquiries" | "pipeline" | "donations" | "messages" | "profile";
 
@@ -40,6 +42,20 @@ type Props = {
     slug: string;
     verified: boolean;
     donationsTabLastSeenAt: Date | null;
+    description: string | null;
+    foundedYear: number | null;
+    teamMembers: unknown;
+    facilityPhotos: string[];
+    facilityVideoUrl: string | null;
+    operatingHours: string | null;
+    volunteerInfo: string | null;
+    donationNeeds: string | null;
+    totalAnimalsRescued: number | null;
+    totalAnimalsAdopted: number | null;
+    contactPhone: string | null;
+    contactEmail: string | null;
+    district: string | null;
+    coverPhotoUrl: string | null;
   };
   listings: OrgListingRow[];
   applications: OrgApplicationRow[];
@@ -769,7 +785,7 @@ export function RescueDashboardClient({
         )}
 
         {tab === "profile" && (
-          <div className="max-w-xl">
+          <div className="max-w-3xl">
             <form onSubmit={handleProfileSubmit} className="space-y-4">
               <div>
                 <label htmlFor="org-name" className="block text-sm font-medium" style={{ color: "var(--color-text)" }}>
@@ -849,6 +865,28 @@ export function RescueDashboardClient({
                   style={{ backgroundColor: "var(--color-background)", borderColor: "var(--color-border)", color: "var(--color-text)" }}
                 />
               </div>
+
+              <RescueOrgShowcaseFields
+                orgId={org.id}
+                allowPhotoUpload
+                initial={{
+                  description: org.description,
+                  foundedYear: org.foundedYear,
+                  teamMembers: teamMembersFromPrismaJson(org.teamMembers),
+                  facilityPhotos: org.facilityPhotos,
+                  facilityVideoUrl: org.facilityVideoUrl,
+                  operatingHours: org.operatingHours,
+                  volunteerInfo: org.volunteerInfo,
+                  donationNeeds: org.donationNeeds,
+                  totalAnimalsRescued: org.totalAnimalsRescued,
+                  totalAnimalsAdopted: org.totalAnimalsAdopted,
+                  contactPhone: org.contactPhone,
+                  publicContactEmail: org.contactEmail,
+                  district: org.district,
+                  coverPhotoUrl: org.coverPhotoUrl,
+                }}
+              />
+
               <button
                 type="submit"
                 className="inline-flex h-10 items-center gap-2 rounded-[var(--radius-pill)] bg-[var(--color-primary)] px-6 text-sm font-semibold text-white hover:opacity-90"

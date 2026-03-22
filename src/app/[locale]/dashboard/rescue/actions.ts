@@ -27,6 +27,7 @@ import type {
   OrgPlacementRow,
   UpdateOrgProfileInput,
 } from "@/lib/rescue/rescue-org-dashboard-types";
+import { extractRescueOrgShowcaseFromForm } from "@/lib/rescue/rescue-org-showcase-form";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
@@ -61,6 +62,20 @@ export async function getRescueOrgDashboard(): Promise<{
     slug: string;
     verified: boolean;
     donationsTabLastSeenAt: Date | null;
+    description: string | null;
+    foundedYear: number | null;
+    teamMembers: unknown;
+    facilityPhotos: string[];
+    facilityVideoUrl: string | null;
+    operatingHours: string | null;
+    volunteerInfo: string | null;
+    donationNeeds: string | null;
+    totalAnimalsRescued: number | null;
+    totalAnimalsAdopted: number | null;
+    contactPhone: string | null;
+    contactEmail: string | null;
+    district: string | null;
+    coverPhotoUrl: string | null;
   } | null;
   error?: string;
 }> {
@@ -79,6 +94,20 @@ export async function getRescueOrgDashboard(): Promise<{
       slug: org.slug,
       verified: org.verified,
       donationsTabLastSeenAt: org.donationsTabLastSeenAt,
+      description: org.description,
+      foundedYear: org.foundedYear,
+      teamMembers: org.teamMembers,
+      facilityPhotos: [...org.facilityPhotos],
+      facilityVideoUrl: org.facilityVideoUrl,
+      operatingHours: org.operatingHours,
+      volunteerInfo: org.volunteerInfo,
+      donationNeeds: org.donationNeeds,
+      totalAnimalsRescued: org.totalAnimalsRescued,
+      totalAnimalsAdopted: org.totalAnimalsAdopted,
+      contactPhone: org.contactPhone,
+      contactEmail: org.contactEmail,
+      district: org.district,
+      coverPhotoUrl: org.coverPhotoUrl,
     },
   };
 }
@@ -300,11 +329,16 @@ export async function toggleListingStatus(listingId: string): Promise<{ error?: 
   }
 }
 
+const MISSION_MAX = 500;
+
 export async function updateOrgProfile(formData: FormData): Promise<{ error?: string }> {
   const { org, error } = await getRescueOrgForUser();
   if (error || !org) return { error: error ?? "Rescue org not found." };
   const name = (formData.get("name") as string)?.trim();
   const mission = (formData.get("mission") as string)?.trim() || null;
+  if (mission && mission.length > MISSION_MAX) {
+    return { error: `Mission must be ${MISSION_MAX} characters or less.` };
+  }
   const location = (formData.get("location") as string)?.trim() || null;
   const website = (formData.get("website") as string)?.trim() || null;
   const logoUrl = (formData.get("logoUrl") as string)?.trim() || null;
@@ -317,11 +351,15 @@ export async function updateOrgProfile(formData: FormData): Promise<{ error?: st
       // leave null if invalid JSON
     }
   }
+
+  const showcase = extractRescueOrgShowcaseFromForm(formData, "json");
+  if (!showcase.ok) return { error: showcase.error };
+
   try {
     await prisma.rescueOrg.update({
       where: { id: org.id },
       data: {
-        name: (name && name.trim()) ? name.trim() : org.name,
+        name: name && name.trim() ? name.trim() : org.name,
         mission,
         location,
         website,
@@ -330,9 +368,24 @@ export async function updateOrgProfile(formData: FormData): Promise<{ error?: st
           socialLinks == null
             ? Prisma.DbNull
             : (socialLinks as Prisma.InputJsonValue),
+        description: showcase.data.description,
+        foundedYear: showcase.data.foundedYear,
+        teamMembers: showcase.data.teamMembers,
+        facilityPhotos: showcase.data.facilityPhotos,
+        facilityVideoUrl: showcase.data.facilityVideoUrl,
+        operatingHours: showcase.data.operatingHours,
+        volunteerInfo: showcase.data.volunteerInfo,
+        donationNeeds: showcase.data.donationNeeds,
+        totalAnimalsRescued: showcase.data.totalAnimalsRescued,
+        totalAnimalsAdopted: showcase.data.totalAnimalsAdopted,
+        contactPhone: showcase.data.contactPhone,
+        contactEmail: showcase.data.contactEmail,
+        district: showcase.data.district,
+        coverPhotoUrl: showcase.data.coverPhotoUrl,
       },
     });
     revalidatePath("/dashboard/rescue");
+    revalidatePath(`/rescue/${org.slug}`);
     return {};
   } catch (e) {
     console.error("updateOrgProfile failed:", e);

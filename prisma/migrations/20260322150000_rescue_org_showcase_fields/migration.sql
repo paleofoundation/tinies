@@ -1,0 +1,15 @@
+-- AlterTable
+ALTER TABLE "rescue_orgs" ADD COLUMN     "description" TEXT,
+ADD COLUMN     "founded_year" INTEGER,
+ADD COLUMN     "team_members" JSONB,
+ADD COLUMN     "facility_photos" TEXT[] DEFAULT ARRAY[]::TEXT[],
+ADD COLUMN     "facility_video_url" TEXT,
+ADD COLUMN     "operating_hours" TEXT,
+ADD COLUMN     "volunteer_info" TEXT,
+ADD COLUMN     "donation_needs" TEXT,
+ADD COLUMN     "total_animals_rescued" INTEGER,
+ADD COLUMN     "total_animals_adopted" INTEGER,
+ADD COLUMN     "contact_phone" TEXT,
+ADD COLUMN     "contact_email" TEXT,
+ADD COLUMN     "district" TEXT,
+ADD COLUMN     "cover_photo_url" TEXT;

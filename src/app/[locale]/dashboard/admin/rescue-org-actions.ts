@@ -7,6 +7,8 @@ import { prisma } from "@/lib/prisma";
 import { ensureUniqueOrgSlug } from "@/lib/rescue/ensure-unique-org-slug";
 import { createClient } from "@/lib/supabase/server";
 import type { RescueOrgDetail, RescueOrgRow } from "@/app/[locale]/dashboard/admin/rescue-org-types";
+import { extractRescueOrgShowcaseFromForm } from "@/lib/rescue/rescue-org-showcase-form";
+import { teamMembersFromPrismaJson } from "@/lib/validations/rescue-org-showcase";
 
 const PLACEHOLDER_PASSWORD_HASH = "supabase-auth-placeholder";
 const MISSION_MAX = 500;
@@ -67,7 +69,21 @@ export async function getRescueOrgById(id: string): Promise<RescueOrgDetail | nu
     bankIban: org.bankIban,
     verified: org.verified,
     slug: org.slug,
-    contactEmail: org.user.email,
+    accountEmail: org.user.email,
+    description: org.description,
+    foundedYear: org.foundedYear,
+    teamMembers: teamMembersFromPrismaJson(org.teamMembers),
+    facilityPhotos: [...org.facilityPhotos],
+    facilityVideoUrl: org.facilityVideoUrl,
+    operatingHours: org.operatingHours,
+    volunteerInfo: org.volunteerInfo,
+    donationNeeds: org.donationNeeds,
+    totalAnimalsRescued: org.totalAnimalsRescued,
+    totalAnimalsAdopted: org.totalAnimalsAdopted,
+    contactPhone: org.contactPhone,
+    publicContactEmail: org.contactEmail,
+    district: org.district,
+    coverPhotoUrl: org.coverPhotoUrl,
   };
 }
 
@@ -105,15 +121,20 @@ export async function createRescueOrg(formData: FormData): Promise<{ error?: str
   const website = (formData.get("website") as string)?.trim() || null;
   const logoUrl = (formData.get("logoUrl") as string)?.trim() || null;
   const bankIban = (formData.get("bankIban") as string)?.trim() || null;
-  const contactEmail = (formData.get("contactEmail") as string)?.trim().toLowerCase();
-  if (!contactEmail) return { error: "Contact email is required." };
-  if (!isValidEmail(contactEmail)) return { error: "Please enter a valid contact email." };
+  const loginEmail =
+    (formData.get("loginEmail") as string)?.trim().toLowerCase() ||
+    (formData.get("contactEmail") as string)?.trim().toLowerCase();
+  if (!loginEmail) return { error: "Account email is required." };
+  if (!isValidEmail(loginEmail)) return { error: "Please enter a valid account email." };
 
   const socialLinks = parseSocialLinks(formData);
 
+  const showcase = extractRescueOrgShowcaseFromForm(formData, "lines");
+  if (!showcase.ok) return { error: showcase.error };
+
   try {
     const existingUser = await prisma.user.findUnique({
-      where: { email: contactEmail },
+      where: { email: loginEmail },
     });
 
     if (existingUser) {
@@ -135,7 +156,7 @@ export async function createRescueOrg(formData: FormData): Promise<{ error?: str
       await prisma.user.create({
         data: {
           id: userId,
-          email: contactEmail,
+          email: loginEmail,
           name: name,
           passwordHash: PLACEHOLDER_PASSWORD_HASH,
           role: "rescue",
@@ -158,11 +179,26 @@ export async function createRescueOrg(formData: FormData): Promise<{ error?: str
           socialLinks && Object.keys(socialLinks).length > 0 ? socialLinks : Prisma.JsonNull,
         slug,
         verified: false,
+        description: showcase.data.description,
+        foundedYear: showcase.data.foundedYear,
+        teamMembers: showcase.data.teamMembers,
+        facilityPhotos: showcase.data.facilityPhotos,
+        facilityVideoUrl: showcase.data.facilityVideoUrl,
+        operatingHours: showcase.data.operatingHours,
+        volunteerInfo: showcase.data.volunteerInfo,
+        donationNeeds: showcase.data.donationNeeds,
+        totalAnimalsRescued: showcase.data.totalAnimalsRescued,
+        totalAnimalsAdopted: showcase.data.totalAnimalsAdopted,
+        contactPhone: showcase.data.contactPhone,
+        contactEmail: showcase.data.contactEmail,
+        district: showcase.data.district,
+        coverPhotoUrl: showcase.data.coverPhotoUrl,
       },
     });
 
     revalidatePath("/dashboard/admin");
     revalidatePath("/dashboard/rescue");
+    revalidatePath(`/rescue/${org.slug}`);
     return { id: org.id };
   } catch (e) {
     console.error("createRescueOrg", e);
@@ -201,6 +237,9 @@ export async function updateRescueOrg(
   const verifiedRaw = formData.get("verified");
   const verified = verifiedRaw === "true" || verifiedRaw === "on";
 
+  const showcase = extractRescueOrgShowcaseFromForm(formData, "json");
+  if (!showcase.ok) return { error: showcase.error };
+
   try {
     await prisma.rescueOrg.update({
       where: { id },
@@ -217,12 +256,27 @@ export async function updateRescueOrg(
             ? socialLinks
             : Prisma.JsonNull,
         verified,
+        description: showcase.data.description,
+        foundedYear: showcase.data.foundedYear,
+        teamMembers: showcase.data.teamMembers,
+        facilityPhotos: showcase.data.facilityPhotos,
+        facilityVideoUrl: showcase.data.facilityVideoUrl,
+        operatingHours: showcase.data.operatingHours,
+        volunteerInfo: showcase.data.volunteerInfo,
+        donationNeeds: showcase.data.donationNeeds,
+        totalAnimalsRescued: showcase.data.totalAnimalsRescued,
+        totalAnimalsAdopted: showcase.data.totalAnimalsAdopted,
+        contactPhone: showcase.data.contactPhone,
+        contactEmail: showcase.data.contactEmail,
+        district: showcase.data.district,
+        coverPhotoUrl: showcase.data.coverPhotoUrl,
       },
     });
 
     revalidatePath("/dashboard/admin");
     revalidatePath(`/dashboard/admin/rescue-orgs/${id}/edit`);
     revalidatePath("/dashboard/rescue");
+    revalidatePath(`/rescue/${org.slug}`);
     return {};
   } catch (e) {
     console.error("updateRescueOrg", e);
@@ -247,11 +301,12 @@ export async function toggleRescueOrgVerification(id: string): Promise<{ error?:
     const updated = await prisma.rescueOrg.update({
       where: { id },
       data: { verified: !org.verified },
-      select: { verified: true },
+      select: { verified: true, slug: true },
     });
 
     revalidatePath("/dashboard/admin");
     revalidatePath("/dashboard/rescue");
+    revalidatePath(`/rescue/${updated.slug}`);
     return { verified: updated.verified };
   } catch (e) {
     console.error("toggleRescueOrgVerification", e);

@@ -29,7 +29,7 @@ export default function NewRescueOrgPage() {
           Register new rescue organisation
         </h1>
         <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-body), sans-serif" }}>
-          Creates a linked user account if the contact email is new. Slug is generated from the organisation name.
+          Creates a linked user account if the account email is new. Slug is generated from the organisation name.
         </p>
         <RescueOrgForm mode="create" />
       </main>
