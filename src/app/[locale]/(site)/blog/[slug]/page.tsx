@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { displayReadMinutesForPost } from "@/lib/blog/read-time";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -127,7 +128,7 @@ export default async function BlogPostPage({ params }: Props) {
             <span aria-hidden>·</span>
             <time dateTime={post.dateISO}>{post.dateDisplay}</time>
             <span aria-hidden>·</span>
-            <span>{post.readTimeMinutes} min read</span>
+            <span>{displayReadMinutesForPost(post)} min read</span>
           </div>
         </header>
 

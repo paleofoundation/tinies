@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { displayReadMinutesForPost } from "@/lib/blog/read-time";
 import type { BlogPostSummary } from "@/lib/blog/types";
 
 type Props = {
@@ -7,6 +8,7 @@ type Props = {
 };
 
 export function BlogCard({ post }: Props) {
+  const readMinutes = displayReadMinutesForPost(post);
   return (
     <article
       className="flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]"
@@ -66,7 +68,9 @@ export function BlogCard({ post }: Props) {
         >
           <time dateTime={post.dateISO}>{post.dateDisplay}</time>
           <span aria-hidden>·</span>
-          <span>{post.readTimeMinutes} min read</span>
+          <span>
+            {readMinutes} min read
+          </span>
         </div>
         <Link
           href={`/blog/${post.slug}`}

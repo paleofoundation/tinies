@@ -7,7 +7,8 @@ export type AdoptBrowseDistrictSlug =
   | "limassol"
   | "larnaca"
   | "paphos"
-  | "famagusta";
+  | "famagusta"
+  | "kyrenia";
 
 export type AdoptBrowseQuery = {
   species?: AdoptBrowseSpecies;
@@ -26,6 +27,7 @@ const DISTRICT_VALUES: AdoptBrowseDistrictSlug[] = [
   "larnaca",
   "paphos",
   "famagusta",
+  "kyrenia",
 ];
 const AGE_VALUES: AdoptAgeBand[] = ["kitten", "young", "adult", "senior"];
 
@@ -92,6 +94,7 @@ export const ADOPT_DISTRICT_OPTIONS: { slug: AdoptBrowseDistrictSlug; label: str
   { slug: "larnaca", label: "Larnaca" },
   { slug: "paphos", label: "Paphos" },
   { slug: "famagusta", label: "Famagusta" },
+  { slug: "kyrenia", label: "Kyrenia" },
 ];
 
 export const ADOPT_AGE_OPTIONS: { value: AdoptAgeBand; label: string }[] = [

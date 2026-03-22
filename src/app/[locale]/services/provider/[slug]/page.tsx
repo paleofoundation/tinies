@@ -25,6 +25,10 @@ import { ProviderCertificationsSection } from "@/components/providers/ProviderCe
 import { ProviderVideoIntro } from "@/components/providers/ProviderVideoIntro";
 import { MeetAndGreetRequestModal } from "./MeetAndGreetRequestModal";
 
+function formatMemberSinceLabel(value: Date | string): string {
+  return new Date(value).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+}
+
 export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -277,7 +281,7 @@ export default async function ProviderProfilePage({ params }: Props) {
                 </span>
                 <span className="inline-flex items-center gap-1">
                   <Calendar className="h-4 w-4 shrink-0" aria-hidden />
-                  Member since {new Date(provider?.memberSince ?? Date.now()).getFullYear()}
+                  Member since {formatMemberSinceLabel(provider?.memberSince ?? Date.now())}
                 </span>
               </div>
 
@@ -789,7 +793,7 @@ export default async function ProviderProfilePage({ params }: Props) {
                 ) : null}
                 <li className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 shrink-0" style={{ color: "var(--color-primary)" }} aria-hidden />
-                  Member since {new Date(provider?.memberSince ?? Date.now()).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}
+                  Member since {formatMemberSinceLabel(provider?.memberSince ?? Date.now())}
                 </li>
                 {rrLabel ? <li>{rrLabel}</li> : null}
                 {repeatLine ? <li>{repeatLine}</li> : null}

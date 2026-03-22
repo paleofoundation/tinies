@@ -1,18 +1,10 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import { computeReadTimeMinutes } from "./read-time";
 import type { BlogPostFull, BlogPostSummary } from "./types";
 
 const CONTENT_DIR = path.join(process.cwd(), "content/blog");
-
-function wordCount(s: string): number {
-  return s.trim().split(/\s+/).filter(Boolean).length;
-}
-
-function readingMinutes(body: string): number {
-  const words = wordCount(body);
-  return Math.max(1, Math.round(words / 200));
-}
 
 function parseCategories(data: Record<string, unknown>): {
   category: string;
@@ -54,7 +46,7 @@ function toSummary(
   const dateISO = String(data.date ?? "").trim();
   const author = String(data.author ?? "Tinies Team").trim();
   const image = String(data.image ?? "").trim();
-  const readTimeMinutes = readingMinutes(content);
+  const readTimeMinutes = computeReadTimeMinutes(content, excerpt, title);
 
   return {
     slug,
