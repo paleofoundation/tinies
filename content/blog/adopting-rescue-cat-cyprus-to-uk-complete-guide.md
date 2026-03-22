@@ -41,17 +41,17 @@ The rescue organisation schedules and completes the following veterinary work:
 
 **Rabies vaccination.** Required for UK entry. Must be administered after or on the same day as microchipping.
 
-**Microchip.** An ISO 11784/11785 compliant microchip is implanted. The microchip number is recorded on all subsequent documents. The microchip must be implanted before or on the same day as the rabies vaccination — this is a strict requirement.
+**Microchip.** An [ISO 11784/11785](https://en.wikipedia.org/wiki/ISO_11784_and_ISO_11785) compliant microchip is implanted. The microchip number is recorded on all subsequent documents. The microchip must be implanted before or on the same day as the rabies vaccination — this is a strict requirement.
 
 **Spay or neuter.** If not already done, the animal is sterilised before travel.
 
-**Rabies titer test.** This is the critical step for UK-bound animals. A blood sample is drawn at least thirty days after the rabies vaccination and sent to an EU-approved laboratory. The test confirms that the animal has developed sufficient antibodies against rabies. Results typically take two to three weeks. This is the longest single step in the process and the main reason UK adoptions take longer than EU adoptions.
+**Rabies titer test.** This is the critical step for UK-bound animals. A blood sample is drawn at least thirty days after the rabies vaccination and sent to an EU-approved laboratory. The test confirms that the animal has developed sufficient antibodies against rabies (see [UK government guidance on rabies blood tests for pet travel](https://www.gov.uk/taking-your-pet-abroad/rabies-blood-test)). Results typically take two to three weeks. This is the longest single step in the process and the main reason UK adoptions take longer than EU adoptions.
 
 **Tapeworm treatment (dogs only).** Dogs must receive tapeworm treatment (praziquantel) twenty-four to one hundred and twenty hours before arrival in the UK. This is administered by a veterinarian and recorded in the pet passport.
 
 ## Step 5: EU pet passport
 
-Once the veterinary preparation is complete, an authorised veterinarian in Cyprus issues an EU pet passport. This document contains the animal's microchip number, vaccination records, rabies titer test results, and owner details. It is the animal's travel document for the rest of its life.
+Once the veterinary preparation is complete, an authorised veterinarian in Cyprus issues an [EU pet passport](https://food.ec.europa.eu/animals/movement-pets_en). This document contains the animal's microchip number, vaccination records, rabies titer test results, and owner details. It is the animal's travel document for the rest of its life.
 
 ## Step 6: Transport booking (1-2 weeks)
 
@@ -132,7 +132,7 @@ No. The entire process is coordinated remotely. Your animal is delivered to your
 Contact Tinies and the rescue organisation. Rescue organisations take returns seriously and will work with you to find a solution — whether that is behavioural support, a trial period adjustment, or in rare cases, rehoming.
 
 **Is the adoption fee tax-deductible?**
-The veterinary and transport components are not tax-deductible. If you make a separate donation to a registered charity through Tinies Giving, that donation may be tax-deductible depending on your jurisdiction. Consult your tax advisor.
+The veterinary and transport components are not tax-deductible. If you make a separate donation to a registered charity through [Tinies Giving](/giving), that donation may be tax-deductible depending on your jurisdiction. Consult your tax advisor.
 
 ## Start your adoption
 

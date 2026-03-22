@@ -17,21 +17,21 @@ It is not entirely wrong. But it is not entirely right, either. And the conclusi
 
 Domestic and feral cats are predators. They hunt birds, lizards, rodents, and insects. In an island environment like Cyprus, where many species evolved without mammalian predators, this hunting pressure can be significant.
 
-Cyprus is home to several endemic and near-endemic bird species that face predation pressure from cats. The Cyprus warbler (Sylvia melanothorax) and the Cyprus wheatear (Oenanthe cypriaca) are both species of conservation interest. BirdLife Cyprus has documented concerns about cat predation on ground-nesting birds, particularly in areas where feral cat colonies are concentrated.
+Cyprus is home to several endemic and near-endemic bird species that face predation pressure from cats. The [Cyprus warbler](https://en.wikipedia.org/wiki/Cyprus_warbler) (Sylvia melanothorax) and the [Cyprus wheatear](https://en.wikipedia.org/wiki/Cyprus_wheatear) (Oenanthe cypriaca) are both species of conservation interest. [BirdLife Cyprus](https://www.birdlifecyprus.org/) has documented concerns about cat predation on ground-nesting birds, particularly in areas where feral cat colonies are concentrated.
 
 Lizard species, including the Troodos lizard (Phoenicolacerta troodica), also face predation. Cats are efficient hunters — even well-fed domestic cats hunt instinctively — and in areas with high feral cat density, the cumulative impact on small vertebrate populations is real.
 
-This is not unique to Cyprus. Studies from Australia, New Zealand, Hawaii, and other island systems have documented the impact of feral cats on native wildlife. Cats are listed among the world's worst invasive species by the International Union for Conservation of Nature (IUCN).
+This is not unique to Cyprus. Studies from Australia, New Zealand, Hawaii, and other island systems have documented the impact of feral cats on native wildlife. Cats are listed among the world's worst invasive species by the [International Union for Conservation of Nature](https://www.iucn.org/) (IUCN).
 
 So yes, the ecological concern is legitimate.
 
 ## The cultural reality is also real
 
-Cats have been part of human life on Cyprus for at least 9,500 years — longer than anywhere else on Earth. Archaeological evidence from Shillourokambos near Parekklisia shows that Neolithic settlers deliberately brought cats to the island by boat around 7,500 BC. A cat was buried alongside a human companion in what is the oldest known evidence of the human-cat bond.
+Cats have been part of human life on Cyprus for at least 9,500 years — longer than anywhere else on Earth. Archaeological evidence from [Shillourokambos](https://en.wikipedia.org/wiki/Shillourokambos) near Parekklisia shows that Neolithic settlers deliberately brought cats to the island by boat around 7,500 BC. A cat was buried alongside a human companion in what is the oldest known evidence of the human-cat bond.
 
-In the fourth century AD, Saint Helen reportedly sent boatloads of cats to the monastery of Saint Nicholas to control venomous snakes. Cats have been integrated into Cypriot life, culture, and even religious tradition for millennia.
+In the fourth century AD, Saint Helen reportedly sent boatloads of cats to the [monastery of Saint Nicholas of the Cats](https://en.wikipedia.org/wiki/Monastery_of_Saint_Nicholas_of_the_Cats) to control venomous snakes. Cats have been integrated into Cypriot life, culture, and even religious tradition for millennia.
 
-Today, the Cyprus cat (Aphrodite's Giant) is recognised as a distinct breed by the World Cat Federation. These cats are not just any strays — they are a genetically distinct landrace adapted to the island over centuries.
+Today, the Cyprus cat (Aphrodite's Giant) is recognised as a distinct breed by the [World Cat Federation](https://wcf.info/). These cats are not just any strays — they are a genetically distinct landrace adapted to the island over centuries.
 
 When someone proposes that cats should be removed from Cyprus, they are proposing the removal of an animal that has been part of the island's cultural and ecological fabric for nearly ten thousand years. That is not a practical proposal. It is not even a coherent one.
 
@@ -47,7 +47,7 @@ Australia's experience is instructive. Despite one of the most aggressive feral 
 
 ## What actually works: TNR at scale
 
-Trap-Neuter-Return (TNR) is the evidence-based approach to managing free-roaming cat populations. The principle is simple: trap feral cats, sterilise them, and return them to their territory. Sterilised cats continue to occupy territory (preventing the vacuum effect) but do not reproduce.
+[Trap-Neuter-Return](https://www.alleycat.org/resources/why-trap-neuter-return-feral-cats-the-case-for-tnr/) (TNR) is the evidence-based approach to managing free-roaming cat populations. The principle is simple: trap feral cats, sterilise them, and return them to their territory. Sterilised cats continue to occupy territory (preventing the vacuum effect) but do not reproduce.
 
 Over time, the population declines through natural attrition. Studies of TNR programs in cities including Rome, Chicago, and across the United States have shown population reductions of thirty to seventy percent over five to ten years when TNR is implemented at sufficient scale.
 
@@ -59,7 +59,7 @@ In Cyprus, TNR programs exist but have not reached the scale needed to bend the 
 
 Here is where the problem becomes circular. Effective TNR at scale requires money — for traps, veterinary services, transport, and the ongoing management of feeding stations. The Cyprus government allocates limited funds to stray management. The EU has declined to provide support, classifying it as a domestic issue. International animal welfare organisations provide some assistance but not at the level needed.
 
-The people actually doing the work are rescue volunteers, most of whom fund operations from personal savings and donations. Gardens of St Gertrude, a sanctuary in Parekklisia, has seen its founders invest over EUR 460,000 in rescue operations since 2017 — including paying vet bills for other rescue organisations across the island. They have sterilised over 160 cats.
+The people actually doing the work are rescue volunteers, most of whom fund operations from personal savings and donations. [Gardens of St Gertrude](/rescue/gardens-of-st-gertrude), a sanctuary in Parekklisia, has seen its founders invest over EUR 460,000 in rescue operations since 2017 — including paying vet bills for other rescue organisations across the island. They have sterilised over 160 cats.
 
 But personal generosity cannot fund a national sterilisation program. The math does not add up.
 

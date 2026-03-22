@@ -25,7 +25,7 @@ To understand why Cyprus has so many stray cats, you need to understand a few in
 
 **Culture.** Outdoor cats have been part of Cypriot life for centuries. Many people feed strays but do not consider them their responsibility to sterilise. The cultural norm of community cats — fed by many, owned by none — means that population control falls through the cracks. Feeding a cat is an act of compassion. Paying EUR 50-80 to sterilise someone else's community cat is a harder ask.
 
-**Government capacity.** Municipal animal management budgets in Cyprus are thin. The district veterinary services handle rabies vaccination programs and some stray management, but the resources allocated to trap-neuter-return (TNR) programs are far below what the population requires. There is no national spay/neuter mandate for owned cats, and enforcement of existing animal welfare laws is inconsistent.
+**Government capacity.** Municipal animal management budgets in Cyprus are thin. The district veterinary services handle rabies vaccination programs and some stray management, but the resources allocated to [Trap-Neuter-Return](https://www.alleycat.org/resources/why-trap-neuter-return-feral-cats-the-case-for-tnr/) (TNR) programs are far below what the population requires. There is no national spay/neuter mandate for owned cats, and enforcement of existing animal welfare laws is inconsistent.
 
 **Abandonment.** Cyprus has a significant expat population. When foreign residents leave the island — whether for work transfers, retirement moves, or simply because their circumstances change — some leave their cats behind. This is not unique to Cyprus, but the combination of a transient population and a warm climate creates a steady inflow of newly abandoned animals.
 
@@ -33,7 +33,7 @@ To understand why Cyprus has so many stray cats, you need to understand a few in
 
 In 2023, a devastating outbreak of feline panleukopenia virus (FPV) swept through Cyprus, killing thousands of cats across the island. FPV is a highly contagious virus that attacks the gastrointestinal tract and immune system. In a population of unvaccinated, immunocompromised strays, it spreads like wildfire.
 
-The outbreak made international headlines. The BBC, The Guardian, and media across Europe covered the mass die-off. Images of sick and dying cats filled social media. Rescue organisations that were already stretched beyond capacity found themselves overwhelmed by the scale of the crisis.
+The outbreak [made international headlines](https://www.bbc.com/news/world-europe-66149287). The BBC, The Guardian, and media across Europe covered the mass die-off. Images of sick and dying cats filled social media. Rescue organisations that were already stretched beyond capacity found themselves overwhelmed by the scale of the crisis.
 
 The government's response was widely criticised as slow and underfunded. Vaccination drives were eventually organised, but by then the virus had already killed an estimated 300,000 cats according to some reports — though the true number is impossible to verify because most stray cats die uncounted.
 
@@ -41,7 +41,7 @@ The FPV outbreak was not a one-time event. It was the predictable consequence of
 
 ## What the EU said
 
-Cyprus, as an EU member state, is subject to European animal welfare regulations. The EU has frameworks for the welfare of farmed animals and animals used in scientific research. But stray animal management falls outside the scope of EU-level policy. It is classified as a matter of national or municipal governance.
+Cyprus, as an EU member state, is subject to [European animal welfare regulations](https://food.ec.europa.eu/animals/animal-welfare_en). The EU has frameworks for the welfare of farmed animals and animals used in scientific research. But stray animal management falls outside the scope of EU-level policy. It is classified as a matter of national or municipal governance.
 
 When Cyprus sought EU funding or technical assistance for its stray cat crisis, the European Commission's position was that member states are responsible for managing their own stray animal populations. EU structural funds and cohesion funds, which can be used for environmental and social projects, have not been made available for stray animal management in Cyprus.
 
@@ -53,13 +53,13 @@ In the absence of government-scale intervention, the work of managing Cyprus's c
 
 There are an estimated forty to sixty registered rescue organisations operating across Cyprus. Some are well-established with international supporter bases. Many are run by one or two people working out of their homes. Almost all of them are chronically underfunded.
 
-These organisations run TNR programs, pulling cats off the streets, sterilising them, and returning them to their colonies. They foster kittens too young to survive on their own. They coordinate international adoptions to the UK, Germany, the Netherlands, and Scandinavia — a complex logistics operation involving veterinary preparation, EU pet passports, and commercial transport.
+These organisations run TNR programs, pulling cats off the streets, sterilising them, and returning them to their colonies. They foster kittens too young to survive on their own. They coordinate [international adoptions](/adopt) to the UK, Germany, the Netherlands, and Scandinavia — a complex logistics operation involving veterinary preparation, EU pet passports, and commercial transport.
 
 They do this with volunteer labour and personal funds. There is no government grant program for rescue organisations in Cyprus. There is no municipal budget line for TNR. Every sterilisation, every vaccination, every vet bill for an injured street cat is paid out of donations, fundraisers, and the personal savings of the people doing the work.
 
-Gardens of St Gertrude, a cat sanctuary in Parekklisia, is one of these organisations. Since 2017, the founders have personally invested over EUR 460,000 in animal rescue across Cyprus — not only for the ninety-two cats in their own sanctuary, but paying veterinary bills for other rescue organisations who needed help with emergencies they could not cover.
+[Gardens of St Gertrude](/rescue/gardens-of-st-gertrude), a cat sanctuary in Parekklisia, is one of these organisations. Since 2017, the founders have personally invested over EUR 460,000 in animal rescue across Cyprus — not only for the ninety-two cats in their own sanctuary, but paying veterinary bills for other rescue organisations who needed help with emergencies they could not cover.
 
-Patch of Heaven Animal Haven in Limassol is another, caring for over one hundred cats and dogs with a constant need for food, litter, and veterinary care.
+[Patch of Heaven](/rescue/patch-of-heaven) Animal Haven in Limassol is another, caring for over one hundred cats and dogs with a constant need for food, litter, and veterinary care.
 
 Multiply these two organisations by dozens, and you begin to see the hidden infrastructure that actually keeps Cyprus's stray population from spiralling further out of control.
 

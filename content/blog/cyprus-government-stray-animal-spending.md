@@ -19,13 +19,13 @@ The short answer: far less than the scale of the problem requires. The longer an
 
 Animal welfare in Cyprus falls under the jurisdiction of the Ministry of Agriculture, Rural Development and Environment, specifically the Department of Veterinary Services. At the municipal level, district veterinary officers handle stray animal management within their jurisdictions.
 
-The legal framework is provided by the Protection and Welfare of Animals Law (N.46(I)/1994, as amended), which covers cruelty prevention, registration requirements, and basic welfare standards. The law was updated in recent years to introduce mandatory microchipping for dogs and stricter penalties for abuse and abandonment.
+The legal framework is provided by the [Protection and Welfare of Animals Law](http://www.cylaw.org/nomoi/enop/non-ind/1994_1_46/full.html) (N.46(I)/1994, as amended), which covers cruelty prevention, registration requirements, and basic welfare standards. The law was updated in recent years to introduce mandatory microchipping for dogs and stricter penalties for abuse and abandonment.
 
 In theory, municipalities are responsible for managing stray populations in their districts. In practice, the resources allocated to this task vary enormously — and are generally insufficient.
 
 ## What the municipalities do
 
-Municipal stray management in Cyprus typically involves a small team of animal control officers who respond to complaints about stray animals, manage municipal shelters (where they exist), and occasionally coordinate with volunteer organisations for trap-neuter-return (TNR) programs.
+Municipal stray management in Cyprus typically involves a small team of animal control officers who respond to complaints about stray animals, manage municipal shelters (where they exist), and occasionally coordinate with volunteer organisations for [trap-neuter-return](https://www.alleycat.org/resources/why-trap-neuter-return-feral-cats-the-case-for-tnr/) (TNR) programs.
 
 The reality on the ground is that most municipalities treat stray management as a reactive rather than proactive function. Animals are collected when complaints are made. Municipal shelters, where they exist, operate at or over capacity. Systematic TNR programs — which are the only evidence-based method for reducing stray populations — are underfunded or nonexistent at the municipal level.
 
@@ -51,15 +51,15 @@ In the absence of government-scale intervention, the real work falls to approxim
 
 Most of them are run by one to five people. Most are funded entirely by donations, fundraisers, and the personal savings of the organisers. None receive meaningful government grants.
 
-Gardens of St Gertrude, a cat sanctuary in Parekklisia, has seen its founders invest over EUR 460,000 in rescue operations since 2017 — not only for the ninety-two cats in their own care, but paying veterinary bills for other rescue organisations across the island who needed help covering emergencies.
+[Gardens of St Gertrude](/rescue/gardens-of-st-gertrude), a cat sanctuary in Parekklisia, has seen its founders invest over EUR 460,000 in rescue operations since 2017 — not only for the ninety-two cats in their own care, but paying veterinary bills for other rescue organisations across the island who needed help covering emergencies.
 
-Patch of Heaven Animal Haven in Limassol cares for over one hundred cats and dogs, running on continuous fundraising and the tireless work of its founder.
+[Patch of Heaven](/rescue/patch-of-heaven) Animal Haven in Limassol cares for over one hundred cats and dogs, running on continuous fundraising and the tireless work of its founder.
 
 These are not unusual stories. They are representative of how animal rescue works in Cyprus: personal commitment, personal money, personal exhaustion.
 
 ## The 2023 FPV wake-up call
 
-The feline panleukopenia virus outbreak of 2023 killed thousands of cats across Cyprus and made international headlines. It was a direct consequence of a large, unvaccinated, unsterilised stray population — exactly the kind of crisis that systematic management would prevent.
+The feline panleukopenia virus outbreak of 2023 killed thousands of cats across Cyprus and [made international headlines](https://www.bbc.com/news/world-europe-66149287). It was a direct consequence of a large, unvaccinated, unsterilised stray population — exactly the kind of crisis that systematic management would prevent.
 
 The government's response was widely criticised as slow. Vaccination drives were eventually organised, but the outbreak had already done catastrophic damage by the time a coordinated response materialised.
 

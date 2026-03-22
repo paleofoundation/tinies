@@ -53,8 +53,8 @@ The percentage a platform takes from your bookings matters more than you think. 
 | Platform | Commission | You keep | Over 100 bookings |
 |---|---|---|---|
 | Tinies | 12% | EUR 22.00 | EUR 2,200 |
-| Rover | ~20% | EUR 20.00 | EUR 2,000 |
-| PetBacker (new) | 25% | EUR 18.75 | EUR 1,875 |
+| [Rover](https://www.rover.com/) | ~20% | EUR 20.00 | EUR 2,000 |
+| [PetBacker](https://www.petbacker.com/) (new) | 25% | EUR 18.75 | EUR 1,875 |
 | PetBacker (established) | 15-20% | EUR 20-21.25 | EUR 2,000-2,125 |
 
 On PetBacker, new providers start at a 25% commission rate. It drops as you complete more bookings — but only to 15% after 3,001 jobs. And if PetBacker discovers you are also working on another platform, the commission jumps to 40%.

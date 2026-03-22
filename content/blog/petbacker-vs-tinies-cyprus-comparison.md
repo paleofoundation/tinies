@@ -9,7 +9,7 @@ image: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_
 author: "Tinies Team"
 ---
 
-If you are looking for pet care in Cyprus — or looking to offer pet care services — you have probably encountered PetBacker. It is a Singapore-based pet care marketplace that has been active in Cyprus for several years, with over 500 provider listings on the island.
+If you are looking for pet care in Cyprus — or looking to offer pet care services — you have probably encountered [PetBacker](https://www.petbacker.com/). It is a Singapore-based pet care marketplace that has been active in Cyprus for several years, with over 500 provider listings on [PetBacker Cyprus](https://www.petbacker.com/cyprus).
 
 Tinies is the local alternative: a Cyprus-based pet care platform built specifically for this market, with a mission to fund animal rescue through every booking.
 
@@ -23,7 +23,7 @@ This is an honest comparison. We will tell you what PetBacker does well, where T
 | **Active since** | 2013 | 2026 |
 | **Cyprus providers** | 500+ (listed) | Growing (new platform) |
 | **Services** | Walking, sitting, boarding, daycare, grooming, training | Walking, sitting, boarding, daycare, drop-ins |
-| **Payment** | Through platform | Through platform (Stripe) |
+| **Payment** | Through platform | Through platform ([Stripe](https://stripe.com/)) |
 | **Languages** | English | English, Greek, Russian |
 
 PetBacker has been operating longer and has more provider listings. That is a straightforward advantage of being established. Tinies is newer but growing, and every provider is identity-verified before appearing in search results.
@@ -90,7 +90,7 @@ Both offer in-app messaging. Tinies adds GPS walk tracking (owners can watch the
 
 **Adoption**
 
-PetBacker does not offer adoption services. Tinies operates a full adoption platform connecting rescue animals in Cyprus with homes across Cyprus and Europe (UK, Germany, Netherlands, Sweden, Austria, Switzerland), including end-to-end logistics coordination.
+PetBacker does not offer adoption services. Tinies operates a full [adoption](/adopt) platform connecting rescue animals in Cyprus with homes across Cyprus and Europe (UK, Germany, Netherlands, Sweden, Austria, Switzerland), including end-to-end logistics coordination.
 
 ## Customer support
 

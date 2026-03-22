@@ -124,11 +124,11 @@ Several factors influence what you will pay:
 
 ## How platform fees work
 
-On Tinies, the price you see on a provider's profile is the provider's rate. A twelve percent service fee is added at checkout — this covers payment processing, the Tinies Guarantee (up to EUR 2,000 vet coverage), and platform operations.
+On Tinies, the price you see on a provider's profile is the provider's rate. A twelve percent service fee is added at checkout — this covers payment processing via [Stripe](https://stripe.com/), the Tinies Guarantee (up to EUR 2,000 vet coverage), and platform operations.
 
 Ninety percent of that service fee goes directly to animal rescue organisations in Cyprus. Every booking you make through Tinies funds the rescue and care of animals across the island.
 
-On PetBacker, the fee structure is different. PetBacker deducts fifteen to twenty-five percent from the provider's earnings, with the rate depending on the number of bookings the provider has completed. If a provider is found to be working on multiple platforms simultaneously, the fee increases to forty percent.
+On [PetBacker](https://www.petbacker.com/), the fee structure is different. PetBacker deducts fifteen to twenty-five percent from the provider's earnings, with the rate depending on the number of bookings the provider has completed. If a provider is found to be working on multiple platforms simultaneously, the fee increases to forty percent.
 
 On Tinies, providers keep eighty-eight percent of every booking. There are no exclusivity requirements and no penalties for working on other platforms.
 

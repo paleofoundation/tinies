@@ -39,14 +39,14 @@ A green corridor following the Garyllis River through central Limassol. The park
 
 ### Akrotiri Salt Lake Trail
 
-A nature trail around the Akrotiri Salt Lake, one of the most important wetland areas in Cyprus. Especially beautiful during flamingo season (November to March).
+A nature trail around the [Akrotiri Salt Lake](https://en.wikipedia.org/wiki/Akrotiri_(salt_lake)), one of the most important wetland areas in Cyprus. Especially beautiful during flamingo season (November to March).
 
 - **Distance:** 4-8 km depending on the loop you choose
 - **Terrain:** Dirt and gravel trails, flat
 - **Shade:** Very little — this is an open wetland area
 - **Water:** None on trail. Bring plenty.
 - **Best time:** Winter and spring only. Summer is dangerously hot with no shade.
-- **Notes:** Keep dogs on lead near the lake during flamingo season. The area is a designated Special Protection Area under the EU Birds Directive.
+- **Notes:** Keep dogs on lead near the lake during flamingo season. The area is a designated Special Protection Area under the [EU Birds Directive](https://environment.ec.europa.eu/topics/nature-and-biodiversity/birds-directive_en).
 
 ### Lady's Mile Beach
 
@@ -63,7 +63,7 @@ A long stretch of beach south of Limassol, popular with dog owners because it is
 
 ### Athalassa National Forest Park
 
-The largest green space in Nicosia and one of the best dog walking areas on the island. A former tree nursery now converted into a national park with multiple trails.
+The largest green space in Nicosia and one of the best dog walking areas on the island. [Athalassa National Forest Park](https://en.wikipedia.org/wiki/Athalassa_National_Forest_Park) is a former tree nursery now converted into a national park with multiple trails.
 
 - **Distance:** Multiple loops from 2 km to 8 km
 - **Terrain:** Dirt trails, some paved sections. Gentle hills.
@@ -140,7 +140,7 @@ A scenic coastal path running from the Paphos Harbour through Kato Paphos and al
 
 ### Avakas Gorge (advanced)
 
-A dramatic gorge hike in the Akamas Peninsula. Not for every dog, but experienced hikers with fit, confident dogs will love it.
+A dramatic [Avakas Gorge](https://en.wikipedia.org/wiki/Avakas_Gorge) hike in the Akamas Peninsula. Not for every dog, but experienced hikers with fit, confident dogs will love it.
 
 - **Distance:** 3 km return (the gorge itself is about 1.5 km each way)
 - **Terrain:** Rocky riverbed, uneven, some wading required
@@ -157,7 +157,7 @@ A dramatic gorge hike in the Akamas Peninsula. Not for every dog, but experience
 
 **Spring (March-May) and Autumn (October-November):** Ideal conditions. Warm but not dangerous. Wildflowers in spring make the trails especially beautiful.
 
-**Year-round:** Ticks are present in grassy areas throughout the year, with peak season in spring and autumn. Check your dog after every walk. Processionary caterpillar nests appear in pine trees from January to April — keep dogs away from pine trees during this period, as the caterpillars are extremely toxic to dogs if ingested or touched.
+**Year-round:** Ticks are present in grassy areas throughout the year, with peak season in spring and autumn. Check your dog after every walk. [Processionary caterpillar](https://www.bluecross.org.uk/advice/pets/health-and-injuries/dogs-cats-and-toxic-oak-processionary-moth-caterpillars) nests appear in pine trees from January to April — keep dogs away from pine trees during this period, as the caterpillars are extremely toxic to dogs if ingested or touched.
 
 ## Need a walker?
 
