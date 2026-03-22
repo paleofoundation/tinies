@@ -119,5 +119,27 @@
         "text": "Check-ins at 1 week, 1 month, and 3 months. Share your story for Tinies who made it and inspire the next adoption."
       }
     ]
+  },
+  "feedback": {
+    "betaBannerText": "Tinies в бета-версии. Помогите нам стать лучше — ",
+    "betaBannerLink": "сообщить об ошибке или предложить функцию",
+    "betaBannerDismiss": "Скрыть уведомление о бета-версии",
+    "fabLabel": "Обратная связь",
+    "panelTitle": "Обратная связь",
+    "typeLabel": "Тип",
+    "typeBug": "Сообщение об ошибке",
+    "typeFeature": "Запрос функции",
+    "typeGeneral": "Общий отзыв",
+    "descriptionLabel": "Описание",
+    "descriptionPlaceholder": "Опишите проблему или пожелание…",
+    "emailLabel": "Email (необязательно)",
+    "emailPlaceholder": "you@example.com",
+    "screenshotLabel": "Прикрепить скриншот",
+    "pageUrlLabel": "Страница",
+    "submit": "Отправить",
+    "submitting": "Отправка…",
+    "success": "Спасибо — мы получили ваше сообщение.",
+    "error": "Что-то пошло не так. Попробуйте снова.",
+    "closePanel": "Закрыть"
   }
 }

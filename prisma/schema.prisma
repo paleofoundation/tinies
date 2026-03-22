@@ -193,11 +193,34 @@ model User {
   providerFavoritesAsTarget  ProviderFavorite[] @relation("ProviderFavoriteProvider")
   bookingUpdatesSent         BookingUpdate[]    @relation("BookingUpdateProvider")
   providerCertifications     ProviderCertification[]
+  feedbackSubmissions        Feedback[]
 
   @@index([email])
   @@index([role])
   @@index([district])
   @@map("users")
+}
+
+model Feedback {
+  id            String   @id @default(uuid())
+  userId        String?  @map("user_id")
+  type          String
+  description   String   @db.Text
+  email         String?
+  pageUrl       String   @map("page_url")
+  userAgent     String?  @map("user_agent") @db.Text
+  screenshotUrl String? @map("screenshot_url")
+  status        String   @default("new")
+  adminNotes    String?  @map("admin_notes") @db.Text
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([type])
+  @@index([createdAt(sort: Desc)])
+  @@map("feedback")
 }
 
 model Pet {

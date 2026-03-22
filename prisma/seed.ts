@@ -172,7 +172,8 @@ const CHARITIES = [
   {
     name: "Gardens of St Gertrude",
     slug: "gardens-of-st-gertrude",
-    mission: "Caring for 92 rescue cats in Parekklisia, Cyprus. Every cat deserves safety, food, and love.",
+    mission:
+      "Since 2017, founders have invested EUR 460,000+ in rescue across Cyprus — 92 cats in daily sanctuary care, 160+ spayed/neutered, and vet support for other rescues.",
     website: "https://gardensofstgertrude.com",
     featured: true,
     district: "Limassol",
@@ -570,7 +571,8 @@ async function main() {
       data: {
         userId: gardensUser.id,
         name: "Gardens of St Gertrude",
-        mission: "Caring for 92 rescue cats in Parekklisia, Cyprus. Every cat deserves safety, food, and love.",
+        mission:
+          "Since 2017, founders have invested EUR 460,000+ in rescue across Cyprus — 92 cats in daily sanctuary care, 160+ spayed/neutered, and vet support for other rescues.",
         location: "Parekklisia, Cyprus",
         website: "https://gardensofstgertrude.com",
         slug: GARDENS_ORG_SLUG,
@@ -588,14 +590,14 @@ async function main() {
     where: { id: gardensOrg.id },
     data: {
       description:
-        "Gardens of St Gertrude is a cat sanctuary in Parekklisia, Cyprus, caring for 92 rescue cats. Founded by the creator of Tinies, the sanctuary provides daily feeding, veterinary care, spaying/neutering, and shelter for cats who were abandoned, injured, or born on the streets of Cyprus. Every cat here has a name, a story, and a warm place to sleep. The sanctuary is open to visitors and always needs volunteers and donations to keep going.",
-      foundedYear: 2023,
+        "Gardens of St Gertrude is a cat sanctuary in Parekklisia, Cyprus, caring for 92 rescue cats every day. Since 2017, the founders have personally invested over EUR 460,000 in animal rescue across Cyprus — funding veterinary care, spay/neuter programs, emergency surgeries, and daily feeding not only for the 92 cats at Gardens of St Gertrude, but for other rescue organisations who needed help with vet bills they couldn't cover. Every cat here has a name, a story, and a warm place to sleep. The sanctuary is open to visitors and always needs volunteers and donations to keep going.",
+      foundedYear: 2017,
       operatingHours: "Open to visitors daily, 9am-1pm",
       volunteerInfo:
         "We welcome volunteers for morning feeding (8am-10am) and afternoon socialisation (2pm-4pm). Contact us to arrange a visit.",
       donationNeeds:
         "We always need: dry and wet cat food, flea and tick treatments, cat litter, blankets, and funds for veterinary emergencies.",
-      totalAnimalsRescued: 92,
+      totalAnimalsRescued: 160,
       contactEmail: "hello@tinies.app",
       district: "Limassol",
       coverPhotoUrl: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_cats_v2.jpg",
@@ -744,6 +746,138 @@ async function main() {
   });
 
   console.log("Ensured Gardens of St Gertrude org, 6 cat adoption listings, Safe Land campaign, and charity link.");
+
+  // ----- 3c. Patch of Heaven Animal Haven (showcase + campaign; no listings yet) -----
+  const PATCH_ORG_SLUG = "patch-of-heaven";
+  const patchUser = await prisma.user.upsert({
+    where: { email: "marina@patchofheavencats.com" },
+    create: {
+      email: "marina@patchofheavencats.com",
+      name: "Marina Niaou",
+      passwordHash: TEST_PASSWORD_HASH,
+      role: "rescue",
+      emailVerified: true,
+      district: "Limassol",
+    },
+    update: { name: "Marina Niaou", district: "Limassol" },
+  });
+
+  const patchDescription =
+    "Patch of Heaven Animal Haven was built to give sanctuary to cats who had nowhere else to go. Founded by Marina Niaou and her husband, the haven began when they relocated stray and feral cats from a colony in a Limassol graveyard — cats that were living in terrible conditions with no one to care for them. Today, Patch of Heaven cares for over 100 cats on site, plus manages outside feeding colonies. Every cat here — whether senior, disabled, abused, or simply unwanted — has a name, daily meals, veterinary care, and a safe place to sleep. The haven runs entirely on donations and volunteer support.";
+
+  let patchOrg = await prisma.rescueOrg.upsert({
+    where: { slug: PATCH_ORG_SLUG },
+    create: {
+      userId: patchUser.id,
+      name: "Patch of Heaven Animal Haven",
+      mission: "A safe home for abused, abandoned, senior, and disabled cats in Limassol.",
+      description: patchDescription,
+      location: "Limassol, Cyprus",
+      district: "Limassol",
+      website: "https://patchofheavencats.com",
+      slug: PATCH_ORG_SLUG,
+      verified: true,
+      socialLinks: { facebook: "https://www.facebook.com/PoHDiamonds/" },
+      totalAnimalsRescued: 100,
+      donationNeeds:
+        "We always need: cat food (wet and dry), flea and tick treatments, cat litter, blankets, towels, and funds for veterinary care and emergency surgeries.",
+      volunteerInfo:
+        "We welcome volunteers for daily feeding, cleaning, and cat socialisation. Contact us through our Facebook page to arrange a visit.",
+      contactEmail: "marina@patchofheavencats.com",
+      coverPhotoUrl: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_cats_v2.jpg",
+    },
+    update: {
+      name: "Patch of Heaven Animal Haven",
+      mission: "A safe home for abused, abandoned, senior, and disabled cats in Limassol.",
+      description: patchDescription,
+      location: "Limassol, Cyprus",
+      district: "Limassol",
+      website: "https://patchofheavencats.com",
+      verified: true,
+      socialLinks: { facebook: "https://www.facebook.com/PoHDiamonds/" },
+      totalAnimalsRescued: 100,
+      donationNeeds:
+        "We always need: cat food (wet and dry), flea and tick treatments, cat litter, blankets, towels, and funds for veterinary care and emergency surgeries.",
+      volunteerInfo:
+        "We welcome volunteers for daily feeding, cleaning, and cat socialisation. Contact us through our Facebook page to arrange a visit.",
+      contactEmail: "marina@patchofheavencats.com",
+      coverPhotoUrl: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_cats_v2.jpg",
+    },
+  });
+
+  if (patchOrg.userId !== patchUser.id) {
+    patchOrg = await prisma.rescueOrg.update({
+      where: { id: patchOrg.id },
+      data: { userId: patchUser.id },
+    });
+  }
+
+  await prisma.charity.updateMany({
+    where: { slug: PATCH_ORG_SLUG },
+    data: { rescueOrgId: patchOrg.id },
+  });
+
+  const patchCampaignDescription =
+    "Patch of Heaven cares for over 100 rescue cats in Limassol — cats rescued from graveyards, streets, and abandonment. Every month costs real money: food, litter, flea treatments, emergency vet visits. Marina and her husband built this haven with their own hands and their own money. Now they need the community's help to keep it going.\n\nYour donation goes directly to daily care:\n- EUR 3 feeds one cat for a week\n- EUR 15 covers flea treatment for five cats\n- EUR 50 pays for an emergency vet visit\n- EUR 100 feeds the entire haven for three days\n\nEvery euro is tracked on the Tinies transparency page. These cats depend on people like you.";
+
+  const patchMilestones = [
+    {
+      title: "Campaign launched",
+      description: "Telling the Patch of Heaven story",
+      targetCents: null,
+      reached: true,
+      reachedAt: "2026-03-22",
+    },
+    {
+      title: "First 10 supporters",
+      description: "Building the community",
+      targetCents: null,
+      reached: false,
+    },
+    {
+      title: "Monthly food costs covered",
+      description: "Sustainable monthly feeding for 100+ cats",
+      targetCents: null,
+      reached: false,
+    },
+    {
+      title: "Emergency vet fund established",
+      description: "EUR 500 reserve for unexpected medical emergencies",
+      targetCents: null,
+      reached: false,
+    },
+  ];
+
+  await prisma.campaign.upsert({
+    where: { slug: "keep-100-cats-fed" },
+    create: {
+      rescueOrgId: patchOrg.id,
+      slug: "keep-100-cats-fed",
+      title: "Keep 100 Cats Fed and Safe",
+      subtitle: "Food, litter, and vet care for 100+ cats at Patch of Heaven.",
+      description: patchCampaignDescription,
+      coverPhotoUrl: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_cats_v2.jpg",
+      goalAmountCents: null,
+      raisedAmountCents: 0,
+      donorCount: 0,
+      status: "active",
+      featured: true,
+      milestones: patchMilestones,
+      updates: [],
+    },
+    update: {
+      title: "Keep 100 Cats Fed and Safe",
+      subtitle: "Food, litter, and vet care for 100+ cats at Patch of Heaven.",
+      description: patchCampaignDescription,
+      coverPhotoUrl: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_cats_v2.jpg",
+      goalAmountCents: null,
+      status: "active",
+      featured: true,
+      milestones: patchMilestones,
+    },
+  });
+
+  console.log("Ensured Patch of Heaven Animal Haven, linked charity, and Keep 100 Cats Fed campaign.");
 
   // ----- 4. Owner user + pets (for bookings and reviews) -----
   const ownerUser = await prisma.user.upsert({

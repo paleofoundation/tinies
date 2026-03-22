@@ -119,5 +119,27 @@
         "text": "Check-ins at 1 week, 1 month, and 3 months. Share your story for Tinies who made it and inspire the next adoption."
       }
     ]
+  },
+  "feedback": {
+    "betaBannerText": "Το Tinies είναι σε beta. Βοηθήστε μας να βελτιωθούμε — ",
+    "betaBannerLink": "αναφέρετε σφάλματα ή προτείνετε λειτουργίες",
+    "betaBannerDismiss": "Κλείσιμο ειδοποίησης beta",
+    "fabLabel": "Στείλτε σχόλια",
+    "panelTitle": "Στείλτε σχόλια",
+    "typeLabel": "Τύπος",
+    "typeBug": "Αναφορά σφάλματος",
+    "typeFeature": "Αίτημα λειτουργίας",
+    "typeGeneral": "Γενικά σχόλια",
+    "descriptionLabel": "Περιγραφή",
+    "descriptionPlaceholder": "Πείτε μας τι συνέβη ή τι θα θέλατε…",
+    "emailLabel": "Email (προαιρετικό)",
+    "emailPlaceholder": "you@example.com",
+    "screenshotLabel": "Επισύναψη στιγμιότυπου οθόνης",
+    "pageUrlLabel": "Σελίδα",
+    "submit": "Υποβολή",
+    "submitting": "Αποστολή…",
+    "success": "Ευχαριστούμε — λάβαμε τα σχόλιά σας.",
+    "error": "Κάτι πήγε στραβά. Δοκιμάστε ξανά.",
+    "closePanel": "Κλείσιμο"
   }
 }

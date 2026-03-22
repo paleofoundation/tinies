@@ -4,8 +4,11 @@ import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { Roboto } from "next/font/google";
 import { Toaster } from "sonner";
+import { FeedbackShell } from "@/components/feedback/FeedbackShell";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { shouldShowBetaFeedbackUI } from "@/lib/feedback/should-show-beta-ui";
+import { createClient } from "@/lib/supabase/server";
 import { routing } from "@/i18n/routing";
 
 const roboto = Roboto({
@@ -35,6 +38,16 @@ export default async function LocaleLayout({ children, params }: Props) {
   setRequestLocale(locale);
   const messages = await getMessages();
 
+  const showBetaUI = shouldShowBetaFeedbackUI();
+  let defaultFeedbackEmail: string | null = null;
+  if (showBetaUI) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    defaultFeedbackEmail = user?.email ?? null;
+  }
+
   return (
     <html lang={locale} className={roboto.variable} suppressHydrationWarning>
       <body
@@ -46,9 +59,11 @@ export default async function LocaleLayout({ children, params }: Props) {
         }}
       >
         <NextIntlClientProvider messages={messages}>
-          <Header />
-          <div className="flex-1">{children}</div>
-          <Footer />
+          <FeedbackShell showBetaUI={showBetaUI} defaultEmail={defaultFeedbackEmail}>
+            <Header />
+            <div className="flex-1">{children}</div>
+            <Footer />
+          </FeedbackShell>
           <Toaster position="top-center" richColors closeButton />
         </NextIntlClientProvider>
       </body>

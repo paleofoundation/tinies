@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { Building2, Coins, Heart, PawPrint } from "lucide-react";
+import { Building2, Coins, Heart, PawPrint, Stethoscope } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { getGivingStats, getAnimalsSupportedCount } from "@/lib/giving/actions";
 
@@ -91,6 +91,11 @@ export default async function AboutPage() {
                 injured, or born on the streets. Feeding, sheltering, and providing veterinary care for 92 cats costs real money
                 — every single day.
               </p>
+              <p className="rounded-[var(--radius-lg)] border-l-4 py-1 pl-4" style={{ borderColor: "var(--color-primary)", color: "var(--color-text)" }}>
+                Since 2017, the founders have personally invested over EUR 460,000 in rescue operations — not just for our own
+                cats, but paying veterinary bills for other rescue organisations across Cyprus who couldn&apos;t afford emergency
+                care.
+              </p>
               <p>
                 We built Tinies to solve that problem. Not with donations alone, but with a sustainable business model: a pet
                 services marketplace where 90% of every commission goes directly to animal rescue.
@@ -144,7 +149,7 @@ export default async function AboutPage() {
           </div>
         </section>
 
-        {/* Live stats */}
+        {/* Founders&apos; real-world impact + live platform stats */}
         <section className="px-4 py-16 sm:px-6 lg:px-8" style={{ paddingBottom: "var(--space-section)" }}>
           <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
             <h2
@@ -154,16 +159,129 @@ export default async function AboutPage() {
               The numbers
             </h2>
             <p
-              className="mt-3 max-w-2xl text-sm"
+              className="mt-3 max-w-3xl text-base leading-relaxed sm:text-lg"
               style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}
             >
-              Live totals from our giving ledger — the same figures you&apos;ll see on{" "}
+              This isn&apos;t a side project — it&apos;s the continuation of years of hands-on rescue work across Cyprus. The
+              figures below are what the founders have already put into the island&apos;s animals; under that, you&apos;ll see
+              live totals from Tinies itself.
+            </p>
+
+            <h3
+              className="mt-12 font-normal sm:text-xl"
+              style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-lg)", color: "var(--color-text)" }}
+            >
+              Rescue impact since 2017
+            </h3>
+            <p className="mt-2 max-w-2xl text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-muted)" }}>
+              Personal investment and on-the-ground work — including support for other organisations, not only Gardens of St
+              Gertrude.
+            </p>
+            <div className="mt-8 grid gap-6 sm:grid-cols-3">
+              <div
+                className="rounded-[var(--radius-xl)] border p-8 ring-2 ring-[var(--color-primary)]/20"
+                style={{
+                  backgroundColor: "var(--color-primary-50)",
+                  borderColor: "var(--color-primary-200)",
+                  boxShadow: "var(--shadow-md)",
+                  padding: "var(--space-card)",
+                }}
+              >
+                <div
+                  className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-lg)]"
+                  style={{ backgroundColor: "var(--color-surface)", color: "var(--color-primary)" }}
+                >
+                  <Coins className="h-6 w-6" aria-hidden />
+                </div>
+                <p className="mt-4 text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--color-primary-800)" }}>
+                  Invested in rescue across Cyprus
+                </p>
+                <p
+                  className="mt-2 text-3xl font-semibold tabular-nums sm:text-4xl"
+                  style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}
+                >
+                  EUR 460,000+
+                </p>
+                <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
+                  Since 2017 — including vet bills for other rescue organisations who couldn&apos;t cover emergency care, not
+                  just our own cats.
+                </p>
+              </div>
+              <div
+                className="rounded-[var(--radius-xl)] border p-8 ring-2 ring-[var(--color-primary)]/20"
+                style={{
+                  backgroundColor: "var(--color-primary-50)",
+                  borderColor: "var(--color-primary-200)",
+                  boxShadow: "var(--shadow-md)",
+                  padding: "var(--space-card)",
+                }}
+              >
+                <div
+                  className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-lg)]"
+                  style={{ backgroundColor: "var(--color-surface)", color: "var(--color-primary)" }}
+                >
+                  <Stethoscope className="h-6 w-6" aria-hidden />
+                </div>
+                <p className="mt-4 text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--color-primary-800)" }}>
+                  Spay &amp; neuter
+                </p>
+                <p
+                  className="mt-2 text-3xl font-semibold tabular-nums sm:text-4xl"
+                  style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}
+                >
+                  160+
+                </p>
+                <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
+                  Cats spayed and neutered through this work — reducing suffering and stray numbers across Cyprus.
+                </p>
+              </div>
+              <div
+                className="rounded-[var(--radius-xl)] border p-8 ring-2 ring-[var(--color-primary)]/20"
+                style={{
+                  backgroundColor: "var(--color-primary-50)",
+                  borderColor: "var(--color-primary-200)",
+                  boxShadow: "var(--shadow-md)",
+                  padding: "var(--space-card)",
+                }}
+              >
+                <div
+                  className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-lg)]"
+                  style={{ backgroundColor: "var(--color-surface)", color: "var(--color-primary)" }}
+                >
+                  <PawPrint className="h-6 w-6" aria-hidden />
+                </div>
+                <p className="mt-4 text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--color-primary-800)" }}>
+                  At Gardens of St Gertrude today
+                </p>
+                <p
+                  className="mt-2 text-3xl font-semibold tabular-nums sm:text-4xl"
+                  style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}
+                >
+                  92
+                </p>
+                <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
+                  Cats currently in daily care at the sanctuary in Parekklisia — fed, sheltered, and looked after by name.
+                </p>
+              </div>
+            </div>
+
+            <h3
+              className="mt-14 font-normal sm:text-xl"
+              style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-lg)", color: "var(--color-text)" }}
+            >
+              Live on Tinies Giving
+            </h3>
+            <p
+              className="mt-2 max-w-2xl text-sm"
+              style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}
+            >
+              Totals from our giving ledger — the same figures you&apos;ll see on{" "}
               <Link href="/giving" className="font-medium underline-offset-2 hover:underline" style={{ color: "var(--color-primary)" }}>
                 Tinies Giving
               </Link>
               .
             </p>
-            <div className="mt-10 grid gap-6 sm:grid-cols-3">
+            <div className="mt-8 grid gap-6 sm:grid-cols-3">
               <div
                 className="rounded-[var(--radius-xl)] border p-8"
                 style={{
@@ -189,7 +307,7 @@ export default async function AboutPage() {
                   {formatEurCents(stats.totalDonatedAllTimeCents)}
                 </p>
                 <p className="mt-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>
-                  All tracked giving: commission share, round-ups, Guardians, and one-time gifts.
+                  Through Tinies: commission share, round-ups, Guardians, and one-time gifts (tracked on Giving).
                 </p>
               </div>
               <div
@@ -233,10 +351,10 @@ export default async function AboutPage() {
                   className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-lg)]"
                   style={{ backgroundColor: "var(--color-primary-50)", color: "var(--color-primary)" }}
                 >
-                  <PawPrint className="h-6 w-6" aria-hidden />
+                  <Heart className="h-6 w-6" aria-hidden />
                 </div>
                 <p className="mt-4 text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--color-text-muted)" }}>
-                  Animals in care
+                  Listed for adoption on Tinies
                 </p>
                 <p
                   className="mt-2 text-3xl font-semibold tabular-nums sm:text-4xl"
@@ -245,7 +363,7 @@ export default async function AboutPage() {
                   {animalsListed}
                 </p>
                 <p className="mt-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>
-                  Rescue animals currently listed for adoption on Tinies.
+                  Rescue animals with active adoption listings on the platform right now.
                 </p>
               </div>
             </div>
@@ -288,8 +406,9 @@ export default async function AboutPage() {
                   className="mt-3 max-w-xl text-sm leading-relaxed text-white/95 sm:text-base"
                   style={{ fontFamily: "var(--font-body), sans-serif" }}
                 >
-                  Gardens of St Gertrude is where it all began. A sanctuary in Parekklisia caring for 92 rescue cats. Every
-                  booking on Tinies helps keep them fed, healthy, and safe.
+                  Gardens of St Gertrude is where it all began — 92 cats in daily care in Parekklisia, on top of years of
+                  island-wide rescue: EUR 460,000+ invested since 2017, 160+ cats spayed and neutered, and vet bills paid for
+                  other rescues when they had nowhere else to turn. Every booking on Tinies helps keep that work going.
                 </p>
                 <Link
                   href="/rescue/gardens-of-st-gertrude"

@@ -214,6 +214,13 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
 
         <div className="mt-6 flex flex-wrap gap-4">
           <Link
+            href="/dashboard/admin/feedback"
+            className="inline-flex h-10 items-center rounded-[var(--radius-pill)] border px-4 text-sm font-semibold hover:bg-[var(--color-primary-50)]"
+            style={{ borderColor: "var(--color-border)", color: "var(--color-primary)" }}
+          >
+            Feedback
+          </Link>
+          <Link
             href="/dashboard/admin/campaigns"
             className="inline-flex h-10 items-center rounded-[var(--radius-pill)] border px-4 text-sm font-semibold hover:bg-[var(--color-primary-50)]"
             style={{ borderColor: "var(--color-border)", color: "var(--color-primary)" }}

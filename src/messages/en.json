@@ -119,5 +119,27 @@
         "text": "Check-ins at 1 week, 1 month, and 3 months. Share your story for Tinies who made it and inspire the next adoption."
       }
     ]
+  },
+  "feedback": {
+    "betaBannerText": "Tinies is in beta. Help us improve — ",
+    "betaBannerLink": "report bugs or suggest features",
+    "betaBannerDismiss": "Dismiss beta notice",
+    "fabLabel": "Send feedback",
+    "panelTitle": "Send feedback",
+    "typeLabel": "Type",
+    "typeBug": "Bug report",
+    "typeFeature": "Feature request",
+    "typeGeneral": "General feedback",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Tell us what happened or what you would like…",
+    "emailLabel": "Email (optional)",
+    "emailPlaceholder": "you@example.com",
+    "screenshotLabel": "Attach a screenshot",
+    "pageUrlLabel": "Page",
+    "submit": "Submit",
+    "submitting": "Sending…",
+    "success": "Thanks — we received your feedback.",
+    "error": "Something went wrong. Please try again.",
+    "closePanel": "Close"
   }
 }
