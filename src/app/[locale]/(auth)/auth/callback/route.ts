@@ -10,7 +10,10 @@ export async function GET(request: NextRequest) {
   const code = requestUrl.searchParams.get("code");
   const next = requestUrl.searchParams.get("next") ?? "/dashboard/owner";
   const origin = requestUrl.origin;
-  const redirectTo = new URL(next.startsWith("/") ? next : `/${next}`, origin);
+  const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard/owner";
+  const welcomeUrl = new URL("/welcome", origin);
+  welcomeUrl.searchParams.set("next", safeNext);
+  const redirectTo = welcomeUrl;
 
   if (!code) {
     return NextResponse.redirect(`${origin}/login?error=auth_callback_error`);

@@ -139,6 +139,7 @@ export async function createRescueOrg(formData: FormData): Promise<{ error?: str
           name: name,
           passwordHash: PLACEHOLDER_PASSWORD_HASH,
           role: "rescue",
+          welcomeFlowCompletedAt: new Date(),
         },
       });
     }

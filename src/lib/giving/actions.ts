@@ -30,77 +30,6 @@ import type {
 
 const GUARDIAN_PRODUCT_ID = process.env.STRIPE_GUARDIAN_PRODUCT_ID;
 
-/** Get one featured charity for welcome/signup donation (rotate by createdAt). */
-export async function getFeaturedCharityForSignup(): Promise<{
-  id: string;
-  name: string;
-  mission: string | null;
-  logoUrl: string | null;
-  slug: string;
-} | null> {
-  const charities = await prisma.charity.findMany({
-    where: { featured: true, active: true },
-    orderBy: { createdAt: "asc" },
-    take: 1,
-    select: { id: true, name: true, mission: true, logoUrl: true, slug: true },
-  });
-  return charities[0] ?? null;
-}
-
-/** Create PaymentIntent for signup one-time donation. Returns clientSecret for Stripe Elements. */
-export async function createSignupDonationPaymentIntent(params: {
-  charityId: string | null;
-  amountCents: number;
-  showOnLeaderboard?: boolean;
-}): Promise<{ clientSecret: string | null; error?: string }> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { clientSecret: null, error: "You must be signed in." };
-  if (params.amountCents < 100) return { clientSecret: null, error: "Minimum donation is €1." };
-  try {
-    const stripe = getStripeServer();
-    const pi = await stripe.paymentIntents.create({
-      amount: params.amountCents,
-      currency: "eur",
-      metadata: {
-        type: "signup_donation",
-        userId: user.id,
-        charityId: params.charityId ?? "",
-        amountCents: String(params.amountCents),
-        showOnLeaderboard: params.showOnLeaderboard ? "1" : "0",
-      },
-      automatic_payment_methods: { enabled: true },
-    });
-    return { clientSecret: pi.client_secret ?? null };
-  } catch (e) {
-    console.error("createSignupDonationPaymentIntent", e);
-    return {
-      clientSecret: null,
-      error: e instanceof Error ? e.message : "Failed to create payment.",
-    };
-  }
-}
-
-/** Record signup donation after PaymentIntent succeeds (called from webhook or after confirm). */
-export async function recordSignupDonation(params: {
-  stripePaymentIntentId: string;
-  userId: string;
-  charityId: string | null;
-  amountCents: number;
-}): Promise<void> {
-  await prisma.donation.create({
-    data: {
-      userId: params.userId,
-      charityId: params.charityId || null,
-      source: DonationSource.signup,
-      amount: params.amountCents,
-      stripePaymentIntentId: params.stripePaymentIntentId,
-    },
-  });
-  revalidatePath("/giving");
-  revalidatePath("/dashboard/owner/giving");
-}
-
 /** Get or create Stripe customer for user. Returns customer id. */
 async function getOrCreateStripeCustomer(userId: string, email: string, name: string): Promise<string> {
   const user = await prisma.user.findUnique({
@@ -946,6 +875,7 @@ async function getOrCreateGuestUser(email: string, name: string): Promise<string
       name: (name || email).trim().slice(0, 200),
       passwordHash: "guest-no-login",
       role: "owner",
+      welcomeFlowCompletedAt: new Date(),
     },
   });
   return id;

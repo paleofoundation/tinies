@@ -32,7 +32,7 @@ function LoginContent() {
       return;
     }
     toast.success("Welcome back!");
-    router.push(next);
+    router.push(`/welcome?next=${encodeURIComponent(next)}`);
     router.refresh();
   }
 

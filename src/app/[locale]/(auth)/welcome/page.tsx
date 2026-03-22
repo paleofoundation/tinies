@@ -1,67 +1,36 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { getFeaturedCharityForSignup } from "@/lib/giving/actions";
-import { WelcomeDonationForm } from "./WelcomeDonationForm";
+import { getWelcomePageState } from "@/lib/giving/signup-donation-actions";
+import { WelcomeExperience } from "./WelcomeExperience";
 
-export default async function WelcomePage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login?next=/welcome");
+export const dynamic = "force-dynamic";
 
-  const featuredCharity = await getFeaturedCharityForSignup();
+type Props = { searchParams: Promise<{ next?: string }> };
 
+function WelcomeFallback() {
+  return (
+    <div className="flex min-h-[50vh] items-center justify-center" style={{ backgroundColor: "var(--color-background)" }}>
+      <p style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-body), sans-serif" }}>Loading…</p>
+    </div>
+  );
+}
+
+async function WelcomeInner({ searchParams }: Props) {
+  const sp = await searchParams;
+  const state = await getWelcomePageState(sp.next ?? null);
+  if (state.status === "redirect") {
+    redirect(state.path);
+  }
+  return <WelcomeExperience charities={state.charities} nextPath={state.nextPath} />;
+}
+
+export default function WelcomePage(props: Props) {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
-      <main className="mx-auto max-w-lg px-4 py-16 sm:px-6">
-        <h1
-          className="text-center font-normal tracking-tight sm:text-3xl"
-          style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-2xl)", color: "var(--color-text)" }}
-        >
-          Welcome to Tinies
-        </h1>
-        <p className="mt-2 text-center text-sm" style={{ color: "var(--color-text-secondary)" }}>
-          No matter the size. Start by supporting animal rescue — or skip to your dashboard.
-        </p>
-
-        <div className="mt-10 rounded-[var(--radius-lg)] border p-6" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>
-          {featuredCharity ? (
-            <>
-              <div className="flex items-start gap-4">
-                {featuredCharity.logoUrl && (
-                  <img
-                    src={featuredCharity.logoUrl}
-                    alt=""
-                    className="h-16 w-16 shrink-0 rounded-[var(--radius-lg)] object-cover"
-                  />
-                )}
-                <div>
-                  <h2 className="font-semibold" style={{ color: "var(--color-text)" }}>{featuredCharity.name}</h2>
-                  {featuredCharity.mission && (
-                    <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>{featuredCharity.mission}</p>
-                  )}
-                </div>
-              </div>
-              <WelcomeDonationForm charityId={featuredCharity.id} />
-            </>
-          ) : (
-            <>
-              <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-                Support the Tinies Giving Fund. Your donation goes to animal rescue in Cyprus.
-              </p>
-              <WelcomeDonationForm charityId={null} />
-            </>
-          )}
-        </div>
-
-        <p className="mt-6 text-center">
-          <a
-            href="/dashboard/owner"
-            className="text-sm font-medium hover:underline"
-            style={{ color: "var(--color-primary)" }}
-          >
-            Skip for now →
-          </a>
-        </p>
+      <main className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
+        <Suspense fallback={<WelcomeFallback />}>
+          <WelcomeInner {...props} />
+        </Suspense>
       </main>
     </div>
   );

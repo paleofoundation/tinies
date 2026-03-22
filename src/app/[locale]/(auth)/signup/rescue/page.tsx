@@ -68,13 +68,15 @@ export default function RescueSignupPage() {
       toast.success(
         "Your organisation is registered. Please sign in with the email and password you chose."
       );
-      router.push("/login?next=/dashboard/rescue");
+      router.push(
+        `/login?next=${encodeURIComponent("/welcome?next=" + encodeURIComponent("/dashboard/rescue"))}`
+      );
       router.refresh();
       return;
     }
 
     toast.success("Welcome to Tinies.");
-    router.push(WELCOME_REDIRECT);
+    router.push(`/welcome?next=${encodeURIComponent(WELCOME_REDIRECT)}`);
     router.refresh();
   }
 
