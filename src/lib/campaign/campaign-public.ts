@@ -153,21 +153,55 @@ export async function getFeaturedCampaignsForMarketing(limit = 6): Promise<Featu
   }
 }
 
-export async function getActiveCampaignsForRescueOrg(orgId: string) {
-  return prisma.campaign.findMany({
-    where: { rescueOrgId: orgId, status: "active" },
-    orderBy: { featured: "desc" },
-    select: {
-      slug: true,
-      title: true,
-      subtitle: true,
-      coverPhotoUrl: true,
-      raisedAmountCents: true,
-      goalAmountCents: true,
-      donorCount: true,
-      featured: true,
-    },
-  });
+export type ActiveCampaignCardRow = {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle: string | null;
+  coverPhotoUrl: string | null;
+  raisedAmountCents: number;
+  goalAmountCents: number | null;
+  donorCount: number;
+  featured: boolean;
+};
+
+export async function getActiveCampaignsForRescueOrg(orgId: string): Promise<ActiveCampaignCardRow[]> {
+  try {
+    const rows = await prisma.campaign.findMany({
+      where: { rescueOrgId: orgId, status: "active" },
+      orderBy: { featured: "desc" },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        subtitle: true,
+        coverPhotoUrl: true,
+        raisedAmountCents: true,
+        goalAmountCents: true,
+        donorCount: true,
+        featured: true,
+      },
+    });
+    return rows
+      .filter((r) => typeof r.slug === "string" && r.slug.trim().length > 0 && typeof r.title === "string")
+      .map((r) => ({
+        id: r.id,
+        slug: r.slug.trim(),
+        title: r.title,
+        subtitle: r.subtitle,
+        coverPhotoUrl: r.coverPhotoUrl,
+        raisedAmountCents: typeof r.raisedAmountCents === "number" && Number.isFinite(r.raisedAmountCents) ? r.raisedAmountCents : 0,
+        goalAmountCents:
+          r.goalAmountCents != null && typeof r.goalAmountCents === "number" && Number.isFinite(r.goalAmountCents)
+            ? r.goalAmountCents
+            : null,
+        donorCount: typeof r.donorCount === "number" && Number.isFinite(r.donorCount) ? Math.max(0, r.donorCount) : 0,
+        featured: r.featured,
+      }));
+  } catch (e) {
+    console.error("getActiveCampaignsForRescueOrg", e);
+    return [];
+  }
 }
 
 export type MemorialListingCard = {
@@ -177,16 +211,23 @@ export type MemorialListingCard = {
 };
 
 export async function getMemorialListingsForRescueOrg(orgId: string): Promise<MemorialListingCard[]> {
-  const rows = await prisma.adoptionListing.findMany({
-    where: { orgId, status: "memorial", active: true },
-    orderBy: { updatedAt: "desc" },
-    select: { slug: true, name: true, photos: true },
-  });
-  return rows.map((r) => ({
-    slug: r.slug,
-    name: r.name,
-    photos: Array.isArray(r.photos) ? r.photos.filter((p): p is string => typeof p === "string") : [],
-  }));
+  try {
+    const rows = await prisma.adoptionListing.findMany({
+      where: { orgId, status: "memorial", active: true },
+      orderBy: { updatedAt: "desc" },
+      select: { slug: true, name: true, photos: true },
+    });
+    return rows
+      .filter((r) => typeof r.slug === "string" && r.slug.trim().length > 0 && typeof r.name === "string")
+      .map((r) => ({
+        slug: r.slug.trim(),
+        name: r.name,
+        photos: Array.isArray(r.photos) ? r.photos.filter((p): p is string => typeof p === "string" && p.trim().length > 0) : [],
+      }));
+  } catch (e) {
+    console.error("getMemorialListingsForRescueOrg", e);
+    return [];
+  }
 }
 
 export type CampaignSupporterRow = {

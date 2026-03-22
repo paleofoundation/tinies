@@ -13,7 +13,8 @@ type Props = {
 };
 
 export function AdoptionListingCard({ listing }: Props) {
-  const photo = listing.photos[0];
+  const photos = Array.isArray(listing.photos) ? listing.photos : [];
+  const photo = photos[0];
   const speciesLabel = formatLabel(listing.species) || "Pet";
   const sexLabel = formatLabel(listing.sex);
 

@@ -163,6 +163,11 @@ export async function getPublicRescueOrgBySlug(slug: string): Promise<PublicResc
         ? charity.howFundsUsed.trim()
         : null;
 
+    const facilityPhotosRaw = org.facilityPhotos;
+    const facilityPhotos = Array.isArray(facilityPhotosRaw)
+      ? facilityPhotosRaw.filter((u): u is string => typeof u === "string" && u.trim().length > 0)
+      : [];
+
     return {
       id: org.id,
       slug: org.slug,
@@ -171,7 +176,7 @@ export async function getPublicRescueOrgBySlug(slug: string): Promise<PublicResc
       description: org.description,
       foundedYear: org.foundedYear,
       teamMembers: teamMembersFromPrismaJson(org.teamMembers),
-      facilityPhotos: [...org.facilityPhotos],
+      facilityPhotos,
       facilityVideoUrl: org.facilityVideoUrl,
       operatingHours: org.operatingHours,
       volunteerInfo: org.volunteerInfo,

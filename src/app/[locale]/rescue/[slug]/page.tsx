@@ -34,8 +34,44 @@ export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ slug: string }> };
 
-function formatEur(cents: number): string {
-  return new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR" }).format(cents / 100);
+function formatEur(cents: unknown): string {
+  const n = typeof cents === "number" && Number.isFinite(cents) ? Math.max(0, Math.round(cents)) : 0;
+  return new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR" }).format(n / 100);
+}
+
+function safeDonationSummary(
+  raw: Awaited<ReturnType<typeof getOrgDonationSummary>> | null | undefined
+): Awaited<ReturnType<typeof getOrgDonationSummary>> {
+  return {
+    totalReceivedDirectCents:
+      typeof raw?.totalReceivedDirectCents === "number" && Number.isFinite(raw.totalReceivedDirectCents)
+        ? raw.totalReceivedDirectCents
+        : 0,
+    totalReceivedFundPayoutsCents:
+      typeof raw?.totalReceivedFundPayoutsCents === "number" && Number.isFinite(raw.totalReceivedFundPayoutsCents)
+        ? raw.totalReceivedFundPayoutsCents
+        : 0,
+    totalReceivedAllTimeCents:
+      typeof raw?.totalReceivedAllTimeCents === "number" && Number.isFinite(raw.totalReceivedAllTimeCents)
+        ? raw.totalReceivedAllTimeCents
+        : 0,
+    thisMonthDirectCents:
+      typeof raw?.thisMonthDirectCents === "number" && Number.isFinite(raw.thisMonthDirectCents)
+        ? raw.thisMonthDirectCents
+        : 0,
+    supporterCount:
+      typeof raw?.supporterCount === "number" && Number.isFinite(raw.supporterCount) ? Math.max(0, raw.supporterCount) : 0,
+    pendingPayoutCents:
+      typeof raw?.pendingPayoutCents === "number" && Number.isFinite(raw.pendingPayoutCents) ? raw.pendingPayoutCents : 0,
+    latestDonationAt: raw?.latestDonationAt ?? null,
+    charityIds: Array.isArray(raw?.charityIds) ? raw.charityIds : [],
+  };
+}
+
+function formatDonationRowDate(createdAt: Date | string): string {
+  const d = createdAt instanceof Date ? createdAt : new Date(createdAt);
+  if (Number.isNaN(d.getTime())) return "—";
+  return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(d);
 }
 
 function locationLine(org: {
@@ -80,15 +116,26 @@ export default async function PublicRescueOrgPage({ params }: Props) {
   const org = await getPublicRescueOrgBySlug(slug);
   if (!org) notFound();
 
-  const [donationSummary, recentDonations, activeCampaigns, memorialListings] = await Promise.all([
-    getOrgDonationSummary(org.id),
-    getOrgRecentDonations(org.id, 5),
+  const [donationSummaryRaw, recentDonationsRaw, activeCampaigns, memorialListings] = await Promise.all([
+    getOrgDonationSummary(org.id).catch((e) => {
+      console.error("getOrgDonationSummary", e);
+      return null;
+    }),
+    getOrgRecentDonations(org.id, 5).catch((e) => {
+      console.error("getOrgRecentDonations", e);
+      return [];
+    }),
     getActiveCampaignsForRescueOrg(org.id),
     getMemorialListingsForRescueOrg(org.id),
   ]);
 
-  const fb = normalizeExternalUrl(org.socialLinks.facebook);
-  const ig = normalizeExternalUrl(org.socialLinks.instagram);
+  const donationSummary = safeDonationSummary(donationSummaryRaw);
+  const recentDonations = (Array.isArray(recentDonationsRaw) ? recentDonationsRaw : []).filter(
+    (d) => d != null && typeof d.id === "string"
+  );
+
+  const fb = normalizeExternalUrl(org.socialLinks?.facebook);
+  const ig = normalizeExternalUrl(org.socialLinks?.instagram);
   const sameAs = [org.websiteHref, fb, ig].filter(Boolean) as string[];
 
   const aboutBody = org.description?.trim() || org.mission?.trim() || null;
@@ -97,12 +144,16 @@ export default async function PublicRescueOrgPage({ params }: Props) {
   const year = new Date().getFullYear();
   const yearsOperating =
     org.foundedYear != null ? Math.max(0, year - org.foundedYear) : null;
-  const adoptedCount = org.totalAnimalsAdopted ?? org.completedPlacementsCount;
+  const adoptedCountRaw = org.totalAnimalsAdopted ?? org.completedPlacementsCount;
+  const adoptedCount =
+    typeof adoptedCountRaw === "number" && Number.isFinite(adoptedCountRaw) ? Math.max(0, Math.round(adoptedCountRaw)) : 0;
   const donateHref = org.charityGiveSlug ? `/giving/${org.charityGiveSlug}` : "/giving";
   const seeAllAdoptHref = `/adopt?rescue=${encodeURIComponent(org.slug)}`;
 
-  const browseListings: AdoptBrowseListing[] = org.listings.map((l) => ({
+  const listingsSafe = Array.isArray(org.listings) ? org.listings : [];
+  const browseListings: AdoptBrowseListing[] = listingsSafe.map((l) => ({
     ...l,
+    photos: Array.isArray(l.photos) ? l.photos.filter((p): p is string => typeof p === "string") : [],
     org: {
       name: org.name,
       slug: org.slug,
@@ -112,7 +163,7 @@ export default async function PublicRescueOrgPage({ params }: Props) {
   }));
   const previewListings = browseListings.slice(0, 8);
 
-  const facilityGallery = org.facilityPhotos.filter(Boolean).slice(0, 10);
+  const facilityGallery = (Array.isArray(org.facilityPhotos) ? org.facilityPhotos : []).filter(Boolean).slice(0, 10);
   const facilityHero = facilityGallery[0];
   const facilityThumbs = facilityGallery.slice(1);
   const facilityVideo = resolveListingVideoUrl(org.facilityVideoUrl);
@@ -279,7 +330,7 @@ export default async function PublicRescueOrgPage({ params }: Props) {
             {[
               {
                 label: "In our care on Tinies",
-                value: String(org.listings.length),
+                value: String(listingsSafe.length),
                 sub: "Available for adoption",
               },
               {
@@ -449,7 +500,9 @@ export default async function PublicRescueOrgPage({ params }: Props) {
         ) : null}
 
         {/* Team */}
-        {org.teamMembers.length > 0 ? (
+        {(Array.isArray(org.teamMembers) ? org.teamMembers : []).filter(
+          (m) => typeof m?.name === "string" && m.name.trim().length > 0 && typeof m.role === "string"
+        ).length > 0 ? (
           <section className="mt-16" aria-labelledby="team-heading">
             <h2
               id="team-heading"
@@ -459,7 +512,11 @@ export default async function PublicRescueOrgPage({ params }: Props) {
               The team
             </h2>
             <ul className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {org.teamMembers.map((m, idx) => {
+              {(Array.isArray(org.teamMembers) ? org.teamMembers : [])
+                .filter(
+                  (m) => typeof m?.name === "string" && m.name.trim().length > 0 && typeof m.role === "string"
+                )
+                .map((m, idx) => {
                 const parts = m.name.trim().split(/\s+/).filter(Boolean);
                 const initials =
                   parts.length >= 2
@@ -525,7 +582,7 @@ export default async function PublicRescueOrgPage({ params }: Props) {
             <ul className="mt-8 grid gap-6 sm:grid-cols-2">
               {activeCampaigns.map((c) => (
                 <li
-                  key={c.slug}
+                  key={c.id}
                   className="overflow-hidden rounded-[var(--radius-xl)] border transition-shadow hover:shadow-[var(--shadow-md)]"
                   style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)", boxShadow: "var(--shadow-sm)" }}
                 >
@@ -566,13 +623,13 @@ export default async function PublicRescueOrgPage({ params }: Props) {
             >
               Our animals
             </h2>
-            {org.listings.length > 8 ? (
+            {listingsSafe.length > 8 ? (
               <Link
                 href={seeAllAdoptHref}
                 className="text-sm font-semibold hover:underline"
                 style={{ color: "var(--color-primary)", fontFamily: "var(--font-body), sans-serif" }}
               >
-                See all {org.listings.length} animals
+                See all {listingsSafe.length} animals
               </Link>
             ) : null}
           </div>
@@ -639,8 +696,7 @@ export default async function PublicRescueOrgPage({ params }: Props) {
                       {formatEur(d.amountCents)}
                     </span>
                     <span className="w-full text-xs sm:w-auto" style={{ color: "var(--color-text-muted)" }}>
-                      {d.sourceLabel} ·{" "}
-                      {new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(new Date(d.createdAt))}
+                      {typeof d.sourceLabel === "string" ? d.sourceLabel : "Gift"} · {formatDonationRowDate(d.createdAt)}
                     </span>
                   </li>
                 ))}
@@ -686,7 +742,7 @@ export default async function PublicRescueOrgPage({ params }: Props) {
             </p>
             <ul className="mt-8 flex flex-wrap gap-6">
               {memorialListings.map((m) => {
-                const thumb = m.photos[0];
+                const thumb = Array.isArray(m.photos) ? m.photos[0] : undefined;
                 return (
                   <li key={m.slug}>
                     <Link
