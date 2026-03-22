@@ -1,7 +1,9 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import Cropper from "react-easy-crop";
+import type { Area, Point } from "react-easy-crop";
 import { ImageIcon, X } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -14,6 +16,8 @@ import type {
   SiteImageAdminRowSerializable,
 } from "@/lib/images/site-image-admin-types";
 import { SITE_IMAGE_ADMIN_CATEGORIES } from "@/lib/images/site-image-admin-types";
+import { getCroppedImage, blobToBase64 } from "@/lib/images/get-cropped-image";
+import { aspectRatioForSiteImageCategory } from "@/lib/images/site-image-crop-aspect";
 
 type Props = {
   initialRows: SiteImageAdminRowSerializable[];
@@ -35,9 +39,10 @@ export function SiteImagesAdminClient({ initialRows }: Props) {
   const [tab, setTab] = useState<SiteImageAdminCategoryTab>("All");
   const [modalKey, setModalKey] = useState<string | null>(null);
   const [draftAlt, setDraftAlt] = useState("");
-  const [pickedMime, setPickedMime] = useState<string | null>(null);
-  const [pickedBase64, setPickedBase64] = useState<string | null>(null);
   const [pickedPreviewUrl, setPickedPreviewUrl] = useState<string | null>(null);
+  const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [saving, setSaving] = useState(false);
 
   const selected = useMemo(
@@ -45,10 +50,28 @@ export function SiteImagesAdminClient({ initialRows }: Props) {
     [modalKey, rows]
   );
 
+  const cropImageSrc = useMemo(() => {
+    if (pickedPreviewUrl) return pickedPreviewUrl;
+    const u = selected?.url?.trim();
+    return u && u.length > 0 ? u : "";
+  }, [pickedPreviewUrl, selected?.url]);
+
+  const cropAspect = useMemo(
+    () => (selected ? aspectRatioForSiteImageCategory(selected.category) : 16 / 9),
+    [selected]
+  );
+
   const filtered = useMemo(() => {
     if (tab === "All") return rows;
     return rows.filter((r) => r.category === tab);
   }, [rows, tab]);
+
+  useEffect(() => {
+    if (!modalKey) return;
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedAreaPixels(null);
+  }, [modalKey, pickedPreviewUrl]);
 
   const openModal = useCallback((row: SiteImageAdminRowSerializable) => {
     setPickedPreviewUrl((prev) => {
@@ -57,8 +80,6 @@ export function SiteImagesAdminClient({ initialRows }: Props) {
     });
     setModalKey(row.imageKey);
     setDraftAlt(row.alt);
-    setPickedMime(null);
-    setPickedBase64(null);
   }, []);
 
   const closeModal = useCallback(() => {
@@ -68,8 +89,9 @@ export function SiteImagesAdminClient({ initialRows }: Props) {
     });
     setModalKey(null);
     setDraftAlt("");
-    setPickedMime(null);
-    setPickedBase64(null);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedAreaPixels(null);
   }, []);
 
   const onPickFile = useCallback((file: File | null) => {
@@ -78,8 +100,6 @@ export function SiteImagesAdminClient({ initialRows }: Props) {
       return null;
     });
     if (!file) {
-      setPickedMime(null);
-      setPickedBase64(null);
       return;
     }
     if (!ACCEPT.split(",").includes(file.type)) {
@@ -90,16 +110,7 @@ export function SiteImagesAdminClient({ initialRows }: Props) {
       toast.error("Image must be 5MB or smaller.");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = String(reader.result ?? "");
-      const comma = dataUrl.indexOf(",");
-      const b64 = comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
-      setPickedBase64(b64);
-      setPickedMime(file.type);
-      setPickedPreviewUrl(URL.createObjectURL(file));
-    };
-    reader.readAsDataURL(file);
+    setPickedPreviewUrl(URL.createObjectURL(file));
   }, []);
 
   const refreshRows = useCallback(async () => {
@@ -116,24 +127,38 @@ export function SiteImagesAdminClient({ initialRows }: Props) {
     );
   }, []);
 
+  const onCropComplete = useCallback((_croppedArea: Area, croppedPixels: Area) => {
+    setCroppedAreaPixels(croppedPixels);
+  }, []);
+
   const onSave = useCallback(async () => {
     if (!selected) return;
     setSaving(true);
     try {
-      if (pickedBase64 && pickedMime) {
+      const altChanged = draftAlt.trim() !== (selected.alt ?? "").trim();
+      const hasCropSource = Boolean(cropImageSrc);
+
+      if (hasCropSource) {
+        if (!croppedAreaPixels) {
+          toast.error("Still preparing the crop preview. Wait a moment and try again.");
+          return;
+        }
+        const blob = await getCroppedImage(cropImageSrc, croppedAreaPixels);
+        const base64 = await blobToBase64(blob);
+        const mimeType = blob.type && blob.type.length > 0 ? blob.type : "image/jpeg";
         const res = await adminUploadSiteImage({
           imageKey: selected.imageKey,
           category: selected.category,
-          base64: pickedBase64,
-          mimeType: pickedMime,
+          base64,
+          mimeType,
           alt: draftAlt,
         });
         if ("error" in res) {
           toast.error(res.error);
           return;
         }
-        toast.success("Image updated.");
-      } else if (draftAlt.trim() !== (selected.alt ?? "").trim()) {
+        toast.success("Image saved.");
+      } else if (altChanged) {
         const res = await adminUpdateSiteImageMeta({
           imageKey: selected.imageKey,
           alt: draftAlt,
@@ -154,7 +179,7 @@ export function SiteImagesAdminClient({ initialRows }: Props) {
       const message =
         e instanceof Error
           ? e.message
-          : "Save failed. If you uploaded a large file, try a smaller image or ask your developer to raise the server action size limit.";
+          : "Save failed. If you uploaded a large file, try a smaller image or check your connection.";
       toast.error(
         /body.*limit|413|too large/i.test(message)
           ? "File is too large for the server to accept. Try an image under ~2MB or compress it, then try again."
@@ -163,7 +188,10 @@ export function SiteImagesAdminClient({ initialRows }: Props) {
     } finally {
       setSaving(false);
     }
-  }, [selected, pickedBase64, pickedMime, draftAlt, refreshRows, closeModal]);
+  }, [selected, cropImageSrc, croppedAreaPixels, draftAlt, refreshRows, closeModal]);
+
+  const saveDisabled =
+    saving || (Boolean(cropImageSrc) && croppedAreaPixels === null);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
@@ -281,27 +309,20 @@ export function SiteImagesAdminClient({ initialRows }: Props) {
             </h2>
             <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
               <code>{selected.imageKey}</code>
+              {" · "}
+              <span>
+                Crop{" "}
+                {selected.category === "blog" || selected.category === "page"
+                  ? "16:9"
+                  : selected.category === "rescue"
+                    ? "3:1"
+                    : selected.category === "adoption"
+                      ? "4:3"
+                      : selected.category === "provider" || selected.category === "branding"
+                        ? "1:1"
+                        : "16:9"}
+              </span>
             </p>
-
-            <div className="relative mt-6 aspect-video w-full overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--color-border)" }}>
-              {pickedPreviewUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element -- blob preview
-                <img src={pickedPreviewUrl} alt="New preview" className="h-full w-full object-contain" />
-              ) : selected.url?.trim() ? (
-                <Image
-                  src={selected.url.trim()}
-                  alt={draftAlt || selected.label}
-                  fill
-                  className="object-contain"
-                  sizes="(max-width: 512px) 100vw, 512px"
-                  unoptimized={selected.url.includes("supabase")}
-                />
-              ) : (
-                <div className="flex h-full min-h-[160px] items-center justify-center" style={{ color: "var(--color-text-muted)" }}>
-                  <ImageIcon className="h-12 w-12" />
-                </div>
-              )}
-            </div>
 
             <div className="mt-4">
               <label className="block text-sm font-medium" style={{ color: "var(--color-text-secondary)" }}>
@@ -317,6 +338,64 @@ export function SiteImagesAdminClient({ initialRows }: Props) {
                 JPEG, PNG, or WebP · max 5MB
               </p>
             </div>
+
+            <div
+              className="relative mt-4 w-full overflow-hidden rounded-[var(--radius-lg)] border bg-[var(--color-background)]"
+              style={{ borderColor: "var(--color-border)", height: 300 }}
+            >
+              {cropImageSrc ? (
+                <Cropper
+                  image={cropImageSrc}
+                  crop={crop}
+                  zoom={zoom}
+                  aspect={cropAspect}
+                  minZoom={1}
+                  maxZoom={3}
+                  onCropChange={setCrop}
+                  onZoomChange={setZoom}
+                  onCropComplete={onCropComplete}
+                  restrictPosition
+                  style={{}}
+                  classes={{}}
+                  mediaProps={
+                    cropImageSrc.startsWith("http")
+                      ? { crossOrigin: "anonymous" as const }
+                      : {}
+                  }
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center" style={{ color: "var(--color-text-muted)" }}>
+                  <div className="flex flex-col items-center gap-2 px-4 text-center text-sm">
+                    <ImageIcon className="h-12 w-12" aria-hidden />
+                    <span>Choose an image file to crop, or use a row that already has a URL.</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4">
+              <label className="flex items-center justify-between text-sm font-medium" htmlFor="site-img-zoom">
+                <span style={{ color: "var(--color-text-secondary)" }}>Zoom</span>
+                <span className="tabular-nums" style={{ color: "var(--color-text-muted)" }}>
+                  {zoom.toFixed(2)}×
+                </span>
+              </label>
+              <input
+                id="site-img-zoom"
+                type="range"
+                min={1}
+                max={3}
+                step={0.01}
+                value={zoom}
+                onChange={(e) => setZoom(Number(e.target.value))}
+                disabled={!cropImageSrc}
+                className="mt-2 w-full accent-[var(--color-primary)] disabled:opacity-40"
+              />
+            </div>
+
+            <p className="mt-2 text-xs leading-relaxed" style={{ color: "var(--color-text-muted)" }}>
+              Drag to reposition. Use the slider to zoom.
+            </p>
 
             <div className="mt-4">
               <label htmlFor="site-img-alt" className="block text-sm font-medium" style={{ color: "var(--color-text-secondary)" }}>
@@ -344,7 +423,7 @@ export function SiteImagesAdminClient({ initialRows }: Props) {
               <button
                 type="button"
                 onClick={onSave}
-                disabled={saving}
+                disabled={saveDisabled}
                 className="rounded-[var(--radius-pill)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
                 style={{ backgroundColor: "var(--color-primary)" }}
               >
