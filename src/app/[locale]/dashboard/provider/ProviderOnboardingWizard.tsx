@@ -323,6 +323,19 @@ export function ProviderOnboardingWizard({ initialProfile, areaPriceGuidance }: 
           <div>
             <h2 className="font-normal" style={{ fontFamily: "var(--font-heading), serif" }}>Bio</h2>
             <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>Write about yourself in 2–3 paragraphs. Include your experience with animals, why you love pet care, your home setup, and any qualifications. Min 200 chars, max 1000.</p>
+            <div
+              className="mt-4 rounded-[var(--radius-lg)] border p-4 text-sm"
+              style={{ borderColor: "var(--color-primary)", backgroundColor: "rgba(10, 128, 128, 0.06)" }}
+            >
+              <p className="font-medium" style={{ color: "var(--color-text)" }}>
+                After onboarding
+              </p>
+              <ul className="mt-2 list-disc space-y-1 pl-5" style={{ color: "var(--color-text-secondary)" }}>
+                <li>Providers with photos of their home get more booking interest.</li>
+                <li>A short video introduction helps owners trust you before the first meet.</li>
+                <li>Add qualifications, languages, and specialties under Edit profile → Trust & professional profile.</li>
+              </ul>
+            </div>
             <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={6} className="mt-4 w-full rounded-[var(--radius-lg)] border px-4 py-3 text-sm" style={{ borderColor: "var(--color-border)", color: "var(--color-text)" }} placeholder="I've been caring for dogs and cats for..." />
             <p className={`mt-2 text-sm ${bio.length < 200 ? "" : bio.length > 1000 ? "text-red-600" : ""}`} style={bio.length >= 200 && bio.length <= 1000 ? { color: "var(--color-primary)" } : {}}>{bio.length} / 1000 characters {bio.length >= 200 && bio.length <= 1000 && "✓"}</p>
           </div>

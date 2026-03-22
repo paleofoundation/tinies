@@ -1,13 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { ServiceType, CancellationPolicy } from "@/lib/constants";
 import { ServiceAreaPicker, type ServiceAreaValue } from "@/components/maps";
 import { VerifyIdentityButton } from "../VerifyIdentityButton";
-import { getProviderHomeDetailsForEdit, updateProviderHomeDetails, getProviderHolidaysForEdit, updateProviderHolidays } from "../actions";
-import { HOLIDAY_OPTIONS } from "@/lib/utils/provider-helpers";
+import {
+  getProviderHomeDetailsForEdit,
+  updateProviderHomeDetails,
+  getProviderHolidaysForEdit,
+  updateProviderHolidays,
+  getProviderRichProfileForEdit,
+  updateProviderRichProfile,
+} from "../actions";
+import { HOLIDAY_OPTIONS, emptyProviderRichProfile } from "@/lib/utils/provider-helpers";
+import type { ProviderRichProfileData } from "@/lib/utils/provider-helpers";
+import {
+  ProviderRichProfileFields,
+  type ProviderRichProfileFieldsHandle,
+} from "@/components/providers/ProviderRichProfileFields";
 
 const DISTRICTS = ["Nicosia", "Limassol", "Larnaca", "Paphos", "Famagusta"] as const;
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
@@ -34,6 +46,10 @@ const CANCELLATION_EXPLANATIONS: Record<string, string> = {
 };
 
 export default function ProviderEditProfilePage() {
+  const richRef = useRef<ProviderRichProfileFieldsHandle>(null);
+  const [richProfile, setRichProfile] = useState<ProviderRichProfileData>(emptyProviderRichProfile());
+  const [richReady, setRichReady] = useState(false);
+
   const [bio, setBio] = useState("");
   const [district, setDistrict] = useState("");
   const [radiusKm, setRadiusKm] = useState(10);
@@ -132,6 +148,16 @@ export default function ProviderEditProfilePage() {
     return () => { cancelled = true; };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    getProviderRichProfileForEdit().then((data) => {
+      if (cancelled) return;
+      setRichProfile(data ?? emptyProviderRichProfile());
+      setRichReady(true);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!bioValid) {
@@ -139,6 +165,12 @@ export default function ProviderEditProfilePage() {
       return;
     }
     setSubmitting(true);
+    const richPayload = richRef.current?.getPayload();
+    if (richPayload == null) {
+      setSubmitting(false);
+      return;
+    }
+
     const [homeErr, holidaysErr] = await Promise.all([
       updateProviderHomeDetails({
         homeType: homeType || null,
@@ -154,9 +186,11 @@ export default function ProviderEditProfilePage() {
       }),
       updateProviderHolidays(confirmedHolidays),
     ]);
+    const richResult = await updateProviderRichProfile(richPayload);
     setSubmitting(false);
     if (homeErr.error) toast.error(homeErr.error);
     else if (holidaysErr.error) toast.error(holidaysErr.error);
+    else if (richResult.error) toast.error(richResult.error);
     else toast.success("Profile saved successfully.");
   }
 
@@ -537,6 +571,16 @@ export default function ProviderEditProfilePage() {
               </label>
             </div>
           </section>
+
+          {richReady ? (
+            <ProviderRichProfileFields ref={richRef} key="rich-profile" initial={richProfile} />
+          ) : (
+            <section className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-8 shadow-[var(--shadow-md)] sm:p-8">
+              <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+                Loading trust profile…
+              </p>
+            </section>
+          )}
 
           {/* Cancellation policy */}
           <section id="cancellation" className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-8 shadow-[var(--shadow-md)] sm:p-8">

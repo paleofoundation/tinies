@@ -1,0 +1,17 @@
+-- AlterTable
+ALTER TABLE "provider_profiles" ADD COLUMN     "headline" TEXT,
+ADD COLUMN     "video_intro_url" TEXT,
+ADD COLUMN     "experience_tags" TEXT[] DEFAULT ARRAY[]::TEXT[],
+ADD COLUMN     "qualifications" JSONB,
+ADD COLUMN     "languages" TEXT[] DEFAULT ARRAY[]::TEXT[],
+ADD COLUMN     "home_description" TEXT,
+ADD COLUMN     "home_photos" TEXT[] DEFAULT ARRAY[]::TEXT[],
+ADD COLUMN     "why_i_do_this" TEXT,
+ADD COLUMN     "previous_experience" TEXT,
+ADD COLUMN     "insurance_details" TEXT,
+ADD COLUMN     "emergency_protocol" TEXT,
+ADD COLUMN     "accepted_breeds" TEXT[] DEFAULT ARRAY[]::TEXT[],
+ADD COLUMN     "not_accepted" TEXT[] DEFAULT ARRAY[]::TEXT[],
+ADD COLUMN     "response_time_minutes" INTEGER,
+ADD COLUMN     "repeat_client_rate" DOUBLE PRECISION,
+ADD COLUMN     "background_check_passed" BOOLEAN NOT NULL DEFAULT false;

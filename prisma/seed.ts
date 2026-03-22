@@ -4,9 +4,61 @@
  * Ensure migrations are applied first: npx prisma migrate deploy
  */
 
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
+
+/** Rich profile showcase data for public provider pages (Maria & Andreas). */
+const RICH_PROVIDER_BY_SLUG: Record<
+  string,
+  {
+    headline: string;
+    whyIDoThis: string;
+    experienceTags: string[];
+    qualifications: Prisma.InputJsonValue;
+    languages: string[];
+    homeDescription: string;
+    previousExperience: string;
+    emergencyProtocol: string;
+    responseTimeMinutes?: number;
+    repeatClientRate?: number;
+    backgroundCheckPassed?: boolean;
+  }
+> = {
+  "maria-georgiou": {
+    headline: "Experienced dog walker and cat sitter in Limassol",
+    whyIDoThis:
+      "I grew up surrounded by animals on my family's farm. Now I channel that love into professional pet care. Every animal deserves to feel safe and loved.",
+    experienceTags: ["senior dogs", "puppies", "cats", "multiple pets", "medical needs"],
+    qualifications: [
+      { title: "Pet First Aid Certificate", issuer: "Cyprus Red Cross", year: 2023 },
+    ],
+    languages: ["English", "Greek"],
+    homeDescription:
+      "Detached house with enclosed garden in a quiet residential area. Separate pet room with beds, toys, and water stations.",
+    previousExperience: "5 years professional pet sitting. Previously volunteered at Limassol Animal Welfare.",
+    emergencyProtocol:
+      "Pet first aid kit always ready. Nearest emergency vet is Limassol Veterinary Clinic, 5 minutes away.",
+    responseTimeMinutes: 90,
+    repeatClientRate: 85,
+    backgroundCheckPassed: true,
+  },
+  "andreas-christou": {
+    headline: "Dog boarding specialist with a big garden in Nicosia",
+    whyIDoThis:
+      "Dogs are family. When you leave your dog with me, they get the same love and attention as my own two dogs.",
+    experienceTags: ["dogs", "puppies", "large breeds", "active breeds"],
+    qualifications: [{ title: "Canine Behavior Certificate", issuer: "Online Academy", year: 2024 }],
+    languages: ["English", "Greek", "Russian"],
+    homeDescription:
+      "Large house with 200sqm enclosed garden. Two resident dogs (friendly, socialized). Covered patio for shade.",
+    previousExperience: "3 years dog boarding. Dog owner for 15 years.",
+    emergencyProtocol: "Pet first aid kit on hand. I know the nearest 24-hour vet in Nicosia.",
+    responseTimeMinutes: 120,
+    repeatClientRate: 78,
+    backgroundCheckPassed: true,
+  },
+};
 
 const TEST_PASSWORD_HASH = "supabase-auth-placeholder";
 
@@ -339,6 +391,8 @@ async function main() {
     });
     providerUserIds.push(user.id);
 
+    const rich = RICH_PROVIDER_BY_SLUG[p.slug];
+
     await prisma.providerProfile.upsert({
       where: { userId: user.id },
       create: {
@@ -366,6 +420,21 @@ async function main() {
         dogsOnFurniture: true,
         typicalDay: "Morning walks or drop-ins, then home for admin. Afternoon visits. I keep a calm routine for boarding pets.",
         infoWantedAboutPet: "Diet, medication, vet contact, and how they get on with other animals.",
+        ...(rich
+          ? {
+              headline: rich.headline,
+              whyIDoThis: rich.whyIDoThis,
+              experienceTags: rich.experienceTags,
+              qualifications: rich.qualifications,
+              languages: rich.languages,
+              homeDescription: rich.homeDescription,
+              previousExperience: rich.previousExperience,
+              emergencyProtocol: rich.emergencyProtocol,
+              responseTimeMinutes: rich.responseTimeMinutes ?? null,
+              repeatClientRate: rich.repeatClientRate ?? null,
+              backgroundCheckPassed: rich.backgroundCheckPassed ?? false,
+            }
+          : {}),
       },
       update: {
         bio: p.bio,
@@ -377,6 +446,21 @@ async function main() {
         homeType: p.homeType,
         hasYard: p.hasYard,
         yardFenced: p.yardFenced ?? false,
+        ...(rich
+          ? {
+              headline: rich.headline,
+              whyIDoThis: rich.whyIDoThis,
+              experienceTags: rich.experienceTags,
+              qualifications: rich.qualifications,
+              languages: rich.languages,
+              homeDescription: rich.homeDescription,
+              previousExperience: rich.previousExperience,
+              emergencyProtocol: rich.emergencyProtocol,
+              responseTimeMinutes: rich.responseTimeMinutes ?? null,
+              repeatClientRate: rich.repeatClientRate ?? null,
+              backgroundCheckPassed: rich.backgroundCheckPassed ?? false,
+            }
+          : {}),
       },
     });
   }

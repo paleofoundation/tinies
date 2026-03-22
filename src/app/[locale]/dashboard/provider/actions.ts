@@ -17,6 +17,7 @@ import ProviderCancelledEmail from "@/lib/email/templates/provider-cancelled";
 import { sendSMS, buildBookingAcceptedSMS, buildBookingExpiredSMS, buildWalkTrackingStartedSMS, buildBookingServiceStartedSMS, buildProviderCancelledOwnerSMS } from "@/lib/sms";
 import { sendBookingCompletedNotifications } from "@/lib/notifications/booking-notifications";
 import slugify from "slugify";
+import { Prisma } from "@prisma/client";
 import type {
   CreateStripeConnectOnboardingResult,
   ProviderStripeStatus,
@@ -29,7 +30,22 @@ import type {
   ServiceOfferInput,
   ProviderHomeDetails,
   UpdateProviderHomeDetailsInput,
+  ProviderRichProfileData,
+  UpdateProviderRichProfileInput,
 } from "@/lib/utils/provider-helpers";
+import {
+  EMERGENCY_MAX,
+  EXPERIENCE_TAG_OPTIONS,
+  HEADLINE_MAX,
+  HOME_DESC_MAX,
+  INSURANCE_MAX,
+  LANGUAGE_OPTIONS,
+  MAX_HOME_PHOTOS,
+  PREV_EXP_MAX,
+  WHY_MAX,
+  qualificationsArraySchema,
+  qualificationsFromPrismaJson,
+} from "@/lib/validations/provider-rich-profile";
 import { HOLIDAY_OPTIONS } from "@/lib/utils/provider-helpers";
 import { recordPlatformCommissionDonation } from "@/lib/giving/actions";
 
@@ -46,6 +62,16 @@ const SERVICE_TYPE_LABELS: Record<string, string> = {
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 const DASHBOARD_RETURN = `${APP_URL}/dashboard/provider`;
 const DASHBOARD_REFRESH = `${APP_URL}/dashboard/provider?refresh=stripe`;
+
+async function revalidateProviderPublicProfile(userId: string): Promise<void> {
+  const row = await prisma.providerProfile.findUnique({
+    where: { userId },
+    select: { slug: true },
+  });
+  if (row) {
+    revalidatePath(`/services/provider/${row.slug}`);
+  }
+}
 
 /** Get current user's provider profile and Stripe Connect status. */
 export async function getProviderStripeStatus(): Promise<ProviderStripeStatus> {
@@ -842,6 +868,9 @@ export async function updateProviderRepeatClientCount(providerId: string): Promi
     ownerCounts.set(b.ownerId, (ownerCounts.get(b.ownerId) ?? 0) + 1);
   }
   const repeatCount = [...ownerCounts.values()].filter((c) => c >= 2).length;
+  const uniqueOwners = ownerCounts.size;
+  const repeatClientRate =
+    uniqueOwners > 0 ? Math.round((repeatCount / uniqueOwners) * 1000) / 10 : null;
   const profile = await prisma.providerProfile.findUnique({
     where: { userId: providerId },
     select: { id: true },
@@ -849,7 +878,10 @@ export async function updateProviderRepeatClientCount(providerId: string): Promi
   if (profile) {
     await prisma.providerProfile.update({
       where: { id: profile.id },
-      data: { repeatClientCount: repeatCount },
+      data: {
+        repeatClientCount: repeatCount,
+        repeatClientRate,
+      },
     });
   }
 }
@@ -1131,6 +1163,7 @@ export async function updateProviderWizardPhoto(avatarUrl: string): Promise<{ er
   try {
     await prisma.user.update({ where: { id: user.id }, data: { avatarUrl } });
     revalidatePath("/dashboard/provider");
+    await revalidateProviderPublicProfile(user.id);
     return {};
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Failed to save." };
@@ -1149,6 +1182,7 @@ export async function updateProviderWizardBio(bio: string): Promise<{ error?: st
       data: { bio: bio.trim() },
     });
     revalidatePath("/dashboard/provider");
+    await revalidateProviderPublicProfile(user.id);
     return {};
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Failed to save." };
@@ -1166,6 +1200,7 @@ export async function updateProviderWizardServices(servicesOffered: ServiceOffer
       data: { servicesOffered: servicesOffered as unknown as object[] },
     });
     revalidatePath("/dashboard/provider");
+    await revalidateProviderPublicProfile(user.id);
     return {};
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Failed to save." };
@@ -1183,6 +1218,7 @@ export async function updateProviderWizardPhotos(photos: string[]): Promise<{ er
       data: { photos: photos.slice(0, 15) },
     });
     revalidatePath("/dashboard/provider");
+    await revalidateProviderPublicProfile(user.id);
     return {};
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Failed to save." };
@@ -1199,6 +1235,7 @@ export async function updateProviderWizardAvailability(availability: Record<stri
       data: { availability: availability as unknown as object },
     });
     revalidatePath("/dashboard/provider");
+    await revalidateProviderPublicProfile(user.id);
     return {};
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Failed to save." };
@@ -1217,6 +1254,7 @@ export async function updateProviderWizardPetPrefs(petTypesAccepted: string, max
       data: { petTypesAccepted: petTypesAccepted.trim(), maxPets },
     });
     revalidatePath("/dashboard/provider");
+    await revalidateProviderPublicProfile(user.id);
     return {};
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Failed to save." };
@@ -1305,9 +1343,159 @@ export async function updateProviderHomeDetails(input: UpdateProviderHomeDetails
     });
     revalidatePath("/dashboard/provider");
     revalidatePath("/dashboard/provider/edit-profile");
+    await revalidateProviderPublicProfile(user.id);
     return {};
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Failed to save." };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Rich trust profile (public provider page)
+// ---------------------------------------------------------------------------
+
+export async function getProviderRichProfileForEdit(): Promise<ProviderRichProfileData | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const p = await prisma.providerProfile.findUnique({
+    where: { userId: user.id },
+    select: {
+      headline: true,
+      videoIntroUrl: true,
+      experienceTags: true,
+      qualifications: true,
+      languages: true,
+      homeDescription: true,
+      homePhotos: true,
+      whyIDoThis: true,
+      previousExperience: true,
+      insuranceDetails: true,
+      emergencyProtocol: true,
+      acceptedBreeds: true,
+      notAccepted: true,
+      responseTimeMinutes: true,
+      backgroundCheckPassed: true,
+    },
+  });
+  if (!p) return null;
+  return {
+    headline: p.headline,
+    videoIntroUrl: p.videoIntroUrl,
+    experienceTags: [...p.experienceTags],
+    qualifications: qualificationsFromPrismaJson(p.qualifications),
+    languages: [...p.languages],
+    homeDescription: p.homeDescription,
+    homePhotos: [...p.homePhotos],
+    whyIDoThis: p.whyIDoThis,
+    previousExperience: p.previousExperience,
+    insuranceDetails: p.insuranceDetails,
+    emergencyProtocol: p.emergencyProtocol,
+    acceptedBreeds: [...p.acceptedBreeds],
+    notAccepted: [...p.notAccepted],
+    responseTimeMinutes: p.responseTimeMinutes,
+    backgroundCheckPassed: p.backgroundCheckPassed,
+  };
+}
+
+function isValidOptionalUrl(s: string | null | undefined): boolean {
+  if (s == null || !s.trim()) return true;
+  try {
+    const u = new URL(s.trim());
+    return u.protocol === "https:" || u.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
+export async function updateProviderRichProfile(
+  input: UpdateProviderRichProfileInput
+): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+
+  const headline = input.headline?.trim() ?? "";
+  if (headline.length > HEADLINE_MAX) {
+    return { error: `Headline must be ${HEADLINE_MAX} characters or less.` };
+  }
+  const why = input.whyIDoThis?.trim() ?? "";
+  if (why.length > WHY_MAX) return { error: `Why I do this must be ${WHY_MAX} characters or less.` };
+  const homeDesc = input.homeDescription?.trim() ?? "";
+  if (homeDesc.length > HOME_DESC_MAX) {
+    return { error: `Home description must be ${HOME_DESC_MAX} characters or less.` };
+  }
+  const prevExp = input.previousExperience?.trim() ?? "";
+  if (prevExp.length > PREV_EXP_MAX) {
+    return { error: `Previous experience must be ${PREV_EXP_MAX} characters or less.` };
+  }
+  const emerg = input.emergencyProtocol?.trim() ?? "";
+  if (emerg.length > EMERGENCY_MAX) {
+    return { error: `Emergency protocol must be ${EMERGENCY_MAX} characters or less.` };
+  }
+  const ins = input.insuranceDetails?.trim() ?? "";
+  if (ins.length > INSURANCE_MAX) {
+    return { error: `Insurance details must be ${INSURANCE_MAX} characters or less.` };
+  }
+
+  const video = input.videoIntroUrl?.trim() ?? "";
+  if (!isValidOptionalUrl(video || null)) return { error: "Video URL is invalid." };
+
+  const allowedTags = new Set<string>(EXPERIENCE_TAG_OPTIONS);
+  const experienceTags = input.experienceTags.filter((t) => allowedTags.has(t));
+
+  const allowedLang = new Set<string>(LANGUAGE_OPTIONS);
+  const languages = input.languages.filter((l) => allowedLang.has(l));
+
+  const homePhotos = input.homePhotos.filter(Boolean).slice(0, MAX_HOME_PHOTOS);
+  for (const u of homePhotos) {
+    if (!isValidOptionalUrl(u)) return { error: "A home photo URL is invalid." };
+  }
+
+  const qCheck = qualificationsArraySchema.safeParse(input.qualifications);
+  if (!qCheck.success) return { error: "Invalid qualifications." };
+  const qualificationsPayload =
+    qCheck.data.length > 0 ? (qCheck.data as unknown as Prisma.InputJsonValue) : Prisma.DbNull;
+
+  const rt = input.responseTimeMinutes;
+  if (rt != null && (rt < 5 || rt > 10080)) {
+    return { error: "Response time must be between 5 and 10080 minutes, or leave blank." };
+  }
+
+  const acceptedBreeds = input.acceptedBreeds.map((b) => b.trim()).filter(Boolean).slice(0, 40);
+  const notAccepted = input.notAccepted.map((b) => b.trim()).filter(Boolean).slice(0, 40);
+
+  try {
+    await prisma.providerProfile.update({
+      where: { userId: user.id },
+      data: {
+        headline: headline || null,
+        videoIntroUrl: video || null,
+        experienceTags,
+        qualifications: qualificationsPayload,
+        languages,
+        homeDescription: homeDesc || null,
+        homePhotos,
+        whyIDoThis: why || null,
+        previousExperience: prevExp || null,
+        insuranceDetails: ins || null,
+        emergencyProtocol: emerg || null,
+        acceptedBreeds,
+        notAccepted,
+        responseTimeMinutes: rt ?? null,
+        backgroundCheckPassed: Boolean(input.backgroundCheckPassed),
+      },
+    });
+    revalidatePath("/dashboard/provider");
+    revalidatePath("/dashboard/provider/edit-profile");
+    await revalidateProviderPublicProfile(user.id);
+    return {};
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Failed to save trust profile." };
   }
 }
 
@@ -1339,6 +1527,7 @@ export async function updateProviderHolidays(confirmedHolidays: string[]): Promi
     });
     revalidatePath("/dashboard/provider");
     revalidatePath("/dashboard/provider/edit-profile");
+    await revalidateProviderPublicProfile(user.id);
     return {};
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Failed to save." };

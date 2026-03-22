@@ -120,6 +120,70 @@ export type UpdateProviderHomeDetailsInput = {
   infoWantedAboutPet?: string | null;
 };
 
+export type ProviderQualificationRow = {
+  title: string;
+  issuer?: string;
+  year?: number;
+  description?: string;
+};
+
+/** Rich trust profile fields (public provider page + editor). */
+export type ProviderRichProfileData = {
+  headline: string | null;
+  videoIntroUrl: string | null;
+  experienceTags: string[];
+  qualifications: ProviderQualificationRow[];
+  languages: string[];
+  homeDescription: string | null;
+  homePhotos: string[];
+  whyIDoThis: string | null;
+  previousExperience: string | null;
+  insuranceDetails: string | null;
+  emergencyProtocol: string | null;
+  acceptedBreeds: string[];
+  notAccepted: string[];
+  responseTimeMinutes: number | null;
+  backgroundCheckPassed: boolean;
+};
+
+export type UpdateProviderRichProfileInput = {
+  headline: string | null;
+  videoIntroUrl: string | null;
+  experienceTags: string[];
+  qualifications: ProviderQualificationRow[];
+  languages: string[];
+  homeDescription: string | null;
+  homePhotos: string[];
+  whyIDoThis: string | null;
+  previousExperience: string | null;
+  insuranceDetails: string | null;
+  emergencyProtocol: string | null;
+  acceptedBreeds: string[];
+  notAccepted: string[];
+  responseTimeMinutes: number | null;
+  backgroundCheckPassed: boolean;
+};
+
+export function emptyProviderRichProfile(): ProviderRichProfileData {
+  return {
+    headline: null,
+    videoIntroUrl: null,
+    experienceTags: [],
+    qualifications: [],
+    languages: [],
+    homeDescription: null,
+    homePhotos: [],
+    whyIDoThis: null,
+    previousExperience: null,
+    insuranceDetails: null,
+    emergencyProtocol: null,
+    acceptedBreeds: [],
+    notAccepted: [],
+    responseTimeMinutes: null,
+    backgroundCheckPassed: false,
+  };
+}
+
 export const HOLIDAY_OPTIONS: { id: string; label: string }[] = [
   { id: "christmas-2026", label: "Christmas 2026" },
   { id: "new-year-2027", label: "New Year 2027" },

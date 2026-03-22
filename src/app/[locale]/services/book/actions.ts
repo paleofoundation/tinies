@@ -20,6 +20,7 @@ import type {
   ProviderReviewPublic,
   ServiceOffer,
 } from "@/app/[locale]/services/book/booking-action-types";
+import { qualificationsFromPrismaJson } from "@/lib/validations/provider-rich-profile";
 
 const SERVICE_TYPE_LABELS: Record<string, string> = {
   walking: "Dog walking",
@@ -37,9 +38,14 @@ export async function getProviderBySlug(
 ): Promise<ProviderForBooking | null> {
   const profile = await prisma.providerProfile.findUnique({
     where: { slug },
-    include: { user: { select: { name: true } } },
+    include: { user: { select: { name: true, avatarUrl: true, district: true, createdAt: true } } },
   });
   if (!profile) return null;
+
+  const completedBookingsCount = await prisma.booking.count({
+    where: { providerId: profile.userId, status: "completed" },
+  });
+
   const raw = profile.servicesOffered as unknown;
   const services: ServiceOffer[] = Array.isArray(raw)
     ? raw.map((s: Record<string, unknown>) => ({
@@ -50,19 +56,49 @@ export async function getProviderBySlug(
         max_pets: Number(s.max_pets) || 2,
       }))
     : [];
+
+  const availability =
+    profile.availability != null && typeof profile.availability === "object" && !Array.isArray(profile.availability)
+      ? (profile.availability as Record<string, boolean>)
+      : null;
+
   return {
     slug: profile.slug,
     providerName: profile.user.name,
     providerId: profile.userId,
+    avatarUrl: profile.user.avatarUrl,
+    district: profile.user.district,
+    memberSince: profile.user.createdAt,
+    verified: profile.verified,
     services,
     cancellationPolicy: profile.cancellationPolicy,
     avgRating: profile.avgRating,
     reviewCount: profile.reviewCount,
     repeatClientCount: profile.repeatClientCount,
+    repeatClientRate: profile.repeatClientRate,
+    responseRate: profile.responseRate,
+    responseTimeMinutes: profile.responseTimeMinutes,
+    completedBookingsCount,
     serviceAreaLat: profile.serviceAreaLat,
     serviceAreaLng: profile.serviceAreaLng,
     serviceAreaRadiusKm: profile.serviceAreaRadiusKm,
     bio: profile.bio,
+    headline: profile.headline,
+    videoIntroUrl: profile.videoIntroUrl,
+    experienceTags: [...profile.experienceTags],
+    qualifications: qualificationsFromPrismaJson(profile.qualifications),
+    languages: [...profile.languages],
+    homeDescription: profile.homeDescription,
+    homePhotos: [...profile.homePhotos],
+    whyIDoThis: profile.whyIDoThis,
+    previousExperience: profile.previousExperience,
+    insuranceDetails: profile.insuranceDetails,
+    emergencyProtocol: profile.emergencyProtocol,
+    acceptedBreeds: [...profile.acceptedBreeds],
+    notAccepted: [...profile.notAccepted],
+    backgroundCheckPassed: profile.backgroundCheckPassed,
+    photos: [...profile.photos],
+    availability,
     homeType: profile.homeType,
     hasYard: profile.hasYard,
     yardFenced: profile.yardFenced,
@@ -90,7 +126,10 @@ export async function getProviderReviewsBySlug(
   const reviews = await prisma.review.findMany({
     where: { providerId: profile.userId },
     orderBy: { createdAt: "desc" },
-    include: { reviewer: { select: { id: true, name: true } } },
+    include: {
+      reviewer: { select: { id: true, name: true } },
+      booking: { select: { serviceType: true } },
+    },
   });
   const tiers = new Map<string, GivingTier>();
   for (const r of reviews) {
@@ -109,6 +148,7 @@ export async function getProviderReviewsBySlug(
     createdAt: r.createdAt,
     providerResponse: r.providerResponse,
     responseAt: r.responseAt,
+    serviceType: r.booking.serviceType,
   }));
 }
 

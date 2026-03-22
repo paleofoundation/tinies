@@ -98,7 +98,7 @@ export function extractRescueOrgShowcaseFromForm(
     data: {
       description,
       foundedYear: fy,
-      teamMembers: teamParsed.length > 0 ? teamParsed : Prisma.DbNull,
+      teamMembers: teamParsed.length > 0 ? teamParsed : [],
       facilityPhotos,
       facilityVideoUrl,
       operatingHours,
