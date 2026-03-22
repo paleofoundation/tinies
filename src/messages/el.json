@@ -43,7 +43,7 @@
   "home": {
     "hero": {
       "title": "No matter the size.",
-      "tagline": "Trusted pet care and rescue adoption in Cyprus",
+      "tagline": "Trusted pet care and rescue adoption in Cyprus. 90% of our proceeds go directly to animal rescue.",
       "subtagline": "Every booking helps a tiny."
     },
     "search": {
@@ -60,12 +60,12 @@
     "howItWorksPreview": {
       "title": "How it works",
       "subtitle": "Book trusted pet care in three simple steps.",
-      "stepSearch": "Search",
-      "stepSearchDesc": "Find verified providers near you",
-      "stepBook": "Book",
-      "stepBookDesc": "Secure payment, instant confirmation",
-      "stepRelax": "Relax",
-      "stepRelaxDesc": "Photo updates while you are away"
+      "stepSearch": "Find your perfect match",
+      "stepSearchDesc": "Browse verified providers near you",
+      "stepBook": "Book with confidence",
+      "stepBookDesc": "Secure payment, free cancellation, EUR 2,000 guarantee",
+      "stepRelax": "Every booking helps",
+      "stepRelaxDesc": "90% of our commission goes to animal rescue"
     }
   },
   "howItWorks": {
