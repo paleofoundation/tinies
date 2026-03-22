@@ -152,15 +152,40 @@ const CHARITIES = [
 const GARDENS_ORG_SLUG = "gardens-of-st-gertrude";
 const GARDENS_DESTINATIONS = ["UK", "Germany", "Netherlands", "Sweden", "Austria", "Switzerland"];
 
-const GARDENS_CATS = [
+type GardensCatSeed = {
+  name: string;
+  breed: string;
+  sex: string;
+  estimatedAge: string;
+  temperament: string;
+  medicalHistory: string | null;
+  specialNeeds: string | null;
+  backstory: string;
+  personality: string;
+  idealHome: string;
+  goodWith: string[];
+  notGoodWith: string[];
+  fosterLocation: string;
+  photo: string;
+};
+
+const GARDENS_CATS: GardensCatSeed[] = [
   {
     name: "Charlie",
     breed: "Domestic Shorthair",
     sex: "male",
     estimatedAge: "3 years",
     temperament: "Friendly, confident, loves attention",
-    medicalHistory: null as string | null,
-    specialNeeds: null as string | null,
+    medicalHistory: null,
+    specialNeeds: null,
+    backstory:
+      "Charlie was found as a kitten hiding under a car in Limassol. A volunteer brought him to the sanctuary at just 4 weeks old. He's been here ever since and has become the unofficial welcoming committee.",
+    personality:
+      "Confident and social, Charlie greets every visitor. He'll head-bump your legs until you pick him up. Loves being held like a baby.",
+    idealHome: "Any loving home — Charlie adapts to everything. He'd thrive with another cat for company.",
+    goodWith: ["other cats", "dogs", "children", "seniors"],
+    notGoodWith: [],
+    fosterLocation: "Gardens of St Gertrude, Parekklisia",
     photo: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/charlie_v2.jpg",
   },
   {
@@ -171,6 +196,14 @@ const GARDENS_CATS = [
     temperament: "Playful, curious, loves exploring",
     medicalHistory: null,
     specialNeeds: null,
+    backstory:
+      "Mabel was surrendered when her elderly owner moved to a care home. She arrived confused but quickly found her favorite sunny spot on the sanctuary wall.",
+    personality:
+      "Curious explorer who investigates every new box, bag, and visitor. Playful with feather toys but also loves a quiet afternoon nap.",
+    idealHome: "A home with space to explore. Mabel loves windowsills and climbing.",
+    goodWith: ["other cats", "children over 10"],
+    notGoodWith: [],
+    fosterLocation: "Gardens of St Gertrude, Parekklisia",
     photo: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/mabel.jpg",
   },
   {
@@ -178,9 +211,18 @@ const GARDENS_CATS = [
     breed: "Domestic Shorthair",
     sex: "male",
     estimatedAge: "5 years",
-    temperament: "Resilient, affectionate, recovering from surgery",
-    medicalHistory: "Required orthopaedic surgery, fully recovered",
-    specialNeeds: "Needs a calm home environment",
+    temperament: "Resilient, affectionate, gentle lap cat",
+    medicalHistory: "Hit by a car near Parekklisia; pelvic fracture, surgery, and three months' recovery — now fully mobile per vet.",
+    specialNeeds: "Recovered from pelvic surgery. Occasional vet checkups recommended.",
+    backstory:
+      "Oliver was hit by a car on the highway near Parekklisia. His pelvis was shattered. After surgery and three months of recovery at the sanctuary, he made a full recovery.",
+    personality:
+      "Despite everything, Oliver is the most affectionate cat here. He'll curl up in your lap and purr for hours. Resilient and gentle.",
+    idealHome:
+      "A calm, indoor home. Oliver shouldn't be near busy roads again. He needs a quiet space where he feels safe.",
+    goodWith: ["seniors", "single people"],
+    notGoodWith: ["small children", "dogs"],
+    fosterLocation: "Gardens of St Gertrude, Parekklisia",
     photo: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/oliver_campaign.jpg",
   },
   {
@@ -191,6 +233,13 @@ const GARDENS_CATS = [
     temperament: "Energetic, playful, loves toys",
     medicalHistory: null,
     specialNeeds: null,
+    backstory: "Ziggy was born at the sanctuary to a rescued pregnant mother. He's never known anything but love.",
+    personality:
+      "Pure energy. Ziggy plays with everything — bottle caps, shoelaces, other cats' tails. Will zoom around the room at 3am.",
+    idealHome: "An active household that can handle kitten energy. Another young cat to play with would be ideal.",
+    goodWith: ["other cats", "children", "active households"],
+    notGoodWith: [],
+    fosterLocation: "Gardens of St Gertrude, Parekklisia",
     photo: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/profile_ziggy.jpg",
   },
   {
@@ -201,6 +250,14 @@ const GARDENS_CATS = [
     temperament: "Sweet, quiet, loves lap time",
     medicalHistory: null,
     specialNeeds: null,
+    backstory:
+      "Splotch was found in a cardboard box outside a supermarket in Limassol with her three siblings. She was the smallest and needed bottle-feeding for two weeks.",
+    personality:
+      "Quiet and sweet. Splotch prefers one person and will claim your lap as her territory. Soft purr, gentle kneading.",
+    idealHome: "A quieter home where she can be someone's devoted companion. Does well as a solo cat.",
+    goodWith: ["seniors", "single people"],
+    notGoodWith: ["dogs", "very young children"],
+    fosterLocation: "Gardens of St Gertrude, Parekklisia",
     photo: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/splotch.jpg",
   },
   {
@@ -211,9 +268,17 @@ const GARDENS_CATS = [
     temperament: "Independent, dignified, enjoys sunbathing",
     medicalHistory: null,
     specialNeeds: null,
+    backstory:
+      "Toshiba appeared at the sanctuary gate one morning and simply walked in like he owned the place. Nobody knows where he came from.",
+    personality:
+      "Independent and dignified. Toshiba chooses when he wants attention — and when he does, he's all in. Expert sunbather. Judges you silently.",
+    idealHome: "A home with outdoor access or a secure garden. Toshiba likes his freedom.",
+    goodWith: ["other cats", "dogs"],
+    notGoodWith: ["very young children"],
+    fosterLocation: "Gardens of St Gertrude, Parekklisia",
     photo: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/toshiba.jpg",
   },
-] as const;
+];
 
 async function ensureUniqueListingSlug(baseSlug: string): Promise<string> {
   const rows = await prisma.adoptionListing.findMany({
@@ -407,46 +472,36 @@ async function main() {
   for (const cat of GARDENS_CATS) {
     const baseSlug = slugify(cat.name);
     const slug = await ensureUniqueListingSlug(baseSlug);
+    const listingBody = {
+      orgId: gardensOrg.id,
+      name: cat.name,
+      species: "cat",
+      breed: cat.breed,
+      estimatedAge: cat.estimatedAge,
+      sex: cat.sex,
+      spayedNeutered: true,
+      temperament: cat.temperament,
+      medicalHistory: cat.medicalHistory,
+      specialNeeds: cat.specialNeeds,
+      backstory: cat.backstory,
+      personality: cat.personality,
+      idealHome: cat.idealHome,
+      goodWith: cat.goodWith,
+      notGoodWith: cat.notGoodWith,
+      fosterLocation: cat.fosterLocation,
+      internationalEligible: true,
+      destinationCountries: [...GARDENS_DESTINATIONS],
+      photos: [cat.photo],
+      status: "available" as const,
+      active: true,
+    };
     await prisma.adoptionListing.upsert({
       where: { slug },
-      create: {
-        orgId: gardensOrg.id,
-        slug,
-        name: cat.name,
-        species: "cat",
-        breed: cat.breed,
-        estimatedAge: cat.estimatedAge,
-        sex: cat.sex,
-        spayedNeutered: true,
-        temperament: cat.temperament,
-        medicalHistory: cat.medicalHistory,
-        specialNeeds: cat.specialNeeds,
-        internationalEligible: true,
-        destinationCountries: [...GARDENS_DESTINATIONS],
-        photos: [cat.photo],
-        status: "available",
-        active: true,
-      },
-      update: {
-        orgId: gardensOrg.id,
-        name: cat.name,
-        species: "cat",
-        breed: cat.breed,
-        estimatedAge: cat.estimatedAge,
-        sex: cat.sex,
-        spayedNeutered: true,
-        temperament: cat.temperament,
-        medicalHistory: cat.medicalHistory,
-        specialNeeds: cat.specialNeeds,
-        internationalEligible: true,
-        destinationCountries: [...GARDENS_DESTINATIONS],
-        photos: [cat.photo],
-        status: "available",
-        active: true,
-      },
+      create: { ...listingBody, slug },
+      update: listingBody,
     });
   }
-  console.log("Ensured Gardens of St Gertrude org and 6 cat adoption listings with photos.");
+  console.log("Ensured Gardens of St Gertrude org and 6 cat adoption listings with rich profiles.");
 
   // ----- 4. Owner user + pets (for bookings and reviews) -----
   const ownerUser = await prisma.user.upsert({

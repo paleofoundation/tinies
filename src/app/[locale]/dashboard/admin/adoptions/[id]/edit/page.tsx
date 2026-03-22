@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { AdoptionListingForm } from "../../new/AdoptionListingForm";
 import type { CreateListingInput } from "../../../adoption-listing-types";
+import { photoUrlFormSlots } from "@/lib/adoption/listing-photos";
 
 export default async function EditAdoptionListingPage({
   params,
@@ -28,13 +29,17 @@ export default async function EditAdoptionListingPage({
     temperament: listing.temperament ?? "",
     medicalHistory: listing.medicalHistory ?? "",
     specialNeeds: listing.specialNeeds ?? "",
+    backstory: listing.backstory ?? "",
+    personality: listing.personality ?? "",
+    idealHome: listing.idealHome ?? "",
+    goodWith: [...listing.goodWith],
+    notGoodWith: [...listing.notGoodWith],
+    videoUrl: listing.videoUrl ?? "",
+    fosterLocation: listing.fosterLocation ?? "",
     localAdoptionFeeEur: listing.localAdoptionFee != null ? listing.localAdoptionFee / 100 : undefined,
     internationalEligible: listing.internationalEligible,
     destinationCountries: listing.destinationCountries ?? [],
-    photoUrls:
-      listing.photos.length > 0
-        ? [...listing.photos, "", "", "", ""].slice(0, 5)
-        : ["", "", "", "", ""],
+    photoUrls: photoUrlFormSlots(listing.photos),
     status: listing.status,
   };
 

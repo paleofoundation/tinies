@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { AdoptionListingForm } from "@/app/[locale]/dashboard/admin/adoptions/new/AdoptionListingForm";
 import type { CreateListingInput } from "@/app/[locale]/dashboard/admin/adoption-listing-types";
+import { photoUrlFormSlots } from "@/lib/adoption/listing-photos";
 import { updateRescueAdoptionListing } from "../../../actions";
 
 export default async function EditRescueListingPage({
@@ -36,13 +37,17 @@ export default async function EditRescueListingPage({
     temperament: listing.temperament ?? "",
     medicalHistory: listing.medicalHistory ?? "",
     specialNeeds: listing.specialNeeds ?? "",
+    backstory: listing.backstory ?? "",
+    personality: listing.personality ?? "",
+    idealHome: listing.idealHome ?? "",
+    goodWith: [...listing.goodWith],
+    notGoodWith: [...listing.notGoodWith],
+    videoUrl: listing.videoUrl ?? "",
+    fosterLocation: listing.fosterLocation ?? "",
     localAdoptionFeeEur: listing.localAdoptionFee != null ? listing.localAdoptionFee / 100 : undefined,
     internationalEligible: listing.internationalEligible,
     destinationCountries: listing.destinationCountries ?? [],
-    photoUrls:
-      listing.photos.length > 0
-        ? [...listing.photos, "", "", "", ""].slice(0, 5)
-        : ["", "", "", "", ""],
+    photoUrls: photoUrlFormSlots(listing.photos),
     status: listing.status,
   };
 

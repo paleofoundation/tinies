@@ -8,6 +8,13 @@ export type CreateListingInput = {
   temperament?: string;
   medicalHistory?: string;
   specialNeeds?: string;
+  backstory?: string;
+  personality?: string;
+  idealHome?: string;
+  goodWith: string[];
+  notGoodWith: string[];
+  videoUrl?: string;
+  fosterLocation?: string;
   localAdoptionFeeEur?: number;
   internationalEligible: boolean;
   destinationCountries: string[];

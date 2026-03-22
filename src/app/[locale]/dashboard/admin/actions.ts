@@ -9,6 +9,8 @@ import type {
   CreateListingInput,
   UpdateListingInput,
 } from "@/app/[locale]/dashboard/admin/adoption-listing-types";
+import { filterGoodWithTags, filterNotGoodWithTags } from "@/lib/adoption/listing-compatibility-tags";
+import { normalizeListingPhotoUrls } from "@/lib/adoption/listing-photos";
 
 const GARDENS_ORG_SLUG = "gardens-of-st-gertrude";
 const GARDENS_ORG_NAME = "Gardens of St Gertrude";
@@ -94,10 +96,17 @@ export async function createAdoptionListing(input: CreateListingInput): Promise<
         temperament: input.temperament?.trim() || null,
         medicalHistory: input.medicalHistory?.trim() || null,
         specialNeeds: input.specialNeeds?.trim() || null,
+        backstory: input.backstory?.trim() || null,
+        personality: input.personality?.trim() || null,
+        idealHome: input.idealHome?.trim() || null,
+        goodWith: filterGoodWithTags(input.goodWith ?? []),
+        notGoodWith: filterNotGoodWithTags(input.notGoodWith ?? []),
+        videoUrl: input.videoUrl?.trim() || null,
+        fosterLocation: input.fosterLocation?.trim() || null,
         localAdoptionFee: feeCents,
         internationalEligible: input.internationalEligible,
         destinationCountries: input.destinationCountries ?? [],
-        photos: (input.photoUrls ?? []).filter(Boolean),
+        photos: normalizeListingPhotoUrls(input.photoUrls),
         status,
         slug,
       },
@@ -135,10 +144,17 @@ export async function updateAdoptionListing(
         temperament: input.temperament?.trim() || null,
         medicalHistory: input.medicalHistory?.trim() || null,
         specialNeeds: input.specialNeeds?.trim() || null,
+        backstory: input.backstory?.trim() || null,
+        personality: input.personality?.trim() || null,
+        idealHome: input.idealHome?.trim() || null,
+        goodWith: filterGoodWithTags(input.goodWith ?? []),
+        notGoodWith: filterNotGoodWithTags(input.notGoodWith ?? []),
+        videoUrl: input.videoUrl?.trim() || null,
+        fosterLocation: input.fosterLocation?.trim() || null,
         localAdoptionFee: feeCents,
         internationalEligible: input.internationalEligible,
         destinationCountries: input.destinationCountries ?? [],
-        photos: (input.photoUrls ?? []).filter(Boolean),
+        photos: normalizeListingPhotoUrls(input.photoUrls),
         status,
       },
     });

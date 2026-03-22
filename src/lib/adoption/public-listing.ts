@@ -18,6 +18,13 @@ export type PublicAdoptionListing = {
   temperament: string | null;
   medicalHistory: string | null;
   specialNeeds: string | null;
+  backstory: string | null;
+  personality: string | null;
+  idealHome: string | null;
+  goodWith: string[];
+  notGoodWith: string[];
+  videoUrl: string | null;
+  fosterLocation: string | null;
   internationalEligible: boolean;
   destinationCountries: string[];
   org: { name: string; slug: string; location: string | null; verified: boolean };
@@ -50,6 +57,13 @@ export async function getPublicAdoptionListingBySlug(
         temperament: true,
         medicalHistory: true,
         specialNeeds: true,
+        backstory: true,
+        personality: true,
+        idealHome: true,
+        goodWith: true,
+        notGoodWith: true,
+        videoUrl: true,
+        fosterLocation: true,
         internationalEligible: true,
         destinationCountries: true,
         org: { select: { name: true, slug: true, location: true, verified: true } },
@@ -68,6 +82,8 @@ export async function getPublicAdoptionListingBySlug(
       ...listing,
       photos: asStringList(listing.photos),
       destinationCountries: asStringList(listing.destinationCountries),
+      goodWith: asStringList(listing.goodWith),
+      notGoodWith: asStringList(listing.notGoodWith),
     };
   } catch (e) {
     console.error("getPublicAdoptionListingBySlug", e);

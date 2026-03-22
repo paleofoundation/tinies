@@ -458,9 +458,24 @@ model AdoptionListing {
   temperament          String?
   medicalHistory       String?   @map("medical_history")
   specialNeeds         String?   @map("special_needs")
+  /// Rescue story: how they came to the sanctuary
+  backstory            String?
+  /// Detailed personality, quirks, habits (long-form)
+  personality          String?
+  /// Ideal adopter / home description
+  idealHome            String?   @map("ideal_home")
+  /// Compatibility tags, e.g. "other cats", "dogs"
+  goodWith             String[]  @default([]) @map("good_with")
+  /// Compatibility cautions, e.g. "small children"
+  notGoodWith          String[]  @default([]) @map("not_good_with")
+  /// YouTube or direct video URL
+  videoUrl             String?   @map("video_url")
+  /// Where the animal is fostered (city / area), if applicable
+  fosterLocation       String?   @map("foster_location")
   localAdoptionFee     Int?      @map("local_adoption_fee") // cents
   internationalEligible Boolean  @default(false) @map("international_eligible")
   destinationCountries String[] @map("destination_countries")
+  /// Public gallery; app layer caps at MAX_LISTING_PHOTOS (10)
   photos               String[]
   status               AdoptionListingStatus
   active                Boolean   @default(true)

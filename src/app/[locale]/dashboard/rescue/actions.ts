@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email";
 import AdoptionStatusUpdateEmail from "@/lib/email/templates/adoption-status-update";
+import { filterGoodWithTags, filterNotGoodWithTags } from "@/lib/adoption/listing-compatibility-tags";
+import { normalizeListingPhotoUrls } from "@/lib/adoption/listing-photos";
 import {
   AdoptionListingStatus,
   ApplicationStatus,
@@ -366,10 +368,17 @@ export async function createRescueAdoptionListing(
         temperament: input.temperament?.trim() || null,
         medicalHistory: input.medicalHistory?.trim() || null,
         specialNeeds: input.specialNeeds?.trim() || null,
+        backstory: input.backstory?.trim() || null,
+        personality: input.personality?.trim() || null,
+        idealHome: input.idealHome?.trim() || null,
+        goodWith: filterGoodWithTags(input.goodWith ?? []),
+        notGoodWith: filterNotGoodWithTags(input.notGoodWith ?? []),
+        videoUrl: input.videoUrl?.trim() || null,
+        fosterLocation: input.fosterLocation?.trim() || null,
         localAdoptionFee: feeCents,
         internationalEligible: input.internationalEligible,
         destinationCountries: input.destinationCountries ?? [],
-        photos: (input.photoUrls ?? []).filter(Boolean),
+        photos: normalizeListingPhotoUrls(input.photoUrls),
         status,
         slug,
       },
@@ -407,10 +416,17 @@ export async function updateRescueAdoptionListing(
         temperament: input.temperament?.trim() || null,
         medicalHistory: input.medicalHistory?.trim() || null,
         specialNeeds: input.specialNeeds?.trim() || null,
+        backstory: input.backstory?.trim() || null,
+        personality: input.personality?.trim() || null,
+        idealHome: input.idealHome?.trim() || null,
+        goodWith: filterGoodWithTags(input.goodWith ?? []),
+        notGoodWith: filterNotGoodWithTags(input.notGoodWith ?? []),
+        videoUrl: input.videoUrl?.trim() || null,
+        fosterLocation: input.fosterLocation?.trim() || null,
         localAdoptionFee: feeCents,
         internationalEligible: input.internationalEligible,
         destinationCountries: input.destinationCountries ?? [],
-        photos: (input.photoUrls ?? []).filter(Boolean),
+        photos: normalizeListingPhotoUrls(input.photoUrls),
         status,
       },
     });

@@ -7,6 +7,11 @@ import { toast } from "sonner";
 import { createAdoptionListing } from "../../actions";
 import type { CreateListingInput } from "../../adoption-listing-types";
 import { LISTING_DESTINATION_COUNTRY_OPTIONS } from "@/lib/adoption/country-requirements";
+import {
+  ADOPTION_GOOD_WITH_TAGS,
+  ADOPTION_NOT_GOOD_WITH_TAGS,
+} from "@/lib/adoption/listing-compatibility-tags";
+import { MAX_LISTING_PHOTOS } from "@/lib/adoption/listing-photos";
 
 const SPECIES = ["Cat", "Dog", "Other"] as const;
 const SEX = ["Male", "Female", "Unknown"] as const;
@@ -18,6 +23,8 @@ const STATUS_OPTIONS = [
   { value: "adopted", label: "Adopted" },
 ] as const;
 
+const emptyPhotoSlots = (): string[] => Array.from({ length: MAX_LISTING_PHOTOS }, () => "");
+
 const emptyForm: CreateListingInput = {
   name: "",
   species: "Cat",
@@ -28,10 +35,17 @@ const emptyForm: CreateListingInput = {
   temperament: "",
   medicalHistory: "",
   specialNeeds: "",
+  backstory: "",
+  personality: "",
+  idealHome: "",
+  goodWith: [],
+  notGoodWith: [],
+  videoUrl: "",
+  fosterLocation: "",
   localAdoptionFeeEur: undefined,
   internationalEligible: false,
   destinationCountries: [],
-  photoUrls: ["", "", "", "", ""],
+  photoUrls: emptyPhotoSlots(),
   status: "available",
 };
 
@@ -59,6 +73,14 @@ export function AdoptionListingForm({ initial, listingId, onCreate, onUpdate, su
         ? prev.destinationCountries.filter((c) => c !== country)
         : [...prev.destinationCountries, country];
       return { ...prev, destinationCountries: next };
+    });
+  };
+
+  const toggleInList = (key: "goodWith" | "notGoodWith", tag: string) => {
+    setForm((prev) => {
+      const cur = prev[key];
+      const next = cur.includes(tag) ? cur.filter((t) => t !== tag) : [...cur, tag];
+      return { ...prev, [key]: next };
     });
   };
 
@@ -235,6 +257,128 @@ export function AdoptionListingForm({ initial, listingId, onCreate, onUpdate, su
           className="text-lg font-normal text-[#1B2432]"
           style={{ fontFamily: "var(--tiny-font-display), serif" }}
         >
+          Story &amp; home fit
+        </h2>
+        <p className="mt-1 text-sm text-[#6B7280]">
+          Richer profiles help adopters connect — these fields appear on the public animal page.
+        </p>
+        <div className="mt-4 space-y-4">
+          <div>
+            <label htmlFor="backstory" className="block text-sm font-medium text-[#1B2432]">
+              Backstory
+            </label>
+            <textarea
+              id="backstory"
+              rows={5}
+              placeholder="How they came to the rescue, what we know about their past…"
+              value={form.backstory ?? ""}
+              onChange={(e) => update("backstory", e.target.value)}
+              className="mt-1.5 w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] placeholder:text-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
+            />
+          </div>
+          <div>
+            <label htmlFor="personality" className="block text-sm font-medium text-[#1B2432]">
+              Personality &amp; quirks
+            </label>
+            <textarea
+              id="personality"
+              rows={4}
+              placeholder="Day-to-day behaviour, habits, what makes them them"
+              value={form.personality ?? ""}
+              onChange={(e) => update("personality", e.target.value)}
+              className="mt-1.5 w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] placeholder:text-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
+            />
+          </div>
+          <div>
+            <label htmlFor="idealHome" className="block text-sm font-medium text-[#1B2432]">
+              Ideal home
+            </label>
+            <textarea
+              id="idealHome"
+              rows={3}
+              placeholder="What kind of household, routine, or adopter would suit them best"
+              value={form.idealHome ?? ""}
+              onChange={(e) => update("idealHome", e.target.value)}
+              className="mt-1.5 w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] placeholder:text-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
+            />
+          </div>
+          <div>
+            <label htmlFor="fosterLocation" className="block text-sm font-medium text-[#1B2432]">
+              Foster location (optional)
+            </label>
+            <input
+              id="fosterLocation"
+              type="text"
+              placeholder="e.g. Limassol foster home"
+              value={form.fosterLocation ?? ""}
+              onChange={(e) => update("fosterLocation", e.target.value)}
+              className="mt-1.5 w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] placeholder:text-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
+            />
+          </div>
+          <div>
+            <label htmlFor="videoUrl" className="block text-sm font-medium text-[#1B2432]">
+              Video URL (optional)
+            </label>
+            <input
+              id="videoUrl"
+              type="url"
+              placeholder="YouTube link or direct video URL"
+              value={form.videoUrl ?? ""}
+              onChange={(e) => update("videoUrl", e.target.value)}
+              className="mt-1.5 w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] placeholder:text-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
+        <h2
+          className="text-lg font-normal text-[#1B2432]"
+          style={{ fontFamily: "var(--tiny-font-display), serif" }}
+        >
+          Compatibility tags
+        </h2>
+        <div className="mt-4 space-y-6">
+          <div>
+            <span className="block text-sm font-medium text-[#1B2432]">Usually good with</span>
+            <div className="mt-2 flex flex-wrap gap-3">
+              {ADOPTION_GOOD_WITH_TAGS.map((tag) => (
+                <label key={tag} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={form.goodWith.includes(tag)}
+                    onChange={() => toggleInList("goodWith", tag)}
+                    className="h-4 w-4 rounded border-[#0A6E5C]/30 text-[#0A6E5C] focus:ring-[#0A6E5C]"
+                  />
+                  <span className="text-sm text-[#1B2432]">{tag}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          <div>
+            <span className="block text-sm font-medium text-[#1B2432]">May not suit</span>
+            <div className="mt-2 flex flex-wrap gap-3">
+              {ADOPTION_NOT_GOOD_WITH_TAGS.map((tag) => (
+                <label key={tag} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={form.notGoodWith.includes(tag)}
+                    onChange={() => toggleInList("notGoodWith", tag)}
+                    className="h-4 w-4 rounded border-[#0A6E5C]/30 text-[#0A6E5C] focus:ring-[#0A6E5C]"
+                  />
+                  <span className="text-sm text-[#1B2432]">{tag}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
+        <h2
+          className="text-lg font-normal text-[#1B2432]"
+          style={{ fontFamily: "var(--tiny-font-display), serif" }}
+        >
           Adoption details
         </h2>
         <div className="mt-4 space-y-4">
@@ -294,9 +438,11 @@ export function AdoptionListingForm({ initial, listingId, onCreate, onUpdate, su
         >
           Photos (URLs for now)
         </h2>
-        <p className="mt-1 text-sm text-[#6B7280]">Up to 5 image URLs. Real upload coming later.</p>
+        <p className="mt-1 text-sm text-[#6B7280]">
+          Up to {MAX_LISTING_PHOTOS} image URLs, shown as a gallery on the public profile. Real upload coming later.
+        </p>
         <div className="mt-4 space-y-2">
-          {[0, 1, 2, 3, 4].map((i) => (
+          {Array.from({ length: MAX_LISTING_PHOTOS }, (_, i) => (
             <input
               key={i}
               type="url"
