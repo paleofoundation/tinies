@@ -4,7 +4,7 @@ slug: "the-complete-guide-to-adopting-a-rescue-cat-from-cyprus"
 date: "2026-03-21"
 category: "Adoption"
 excerpt: "From choosing a rescue to paperwork and travel: a practical overview for families ready to welcome a Cypriot rescue cat."
-image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=1200&q=80"
+image: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_home_v3.jpg"
 author: "Tinies Team"
 ---
 

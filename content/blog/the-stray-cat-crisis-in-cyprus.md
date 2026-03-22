@@ -4,7 +4,7 @@ slug: "the-stray-cat-crisis-in-cyprus"
 date: "2026-03-15"
 category: "Rescue Stories"
 excerpt: "An island of one million people. An estimated one million stray cats. And the volunteers trying to hold it all together."
-image: "https://images.unsplash.com/photo-1495360010541-f48722b34f7d?w=1200&q=80"
+image: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_volunteer.jpg"
 author: "Tinies Team"
 ---
 

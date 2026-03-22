@@ -6,7 +6,7 @@ category: "Adoption"
 categories:
   - "Cyprus Guide"
 excerpt: "Everything you need to know about bringing a rescue cat from Cyprus to the United Kingdom — requirements, costs, timeline, and how to do it."
-image: "https://images.unsplash.com/photo-1574158622682-e40e69881006?w=1200&q=80"
+image: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_main_latest.jpg"
 author: "Tinies Team"
 ---
 

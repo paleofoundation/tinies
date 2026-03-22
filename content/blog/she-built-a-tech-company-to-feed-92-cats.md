@@ -4,7 +4,7 @@ slug: "she-built-a-tech-company-to-feed-92-cats"
 date: "2026-03-15"
 category: "Rescue Stories"
 excerpt: "The story behind Tinies, the Cyprus pet marketplace where 90% of revenue goes to animal rescue."
-image: "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=1200&q=80"
+image: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/story_portrait_new.jpg"
 author: "Tinies Team"
 ---
 

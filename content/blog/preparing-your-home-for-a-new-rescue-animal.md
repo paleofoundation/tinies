@@ -4,7 +4,7 @@ slug: "preparing-your-home-for-a-new-rescue-animal"
 date: "2026-03-21"
 category: "Pet Care"
 excerpt: "Room setup, supplies, and first-week routines so your rescue dog or cat can decompress and trust their new space."
-image: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=1200&q=80"
+image: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_garden_cat.jpg"
 author: "Tinies Team"
 ---
 

@@ -4,7 +4,7 @@ slug: "how-to-find-a-trusted-pet-sitter-in-cyprus"
 date: "2026-03-21"
 category: "Pet Care"
 excerpt: "What to look for when booking pet care in Limassol, Nicosia, or anywhere on the island — verification, reviews, and red flags to avoid."
-image: "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=1200&q=80"
+image: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_cuddleboxes.jpg"
 author: "Tinies Team"
 ---
 

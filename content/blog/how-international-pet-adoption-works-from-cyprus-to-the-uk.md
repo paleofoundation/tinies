@@ -6,7 +6,7 @@ category: "Adoption"
 categories:
   - "Cyprus Guide"
 excerpt: "Paperwork, rabies titre tests, transport, and realistic timelines for bringing a rescue cat or dog from Cyprus into the United Kingdom."
-image: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1200&q=80"
+image: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_main_latest.jpg"
 author: "Tinies Team"
 ---
 

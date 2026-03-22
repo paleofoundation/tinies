@@ -4,7 +4,7 @@ slug: "why-cyprus-has-so-many-stray-cats-and-what-you-can-do"
 date: "2026-03-21"
 category: "Rescue Stories"
 excerpt: "Climate, culture, and capacity: understanding the stray cat situation in Cyprus without turning away — and practical ways to help today."
-image: "https://images.unsplash.com/photo-1511044568932-338cba067ad5?w=1200&q=80"
+image: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_cats_v2.jpg"
 author: "Tinies Team"
 ---
 
