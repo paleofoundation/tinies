@@ -60,55 +60,78 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   let givingPastDistributionsError: string | undefined;
 
   try {
-    const [placementsResult, disputesResult, claimsResult] = await Promise.all([
-      getAllPlacements(placementStatus),
-      getOpenDisputesForAdmin().then((r) => (r.error ? { disputes: [] } : r)),
-      getOpenClaimsForAdmin().then((r) => (r.error ? { claims: [] } : r)),
-    ]);
+    const placementsResult = await getAllPlacements(placementStatus);
     placements = placementsResult.placements;
-    openDisputes = disputesResult.disputes ?? [];
-    openClaims = claimsResult.claims ?? [];
   } catch (e) {
-    console.error("AdminDashboardPage placements/disputes/claims", e);
+    console.error("AdminDashboardPage placements", e);
   }
 
   try {
-    [listings, charitiesForQr, pendingVerification, recentlyVerified] = await Promise.all([
-      prisma.adoptionListing.findMany({
-        orderBy: { createdAt: "desc" },
-        select: {
-          id: true,
-          name: true,
-          species: true,
-          breed: true,
-          estimatedAge: true,
-          status: true,
-          createdAt: true,
-        },
-      }),
-      prisma.charity.findMany({
-        where: { active: true },
-        orderBy: { name: "asc" },
-        select: { id: true, name: true, slug: true },
-      }),
-      getProvidersPendingVerification(),
-      getRecentlyVerifiedProviders(10),
-    ]);
+    const disputesResult = await getOpenDisputesForAdmin();
+    openDisputes = disputesResult.error ? [] : (disputesResult.disputes ?? []);
   } catch (e) {
-    console.error("AdminDashboardPage listings/charities/providers", e);
+    console.error("AdminDashboardPage disputes", e);
   }
 
   try {
-    const [rescueResult, pendingRescueCount] = await Promise.all([
-      getAllRescueOrgs(),
-      prisma.rescueOrg.count({ where: { verified: false } }),
-    ]);
+    const claimsResult = await getOpenClaimsForAdmin();
+    openClaims = claimsResult.error ? [] : (claimsResult.claims ?? []);
+  } catch (e) {
+    console.error("AdminDashboardPage claims", e);
+  }
+
+  try {
+    listings = await prisma.adoptionListing.findMany({
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        species: true,
+        breed: true,
+        estimatedAge: true,
+        status: true,
+        createdAt: true,
+      },
+    });
+  } catch (e) {
+    console.error("AdminDashboardPage listings", e);
+  }
+
+  try {
+    charitiesForQr = await prisma.charity.findMany({
+      where: { active: true },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true, slug: true },
+    });
+  } catch (e) {
+    console.error("AdminDashboardPage charities", e);
+  }
+
+  try {
+    pendingVerification = await getProvidersPendingVerification();
+  } catch (e) {
+    console.error("AdminDashboardPage pending verification", e);
+  }
+
+  try {
+    recentlyVerified = await getRecentlyVerifiedProviders(10);
+  } catch (e) {
+    console.error("AdminDashboardPage recently verified", e);
+  }
+
+  try {
+    const rescueResult = await getAllRescueOrgs();
     rescueOrgs = rescueResult.orgs;
     rescueOrgsError = rescueResult.error;
-    pendingRescueVerificationCount = pendingRescueCount;
   } catch (e) {
-    console.error("AdminDashboardPage rescue orgs", e);
+    console.error("AdminDashboardPage rescue orgs list", e);
     rescueOrgsError = "Failed to load rescue organisations.";
+  }
+
+  try {
+    pendingRescueVerificationCount = await prisma.rescueOrg.count({ where: { verified: false } });
+  } catch (e) {
+    console.error("AdminDashboardPage rescue org count", e);
   }
 
   try {

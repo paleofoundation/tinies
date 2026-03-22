@@ -363,75 +363,89 @@ export async function getClaimsForUser(): Promise<{ claims: ClaimCard[]; error?:
 }
 
 export async function getOpenDisputesForAdmin(): Promise<{ disputes: AdminDisputeRow[]; error?: string }> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { disputes: [], error: "Not signed in." };
-  const rows = await prisma.dispute.findMany({
-    where: { status: { notIn: ["resolved"] } },
-    orderBy: { createdAt: "desc" },
-    include: {
-      booking: { select: { totalPrice: true, stripePaymentIntentId: true } },
-      openedByUser: { select: { name: true } },
-      respondent: { select: { name: true } },
-    },
-  });
-  const disputes: AdminDisputeRow[] = rows.map((d) => ({
-    id: d.id,
-    bookingId: d.bookingId,
-    disputeType: d.disputeType,
-    description: d.description,
-    evidencePhotos: d.evidencePhotos,
-    respondentResponse: d.respondentResponse,
-    respondentPhotos: d.respondentPhotos,
-    status: d.status,
-    ruling: d.ruling,
-    refundAmount: d.refundAmount,
-    openedByName: d.openedByUser.name,
-    respondentName: d.respondent.name,
-    bookingTotalCents: d.booking.totalPrice,
-    stripePaymentIntentId: d.booking.stripePaymentIntentId,
-    createdAt: d.createdAt,
-  }));
-  return { disputes };
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { disputes: [], error: "Not signed in." };
+    const rows = await prisma.dispute.findMany({
+      where: { status: { notIn: ["resolved"] } },
+      orderBy: { createdAt: "desc" },
+      include: {
+        booking: { select: { totalPrice: true, stripePaymentIntentId: true } },
+        openedByUser: { select: { name: true } },
+        respondent: { select: { name: true } },
+      },
+    });
+    const disputes: AdminDisputeRow[] = rows
+      .filter((d) => d.booking && d.openedByUser && d.respondent)
+      .map((d) => ({
+        id: d.id,
+        bookingId: d.bookingId,
+        disputeType: d.disputeType,
+        description: d.description,
+        evidencePhotos: d.evidencePhotos,
+        respondentResponse: d.respondentResponse,
+        respondentPhotos: d.respondentPhotos,
+        status: d.status,
+        ruling: d.ruling,
+        refundAmount: d.refundAmount,
+        openedByName: d.openedByUser!.name,
+        respondentName: d.respondent!.name,
+        bookingTotalCents: d.booking!.totalPrice,
+        stripePaymentIntentId: d.booking!.stripePaymentIntentId,
+        createdAt: d.createdAt,
+      }));
+    return { disputes };
+  } catch (e) {
+    console.error("getOpenDisputesForAdmin", e);
+    return { disputes: [], error: "Failed to load disputes." };
+  }
 }
 
 export async function getOpenClaimsForAdmin(): Promise<{ claims: AdminClaimRow[]; error?: string }> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { claims: [], error: "Not signed in." };
-  const rows = await prisma.guaranteeClaim.findMany({
-    where: { status: { notIn: ["resolved", "appeal_resolved"] } },
-    orderBy: { createdAt: "desc" },
-    include: {
-      booking: { include: { owner: { select: { id: true, name: true } }, provider: { select: { id: true, name: true } } } },
-      reporter: { select: { name: true } },
-      payoutRecipient: { select: { name: true } },
-    },
-  });
-  const claims: AdminClaimRow[] = rows.map((c) => ({
-    id: c.id,
-    bookingId: c.bookingId,
-    claimType: c.claimType,
-    description: c.description,
-    photos: c.photos,
-    otherPartyResponse: c.otherPartyResponse,
-    otherPartyPhotos: c.otherPartyPhotos,
-    status: c.status,
-    ruling: c.ruling,
-    payoutAmount: c.payoutAmount,
-    payoutRecipientName: c.payoutRecipient?.name ?? null,
-    reporterName: c.reporter.name,
-    createdAt: c.createdAt,
-    ownerId: c.booking.owner.id,
-    ownerName: c.booking.owner.name,
-    providerId: c.booking.provider.id,
-    providerName: c.booking.provider.name,
-  }));
-  return { claims };
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { claims: [], error: "Not signed in." };
+    const rows = await prisma.guaranteeClaim.findMany({
+      where: { status: { notIn: ["resolved", "appeal_resolved"] } },
+      orderBy: { createdAt: "desc" },
+      include: {
+        booking: { include: { owner: { select: { id: true, name: true } }, provider: { select: { id: true, name: true } } } },
+        reporter: { select: { name: true } },
+        payoutRecipient: { select: { name: true } },
+      },
+    });
+    const claims: AdminClaimRow[] = rows
+      .filter((c) => c.booking?.owner && c.booking?.provider && c.reporter)
+      .map((c) => ({
+        id: c.id,
+        bookingId: c.bookingId,
+        claimType: c.claimType,
+        description: c.description,
+        photos: c.photos,
+        otherPartyResponse: c.otherPartyResponse,
+        otherPartyPhotos: c.otherPartyPhotos,
+        status: c.status,
+        ruling: c.ruling,
+        payoutAmount: c.payoutAmount,
+        payoutRecipientName: c.payoutRecipient?.name ?? null,
+        reporterName: c.reporter!.name,
+        createdAt: c.createdAt,
+        ownerId: c.booking!.owner.id,
+        ownerName: c.booking!.owner.name,
+        providerId: c.booking!.provider.id,
+        providerName: c.booking!.provider.name,
+      }));
+    return { claims };
+  } catch (e) {
+    console.error("getOpenClaimsForAdmin", e);
+    return { claims: [], error: "Failed to load claims." };
+  }
 }
 
 export async function adminResolveDispute(

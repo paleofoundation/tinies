@@ -1,5 +1,10 @@
 import { prisma } from "@/lib/prisma";
 
+function asStringList(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((x): x is string => typeof x === "string");
+}
+
 export type RescueSocialLinks = {
   facebook?: string;
   instagram?: string;
@@ -128,7 +133,10 @@ export async function getPublicRescueOrgBySlug(
       verified: true,
       socialLinks: parseSocialLinks(org.socialLinks),
       howDonationsUsed,
-      listings,
+      listings: listings.map((l) => ({
+        ...l,
+        photos: asStringList(l.photos),
+      })),
     };
   } catch (e) {
     console.error("getPublicRescueOrgBySlug", e);

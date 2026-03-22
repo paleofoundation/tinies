@@ -4,8 +4,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Heart, MapPin } from "lucide-react";
 import { getPublicAdoptionListingBySlug } from "@/lib/adoption/public-listing";
+import TiniesWhoMadeItPageContent, {
+  tiniesWhoMadeItMetadata,
+} from "../tinies-who-made-it/TiniesWhoMadeItPageContent";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+
+/** If the dynamic segment wins over the static `tinies-who-made-it` route, still show the gallery (not a listing 404). */
+const RESERVED_ADOPTION_SLUGS = new Set(["tinies-who-made-it"]);
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +24,9 @@ function formatSpecies(species: string): string {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  if (RESERVED_ADOPTION_SLUGS.has(slug)) {
+    return tiniesWhoMadeItMetadata;
+  }
   const listing = await getPublicAdoptionListingBySlug(slug);
   if (!listing) return { title: "Adopt | Tinies" };
   const title = `${listing.name} — Adopt | Tinies`;
@@ -40,6 +49,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function AdoptionListingProfilePage({ params }: Props) {
   const { slug } = await params;
+  if (RESERVED_ADOPTION_SLUGS.has(slug)) {
+    return <TiniesWhoMadeItPageContent />;
+  }
   const listing = await getPublicAdoptionListingBySlug(slug);
   if (!listing) notFound();
 

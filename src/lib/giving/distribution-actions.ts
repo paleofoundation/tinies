@@ -55,6 +55,26 @@ function parsePerCharityAmounts(
 
 /** Preview equal split of available fund balance across verified active charities. */
 export async function getDistributionPreview(): Promise<DistributionPreview> {
+  try {
+    return await buildDistributionPreview();
+  } catch (e) {
+    console.error("getDistributionPreview", e);
+    const now = new Date();
+    return {
+      unallocatedCents: 0,
+      pendingOrProcessingLockedCents: 0,
+      availableForDistributionCents: 0,
+      platformCommissionToFundCents: 0,
+      distributedCompletedCents: 0,
+      charityRows: [],
+      currentMonthStartIso: startOfUtcMonth(now).toISOString(),
+      canApprove: false,
+      approveBlockedReason: "Failed to load distribution preview.",
+    };
+  }
+}
+
+async function buildDistributionPreview(): Promise<DistributionPreview> {
   const balance = await getGivingFundBalance();
   const now = new Date();
   const monthStart = startOfUtcMonth(now);

@@ -1,5 +1,10 @@
 import { prisma } from "@/lib/prisma";
 
+function asStringList(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((x): x is string => typeof x === "string");
+}
+
 export type PublicAdoptionListing = {
   id: string;
   slug: string;
@@ -24,7 +29,7 @@ export async function getPublicAdoptionListingBySlug(
 ): Promise<PublicAdoptionListing | null> {
   try {
     const listing = await prisma.adoptionListing.findFirst({
-      where: { slug, status: "available", active: true, org: { verified: true } },
+      where: { slug, status: "available", active: true },
       select: {
         id: true,
         slug: true,
@@ -43,7 +48,12 @@ export async function getPublicAdoptionListingBySlug(
         org: { select: { name: true, slug: true, location: true, verified: true } },
       },
     });
-    return listing;
+    if (!listing) return null;
+    return {
+      ...listing,
+      photos: asStringList(listing.photos),
+      destinationCountries: asStringList(listing.destinationCountries),
+    };
   } catch (e) {
     console.error("getPublicAdoptionListingBySlug", e);
     return null;

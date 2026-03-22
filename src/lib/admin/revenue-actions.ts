@@ -63,8 +63,8 @@ function buildPeriodFromBookingsAndPlacements(
   let bookingRevenueCents = 0;
   let commissionCents = 0;
   for (const b of bookings) {
-    bookingRevenueCents += b.totalPrice;
-    commissionCents += b.commissionAmount;
+    bookingRevenueCents += b.totalPrice ?? 0;
+    commissionCents += b.commissionAmount ?? 0;
   }
   const { toRescueCents, retainedCents } = splitCommissionCents(commissionCents);
   let adoptionCoordinationFeesCents = 0;
@@ -84,6 +84,18 @@ function buildPeriodFromBookingsAndPlacements(
 
 /** All-time revenue totals from completed bookings and completed placements. */
 export async function getRevenueOverview(): Promise<RevenueOverview> {
+  try {
+    return await loadRevenueOverview();
+  } catch (e) {
+    console.error("getRevenueOverview", e);
+    return {
+      ...emptyPeriod(),
+      ledgerPlatformCommissionCents: 0,
+    };
+  }
+}
+
+async function loadRevenueOverview(): Promise<RevenueOverview> {
   const [agg, placementAgg, ledgerAgg] = await Promise.all([
     prisma.booking.aggregate({
       where: { status: "completed" },
@@ -142,6 +154,15 @@ function labelForYearMonth(yearMonth: string): string {
 
 /** Last `months` calendar months (UTC), most recent first. */
 export async function getRevenueByMonth(months: number = 12): Promise<RevenueMonthRow[]> {
+  try {
+    return await loadRevenueByMonth(months);
+  } catch (e) {
+    console.error("getRevenueByMonth", e);
+    return [];
+  }
+}
+
+async function loadRevenueByMonth(months: number): Promise<RevenueMonthRow[]> {
   const now = new Date();
   const end = utcMonthEndExclusive(now.getUTCFullYear(), now.getUTCMonth());
   const start = utcMonthStart(now.getUTCFullYear(), now.getUTCMonth() - (months - 1));
@@ -206,6 +227,16 @@ export async function getRevenueByMonth(months: number = 12): Promise<RevenueMon
 
 /** Current calendar month vs previous (UTC), with metrics for comparison UI. */
 export async function getCurrentVsLastMonth(): Promise<RevenueComparison> {
+  try {
+    return await loadCurrentVsLastMonth();
+  } catch (e) {
+    console.error("getCurrentVsLastMonth", e);
+    const empty = emptyPeriod();
+    return { current: empty, previous: empty };
+  }
+}
+
+async function loadCurrentVsLastMonth(): Promise<RevenueComparison> {
   const now = new Date();
   const cy = now.getUTCFullYear();
   const cm = now.getUTCMonth();
