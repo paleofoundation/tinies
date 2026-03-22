@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import type { SearchProviderCard } from "@/lib/utils/search-helpers";
 
 /** Invalidate via `revalidateTag(SITE_IMAGES_CACHE_TAG)` after admin image updates. */
 export const SITE_IMAGES_CACHE_TAG = "site-images";
@@ -32,7 +33,20 @@ export async function getSiteImage(imageKey: string): Promise<string | null> {
 export async function getSiteImageWithFallback(imageKey: string, fallback: string): Promise<string> {
   const url = await getSiteImage(imageKey);
   if (url) return url;
-  return fallback.trim().length > 0 ? fallback : "";
+  const f = fallback.trim();
+  return f.length > 0 ? f : "";
+}
+
+/** Apply admin `provider-{slug}` avatar overrides to search / favorites cards. */
+export async function mergeProviderAvatarSiteImages(
+  cards: SearchProviderCard[]
+): Promise<SearchProviderCard[]> {
+  if (cards.length === 0) return cards;
+  const map = await getSiteImageUrlsForKeys(cards.map((c) => `provider-${c.slug}`));
+  return cards.map((c) => {
+    const u = map.get(`provider-${c.slug}`);
+    return u ? { ...c, avatarUrl: u } : c;
+  });
 }
 
 /** Batch lookup for list pages (e.g. search). Not individually cached. */

@@ -12,6 +12,7 @@ import { Link } from "@/i18n/navigation";
 import { HomeSearchBar } from "@/components/layout/HomeSearchBar";
 import { getHomepageData } from "@/lib/home/get-homepage-data";
 import { getBlogPostSummaries } from "@/lib/blog/load-posts";
+import { getSiteImageWithFallback } from "@/lib/images/get-site-image";
 import { BlogCard } from "@/components/blog/BlogCard";
 import { FaqEntry } from "@/components/faq/FaqEntry";
 import { formatPrice } from "@/lib/utils";
@@ -124,7 +125,15 @@ export default async function Home() {
   const tHero = await getTranslations("home.hero");
   const tPreview = await getTranslations("home.howItWorksPreview");
   const homeData = await getHomepageData();
-  const recentPosts = getBlogPostSummaries().slice(0, 3);
+  const recentPostsRaw = getBlogPostSummaries().slice(0, 3);
+  const recentPosts = await Promise.all(
+    recentPostsRaw.map(async (p) => ({
+      ...p,
+      image: await getSiteImageWithFallback(`blog-${p.slug}`, p.image),
+    }))
+  );
+  const heroImageUrl = await getSiteImageWithFallback("page-homepage-hero", HERO_CATS_URL);
+  const sanctuaryImageUrl = await getSiteImageWithFallback("page-homepage-sanctuary", SANCTUARY_STORY_URL);
 
   const {
     completedBookingsCount,
@@ -148,7 +157,7 @@ export default async function Home() {
       {/* Hero */}
       <header className="relative min-h-[min(88vh,720px)] overflow-hidden">
         <Image
-          src={HERO_CATS_URL}
+          src={heroImageUrl}
           alt="Rescue cats at Gardens of St Gertrude sanctuary, Cyprus"
           fill
           priority
@@ -679,7 +688,7 @@ export default async function Home() {
       {/* Gardens of St Gertrude */}
       <section className="relative min-h-[420px] overflow-hidden sm:min-h-[480px]">
         <Image
-          src={SANCTUARY_STORY_URL}
+          src={sanctuaryImageUrl}
           alt="Cat in the garden at Gardens of St Gertrude sanctuary"
           fill
           className="object-cover object-center"

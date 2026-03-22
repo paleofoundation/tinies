@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { getSiteImageWithFallback } from "@/lib/images/get-site-image";
 import { teamMembersFromPrismaJson } from "@/lib/validations/rescue-org-showcase";
 
 function asStringList(raw: unknown): string[] {
@@ -168,6 +169,10 @@ export async function getPublicRescueOrgBySlug(slug: string): Promise<PublicResc
       ? facilityPhotosRaw.filter((u): u is string => typeof u === "string" && u.trim().length > 0)
       : [];
 
+    const coverMerged = (
+      await getSiteImageWithFallback(`rescue-cover-${org.slug}`, org.coverPhotoUrl ?? "")
+    ).trim();
+
     return {
       id: org.id,
       slug: org.slug,
@@ -186,7 +191,7 @@ export async function getPublicRescueOrgBySlug(slug: string): Promise<PublicResc
       contactPhone: org.contactPhone,
       contactEmail: org.contactEmail,
       district: org.district,
-      coverPhotoUrl: org.coverPhotoUrl,
+      coverPhotoUrl: coverMerged.length > 0 ? coverMerged : org.coverPhotoUrl,
       location: org.location,
       website: org.website,
       websiteHref: normalizeExternalUrl(org.website),

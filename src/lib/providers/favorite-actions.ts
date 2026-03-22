@@ -10,6 +10,7 @@ import {
 } from "@/lib/providers/search-provider-card-map";
 import { fetchCertificationDotsByProviderUserIds } from "@/lib/providers/search-certifications";
 import type { SearchProviderCard } from "@/lib/utils/search-helpers";
+import { mergeProviderAvatarSiteImages } from "@/lib/images/get-site-image";
 import type { FavoriteViewerKind } from "@/lib/providers/favorite-actions-types";
 
 const profileInclude = {
@@ -157,7 +158,7 @@ export async function getOwnerFavoriteProviderCards(): Promise<SearchProviderCar
     });
   }
   const certDotsByUser = await fetchCertificationDotsByProviderUserIds(rows.map((r) => r.userId));
-  return rows.map((row) =>
+  const cards = rows.map((row) =>
     mapProfileToSearchProviderCard(row, {
       serviceType: undefined,
       searchLat: null,
@@ -165,4 +166,5 @@ export async function getOwnerFavoriteProviderCards(): Promise<SearchProviderCar
       certificationDots: certDotsByUser.get(row.userId) ?? [],
     })
   );
+  return await mergeProviderAvatarSiteImages(cards);
 }

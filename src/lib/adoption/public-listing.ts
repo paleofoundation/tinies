@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { getSiteImageUrlsForKeys } from "@/lib/images/get-site-image";
 
 function asStringList(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
@@ -140,6 +141,11 @@ export async function getPublicAdoptionListingBySlug(
         photo: r.photos[0] ?? null,
       }));
 
+    const basePhotos = asStringList(listing.photos);
+    const photoKeys = basePhotos.map((_, i) => `adoption-${listing.slug}-${i + 1}`);
+    const photoOverrides = await getSiteImageUrlsForKeys(photoKeys);
+    const photos = basePhotos.map((p, i) => photoOverrides.get(`adoption-${listing.slug}-${i + 1}`) ?? p);
+
     return {
       id: listing.id,
       slug: listing.slug,
@@ -152,7 +158,7 @@ export async function getPublicAdoptionListingBySlug(
       estimatedAge: listing.estimatedAge,
       sex: listing.sex,
       spayedNeutered: listing.spayedNeutered,
-      photos: asStringList(listing.photos),
+      photos,
       temperament: listing.temperament,
       medicalHistory: listing.medicalHistory,
       specialNeeds: listing.specialNeeds,

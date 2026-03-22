@@ -9,6 +9,7 @@ import {
   getBlogPostBySlug,
   getRelatedPosts,
 } from "@/lib/blog/load-posts";
+import { getSiteImageWithFallback } from "@/lib/images/get-site-image";
 import { MarkdownBody } from "./MarkdownBody";
 import { ShareButtons } from "./ShareButtons";
 import { BlogCard } from "@/components/blog/BlogCard";
@@ -26,7 +27,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = getBlogPostBySlug(slug);
   if (!post) return { title: "Blog | Tinies" };
 
-  const ogImage = absoluteBlogImageUrl(post.image, BASE_URL);
+  const imageResolved = await getSiteImageWithFallback(`blog-${slug}`, post.image);
+  const ogImage = absoluteBlogImageUrl(imageResolved, BASE_URL);
   return {
     title: `${post.title} | Tinies`,
     description: post.excerpt,
@@ -54,7 +56,9 @@ export default async function BlogPostPage({ params }: Props) {
   if (!post) notFound();
 
   const postUrl = `${BASE_URL}/blog/${post.slug}`;
-  const ogImage = absoluteBlogImageUrl(post.image, BASE_URL);
+  const imageResolved = await getSiteImageWithFallback(`blog-${slug}`, post.image);
+  const postForView = { ...post, image: imageResolved };
+  const ogImage = absoluteBlogImageUrl(imageResolved, BASE_URL);
 
   const articleJsonLd = {
     "@context": "https://schema.org",
@@ -79,7 +83,13 @@ export default async function BlogPostPage({ params }: Props) {
     ...(ogImage ? { image: [ogImage] } : {}),
   };
 
-  const related = getRelatedPosts(slug, post.category, post.categories, 3);
+  const relatedRaw = getRelatedPosts(slug, post.category, post.categories, 3);
+  const related = await Promise.all(
+    relatedRaw.map(async (r) => ({
+      ...r,
+      image: await getSiteImageWithFallback(`blog-${r.slug}`, r.image),
+    }))
+  );
 
   return (
     <div
@@ -132,13 +142,13 @@ export default async function BlogPostPage({ params }: Props) {
           </div>
         </header>
 
-        {post.image ? (
+        {postForView.image ? (
           <div
             className="relative mt-10 aspect-[16/9] overflow-hidden rounded-[var(--radius-lg)] border"
             style={{ borderColor: "var(--color-border)" }}
           >
             <Image
-              src={post.image}
+              src={postForView.image}
               alt={post.title}
               fill
               className="object-cover"

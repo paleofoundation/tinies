@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useMemo } from "react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -65,9 +66,14 @@ export function Header() {
   const [hasProviderProfile, setHasProviderProfile] = useState(false);
   const [dbRole, setDbRole] = useState<UserRole | null>(null);
   const [dbAvatarUrl, setDbAvatarUrl] = useState<string | null>(null);
+  const [headerLogoUrl, setHeaderLogoUrl] = useState<string | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    getHeaderNavMeta().then((m) => setHeaderLogoUrl(m.logoUrl));
+  }, []);
 
   useEffect(() => {
     const supabase = createClient();
@@ -97,6 +103,7 @@ export function Header() {
       setHasProviderProfile(m.hasProviderProfile);
       setDbRole(m.dbRole);
       setDbAvatarUrl(m.avatarUrl);
+      setHeaderLogoUrl(m.logoUrl);
     });
     getUnreadMessageCount().then(({ count }) => setUnreadCount(count));
     const interval = setInterval(() => {
@@ -164,14 +171,28 @@ export function Header() {
       >
         <Link
           href="/"
-          className="shrink-0 transition-opacity hover:opacity-80"
+          className="flex shrink-0 items-center transition-opacity hover:opacity-80"
           style={{
             fontFamily: "var(--font-heading), serif",
             fontSize: "var(--text-xl)",
             color: "var(--color-text)",
           }}
         >
-          tinies.app
+          {headerLogoUrl?.trim() ? (
+            <Image
+              src={headerLogoUrl.trim()}
+              alt="Tinies"
+              width={160}
+              height={32}
+              className="h-8 w-auto max-w-[min(160px,42vw)] object-contain object-left"
+              unoptimized={
+                headerLogoUrl.includes("supabase") || headerLogoUrl.startsWith("data:")
+              }
+              priority
+            />
+          ) : (
+            "tinies.app"
+          )}
         </Link>
 
         {/* Center nav — desktop & tablet (md+) */}

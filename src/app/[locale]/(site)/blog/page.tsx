@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BlogCard } from "@/components/blog/BlogCard";
 import { getBlogPostSummaries, postMatchesFilter } from "@/lib/blog/load-posts";
+import { getSiteImageWithFallback } from "@/lib/images/get-site-image";
 import { BLOG_FILTER_CATEGORIES, type BlogFilterCategory } from "@/lib/blog/types";
 
 const BASE_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app").replace(/\/$/, "");
@@ -40,7 +41,13 @@ export default async function BlogIndexPage({ searchParams }: SearchProps) {
   const activeFilter: BlogFilterCategory =
     raw && raw !== "All" && isFilterCategory(raw) ? raw : "All";
 
-  const allPosts = getBlogPostSummaries();
+  const allPostsRaw = getBlogPostSummaries();
+  const allPosts = await Promise.all(
+    allPostsRaw.map(async (p) => ({
+      ...p,
+      image: await getSiteImageWithFallback(`blog-${p.slug}`, p.image),
+    }))
+  );
   const posts =
     activeFilter === "All"
       ? allPosts

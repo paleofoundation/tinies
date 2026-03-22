@@ -1,8 +1,10 @@
+import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { Roboto } from "next/font/google";
+import { getSiteImageWithFallback } from "@/lib/images/get-site-image";
 import { Toaster } from "sonner";
 import { FeedbackShell } from "@/components/feedback/FeedbackShell";
 import { Header } from "@/components/layout/Header";
@@ -27,6 +29,25 @@ type Props = {
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
+}
+
+const DEFAULT_OG_IMAGE =
+  "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_cats_v2.jpg";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const [ogUrl, faviconUrl] = await Promise.all([
+    getSiteImageWithFallback("og-default", DEFAULT_OG_IMAGE),
+    getSiteImageWithFallback("favicon", "/favicon.png"),
+  ]);
+  const og = ogUrl.trim();
+  const fav = faviconUrl.trim() || "/favicon.png";
+  const isPng = fav.toLowerCase().endsWith(".png");
+  return {
+    ...(og ? { openGraph: { images: [{ url: og }] }, twitter: { images: [og] } } : {}),
+    icons: {
+      icon: [{ url: fav, sizes: "32x32", type: isPng ? "image/png" : "image/x-icon" }],
+    },
+  };
 }
 
 export default async function LocaleLayout({ children, params }: Props) {

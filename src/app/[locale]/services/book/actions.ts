@@ -24,6 +24,7 @@ import { getOrCreateStripeCustomerForUser } from "@/lib/stripe/customer";
 import { endOfDayFromYmdString } from "@/lib/recurring-bookings/schedule";
 import { qualificationsFromPrismaJson } from "@/lib/validations/provider-rich-profile";
 import { getPublicCertificationsForProviderUserId } from "@/lib/training/course-actions";
+import { getSiteImageWithFallback } from "@/lib/images/get-site-image";
 
 const SERVICE_TYPE_LABELS: Record<string, string> = {
   walking: "Dog walking",
@@ -67,11 +68,16 @@ export async function getProviderBySlug(
       ? (profile.availability as Record<string, boolean>)
       : null;
 
+  const avatarOverride = (
+    await getSiteImageWithFallback(`provider-${profile.slug}`, profile.user.avatarUrl ?? "")
+  ).trim();
+  const avatarUrl = avatarOverride || profile.user.avatarUrl;
+
   return {
     slug: profile.slug,
     providerName: profile.user.name,
     providerId: profile.userId,
-    avatarUrl: profile.user.avatarUrl,
+    avatarUrl,
     district: profile.user.district,
     memberSince: profile.user.createdAt,
     verified: profile.verified,

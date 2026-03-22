@@ -1,5 +1,6 @@
 import { AdoptionListingStatus, BookingStatus, GuardianStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { getSiteImageUrlsForKeys } from "@/lib/images/get-site-image";
 
 export type HomepageFeaturedProvider = {
   slug: string;
@@ -80,6 +81,32 @@ function firstName(fullName: string | null | undefined): string {
   const t = fullName?.trim();
   if (!t) return "Pet owner";
   return t.split(/\s+/)[0] ?? t;
+}
+
+async function mergeHomepageProviderAvatars(
+  items: HomepageFeaturedProvider[]
+): Promise<HomepageFeaturedProvider[]> {
+  if (items.length === 0) return items;
+  const map = await getSiteImageUrlsForKeys(items.map((p) => `provider-${p.slug}`));
+  return items.map((p) => {
+    const u = map.get(`provider-${p.slug}`);
+    return u ? { ...p, avatarUrl: u } : p;
+  });
+}
+
+async function mergeHomepageListingPhotos(
+  items: HomepageFeaturedListing[]
+): Promise<HomepageFeaturedListing[]> {
+  if (items.length === 0) return items;
+  const keys: string[] = [];
+  for (const L of items) {
+    L.photos.forEach((_, i) => keys.push(`adoption-${L.slug}-${i + 1}`));
+  }
+  const map = await getSiteImageUrlsForKeys(keys);
+  return items.map((L) => ({
+    ...L,
+    photos: L.photos.map((p, i) => map.get(`adoption-${L.slug}-${i + 1}`) ?? p),
+  }));
 }
 
 async function featuredProvidersForHome(): Promise<HomepageFeaturedProvider[]> {
@@ -220,14 +247,14 @@ export async function getHomepageData(): Promise<HomepageData> {
 
   let featuredProviders: HomepageFeaturedProvider[] = [];
   try {
-    featuredProviders = await featuredProvidersForHome();
+    featuredProviders = await mergeHomepageProviderAvatars(await featuredProvidersForHome());
   } catch (e) {
     console.error("getHomepageData (featuredProviders)", e);
   }
 
   let featuredListings: HomepageFeaturedListing[] = [];
   try {
-    featuredListings = await featuredListingsForHome(4);
+    featuredListings = await mergeHomepageListingPhotos(await featuredListingsForHome(4));
   } catch (e) {
     console.error("getHomepageData (featuredListings)", e);
   }

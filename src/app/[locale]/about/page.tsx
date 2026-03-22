@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Building2, Coins, Heart, PawPrint, Stethoscope } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { getGivingStats, getAnimalsSupportedCount } from "@/lib/giving/actions";
+import { getSiteImageWithFallback } from "@/lib/images/get-site-image";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
@@ -43,7 +44,11 @@ export const metadata: Metadata = {
 };
 
 export default async function AboutPage() {
-  const [stats, animalsListed] = await Promise.all([getGivingStats(), getAnimalsSupportedCount()]);
+  const [stats, animalsListed, gardensHeroUrl] = await Promise.all([
+    getGivingStats(),
+    getAnimalsSupportedCount(),
+    getSiteImageWithFallback("page-about-hero", GARDENS_HERO_IMAGE),
+  ]);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
@@ -401,7 +406,7 @@ export default async function AboutPage() {
           >
             <div className="relative aspect-[21/9] min-h-[200px] w-full sm:aspect-[3/1] sm:min-h-[280px]">
               <Image
-                src={GARDENS_HERO_IMAGE}
+                src={gardensHeroUrl}
                 alt="Rescue cats at Gardens of St Gertrude sanctuary"
                 fill
                 className="object-cover object-center"

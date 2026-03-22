@@ -6,6 +6,7 @@
 
 import { AdoptionListingStatus, Prisma, PrismaClient } from "@prisma/client";
 import { seedTrainingCourses } from "./seed-training-courses";
+import { seedSiteImages } from "./seed-site-images";
 
 const prisma = new PrismaClient();
 
@@ -1186,6 +1187,8 @@ async function main() {
 
   await seedTrainingCourses(prisma);
   await certifyAllProvidersForRequiredCourses(prisma);
+
+  await seedSiteImages(prisma);
 
   console.log("\nSeed complete.");
 }

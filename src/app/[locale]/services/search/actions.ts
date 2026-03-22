@@ -5,6 +5,7 @@ import { geocodeAddress } from "@/lib/utils/geocoding";
 import type { SearchProviderCard, SearchFilters } from "@/lib/utils/search-helpers";
 import { mapProfileToSearchProviderCard } from "@/lib/providers/search-provider-card-map";
 import { fetchCertificationDotsByProviderUserIds } from "@/lib/providers/search-certifications";
+import { mergeProviderAvatarSiteImages } from "@/lib/images/get-site-image";
 
 /** Geocode an address for search; returns lat/lng or null. */
 export async function geocodeSearchLocation(
@@ -120,6 +121,8 @@ export async function getSearchProviders(
         filters.cancellationPolicy!.toLowerCase()
     );
   }
+
+  result = await mergeProviderAvatarSiteImages(result);
 
   result.sort((a, b) => {
     switch (sort) {
