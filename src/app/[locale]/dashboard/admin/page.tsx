@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { ImageIcon } from "lucide-react";
 import type { AdoptionListingStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getAllPlacements } from "./adoptions/actions";
@@ -214,13 +215,6 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
 
         <div className="mt-6 flex flex-wrap gap-4">
           <Link
-            href="/dashboard/admin/images"
-            className="inline-flex h-10 items-center rounded-[var(--radius-pill)] border px-4 text-sm font-semibold hover:bg-[var(--color-primary-50)]"
-            style={{ borderColor: "var(--color-border)", color: "var(--color-primary)" }}
-          >
-            Site images
-          </Link>
-          <Link
             href="/dashboard/admin/feedback"
             className="inline-flex h-10 items-center rounded-[var(--radius-pill)] border px-4 text-sm font-semibold hover:bg-[var(--color-primary-50)]"
             style={{ borderColor: "var(--color-border)", color: "var(--color-primary)" }}
@@ -242,6 +236,42 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
             Invite Charity
           </Link>
         </div>
+
+        {/* Site images */}
+        <section
+          className="mt-8 rounded-[var(--radius-lg)] border p-8"
+          style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}
+        >
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex gap-4">
+              <div
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--radius-lg)]"
+                style={{ backgroundColor: "var(--color-primary-50)", color: "var(--color-primary)" }}
+                aria-hidden
+              >
+                <ImageIcon className="h-6 w-6" />
+              </div>
+              <div>
+                <h2
+                  className="text-lg font-normal"
+                  style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}
+                >
+                  Site Images
+                </h2>
+                <p className="mt-2 max-w-xl text-sm leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+                  Upload and manage all images on the site.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/dashboard/admin/images"
+              className="inline-flex h-12 shrink-0 items-center justify-center rounded-[var(--radius-pill)] px-6 font-semibold text-white transition-opacity hover:opacity-90"
+              style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-primary)" }}
+            >
+              Manage images
+            </Link>
+          </div>
+        </section>
 
         {/* Adoption Listings tab */}
         <section className="mt-8 rounded-[var(--radius-lg)] border p-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}>

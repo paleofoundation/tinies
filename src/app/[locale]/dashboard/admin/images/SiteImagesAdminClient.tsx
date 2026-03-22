@@ -149,6 +149,17 @@ export function SiteImagesAdminClient({ initialRows }: Props) {
       }
       await refreshRows();
       closeModal();
+    } catch (e) {
+      console.error("SiteImagesAdminClient onSave", e);
+      const message =
+        e instanceof Error
+          ? e.message
+          : "Save failed. If you uploaded a large file, try a smaller image or ask your developer to raise the server action size limit.";
+      toast.error(
+        /body.*limit|413|too large/i.test(message)
+          ? "File is too large for the server to accept. Try an image under ~2MB or compress it, then try again."
+          : message
+      );
     } finally {
       setSaving(false);
     }

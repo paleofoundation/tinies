@@ -133,6 +133,13 @@ export async function adminUploadSiteImage(input: {
 
   const path = storagePath(input.category, input.imageKey, mime);
 
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+    return {
+      error:
+        "Image upload is not configured on the server. Set SUPABASE_SERVICE_ROLE_KEY (and NEXT_PUBLIC_SUPABASE_URL) in your environment — the anon key cannot upload to Storage.",
+    };
+  }
+
   try {
     const admin = createSupabaseAdmin();
     const { error: upErr } = await admin.storage.from(BUCKET).upload(path, buffer, {
@@ -165,6 +172,13 @@ export async function adminUploadSiteImage(input: {
     return { ok: true, publicUrl };
   } catch (e) {
     console.error("adminUploadSiteImage", e);
-    return { error: "Upload failed." };
+    const msg = e instanceof Error ? e.message : String(e);
+    if (msg.includes("SUPABASE_SERVICE_ROLE_KEY") || msg.includes("NEXT_PUBLIC_SUPABASE_URL")) {
+      return {
+        error:
+          "Supabase admin client could not start. Confirm SUPABASE_SERVICE_ROLE_KEY and NEXT_PUBLIC_SUPABASE_URL are set on the server.",
+      };
+    }
+    return { error: msg.length > 0 && msg.length < 200 ? msg : "Upload failed." };
   }
 }
