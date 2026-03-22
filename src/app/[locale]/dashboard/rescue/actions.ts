@@ -7,6 +7,12 @@ import { createClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email";
 import AdoptionStatusUpdateEmail from "@/lib/email/templates/adoption-status-update";
 import { filterGoodWithTags, filterNotGoodWithTags } from "@/lib/adoption/listing-compatibility-tags";
+import {
+  normalizeAlternateNames,
+  normalizeListingFk,
+  normalizeSiblingIds,
+  sanitizeParentIds,
+} from "@/lib/adoption/listing-input-normalize";
 import { normalizeListingPhotoUrls } from "@/lib/adoption/listing-photos";
 import {
   AdoptionListingStatus,
@@ -356,10 +362,15 @@ export async function createRescueAdoptionListing(
     const slug = await ensureUniqueSlug(baseSlug);
     const feeCents = input.localAdoptionFeeEur != null ? Math.round(input.localAdoptionFeeEur * 100) : null;
     const status = STATUS_MAP[input.status] ?? AdoptionListingStatus.available;
+    const motherId = normalizeListingFk(input.motherId);
+    const fatherId = normalizeListingFk(input.fatherId);
+    const parents = sanitizeParentIds(motherId, fatherId);
     await prisma.adoptionListing.create({
       data: {
         orgId: org.id,
         name: input.name.trim(),
+        alternateNames: normalizeAlternateNames(input.alternateNames),
+        nameStory: input.nameStory?.trim() || null,
         species: input.species,
         breed: input.breed?.trim() || null,
         estimatedAge: input.estimatedAge?.trim() || null,
@@ -375,6 +386,13 @@ export async function createRescueAdoptionListing(
         notGoodWith: filterNotGoodWithTags(input.notGoodWith ?? []),
         videoUrl: input.videoUrl?.trim() || null,
         fosterLocation: input.fosterLocation?.trim() || null,
+        lineageTitle: input.lineageTitle?.trim() || null,
+        motherId: parents.motherId,
+        fatherId: parents.fatherId,
+        motherName: input.motherName?.trim() || null,
+        fatherName: input.fatherName?.trim() || null,
+        siblingIds: normalizeSiblingIds(input.siblingIds),
+        familyNotes: input.familyNotes?.trim() || null,
         localAdoptionFee: feeCents,
         internationalEligible: input.internationalEligible,
         destinationCountries: input.destinationCountries ?? [],
@@ -404,10 +422,15 @@ export async function updateRescueAdoptionListing(
   try {
     const feeCents = input.localAdoptionFeeEur != null ? Math.round(input.localAdoptionFeeEur * 100) : null;
     const status = STATUS_MAP[input.status] ?? AdoptionListingStatus.available;
+    const motherId = normalizeListingFk(input.motherId);
+    const fatherId = normalizeListingFk(input.fatherId);
+    const parents = sanitizeParentIds(motherId, fatherId, id);
     await prisma.adoptionListing.update({
       where: { id },
       data: {
         name: input.name.trim(),
+        alternateNames: normalizeAlternateNames(input.alternateNames),
+        nameStory: input.nameStory?.trim() || null,
         species: input.species,
         breed: input.breed?.trim() || null,
         estimatedAge: input.estimatedAge?.trim() || null,
@@ -423,6 +446,13 @@ export async function updateRescueAdoptionListing(
         notGoodWith: filterNotGoodWithTags(input.notGoodWith ?? []),
         videoUrl: input.videoUrl?.trim() || null,
         fosterLocation: input.fosterLocation?.trim() || null,
+        lineageTitle: input.lineageTitle?.trim() || null,
+        motherId: parents.motherId,
+        fatherId: parents.fatherId,
+        motherName: input.motherName?.trim() || null,
+        fatherName: input.fatherName?.trim() || null,
+        siblingIds: normalizeSiblingIds(input.siblingIds, id),
+        familyNotes: input.familyNotes?.trim() || null,
         localAdoptionFee: feeCents,
         internationalEligible: input.internationalEligible,
         destinationCountries: input.destinationCountries ?? [],

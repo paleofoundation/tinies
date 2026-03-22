@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { AdoptionListingForm } from "../../new/AdoptionListingForm";
 import type { CreateListingInput } from "../../../adoption-listing-types";
-import { photoUrlFormSlots } from "@/lib/adoption/listing-photos";
+import { photoUrlSlotsForForm } from "@/lib/adoption/listing-photos";
+import { getAdoptionListingPeerOptions } from "@/lib/adoption/listing-peers";
 
 export default async function EditAdoptionListingPage({
   params,
@@ -19,6 +20,8 @@ export default async function EditAdoptionListingPage({
     notFound();
   }
 
+  const peerListings = await getAdoptionListingPeerOptions({ excludeListingId: id });
+
   const initial: Partial<CreateListingInput> = {
     name: listing.name,
     species: listing.species,
@@ -26,6 +29,8 @@ export default async function EditAdoptionListingPage({
     estimatedAge: listing.estimatedAge ?? "",
     sex: listing.sex ?? "Unknown",
     spayedNeutered: listing.spayedNeutered ?? false,
+    alternateNames: [...listing.alternateNames],
+    nameStory: listing.nameStory ?? "",
     temperament: listing.temperament ?? "",
     medicalHistory: listing.medicalHistory ?? "",
     specialNeeds: listing.specialNeeds ?? "",
@@ -36,10 +41,17 @@ export default async function EditAdoptionListingPage({
     notGoodWith: [...listing.notGoodWith],
     videoUrl: listing.videoUrl ?? "",
     fosterLocation: listing.fosterLocation ?? "",
+    lineageTitle: listing.lineageTitle ?? "",
+    motherId: listing.motherId ?? "",
+    fatherId: listing.fatherId ?? "",
+    motherName: listing.motherName ?? "",
+    fatherName: listing.fatherName ?? "",
+    siblingIds: [...listing.siblingIds],
+    familyNotes: listing.familyNotes ?? "",
     localAdoptionFeeEur: listing.localAdoptionFee != null ? listing.localAdoptionFee / 100 : undefined,
     internationalEligible: listing.internationalEligible,
     destinationCountries: listing.destinationCountries ?? [],
-    photoUrls: photoUrlFormSlots(listing.photos),
+    photoUrls: photoUrlSlotsForForm(listing.photos),
     status: listing.status,
   };
 
@@ -62,7 +74,12 @@ export default async function EditAdoptionListingPage({
           {listing.name}
         </p>
         <div className="mt-8">
-          <AdoptionListingForm initial={initial} listingId={id} />
+          <AdoptionListingForm
+            initial={initial}
+            listingId={id}
+            listingSlugForUpload={listing.slug}
+            peerListings={peerListings}
+          />
         </div>
       </main>
     </div>

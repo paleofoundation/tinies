@@ -5,14 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createAdoptionListing } from "../../actions";
-import type { CreateListingInput } from "../../adoption-listing-types";
+import type { AdoptionListingPeerOption, CreateListingInput } from "../../adoption-listing-types";
+import { AdoptionListingPhotosEditor } from "./AdoptionListingPhotosEditor";
 import { LISTING_DESTINATION_COUNTRY_OPTIONS } from "@/lib/adoption/country-requirements";
 import {
   ADOPTION_GOOD_WITH_TAGS,
   ADOPTION_NOT_GOOD_WITH_TAGS,
 } from "@/lib/adoption/listing-compatibility-tags";
-import { MAX_LISTING_PHOTOS } from "@/lib/adoption/listing-photos";
-
 const SPECIES = ["Cat", "Dog", "Other"] as const;
 const SEX = ["Male", "Female", "Unknown"] as const;
 const STATUS_OPTIONS = [
@@ -23,8 +22,6 @@ const STATUS_OPTIONS = [
   { value: "adopted", label: "Adopted" },
 ] as const;
 
-const emptyPhotoSlots = (): string[] => Array.from({ length: MAX_LISTING_PHOTOS }, () => "");
-
 const emptyForm: CreateListingInput = {
   name: "",
   species: "Cat",
@@ -32,6 +29,8 @@ const emptyForm: CreateListingInput = {
   estimatedAge: "",
   sex: "Unknown",
   spayedNeutered: false,
+  alternateNames: [],
+  nameStory: "",
   temperament: "",
   medicalHistory: "",
   specialNeeds: "",
@@ -42,26 +41,65 @@ const emptyForm: CreateListingInput = {
   notGoodWith: [],
   videoUrl: "",
   fosterLocation: "",
+  lineageTitle: "",
+  motherId: "",
+  fatherId: "",
+  motherName: "",
+  fatherName: "",
+  siblingIds: [],
+  familyNotes: "",
   localAdoptionFeeEur: undefined,
   internationalEligible: false,
   destinationCountries: [],
-  photoUrls: emptyPhotoSlots(),
+  photoUrls: [""],
   status: "available",
 };
+
+function mergeListingInitial(
+  base: CreateListingInput,
+  initial?: Partial<CreateListingInput>
+): CreateListingInput {
+  if (!initial) return base;
+  return {
+    ...base,
+    ...initial,
+    alternateNames: initial.alternateNames ?? base.alternateNames,
+    siblingIds: initial.siblingIds ?? base.siblingIds,
+    goodWith: initial.goodWith ?? base.goodWith,
+    notGoodWith: initial.notGoodWith ?? base.notGoodWith,
+    destinationCountries: initial.destinationCountries ?? base.destinationCountries,
+    photoUrls:
+      initial.photoUrls && initial.photoUrls.some((u) => u.trim())
+        ? initial.photoUrls
+        : base.photoUrls,
+  };
+}
 
 type Props = {
   initial?: Partial<CreateListingInput>;
   listingId?: string;
+  /** Existing slug — used for Supabase upload path when editing. */
+  listingSlugForUpload?: string | null;
+  peerListings?: AdoptionListingPeerOption[];
   /** When provided, used instead of default admin create/update and redirect (e.g. rescue dashboard). */
   onCreate?: (input: CreateListingInput) => Promise<{ error?: string }>;
   onUpdate?: (id: string, input: CreateListingInput) => Promise<{ error?: string }>;
   successRedirect?: string;
 };
 
-export function AdoptionListingForm({ initial, listingId, onCreate, onUpdate, successRedirect }: Props) {
+export function AdoptionListingForm({
+  initial,
+  listingId,
+  listingSlugForUpload,
+  peerListings = [],
+  onCreate,
+  onUpdate,
+  successRedirect,
+}: Props) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState<CreateListingInput>({ ...emptyForm, ...initial });
+  const [aliasDraft, setAliasDraft] = useState("");
+  const [form, setForm] = useState<CreateListingInput>(() => mergeListingInitial(emptyForm, initial));
 
   const update = <K extends keyof CreateListingInput>(key: K, value: CreateListingInput[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -84,10 +122,30 @@ export function AdoptionListingForm({ initial, listingId, onCreate, onUpdate, su
     });
   };
 
-  const setPhotoUrl = (index: number, value: string) => {
-    const next = [...form.photoUrls];
-    next[index] = value;
-    update("photoUrls", next);
+  const addAlternateName = () => {
+    const t = aliasDraft.trim();
+    if (!t) return;
+    if (form.alternateNames.some((n) => n.toLowerCase() === t.toLowerCase())) {
+      setAliasDraft("");
+      return;
+    }
+    update("alternateNames", [...form.alternateNames, t]);
+    setAliasDraft("");
+  };
+
+  const removeAlternateName = (name: string) => {
+    update(
+      "alternateNames",
+      form.alternateNames.filter((n) => n !== name)
+    );
+  };
+
+  const toggleSibling = (id: string) => {
+    const has = form.siblingIds.includes(id);
+    update(
+      "siblingIds",
+      has ? form.siblingIds.filter((x) => x !== id) : [...form.siblingIds, id]
+    );
   };
 
   async function handleSubmit(e: React.FormEvent) {
@@ -132,6 +190,62 @@ export function AdoptionListingForm({ initial, listingId, onCreate, onUpdate, su
               value={form.name}
               onChange={(e) => update("name", e.target.value)}
               className="mt-1.5 w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <span className="block text-sm font-medium text-[#1B2432]">Also known as</span>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {form.alternateNames.map((n) => (
+                <span
+                  key={n}
+                  className="inline-flex items-center gap-1 rounded-full bg-[#E8F5F3] px-3 py-1 text-sm text-[#1B2432]"
+                >
+                  {n}
+                  <button
+                    type="button"
+                    onClick={() => removeAlternateName(n)}
+                    className="font-medium text-[#0A6E5C] hover:underline"
+                    aria-label={`Remove ${n}`}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <input
+                type="text"
+                value={aliasDraft}
+                onChange={(e) => setAliasDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addAlternateName();
+                  }
+                }}
+                placeholder="Nickname or previous name"
+                className="min-w-[200px] flex-1 rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] placeholder:text-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
+              />
+              <button
+                type="button"
+                onClick={addAlternateName}
+                className="rounded-[14px] border border-[#0A6E5C]/40 px-4 py-2.5 text-sm font-medium text-[#0A6E5C] hover:bg-[#0A6E5C]/5"
+              >
+                Add name
+              </button>
+            </div>
+          </div>
+          <div className="sm:col-span-2">
+            <label htmlFor="nameStory" className="block text-sm font-medium text-[#1B2432]">
+              Name story (optional)
+            </label>
+            <input
+              id="nameStory"
+              type="text"
+              placeholder='e.g. "We thought she was a boy for six months"'
+              value={form.nameStory ?? ""}
+              onChange={(e) => update("nameStory", e.target.value)}
+              className="mt-1.5 w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] placeholder:text-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
             />
           </div>
           <div>
@@ -336,6 +450,126 @@ export function AdoptionListingForm({ initial, listingId, onCreate, onUpdate, su
           className="text-lg font-normal text-[#1B2432]"
           style={{ fontFamily: "var(--tiny-font-display), serif" }}
         >
+          Family &amp; lineage
+        </h2>
+        <p className="mt-1 text-sm text-[#6B7280]">
+          Links to other Tinies listings appear on the public profile. Names-only fields show when the parent isn&apos;t listed.
+        </p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <label htmlFor="lineageTitle" className="block text-sm font-medium text-[#1B2432]">
+              Lineage title (optional)
+            </label>
+            <input
+              id="lineageTitle"
+              type="text"
+              placeholder='e.g. "Of Gertian"'
+              value={form.lineageTitle ?? ""}
+              onChange={(e) => update("lineageTitle", e.target.value)}
+              className="mt-1.5 w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] placeholder:text-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
+            />
+          </div>
+          <div>
+            <label htmlFor="motherListing" className="block text-sm font-medium text-[#1B2432]">
+              Mother on Tinies
+            </label>
+            <select
+              id="motherListing"
+              value={form.motherId ?? ""}
+              onChange={(e) => update("motherId", e.target.value)}
+              className="mt-1.5 w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
+            >
+              <option value="">— None / not listed —</option>
+              {peerListings.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} ({p.slug})
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="motherName" className="block text-sm font-medium text-[#1B2432]">
+              Mother&apos;s name (if not on Tinies)
+            </label>
+            <input
+              id="motherName"
+              type="text"
+              value={form.motherName ?? ""}
+              onChange={(e) => update("motherName", e.target.value)}
+              className="mt-1.5 w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
+            />
+          </div>
+          <div>
+            <label htmlFor="fatherListing" className="block text-sm font-medium text-[#1B2432]">
+              Father on Tinies
+            </label>
+            <select
+              id="fatherListing"
+              value={form.fatherId ?? ""}
+              onChange={(e) => update("fatherId", e.target.value)}
+              className="mt-1.5 w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
+            >
+              <option value="">— None / not listed —</option>
+              {peerListings.map((p) => (
+                <option key={`f-${p.id}`} value={p.id}>
+                  {p.name} ({p.slug})
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="fatherName" className="block text-sm font-medium text-[#1B2432]">
+              Father&apos;s name (if not on Tinies)
+            </label>
+            <input
+              id="fatherName"
+              type="text"
+              value={form.fatherName ?? ""}
+              onChange={(e) => update("fatherName", e.target.value)}
+              className="mt-1.5 w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <span className="block text-sm font-medium text-[#1B2432]">Siblings on Tinies</span>
+            <div className="mt-2 max-h-48 space-y-2 overflow-y-auto rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] p-3">
+              {peerListings.length === 0 ? (
+                <p className="text-sm text-[#6B7280]">No other listings to link yet.</p>
+              ) : (
+                peerListings.map((p) => (
+                  <label key={`sib-${p.id}`} className="flex cursor-pointer items-center gap-2 text-sm text-[#1B2432]">
+                    <input
+                      type="checkbox"
+                      checked={form.siblingIds.includes(p.id)}
+                      onChange={() => toggleSibling(p.id)}
+                      className="h-4 w-4 rounded border-[#0A6E5C]/30 text-[#0A6E5C] focus:ring-[#0A6E5C]"
+                    />
+                    {p.name} ({p.slug})
+                  </label>
+                ))
+              )}
+            </div>
+          </div>
+          <div className="sm:col-span-2">
+            <label htmlFor="familyNotes" className="block text-sm font-medium text-[#1B2432]">
+              Family notes
+            </label>
+            <textarea
+              id="familyNotes"
+              rows={3}
+              placeholder="Relationships, litter mates, stories adopters will love…"
+              value={form.familyNotes ?? ""}
+              onChange={(e) => update("familyNotes", e.target.value)}
+              className="mt-1.5 w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] placeholder:text-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
+        <h2
+          className="text-lg font-normal text-[#1B2432]"
+          style={{ fontFamily: "var(--tiny-font-display), serif" }}
+        >
           Compatibility tags
         </h2>
         <div className="mt-4 space-y-6">
@@ -436,22 +670,18 @@ export function AdoptionListingForm({ initial, listingId, onCreate, onUpdate, su
           className="text-lg font-normal text-[#1B2432]"
           style={{ fontFamily: "var(--tiny-font-display), serif" }}
         >
-          Photos (URLs for now)
+          Photos
         </h2>
         <p className="mt-1 text-sm text-[#6B7280]">
-          Up to {MAX_LISTING_PHOTOS} image URLs, shown as a gallery on the public profile. Real upload coming later.
+          Bucket <code className="rounded bg-[#E5E7EB] px-1">adoption-photos</code> — create in Supabase with public read (see{" "}
+          <code className="rounded bg-[#E5E7EB] px-1">adoption-photos-bucket.ts</code>).
         </p>
-        <div className="mt-4 space-y-2">
-          {Array.from({ length: MAX_LISTING_PHOTOS }, (_, i) => (
-            <input
-              key={i}
-              type="url"
-              placeholder={`Photo ${i + 1} URL`}
-              value={form.photoUrls[i] ?? ""}
-              onChange={(e) => setPhotoUrl(i, e.target.value)}
-              className="w-full rounded-[14px] border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#1B2432] placeholder:text-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#0A6E5C]/40"
-            />
-          ))}
+        <div className="mt-4">
+          <AdoptionListingPhotosEditor
+            photoUrls={form.photoUrls}
+            onChange={(urls) => update("photoUrls", urls)}
+            listingSlugForUpload={listingSlugForUpload}
+          />
         </div>
       </div>
 

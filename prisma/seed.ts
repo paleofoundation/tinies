@@ -165,8 +165,16 @@ type GardensCatSeed = {
   idealHome: string;
   goodWith: string[];
   notGoodWith: string[];
+  /** YouTube or direct URL; omit for null */
+  videoUrl?: string | null;
   fosterLocation: string;
   photo: string;
+  alternateNames?: string[];
+  nameStory?: string | null;
+  lineageTitle?: string | null;
+  motherName?: string | null;
+  fatherName?: string | null;
+  familyNotes?: string | null;
 };
 
 const GARDENS_CATS: GardensCatSeed[] = [
@@ -205,6 +213,8 @@ const GARDENS_CATS: GardensCatSeed[] = [
     notGoodWith: [],
     fosterLocation: "Gardens of St Gertrude, Parekklisia",
     photo: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/mabel.jpg",
+    alternateNames: ["Mae"],
+    nameStory: "Volunteers nicknamed her Mae within days of arrival.",
   },
   {
     name: "Oliver",
@@ -241,6 +251,9 @@ const GARDENS_CATS: GardensCatSeed[] = [
     notGoodWith: [],
     fosterLocation: "Gardens of St Gertrude, Parekklisia",
     photo: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/profile_ziggy.jpg",
+    lineageTitle: "Of Gertian",
+    motherName: "Gertie",
+    familyNotes: "Born at the sanctuary.",
   },
   {
     name: "Splotch",
@@ -259,6 +272,7 @@ const GARDENS_CATS: GardensCatSeed[] = [
     notGoodWith: ["dogs", "very young children"],
     fosterLocation: "Gardens of St Gertrude, Parekklisia",
     photo: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/splotch.jpg",
+    familyNotes: "We think Splotch is the grandson of Rusty aka Rusty Sweet.",
   },
   {
     name: "Toshiba",
@@ -472,9 +486,12 @@ async function main() {
   for (const cat of GARDENS_CATS) {
     const baseSlug = slugify(cat.name);
     const slug = await ensureUniqueListingSlug(baseSlug);
+    // Same payload on create + update so re-seeding refreshes every seeded column (including rich-profile fields).
     const listingBody = {
       orgId: gardensOrg.id,
       name: cat.name,
+      alternateNames: [...(cat.alternateNames ?? [])],
+      nameStory: cat.nameStory ?? null,
       species: "cat",
       breed: cat.breed,
       estimatedAge: cat.estimatedAge,
@@ -486,9 +503,17 @@ async function main() {
       backstory: cat.backstory,
       personality: cat.personality,
       idealHome: cat.idealHome,
-      goodWith: cat.goodWith,
-      notGoodWith: cat.notGoodWith,
+      goodWith: [...cat.goodWith],
+      notGoodWith: [...cat.notGoodWith],
+      videoUrl: cat.videoUrl ?? null,
       fosterLocation: cat.fosterLocation,
+      lineageTitle: cat.lineageTitle ?? null,
+      motherId: null as string | null,
+      fatherId: null as string | null,
+      motherName: cat.motherName ?? null,
+      fatherName: cat.fatherName ?? null,
+      siblingIds: [] as string[],
+      familyNotes: cat.familyNotes ?? null,
       internationalEligible: true,
       destinationCountries: [...GARDENS_DESTINATIONS],
       photos: [cat.photo],
@@ -501,6 +526,26 @@ async function main() {
       update: listingBody,
     });
   }
+
+  const ziggyRow = await prisma.adoptionListing.findFirst({
+    where: { orgId: gardensOrg.id, name: "Ziggy" },
+    select: { id: true },
+  });
+  const splotchRow = await prisma.adoptionListing.findFirst({
+    where: { orgId: gardensOrg.id, name: "Splotch" },
+    select: { id: true },
+  });
+  if (ziggyRow && splotchRow) {
+    await prisma.adoptionListing.update({
+      where: { id: ziggyRow.id },
+      data: { siblingIds: [splotchRow.id] },
+    });
+    await prisma.adoptionListing.update({
+      where: { id: splotchRow.id },
+      data: { siblingIds: [ziggyRow.id] },
+    });
+  }
+
   console.log("Ensured Gardens of St Gertrude org and 6 cat adoption listings with rich profiles.");
 
   // ----- 4. Owner user + pets (for bookings and reviews) -----

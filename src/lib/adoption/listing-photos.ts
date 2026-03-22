@@ -8,9 +8,10 @@ export function normalizeListingPhotoUrls(urls: string[] | undefined): string[] 
     .slice(0, MAX_LISTING_PHOTOS);
 }
 
-/** Pad/truncate to MAX_LISTING_PHOTOS empty string slots for controlled inputs. */
-export function photoUrlFormSlots(stored: string[]): string[] {
+/** One trailing empty row when under max, so users can add more without 10 empty inputs. */
+export function photoUrlSlotsForForm(stored: string[]): string[] {
   const filled = stored.filter(Boolean).slice(0, MAX_LISTING_PHOTOS);
-  const pad = MAX_LISTING_PHOTOS - filled.length;
-  return pad > 0 ? [...filled, ...Array.from({ length: pad }, () => "")] : filled;
+  if (filled.length === 0) return [""];
+  if (filled.length < MAX_LISTING_PHOTOS) return [...filled, ""];
+  return filled;
 }

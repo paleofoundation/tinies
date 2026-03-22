@@ -1,8 +1,20 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { prisma } from "@/lib/prisma";
 import { AdoptionListingForm } from "@/app/[locale]/dashboard/admin/adoptions/new/AdoptionListingForm";
 import { createRescueAdoptionListing } from "../../actions";
+import { getAdoptionListingPeerOptions } from "@/lib/adoption/listing-peers";
 
-export default function NewRescueListingPage() {
+export default async function NewRescueListingPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) notFound();
+  const org = await prisma.rescueOrg.findUnique({ where: { userId: user.id } });
+  if (!org) notFound();
+  const peerListings = await getAdoptionListingPeerOptions({ orgId: org.id });
   return (
     <div
       className="min-h-screen px-4 py-12 sm:px-6 sm:py-16"
@@ -29,6 +41,7 @@ export default function NewRescueListingPage() {
           <AdoptionListingForm
             onCreate={createRescueAdoptionListing}
             successRedirect="/dashboard/rescue"
+            peerListings={peerListings}
           />
         </div>
       </main>

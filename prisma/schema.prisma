@@ -450,6 +450,10 @@ model AdoptionListing {
   id                   String    @id @default(uuid())
   orgId                String    @map("org_id")
   name                 String
+  /// Other names the animal responds to
+  alternateNames       String[]  @default([]) @map("alternate_names")
+  /// Fun context, e.g. mistaken sex at intake
+  nameStory            String?   @map("name_story")
   species              String
   breed                String?
   estimatedAge         String?   @map("estimated_age")
@@ -477,6 +481,15 @@ model AdoptionListing {
   destinationCountries String[] @map("destination_countries")
   /// Public gallery; app layer caps at MAX_LISTING_PHOTOS (10)
   photos               String[]
+  /// e.g. "Of Gertian"
+  lineageTitle         String?   @map("lineage_title")
+  motherId             String?   @map("mother_id")
+  fatherId             String?   @map("father_id")
+  motherName           String?   @map("mother_name")
+  fatherName           String?   @map("father_name")
+  /// Other listing IDs on Tinies (same-species family)
+  siblingIds           String[]  @default([]) @map("sibling_ids")
+  familyNotes          String?   @map("family_notes")
   status               AdoptionListingStatus
   active                Boolean   @default(true)
   slug                 String    @unique
@@ -486,11 +499,17 @@ model AdoptionListing {
   org          RescueOrg @relation(fields: [orgId], references: [id], onDelete: Cascade)
   applications AdoptionApplication[]
   placements   AdoptionPlacement[]
+  motherListing  AdoptionListing?  @relation("AdoptionListingMother", fields: [motherId], references: [id], onDelete: SetNull)
+  fatherListing  AdoptionListing?  @relation("AdoptionListingFather", fields: [fatherId], references: [id], onDelete: SetNull)
+  childrenAsMother AdoptionListing[] @relation("AdoptionListingMother")
+  childrenAsFather AdoptionListing[] @relation("AdoptionListingFather")
 
   @@index([orgId])
   @@index([status])
   @@index([species])
   @@index([slug])
+  @@index([motherId])
+  @@index([fatherId])
   @@map("adoption_listings")
 }
 

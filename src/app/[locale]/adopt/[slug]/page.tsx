@@ -71,7 +71,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
   const listing = await getPublicAdoptionListingBySlug(slug);
   if (!listing) return { title: "Adopt | Tinies" };
-  const title = `${listing.name} — Adopt | Tinies`;
+  const title = `${listing.name}${listing.lineageTitle ? ` — ${listing.lineageTitle}` : ""} — Adopt | Tinies`;
   const description = buildListingMetaDescription(listing);
   const url = `${BASE_URL}/adopt/${slug}`;
   const ogImages = listing.photos.filter(Boolean).slice(0, 4).map((src) => ({ url: src }));
@@ -108,6 +108,12 @@ export default async function AdoptionListingProfilePage({ params }: Props) {
   const hero = gallery[0];
   const thumbs = gallery.slice(1);
   const video = resolveListingVideoUrl(listing.videoUrl);
+  const hasFamily =
+    Boolean(listing.lineageTitle?.trim()) ||
+    Boolean(listing.familyNotes?.trim()) ||
+    listing.mother != null ||
+    listing.father != null ||
+    listing.siblings.length > 0;
   const jsonLdImages = gallery.length > 0 ? gallery : hero ? [hero] : [];
   const jsonLd = {
     "@context": "https://schema.org",
@@ -200,6 +206,99 @@ export default async function AdoptionListingProfilePage({ params }: Props) {
                     <video src={video.src} controls className="aspect-video w-full bg-black object-contain" />
                   )}
                 </div>
+              </section>
+            ) : null}
+
+            {hasFamily ? (
+              <section
+                aria-labelledby="family-heading"
+                className="rounded-[var(--radius-xl)] border p-6 sm:p-8"
+                style={{
+                  borderColor: "var(--color-border)",
+                  backgroundColor: "rgba(10, 128, 128, 0.04)",
+                  boxShadow: "var(--shadow-sm)",
+                }}
+              >
+                <h2
+                  id="family-heading"
+                  className="font-normal tracking-tight"
+                  style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-xl)", color: "var(--color-text)" }}
+                >
+                  Family
+                </h2>
+                <p className="mt-2 text-sm leading-relaxed" style={{ ...bodyStyle, color: "var(--color-text-secondary)" }}>
+                  Every rescue has roots. Here&apos;s what we know about {listing.name}&apos;s circle.
+                </p>
+                <dl className="mt-6 space-y-4 text-sm" style={bodyStyle}>
+                  {listing.mother ? (
+                    <div>
+                      <dt className="font-semibold" style={{ color: "var(--color-text)" }}>
+                        Mother
+                      </dt>
+                      <dd className="mt-1" style={{ color: "var(--color-text-secondary)" }}>
+                        {listing.mother.type === "listing" ? (
+                          <Link href={`/adopt/${listing.mother.slug}`} className="font-medium hover:underline" style={{ color: "var(--color-primary)" }}>
+                            {listing.mother.name}
+                          </Link>
+                        ) : (
+                          <span>{listing.mother.name}</span>
+                        )}
+                      </dd>
+                    </div>
+                  ) : null}
+                  {listing.father ? (
+                    <div>
+                      <dt className="font-semibold" style={{ color: "var(--color-text)" }}>
+                        Father
+                      </dt>
+                      <dd className="mt-1" style={{ color: "var(--color-text-secondary)" }}>
+                        {listing.father.type === "listing" ? (
+                          <Link href={`/adopt/${listing.father.slug}`} className="font-medium hover:underline" style={{ color: "var(--color-primary)" }}>
+                            {listing.father.name}
+                          </Link>
+                        ) : (
+                          <span>{listing.father.name}</span>
+                        )}
+                      </dd>
+                    </div>
+                  ) : null}
+                </dl>
+                {listing.siblings.length > 0 ? (
+                  <div className="mt-6">
+                    <p className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>
+                      Siblings on Tinies
+                    </p>
+                    <ul className="mt-3 flex flex-wrap gap-4">
+                      {listing.siblings.map((s) => (
+                        <li key={s.slug}>
+                          <Link
+                            href={`/adopt/${s.slug}`}
+                            className="block w-28 overflow-hidden rounded-[var(--radius-lg)] border transition-shadow hover:shadow-[var(--shadow-md)]"
+                            style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}
+                          >
+                            <div className="relative aspect-square w-full">
+                              {s.photo ? (
+                                <Image src={s.photo} alt="" fill className="object-cover" sizes="112px" />
+                              ) : (
+                                <div className="flex h-full items-center justify-center text-2xl" aria-hidden>
+                                  🐾
+                                </div>
+                              )}
+                            </div>
+                            <p className="truncate px-2 py-2 text-center text-xs font-medium" style={{ color: "var(--color-text)" }}>
+                              {s.name}
+                            </p>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {listing.familyNotes ? (
+                  <p className="mt-6 whitespace-pre-wrap text-sm leading-relaxed" style={{ ...bodyStyle, color: "var(--color-text-secondary)" }}>
+                    {listing.familyNotes}
+                  </p>
+                ) : null}
               </section>
             ) : null}
 
@@ -305,8 +404,31 @@ export default async function AdoptionListingProfilePage({ params }: Props) {
                 style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
               >
                 {listing.name}
+                {listing.lineageTitle ? (
+                  <span style={{ color: "var(--color-primary)" }}>{` — ${listing.lineageTitle}`}</span>
+                ) : null}
               </h1>
-              <p className="mt-2 text-lg" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+              {listing.alternateNames.length > 0 ? (
+                <p
+                  className="mt-2 text-sm italic"
+                  style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-muted)" }}
+                >
+                  Also known as: {listing.alternateNames.join(", ")}
+                </p>
+              ) : null}
+              {listing.nameStory?.trim() ? (
+                <p className="mt-2 text-sm leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+                  {listing.nameStory.trim()}
+                </p>
+              ) : null}
+              <p
+                className={
+                  listing.alternateNames.length > 0 || listing.nameStory?.trim()
+                    ? "mt-3 text-lg"
+                    : "mt-2 text-lg"
+                }
+                style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}
+              >
                 {formatSpecies(listing.species)}
                 {listing.breed ? ` · ${listing.breed}` : ""}
                 {listing.estimatedAge ? ` · ${listing.estimatedAge}` : ""}

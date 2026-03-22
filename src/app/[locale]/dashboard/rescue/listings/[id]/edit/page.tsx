@@ -4,7 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { AdoptionListingForm } from "@/app/[locale]/dashboard/admin/adoptions/new/AdoptionListingForm";
 import type { CreateListingInput } from "@/app/[locale]/dashboard/admin/adoption-listing-types";
-import { photoUrlFormSlots } from "@/lib/adoption/listing-photos";
+import { photoUrlSlotsForForm } from "@/lib/adoption/listing-photos";
+import { getAdoptionListingPeerOptions } from "@/lib/adoption/listing-peers";
 import { updateRescueAdoptionListing } from "../../../actions";
 
 export default async function EditRescueListingPage({
@@ -27,6 +28,11 @@ export default async function EditRescueListingPage({
   });
   if (!listing) notFound();
 
+  const peerListings = await getAdoptionListingPeerOptions({
+    excludeListingId: id,
+    orgId: org.id,
+  });
+
   const initial: Partial<CreateListingInput> = {
     name: listing.name,
     species: listing.species,
@@ -34,6 +40,8 @@ export default async function EditRescueListingPage({
     estimatedAge: listing.estimatedAge ?? "",
     sex: listing.sex ?? "Unknown",
     spayedNeutered: listing.spayedNeutered ?? false,
+    alternateNames: [...listing.alternateNames],
+    nameStory: listing.nameStory ?? "",
     temperament: listing.temperament ?? "",
     medicalHistory: listing.medicalHistory ?? "",
     specialNeeds: listing.specialNeeds ?? "",
@@ -44,10 +52,17 @@ export default async function EditRescueListingPage({
     notGoodWith: [...listing.notGoodWith],
     videoUrl: listing.videoUrl ?? "",
     fosterLocation: listing.fosterLocation ?? "",
+    lineageTitle: listing.lineageTitle ?? "",
+    motherId: listing.motherId ?? "",
+    fatherId: listing.fatherId ?? "",
+    motherName: listing.motherName ?? "",
+    fatherName: listing.fatherName ?? "",
+    siblingIds: [...listing.siblingIds],
+    familyNotes: listing.familyNotes ?? "",
     localAdoptionFeeEur: listing.localAdoptionFee != null ? listing.localAdoptionFee / 100 : undefined,
     internationalEligible: listing.internationalEligible,
     destinationCountries: listing.destinationCountries ?? [],
-    photoUrls: photoUrlFormSlots(listing.photos),
+    photoUrls: photoUrlSlotsForForm(listing.photos),
     status: listing.status,
   };
 
@@ -77,6 +92,8 @@ export default async function EditRescueListingPage({
           <AdoptionListingForm
             initial={initial}
             listingId={id}
+            listingSlugForUpload={listing.slug}
+            peerListings={peerListings}
             onUpdate={updateRescueAdoptionListing}
             successRedirect="/dashboard/rescue"
           />

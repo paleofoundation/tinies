@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { AdoptionListingForm } from "./AdoptionListingForm";
+import { getAdoptionListingPeerOptions } from "@/lib/adoption/listing-peers";
 
-export default function NewAdoptionListingPage() {
+export default async function NewAdoptionListingPage() {
+  const peerListings = await getAdoptionListingPeerOptions();
   return (
     <div className="min-h-screen bg-[#F7F7F8] text-[#1B2432]">
       <main className="mx-auto max-w-[1170px] px-4 py-20 sm:px-6 sm:py-20">
@@ -21,7 +23,7 @@ export default function NewAdoptionListingPage() {
           Gardens of St Gertrude – create a new listing.
         </p>
         <div className="mt-8">
-          <AdoptionListingForm />
+          <AdoptionListingForm peerListings={peerListings} />
         </div>
       </main>
     </div>
