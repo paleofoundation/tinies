@@ -47,6 +47,9 @@ export async function generateMetadata(): Promise<Metadata> {
     icons: {
       icon: [{ url: fav, sizes: "32x32", type: isPng ? "image/png" : "image/x-icon" }],
     },
+    verification: {
+      google: "SDaMcgoMNYZbxTDqDw9kpPlRU2d19_2pdunQxC54yo4",
+    },
   };
 }
 
