@@ -15,8 +15,6 @@ image: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_
 author: "Karen Pendergrass"
 ---
 
-<!-- Tinies blog: internal paths /become-a-sitter and /contact below — verify routes ship for your deployment. -->
-
 This is the post that every startup founder is advised not to write.
 
 The conventional wisdom is that you do not talk about money in terms of what you don't want. You don't tell investors you're not trying to maximize returns. You don't tell the market you're not optimizing for growth. You don't draw a line between your platform and the standard playbook in a way that could be read as leaving money on the table.

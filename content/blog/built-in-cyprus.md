@@ -10,8 +10,6 @@ image: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_
 author: "Karen Pendergrass"
 ---
 
-<!-- Tinies blog: internal path /contact below — verify route ships for your deployment. -->
-
 Parekklisia is a small village in the Limassol district of Cyprus. It sits about ten minutes from a British military base, thirty minutes from the Troodos mountains, and approximately 5,400 miles from Silicon Valley. It is where I live, where I work, and where I built Tinies.
 
 I say this not because the geography is interesting — though it is — but because it is the first thing that sounds like a liability and isn't.

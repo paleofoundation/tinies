@@ -10,8 +10,6 @@ image: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_
 author: "Tinies Team"
 ---
 
-<!-- Tinies blog: internal path /adopt below — verify route ships for your deployment. -->
-
 There is a version of this post that reads as a startup pitch. There is another version that reads as a quiet rejection of how startups are supposed to work. We wrote both at the same time, on purpose, because we think the tension between them is exactly the point.
 
 ---

@@ -10,8 +10,6 @@ image: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_
 author: "Tinies Team"
 ---
 
-<!-- Tinies blog: internal path /become-a-sitter below — verify route ships for your deployment. -->
-
 Rover operates in the United States, Canada, the United Kingdom, Germany, the Netherlands, Norway, Sweden, Denmark, Finland, Austria, Switzerland, France, Belgium, Italy, and Spain.
 
 That is a list of the wealthiest, most infrastructure-dense, most digitally mature pet care markets in the world. It is also, not coincidentally, a list of the countries where the least help is needed.

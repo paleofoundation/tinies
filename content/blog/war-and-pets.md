@@ -10,8 +10,6 @@ image: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_
 author: "Tinies Team"
 ---
 
-<!-- Tinies blog: internal paths /adopt and /contact below — verify routes ship for your deployment. -->
-
 When a family flees, the question of what to do with the dog is not a small one.
 
 It does not feel small when you are standing at a border crossing that does not permit animals. It does not feel small when the evacuation bus has no room, when the shelter has a no-pets policy, when the rescue organization is overwhelmed and the international adoption waitlist is months long. It does not feel small when you have to make a decision in minutes that you will think about for the rest of your life.
