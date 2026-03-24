@@ -61,6 +61,10 @@ The sterilization budget was tripled and declared a victory. Meanwhile, at Harva
 
 The crisis is not unsolvable. It is unsolved because the most promising solution has not been pursued.
 
+This is the first article in our five-part Solutions Series. Read the others: [Cyprus Could Turn Its Cat Crisis Into a €100 Million Tourism Industry](/blog/cyprus-cat-crisis-tourism-industry), [The Cyprus Cat Crisis Will Never Be Solved Without Fixing the Bins](/blog/cyprus-cat-crisis-waste-management), [What If Every Cat in Cyprus Had an Identity?](/blog/national-feline-registry-cyprus), [Eradicate by District](/blog/eradicate-by-district-cyprus-cat-strategy), and [A Million Cats and No Map](/blog/cyprus-cat-population-dashboard-citizen-science).
+
+For background on the crisis itself, see [The Stray Cat Crisis in Cyprus](/blog/the-stray-cat-crisis-in-cyprus) and [Why Cyprus Has So Many Stray Cats](/blog/why-cyprus-has-so-many-stray-cats-and-what-you-can-do).
+
 ---
 
-*Tinies is a pet services marketplace where approximately 90 percent of booking commissions fund Gardens of St. Gertrude and other cat sanctuaries in Cyprus. Every booking helps. Visit [tinies.app](https://tinies.app) to learn more.*
+*Tinies is a pet services marketplace where approximately 90 percent of booking commissions fund Gardens of St. Gertrude and other cat sanctuaries in Cyprus. Every booking helps. [Browse adoptable animals](/adopt), [find trusted pet care](/services), or [learn how it works](/how-it-works).*

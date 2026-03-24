@@ -85,6 +85,10 @@ A population dashboard costs a fraction of the sterilization budget and multipli
 
 You cannot manage what you cannot measure. Cyprus has been trying to manage a million-cat crisis with no measurement system for decades. The result is what you would expect.
 
+This is the sixth article in our Solutions Series. Read the others: [The Single Injection That Could End the Cyprus Cat Crisis](/blog/single-injection-end-cyprus-cat-crisis), [Cyprus Could Turn Its Cat Crisis Into a €100 Million Tourism Industry](/blog/cyprus-cat-crisis-tourism-industry), [The Cyprus Cat Crisis Will Never Be Solved Without Fixing the Bins](/blog/cyprus-cat-crisis-waste-management), [What If Every Cat in Cyprus Had an Identity?](/blog/national-feline-registry-cyprus), and [Eradicate by District](/blog/eradicate-by-district-cyprus-cat-strategy).
+
+For more on the scale of the problem, see [Cyprus Government Stray Animal Spending](/blog/cyprus-government-stray-animal-spending) and [The Stray Cat Crisis in Cyprus](/blog/the-stray-cat-crisis-in-cyprus).
+
 ---
 
-*Tinies believes in measurement and transparency. Approximately 90 percent of marketplace booking commissions flow to Gardens of St. Gertrude and other sanctuaries, and every euro is tracked. Visit [tinies.app](https://tinies.app) to support accountable animal welfare.*
+*Tinies believes in measurement and transparency. Approximately 90 percent of marketplace booking commissions flow to Gardens of St. Gertrude and other sanctuaries, and every euro is tracked. [Browse adoptable animals](/adopt), [find trusted pet care](/services), or [see how your support helps](/giving).*

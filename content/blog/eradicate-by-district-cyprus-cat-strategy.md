@@ -77,6 +77,10 @@ Gardens of St. Gertrude in Parekklisia already operates a 92-cat sanctuary. The 
 
 If one village can be cleared and maintained, the argument for sequential deployment becomes empirical rather than theoretical. And empirical arguments are the ones that move governments.
 
+This is the fifth article in our five-part Solutions Series. Read the others: [The Single Injection That Could End the Cyprus Cat Crisis](/blog/single-injection-end-cyprus-cat-crisis), [Cyprus Could Turn Its Cat Crisis Into a €100 Million Tourism Industry](/blog/cyprus-cat-crisis-tourism-industry), [The Cyprus Cat Crisis Will Never Be Solved Without Fixing the Bins](/blog/cyprus-cat-crisis-waste-management), [What If Every Cat in Cyprus Had an Identity?](/blog/national-feline-registry-cyprus), and [A Million Cats and No Map](/blog/cyprus-cat-population-dashboard-citizen-science).
+
+For background on why current approaches are failing, see [TNR in Cyprus Is Failing](/blog/tnr-cyprus-failing-what-works) and [The EU Rejected Cyprus's Cat Crisis Funding](/blog/eu-rejected-cyprus-cat-crisis).
+
 ---
 
-*Tinies funds the infrastructure that makes this possible. Approximately 90 percent of marketplace booking commissions support Gardens of St. Gertrude and other sanctuaries in Cyprus. Visit [tinies.app](https://tinies.app) to be part of the solution.*
+*Tinies funds the infrastructure that makes this possible. Approximately 90 percent of marketplace booking commissions support Gardens of St. Gertrude and other sanctuaries in Cyprus. [Browse adoptable animals](/adopt), [find trusted pet care](/services), or [become a provider](/for-providers).*

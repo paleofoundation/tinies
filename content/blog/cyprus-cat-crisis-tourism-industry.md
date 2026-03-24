@@ -67,6 +67,10 @@ Japan proved the model works at small scale. Cyprus has the raw materials to pro
 
 What it needs is someone to build the bridge between the cats and the revenue they could generate.
 
+This is the second article in our five-part Solutions Series. Read the others: [The Single Injection That Could End the Cyprus Cat Crisis](/blog/single-injection-end-cyprus-cat-crisis), [The Cyprus Cat Crisis Will Never Be Solved Without Fixing the Bins](/blog/cyprus-cat-crisis-waste-management), [What If Every Cat in Cyprus Had an Identity?](/blog/national-feline-registry-cyprus), [Eradicate by District](/blog/eradicate-by-district-cyprus-cat-strategy), and [A Million Cats and No Map](/blog/cyprus-cat-population-dashboard-citizen-science).
+
+For the full picture of how the crisis developed, read [The Ecology of Cats in Cyprus](/blog/ecology-of-cats-in-cyprus) and [Cyprus Government Stray Animal Spending](/blog/cyprus-government-stray-animal-spending).
+
 ---
 
-*Tinies is building that bridge. As a pet services marketplace that channels approximately 90 percent of booking commissions to Gardens of St. Gertrude and other Cyprus sanctuaries, Tinies demonstrates that animal welfare and sustainable revenue are not in conflict. They are the same thing. Visit [tinies.app](https://tinies.app).*
+*Tinies is building that bridge. As a pet services marketplace that channels approximately 90 percent of booking commissions to Gardens of St. Gertrude and other Cyprus sanctuaries, Tinies demonstrates that animal welfare and sustainable revenue are not in conflict. They are the same thing. [Browse adoptable animals](/adopt), [find trusted pet care](/services), or [become a provider](/for-providers).*

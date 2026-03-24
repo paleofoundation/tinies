@@ -67,6 +67,10 @@ The bins are not a glamorous issue. They do not generate emotional social media 
 
 The solution to the cat crisis is not just veterinary. It is infrastructural.
 
+This is the third article in our five-part Solutions Series. Read the others: [The Single Injection That Could End the Cyprus Cat Crisis](/blog/single-injection-end-cyprus-cat-crisis), [Cyprus Could Turn Its Cat Crisis Into a €100 Million Tourism Industry](/blog/cyprus-cat-crisis-tourism-industry), [What If Every Cat in Cyprus Had an Identity?](/blog/national-feline-registry-cyprus), [Eradicate by District](/blog/eradicate-by-district-cyprus-cat-strategy), and [A Million Cats and No Map](/blog/cyprus-cat-population-dashboard-citizen-science).
+
+For more on the economics of stray cat care, see [The Real Economics of Stray Cat Care in Cyprus](/blog/real-economics-stray-cat-care-cyprus) and [Pet Care Cost Cyprus 2026 Price Guide](/blog/pet-care-cost-cyprus-2026-price-guide).
+
 ---
 
-*Tinies funds cat sanctuaries through marketplace bookings, channeling approximately 90 percent of commissions to Gardens of St. Gertrude and other organizations working on the ground in Cyprus. Visit [tinies.app](https://tinies.app) to support the work.*
+*Tinies funds cat sanctuaries through marketplace bookings, channeling approximately 90 percent of commissions to Gardens of St. Gertrude and other organizations working on the ground in Cyprus. [Browse adoptable animals](/adopt), [find trusted pet care](/services), or [learn about the Tinies model](/how-it-works).*

@@ -75,6 +75,10 @@ But cultural shifts are exactly what systemic crises require. The informal relat
 
 The registry does not end that relationship. It structures it. And structure is what has been missing from every attempt to solve this crisis so far.
 
+This is the fourth article in our five-part Solutions Series. Read the others: [The Single Injection That Could End the Cyprus Cat Crisis](/blog/single-injection-end-cyprus-cat-crisis), [Cyprus Could Turn Its Cat Crisis Into a €100 Million Tourism Industry](/blog/cyprus-cat-crisis-tourism-industry), [The Cyprus Cat Crisis Will Never Be Solved Without Fixing the Bins](/blog/cyprus-cat-crisis-waste-management), [Eradicate by District](/blog/eradicate-by-district-cyprus-cat-strategy), and [A Million Cats and No Map](/blog/cyprus-cat-population-dashboard-citizen-science).
+
+If you are considering adopting a cat from Cyprus, see [How International Pet Adoption Works from Cyprus to the UK](/blog/how-international-pet-adoption-works-from-cyprus-to-the-uk) and [The Complete Guide to Adopting a Rescue Cat from Cyprus](/blog/the-complete-guide-to-adopting-a-rescue-cat-from-cyprus).
+
 ---
 
-*Tinies operates as a structured system for funding cat welfare — approximately 90 percent of marketplace booking commissions go directly to Gardens of St. Gertrude and other Cyprus sanctuaries. Structure works. Visit [tinies.app](https://tinies.app).*
+*Tinies operates as a structured system for funding cat welfare — approximately 90 percent of marketplace booking commissions go directly to Gardens of St. Gertrude and other Cyprus sanctuaries. Structure works. [Browse adoptable animals](/adopt), [find trusted pet care](/services), or [learn about our mission](/about).*
