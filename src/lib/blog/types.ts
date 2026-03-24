@@ -12,6 +12,8 @@ export type BlogPostSummary = {
   slug: string;
   title: string;
   excerpt: string;
+  /** Optional; used for meta/OG description when set, otherwise `excerpt` is used. */
+  seoDescription: string;
   excerptDisplay: string;
   dateISO: string;
   dateDisplay: string;

@@ -35,14 +35,19 @@ const components: Components = {
   p: ({ children }: { children?: ReactNode }) => (
     <p className="my-4 leading-[1.8] text-[var(--color-text)]">{children}</p>
   ),
-  a: ({ href, children }: { href?: string; children?: ReactNode }) => (
-    <a
-      href={href}
-      className="font-semibold text-[var(--color-primary)] no-underline hover:underline"
-    >
-      {children}
-    </a>
-  ),
+  a: ({ href, children }: { href?: string; children?: ReactNode }) => {
+    const url = href ?? "";
+    const isExternalHttp = /^https?:\/\//i.test(url);
+    return (
+      <a
+        href={href}
+        className="font-semibold text-[var(--color-primary)] no-underline hover:underline"
+        {...(isExternalHttp ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      >
+        {children}
+      </a>
+    );
+  },
   strong: ({ children }: { children?: ReactNode }) => (
     <strong className="font-semibold text-[var(--color-text)]">{children}</strong>
   ),

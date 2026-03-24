@@ -29,12 +29,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const imageResolved = await getSiteImageWithFallback(`blog-${slug}`, post.image);
   const ogImage = absoluteBlogImageUrl(imageResolved, BASE_URL);
+  const metaDescription = post.seoDescription.trim() || post.excerpt;
   return {
     title: `${post.title} | Tinies`,
-    description: post.excerpt,
+    description: metaDescription,
     openGraph: {
       title: post.title,
-      description: post.excerpt,
+      description: metaDescription,
       type: "article",
       publishedTime: post.dateISO,
       authors: [post.author],
@@ -44,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     twitter: {
       card: "summary_large_image",
       title: post.title,
-      description: post.excerpt,
+      description: metaDescription,
       ...(ogImage ? { images: [ogImage] } : {}),
     },
   };
@@ -64,7 +65,7 @@ export default async function BlogPostPage({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: post.title,
-    description: post.excerpt,
+    description: post.seoDescription.trim() || post.excerpt,
     datePublished: post.dateISO,
     author: {
       "@type": "Organization",

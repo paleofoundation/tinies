@@ -43,6 +43,9 @@ function toSummary(
   const { category, categories } = parseCategories(data);
   const title = String(data.title ?? slug).trim();
   const excerpt = String(data.excerpt ?? "").trim();
+  const seoRaw = data.seoDescription ?? data.seo_description;
+  const seoDescription =
+    typeof seoRaw === "string" && seoRaw.trim().length > 0 ? seoRaw.trim() : excerpt;
   const dateISO = String(data.date ?? "").trim();
   const author = String(data.author ?? "Tinies Team").trim();
   const image = String(data.image ?? "").trim();
@@ -52,6 +55,7 @@ function toSummary(
     slug,
     title,
     excerpt,
+    seoDescription,
     excerptDisplay: excerptDisplay(excerpt),
     dateISO,
     dateDisplay: dateDisplay(dateISO),
