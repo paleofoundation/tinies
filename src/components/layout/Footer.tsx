@@ -55,89 +55,78 @@ export async function Footer() {
     },
   ] as const;
 
+  const linkClass =
+    "text-[0.875rem] text-[rgba(28,28,28,0.7)] transition-colors hover:text-[#1C1C1C] hover:underline";
+
   return (
     <footer
-      className="px-4 py-14 sm:px-6 lg:px-8"
-      style={{ backgroundColor: "var(--color-primary-900)" }}
+      className="border-t bg-[var(--color-background)]"
+      style={{ borderColor: "rgba(10, 128, 128, 0.15)" }}
     >
-      <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
-        <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
-          <div>
+      <div className="mx-auto max-w-[1280px] px-6 py-10">
+        <div
+          className="grid gap-8"
+          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}
+        >
+          <div className="min-w-0">
             <p
-              className="text-xl font-semibold text-white"
-              style={{ fontFamily: "var(--font-heading), serif" }}
+              className="font-extrabold uppercase"
+              style={{
+                fontFamily: "var(--font-display), sans-serif",
+                fontSize: "0.75rem",
+                letterSpacing: "0.08em",
+                color: "var(--color-primary)",
+              }}
             >
-              {t("brandTitle")}
+              {t("brandWordmark")}
             </p>
             <p
-              className="mt-2 text-lg italic text-white"
-              style={{ fontFamily: "var(--font-heading), serif" }}
+              className="mt-3 max-w-[280px]"
+              style={{
+                fontFamily: "var(--font-body), sans-serif",
+                fontSize: "0.875rem",
+                lineHeight: 1.8,
+                color: "rgba(28, 28, 28, 0.7)",
+              }}
             >
-              {t("brandTagline")}
-            </p>
-            <p
-              className="mt-2 text-lg italic text-white"
-              style={{ fontFamily: "var(--font-heading), serif" }}
-            >
-              {t("brandSubtitle")}
+              {t("brandLead")}
             </p>
             <FooterSocialLinks urls={socialUrls} />
           </div>
-          <nav
-            className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5"
-            aria-label="Footer"
-          >
+
+          <nav aria-label="Footer" className="contents">
             {columns.map((col) => (
-              <div key={col.title} className="flex flex-col gap-3">
+              <div key={col.title} className="flex min-w-0 flex-col gap-3">
                 <p
-                  className="text-xs font-semibold uppercase tracking-wider"
-                  style={{
-                    fontFamily: "var(--font-body), sans-serif",
-                    color: "rgba(255,255,255,0.7)",
-                  }}
+                  className="text-[0.875rem] font-bold"
+                  style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}
                 >
                   {col.title}
                 </p>
-                {col.links.map((link) =>
-                  "external" in link && link.external ? (
-                    <a
-                      key={link.href + link.label}
-                      href={link.href}
-                      className="text-sm transition-opacity hover:opacity-100 hover:underline"
-                      style={{
-                        fontFamily: "var(--font-body), sans-serif",
-                        color: "rgba(255,255,255,0.9)",
-                      }}
-                    >
-                      {link.label}
-                    </a>
-                  ) : (
-                    <Link
-                      key={link.href + link.label}
-                      href={link.href}
-                      className="text-sm transition-opacity hover:opacity-100 hover:underline"
-                      style={{
-                        fontFamily: "var(--font-body), sans-serif",
-                        color: "rgba(255,255,255,0.9)",
-                      }}
-                    >
-                      {link.label}
-                    </Link>
-                  )
-                )}
+                {col.links.map((link) => (
+                  <Link
+                    key={link.href + link.label}
+                    href={link.href}
+                    className={linkClass}
+                    style={{ fontFamily: "var(--font-body), sans-serif" }}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
               </div>
             ))}
           </nav>
         </div>
+
         <div
-          className="mt-14 flex flex-col gap-4 border-t pt-10 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
-          style={{ borderColor: "rgba(255,255,255,0.2)" }}
+          className="mt-10 flex flex-col gap-4 border-t pt-6 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
+          style={{ borderColor: "rgba(10, 128, 128, 0.15)" }}
         >
           <p
-            className="text-sm"
+            className="text-[0.75rem]"
             style={{
               fontFamily: "var(--font-body), sans-serif",
-              color: "rgba(255,255,255,0.8)",
+              color: "rgba(28, 28, 28, 0.5)",
             }}
           >
             {t("copyright", { year: new Date().getFullYear() })}
@@ -145,13 +134,13 @@ export async function Footer() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
             <LanguageSwitcher />
             <div
-              className="flex items-center gap-2 text-sm"
+              className="flex items-center gap-2 text-[0.875rem]"
               style={{
                 fontFamily: "var(--font-body), sans-serif",
-                color: "rgba(255,255,255,0.8)",
+                color: "rgba(28, 28, 28, 0.7)",
               }}
             >
-              <MapPin className="h-4 w-4" />
+              <MapPin className="h-4 w-4 shrink-0" style={{ color: "var(--color-primary)" }} aria-hidden />
               {t("cyprus")}
             </div>
           </div>
