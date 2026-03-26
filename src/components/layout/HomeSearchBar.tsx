@@ -95,7 +95,7 @@ export function HomeSearchBar({ variant = "default", compactTopMargin = false }:
       >
         {isHero ? (
           <>
-            <div className="relative min-w-0 flex-1 sm:max-w-[min(28%,220px)] sm:flex-none sm:shrink-0">
+            <div className="relative w-full flex-1 sm:w-auto sm:min-w-[13.5rem] sm:max-w-[min(46%,320px)] sm:flex-none sm:shrink-0">
               <ChevronDown
                 className="absolute left-4 top-1/2 z-[1] h-5 w-5 -translate-y-1/2 pointer-events-none"
                 style={{ color: "var(--color-text-muted)" }}
@@ -141,7 +141,7 @@ export function HomeSearchBar({ variant = "default", compactTopMargin = false }:
                 className="py-3.5 sm:rounded-none sm:rounded-l-[var(--radius-lg)] sm:border-r-0"
               />
             </div>
-            <div className="relative flex-1 sm:max-w-[200px]">
+            <div className="relative min-w-0 flex-1 sm:min-w-[12rem] sm:max-w-[min(100%,260px)] sm:flex-none sm:shrink-0">
               <ChevronDown
                 className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 pointer-events-none"
                 style={{ color: "var(--color-text-muted)" }}
