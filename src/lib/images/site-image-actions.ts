@@ -1,6 +1,8 @@
 "use server";
 
+import { randomUUID } from "crypto";
 import { revalidateTag } from "next/cache";
+import { getBlogPostSummaries } from "@/lib/blog/load-posts";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
@@ -49,6 +51,49 @@ export type SiteImageAdminRow = {
   updatedAt: Date;
 };
 
+/**
+ * Blog covers live in markdown (`image` in frontmatter), not in a Prisma `BlogPost` table.
+ * `site_images` rows are optional overrides (seeded or created on first admin upload).
+ * Merge markdown posts so every blog cover appears in admin even when no DB row exists yet.
+ */
+function mergeBlogMarkdownIntoSiteImageRows(
+  prismaRows: SiteImageAdminRow[],
+  blogSummaries: ReturnType<typeof getBlogPostSummaries>
+): SiteImageAdminRow[] {
+  const prismaKeys = new Set(prismaRows.map((r) => r.imageKey));
+  const postBySlug = new Map(blogSummaries.map((p) => [p.slug, p]));
+
+  const fromPrisma = prismaRows.map((r) => {
+    if (!r.imageKey.startsWith("blog-")) return r;
+    const slug = r.imageKey.slice("blog-".length);
+    const post = postBySlug.get(slug);
+    if (!post) return r;
+    return { ...r, label: `Blog: ${post.title}` };
+  });
+
+  const synthetic: SiteImageAdminRow[] = [];
+  for (const p of blogSummaries) {
+    const imageKey = `blog-${p.slug}`;
+    if (prismaKeys.has(imageKey)) continue;
+    const d = Date.parse(p.dateISO);
+    synthetic.push({
+      id: `markdown:${p.slug}`,
+      imageKey,
+      category: "blog",
+      label: `Blog: ${p.title}`,
+      url: p.image.trim(),
+      alt: p.title.trim(),
+      width: null,
+      height: null,
+      updatedAt: Number.isNaN(d) ? new Date(0) : new Date(d),
+    });
+  }
+
+  return [...fromPrisma, ...synthetic].sort(
+    (a, b) => a.category.localeCompare(b.category) || a.label.localeCompare(b.label)
+  );
+}
+
 export async function adminListSiteImages(): Promise<SiteImageAdminRow[] | { error: string }> {
   const gate = await requireAdminUserId();
   if (!gate.ok) return { error: gate.error };
@@ -56,7 +101,7 @@ export async function adminListSiteImages(): Promise<SiteImageAdminRow[] | { err
     const rows = await prisma.siteImage.findMany({
       orderBy: [{ category: "asc" }, { label: "asc" }],
     });
-    return rows.map((r) => ({
+    const mapped = rows.map((r) => ({
       id: r.id,
       imageKey: r.imageKey,
       category: r.category,
@@ -67,6 +112,8 @@ export async function adminListSiteImages(): Promise<SiteImageAdminRow[] | { err
       height: r.height,
       updatedAt: r.updatedAt,
     }));
+    const blogPosts = getBlogPostSummaries();
+    return mergeBlogMarkdownIntoSiteImageRows(mapped, blogPosts);
   } catch (e) {
     console.error("adminListSiteImages", e);
     return { error: "Could not load images." };
@@ -76,13 +123,27 @@ export async function adminListSiteImages(): Promise<SiteImageAdminRow[] | { err
 export async function adminUpdateSiteImageMeta(input: {
   imageKey: string;
   alt: string;
+  /** Used when creating a new site_images row (e.g. markdown-only blog cover). */
+  category?: string;
+  label?: string;
 }): Promise<{ ok: true } | { error: string }> {
   const gate = await requireAdminUserId();
   if (!gate.ok) return { error: gate.error };
   try {
-    await prisma.siteImage.update({
+    const alt = input.alt.trim();
+    const category = (input.category ?? "blog").trim().slice(0, 64) || "blog";
+    const label = (input.label ?? input.imageKey).trim().slice(0, 500) || input.imageKey;
+    await prisma.siteImage.upsert({
       where: { imageKey: input.imageKey },
-      data: { alt: input.alt.trim() },
+      create: {
+        id: randomUUID(),
+        imageKey: input.imageKey,
+        category,
+        label,
+        url: "",
+        alt,
+      },
+      update: { alt },
     });
     revalidateTag(SITE_IMAGES_CACHE_TAG, "max");
     return { ok: true };
@@ -101,6 +162,8 @@ export async function adminUploadSiteImage(input: {
   base64: string;
   mimeType: string;
   alt?: string;
+  /** Required when the row does not exist yet (e.g. blog cover only in markdown). */
+  label?: string;
 }): Promise<{ ok: true; publicUrl: string } | { error: string }> {
   const gate = await requireAdminUserId();
   if (!gate.ok) return { error: gate.error };
@@ -123,15 +186,34 @@ export async function adminUploadSiteImage(input: {
     return { error: "Empty file." };
   }
 
-  const row = await prisma.siteImage.findUnique({
+  const category = input.category.trim().slice(0, 64) || "blog";
+  const label =
+    (input.label ?? input.imageKey).trim().slice(0, 500) || input.imageKey;
+  let row = await prisma.siteImage.findUnique({
     where: { imageKey: input.imageKey },
     select: { id: true },
   });
   if (!row) {
-    return { error: "Unknown image key." };
+    await prisma.siteImage.create({
+      data: {
+        id: randomUUID(),
+        imageKey: input.imageKey,
+        category,
+        label,
+        url: "",
+        alt: (input.alt ?? "").trim(),
+      },
+    });
+    row = await prisma.siteImage.findUnique({
+      where: { imageKey: input.imageKey },
+      select: { id: true },
+    });
+  }
+  if (!row) {
+    return { error: "Could not register image key." };
   }
 
-  const path = storagePath(input.category, input.imageKey, mime);
+  const path = storagePath(category, input.imageKey, mime);
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
     return {
@@ -165,6 +247,7 @@ export async function adminUploadSiteImage(input: {
       data: {
         url: publicUrl,
         ...(input.alt !== undefined ? { alt: input.alt.trim() } : {}),
+        ...(input.label !== undefined ? { label: input.label.trim().slice(0, 500) } : {}),
       },
     });
 

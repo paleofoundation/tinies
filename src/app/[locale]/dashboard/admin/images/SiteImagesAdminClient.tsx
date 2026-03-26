@@ -152,6 +152,7 @@ export function SiteImagesAdminClient({ initialRows }: Props) {
           base64,
           mimeType,
           alt: draftAlt,
+          label: selected.label,
         });
         if ("error" in res) {
           toast.error(res.error);
@@ -162,6 +163,8 @@ export function SiteImagesAdminClient({ initialRows }: Props) {
         const res = await adminUpdateSiteImageMeta({
           imageKey: selected.imageKey,
           alt: draftAlt,
+          category: selected.category,
+          label: selected.label,
         });
         if ("error" in res) {
           toast.error(res.error);
