@@ -115,9 +115,11 @@
   --space-card: 36px;
   --max-width: 1170px;
 
-  /* Blog category strip + “actually matter” accent on Stay connected band */
+  /* Blog category strip + Stay connected band */
   --blog-filter-bar-bg: #f0f9f9;
   --blog-cta-band-bg: #0a8081;
+  /** Second line of Stay connected headline (“actually matter”) on --blog-cta-band-bg */
+  --blog-cta-headline-accent: #d5e7e7;
   --blog-card-radius: 28px;
 
   /* Primary / secondary tints — use instead of hardcoded rgba(10,128,128,…) / coral rgba in UI */
