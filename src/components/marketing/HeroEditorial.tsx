@@ -11,8 +11,6 @@ export type HeroEditorialProps = {
   insetBetaNotice?: string;
   /** Optional texture or tint behind content (e.g. `theme-paper-grid`). */
   bleedClassName?: string;
-  /** Use serif (heading font) for description — matches editorial mock body. */
-  descriptionSerif?: boolean;
   image: {
     src: string;
     alt: string;
@@ -34,7 +32,6 @@ export function HeroEditorial({
   description,
   insetBetaNotice,
   bleedClassName,
-  descriptionSerif = false,
   image,
   overlappingCard,
   actions,
@@ -72,26 +69,25 @@ export function HeroEditorial({
           <div className="min-w-0">
             {eyebrow ? (
               <p
-                className="theme-eyebrow mb-4"
+                className="theme-eyebrow mb-4 text-[0.75rem] tracking-[0.08em]"
                 style={{ color: "var(--color-primary)" }}
               >
                 {eyebrow}
               </p>
             ) : null}
             <h1
-              className="theme-display text-[var(--display-hero-mock)] leading-[0.94]"
+              className="theme-display max-w-[720px] text-[var(--display-hero-mock)] leading-[0.94]"
               style={{ color: "var(--color-text)" }}
             >
               {title}
             </h1>
             {description ? (
               <div
-                className="mt-5 max-w-xl text-base leading-[1.75] sm:text-lg"
+                className="mt-6 max-w-[560px] text-[clamp(1rem,2.5vw,1.25rem)] leading-[1.7]"
                 style={{
                   color: "var(--color-text-secondary)",
-                  fontFamily: descriptionSerif
-                    ? "var(--font-heading), Georgia, serif"
-                    : "var(--font-body)",
+                  fontFamily: "var(--font-body)",
+                  fontWeight: 400,
                 }}
               >
                 {description}

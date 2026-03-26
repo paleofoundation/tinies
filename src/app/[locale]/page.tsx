@@ -221,7 +221,6 @@ export default async function Home() {
         bleedClassName="theme-paper-grid bg-[var(--color-background)]"
         insetBetaNotice={tHero("betaInset")}
         eyebrow={tHero("eyebrow")}
-        descriptionSerif
         title={
           <>
             <span style={{ color: "var(--color-text)" }}>{tHero("titleLine1")}</span>
