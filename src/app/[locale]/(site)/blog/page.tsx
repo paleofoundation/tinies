@@ -94,7 +94,10 @@ export default async function BlogIndexPage({ searchParams }: SearchProps) {
       </header>
 
       {/* Category bar */}
-      <div className="w-full border-b border-[var(--color-primary-muted-08)]" style={{ backgroundColor: "var(--blog-filter-bar-bg)" }}>
+      <div
+        className="w-full border-b border-white/20"
+        style={{ backgroundColor: "var(--color-primary)" }}
+      >
         <PageContainer className="py-4 sm:py-5">
           <nav className="flex flex-wrap gap-2 sm:gap-2.5" aria-label="Filter by category">
             {BLOG_FILTER_CATEGORIES.map((cat) => {
@@ -104,12 +107,12 @@ export default async function BlogIndexPage({ searchParams }: SearchProps) {
                 <Link
                   key={cat}
                   href={href}
-                  className="rounded-[var(--radius-pill)] px-4 py-2 text-sm font-semibold transition-colors"
+                  className="rounded-[var(--radius-pill)] px-4 py-2 text-sm font-semibold transition-colors hover:opacity-95"
                   style={{
                     fontFamily: "var(--font-body), sans-serif",
-                    border: isActive ? "1px solid transparent" : "1px solid var(--color-neutral-200)",
-                    backgroundColor: isActive ? "var(--color-primary)" : "#ffffff",
-                    color: isActive ? "#ffffff" : "var(--color-neutral-700)",
+                    border: isActive ? "1px solid transparent" : "1px solid rgba(255,255,255,0.42)",
+                    backgroundColor: isActive ? "#ffffff" : "transparent",
+                    color: isActive ? "var(--color-primary)" : "rgba(255,255,255,0.95)",
                   }}
                 >
                   {cat}

@@ -24,7 +24,7 @@ export function BlogStayConnectedCTA() {
           }}
         >
           <span className="block text-white">Stories that</span>
-          <span className="block" style={{ color: "var(--color-primary-200)" }}>
+          <span className="block" style={{ color: "var(--blog-filter-bar-bg)" }}>
             actually matter
           </span>
         </h2>
