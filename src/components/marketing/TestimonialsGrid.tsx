@@ -35,10 +35,10 @@ export function TestimonialsGrid({
 
   return (
     <div
-      className={cn("w-full py-12 sm:py-16 lg:py-20", className)}
+      className={cn("w-full py-[clamp(4rem,8vw,8rem)]", className)}
       style={{ backgroundColor: BG[background] }}
     >
-      <div className="theme-container">
+      <div className="mx-auto w-full max-w-[1280px] px-6 lg:px-10">
         {editorial ? (
           <div className="grid gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start lg:gap-14">
             {intro ? <div className="min-w-0 max-w-lg">{intro}</div> : null}

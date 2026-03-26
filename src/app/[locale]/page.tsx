@@ -15,7 +15,6 @@ import {
   StatsBand,
   TestimonialsGrid,
 } from "@/components/marketing";
-import { PageContainer, Section } from "@/components/theme";
 import { getHomepageData } from "@/lib/home/get-homepage-data";
 import { getBlogPostSummaries } from "@/lib/blog/load-posts";
 import { getSiteImageWithFallback } from "@/lib/images/get-site-image";
@@ -92,6 +91,11 @@ const homepageFaqJsonLd = {
   })),
 };
 
+/** Editorial homepage: section vertical rhythm + 1280px container (matches editorial-preview). */
+const HOME_Y = "py-[clamp(4rem,8vw,8rem)]";
+const HOME_INNER = "mx-auto w-full max-w-[1280px] px-6 lg:px-10";
+const BORDER_TEAL_15 = "rgba(10, 128, 128, 0.15)";
+
 const HOMEPAGE_FAQ_PREVIEW = HOMEPAGE_FAQ_ITEMS.slice(0, 4);
 const FAQ_STACK_PREVIEW = HOMEPAGE_FAQ_PREVIEW.map((item, index) => ({
   id: `home-faq-preview-${index}`,
@@ -145,10 +149,13 @@ function EditorialHowStep({
   description: string;
 }) {
   return (
-    <div className="rounded-[22px] border border-[var(--color-border)] bg-white p-6 shadow-[var(--shadow-sm)] transition-[box-shadow,transform] hover:shadow-[var(--shadow-md)]">
+    <div
+      className="rounded-[22px] border bg-white p-6 transition-[transform,box-shadow] hover:-translate-y-1 hover:shadow-[0_4px_16px_rgba(10,128,128,0.08)]"
+      style={{ borderColor: BORDER_TEAL_15, boxShadow: "0 2px 8px rgba(10, 128, 128, 0.06)" }}
+    >
       <div
-        className="theme-display text-[1.875rem] leading-none"
-        style={{ color: "var(--color-primary)" }}
+        className="text-[1.875rem] font-black uppercase leading-none"
+        style={{ color: "var(--color-primary)", fontFamily: "var(--font-display), sans-serif" }}
       >
         {num}
       </div>
@@ -237,8 +244,12 @@ export default async function Home() {
         image={{ src: heroImageUrl, alt: "Rescue cats at Gardens of St Gertrude sanctuary, Cyprus", priority: true }}
         overlappingCard={
           <div
-            className="rounded-[24px] border border-[var(--color-border)] bg-white p-6 text-left shadow-[var(--shadow-lg)]"
-            style={{ fontFamily: "var(--font-body)" }}
+            className="rounded-[24px] border bg-white p-6 text-left"
+            style={{
+              fontFamily: "var(--font-body), sans-serif",
+              borderColor: BORDER_TEAL_15,
+              boxShadow: "0 8px 32px rgba(10, 128, 128, 0.1)",
+            }}
           >
             <p
               className="theme-display text-[clamp(1.35rem,3vw,1.875rem)] leading-[1.05]"
@@ -291,21 +302,15 @@ export default async function Home() {
               <HomeSearchBar variant="hero" compactTopMargin />
             </div>
             <div
-              className="w-full max-w-3xl border-t border-[var(--color-border)] pt-6"
-              style={{ fontFamily: "var(--font-body)" }}
+              className="w-full max-w-3xl border-t pt-6"
+              style={{ fontFamily: "var(--font-body), sans-serif", borderColor: BORDER_TEAL_15 }}
             >
               <div
-                className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm font-medium sm:text-base"
-                style={{ color: "var(--color-text-secondary)" }}
+                className="flex flex-wrap items-center gap-x-8 gap-y-2 text-[0.875rem] font-medium"
+                style={{ color: "rgba(28, 28, 28, 0.7)" }}
               >
                 <span>92+ verified providers</span>
-                <span className="hidden sm:inline" style={{ color: "var(--color-text-muted)" }} aria-hidden>
-                  •
-                </span>
                 <span>90% to animal rescue</span>
-                <span className="hidden sm:inline" style={{ color: "var(--color-text-muted)" }} aria-hidden>
-                  •
-                </span>
                 <span>EUR 2,000 guarantee</span>
               </div>
             </div>
@@ -315,8 +320,11 @@ export default async function Home() {
 
       <StatsBand stats={stats} />
 
-      <Section background="background" padded className="border-b border-[var(--color-border)]">
-        <PageContainer>
+      <section
+        className={`${HOME_Y} border-b`}
+        style={{ backgroundColor: "var(--color-background)", borderColor: BORDER_TEAL_15 }}
+      >
+        <div className={HOME_INNER}>
           <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-14">
             <div className="min-w-0">
               <p className="theme-eyebrow mb-4" style={{ color: "var(--color-primary)" }}>
@@ -354,15 +362,14 @@ export default async function Home() {
               />
             </div>
           </div>
-        </PageContainer>
-      </Section>
+        </div>
+      </section>
 
-      <Section
-        background="primary-50"
-        padded
-        className="theme-soft-noise border-b border-[var(--color-border)]"
+      <section
+        className={`theme-soft-noise ${HOME_Y} border-b`}
+        style={{ backgroundColor: "var(--color-primary-50)", borderColor: BORDER_TEAL_15 }}
       >
-        <PageContainer>
+        <div className={HOME_INNER}>
           <div className="grid items-end gap-12 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-14">
             <div className="min-w-0 max-w-lg">
               <p className="theme-eyebrow mb-4" style={{ color: "var(--color-secondary)" }}>
@@ -405,15 +412,19 @@ export default async function Home() {
                       <Link
                         key={p.slug}
                         href={`/services/provider/${p.slug}`}
-                        className="block overflow-hidden rounded-[22px] border border-[var(--color-border)] bg-white shadow-[var(--shadow-sm)] no-underline transition-shadow hover:shadow-[var(--shadow-md)]"
+                        className="group block overflow-hidden border bg-white no-underline transition-[transform,box-shadow] hover:-translate-y-1 hover:shadow-[0_4px_16px_rgba(10,128,128,0.08)]"
+                        style={{ borderColor: BORDER_TEAL_15, boxShadow: "0 2px 8px rgba(10, 128, 128, 0.06)" }}
                       >
-                        <div className="relative h-56 w-full overflow-hidden" style={{ backgroundColor: "var(--color-primary-muted-08)" }}>
+                        <div
+                          className="relative h-[224px] w-full overflow-hidden"
+                          style={{ backgroundColor: "var(--color-primary-muted-08)" }}
+                        >
                           {img ? (
                             <Image
                               src={img}
                               alt={`${p.displayName}, verified pet care provider`}
                               fill
-                              className="object-cover transition-transform duration-300 hover:scale-105"
+                              className="object-cover transition-transform duration-300 group-hover:scale-105"
                               sizes="(max-width: 768px) 100vw, 50vw"
                             />
                           ) : (
@@ -424,8 +435,8 @@ export default async function Home() {
                         </div>
                         <div className="p-5 text-left">
                           <p
-                            className="theme-display text-[1.375rem] leading-tight"
-                            style={{ color: "var(--color-primary)" }}
+                            className="text-[1.375rem] font-black uppercase leading-tight tracking-tight"
+                            style={{ color: "var(--color-primary)", fontFamily: "var(--font-display), sans-serif" }}
                           >
                             {p.displayName}
                           </p>
@@ -445,11 +456,14 @@ export default async function Home() {
               )}
             </div>
           </div>
-        </PageContainer>
-      </Section>
+        </div>
+      </section>
 
-      <Section background="background" padded className="border-b border-[var(--color-border)]">
-        <PageContainer>
+      <section
+        className={`${HOME_Y} border-b`}
+        style={{ backgroundColor: "var(--color-background)", borderColor: BORDER_TEAL_15 }}
+      >
+        <div className={HOME_INNER}>
           <div className="max-w-4xl">
             <p className="theme-eyebrow mb-4" style={{ color: "var(--color-primary)" }}>
               {tEd("adoptEyebrow")}
@@ -481,18 +495,19 @@ export default async function Home() {
                 return (
                   <article
                     key={listing.slug}
-                    className="theme-card flex flex-col overflow-hidden rounded-[22px]"
+                    className="group flex flex-col overflow-hidden border bg-white transition-[transform,box-shadow] hover:-translate-y-1 hover:shadow-[0_4px_16px_rgba(10,128,128,0.08)]"
+                    style={{ borderColor: BORDER_TEAL_15, boxShadow: "0 2px 8px rgba(10, 128, 128, 0.06)" }}
                   >
                     <div
-                      className="relative aspect-[4/3] w-full border-b"
-                      style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}
+                      className="relative h-[224px] w-full overflow-hidden border-b"
+                      style={{ borderColor: BORDER_TEAL_15, backgroundColor: "var(--color-background)" }}
                     >
                       {photo ? (
                         <Image
                           src={photo}
                           alt={`${listing.name}, ${formatSpecies(listing.species)} — adoptable`}
                           fill
-                          className="object-cover"
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                         />
                       ) : (
@@ -503,8 +518,8 @@ export default async function Home() {
                     </div>
                     <div className="flex flex-1 flex-col p-5">
                       <h3
-                        className="theme-display text-[1.375rem] leading-tight"
-                        style={{ color: "var(--color-text)" }}
+                        className="text-[1.375rem] font-black uppercase leading-tight tracking-tight"
+                        style={{ color: "var(--color-text)", fontFamily: "var(--font-display), sans-serif" }}
                       >
                         {listing.name}
                       </h3>
@@ -540,11 +555,14 @@ export default async function Home() {
               View all adoptable tinies →
             </EditorialButton>
           </div>
-        </PageContainer>
-      </Section>
+        </div>
+      </section>
 
-      <section className="border-b border-[var(--color-border)] py-16 lg:py-24" style={{ backgroundColor: "var(--color-primary)" }}>
-        <PageContainer>
+      <section
+        className={`${HOME_Y} border-b`}
+        style={{ backgroundColor: "#0A8080", borderColor: BORDER_TEAL_15 }}
+      >
+        <div className={HOME_INNER}>
           <div className="grid gap-14 lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] lg:items-start lg:gap-16">
             <div className="min-w-0 max-w-md">
               <p className="theme-eyebrow mb-4 text-white/75">{tEd("whyEyebrow")}</p>
@@ -565,7 +583,7 @@ export default async function Home() {
               ).map((card) => (
                 <div
                   key={card.title}
-                  className="rounded-3xl border border-white/15 bg-white/[0.08] p-6 backdrop-blur-sm"
+                  className="rounded-[24px] border border-white/15 bg-white/[0.08] p-6 backdrop-blur-[4px]"
                 >
                   <h3 className="theme-display text-[1.375rem] leading-tight text-white">{card.title}</h3>
                   <p
@@ -578,11 +596,14 @@ export default async function Home() {
               ))}
             </div>
           </div>
-        </PageContainer>
+        </div>
       </section>
 
-      <Section background="background" padded className="border-b border-[var(--color-border)]">
-        <PageContainer>
+      <section
+        className={`${HOME_Y} border-b`}
+        style={{ backgroundColor: "var(--color-background)", borderColor: BORDER_TEAL_15 }}
+      >
+        <div className={HOME_INNER}>
           <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-16">
             <div className="relative min-h-[320px] w-full sm:min-h-[400px] lg:min-h-[480px]">
               <div
@@ -590,7 +611,10 @@ export default async function Home() {
                 style={{ backgroundColor: "var(--color-secondary-muted-12)" }}
                 aria-hidden
               />
-              <div className="absolute bottom-0 right-0 h-[min(84%,420px)] w-[min(92%,100%)] overflow-hidden rounded-3xl shadow-[var(--shadow-lg)] sm:h-[84%] sm:w-[80%]">
+              <div
+                className="absolute bottom-0 right-0 h-[min(84%,420px)] w-[min(92%,100%)] overflow-hidden rounded-[24px] sm:h-[84%] sm:w-[80%]"
+                style={{ boxShadow: "0 8px 32px rgba(10, 128, 128, 0.1)" }}
+              >
                 <div className="relative h-full w-full">
                   <Image
                     src={sanctuaryImageUrl}
@@ -602,8 +626,12 @@ export default async function Home() {
                 </div>
               </div>
               <div
-                className="absolute bottom-10 left-0 z-[2] max-w-[340px] rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-[var(--shadow-lg)]"
-                style={{ fontFamily: "var(--font-body)" }}
+                className="absolute bottom-10 left-0 z-[2] max-w-[340px] rounded-[24px] border bg-white p-6"
+                style={{
+                  fontFamily: "var(--font-body), sans-serif",
+                  borderColor: BORDER_TEAL_15,
+                  boxShadow: "0 8px 32px rgba(10, 128, 128, 0.1)",
+                }}
               >
                 <p
                   className="theme-display text-[clamp(1.35rem,3vw,1.875rem)] leading-none"
@@ -655,8 +683,8 @@ export default async function Home() {
               </div>
             </div>
           </div>
-        </PageContainer>
-      </Section>
+        </div>
+      </section>
 
       <TestimonialsGrid
         background="secondary"
@@ -681,7 +709,8 @@ export default async function Home() {
           recentReviews.map((r) => (
             <div
               key={r.id}
-              className="flex flex-col border border-white/20 bg-white/[0.08] p-6 backdrop-blur-sm"
+              className="flex flex-col border bg-white/[0.08] p-6 backdrop-blur-[4px]"
+              style={{ borderColor: "rgba(255, 255, 255, 0.18)" }}
             >
               <StarRow rating={r.rating} onCoral />
               <p
@@ -707,8 +736,11 @@ export default async function Home() {
       </TestimonialsGrid>
 
       {recentPosts.length > 0 ? (
-        <Section background="background" padded className="border-b border-[var(--color-border)]">
-          <PageContainer>
+        <section
+          className={`${HOME_Y} border-b`}
+          style={{ backgroundColor: "var(--color-background)", borderColor: BORDER_TEAL_15 }}
+        >
+          <div className={HOME_INNER}>
             <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
               <div className="flex items-start gap-3">
                 <BookOpen
@@ -734,47 +766,80 @@ export default async function Home() {
                 </li>
               ))}
             </ul>
-          </PageContainer>
-        </Section>
+          </div>
+        </section>
       ) : null}
 
       <PressStrip label={tEd("pressLabel")} description={tEd("pressDesc")}>
-        <div className="flex min-h-[72px] items-center justify-center rounded-[18px] border border-[var(--color-border)] bg-white px-3 py-4">
-          <span className="theme-display text-[clamp(1rem,2vw,1.25rem)] tracking-tight text-[var(--color-text)]">
+        <div
+          className="flex min-h-[72px] items-center justify-center rounded-[18px] border bg-white px-3 py-4"
+          style={{ borderColor: BORDER_TEAL_15 }}
+        >
+          <span
+            className="text-[clamp(1rem,2vw,1.25rem)] font-bold uppercase tracking-tight text-[var(--color-text)]"
+            style={{ fontFamily: "var(--font-display), sans-serif" }}
+          >
             {tEd("pressToday")}
           </span>
         </div>
-        <div className="flex min-h-[72px] items-center justify-center rounded-[18px] border border-[var(--color-border)] bg-white px-3 py-4">
-          <span className="theme-display text-[clamp(1rem,2vw,1.25rem)] tracking-tight text-[var(--color-text)]">
+        <div
+          className="flex min-h-[72px] items-center justify-center rounded-[18px] border bg-white px-3 py-4"
+          style={{ borderColor: BORDER_TEAL_15 }}
+        >
+          <span
+            className="text-[clamp(1rem,2vw,1.25rem)] font-bold uppercase tracking-tight text-[var(--color-text)]"
+            style={{ fontFamily: "var(--font-display), sans-serif" }}
+          >
             {tEd("pressForbes")}
           </span>
         </div>
-        <div className="flex min-h-[72px] flex-col items-center justify-center gap-0 rounded-[18px] border border-[var(--color-border)] bg-white px-2 py-3 text-center leading-none">
-          <span className="theme-display text-[clamp(0.75rem,1.5vw,1rem)] tracking-tight text-[var(--color-text)]">
+        <div
+          className="flex min-h-[72px] flex-col items-center justify-center gap-0 rounded-[18px] border bg-white px-2 py-3 text-center leading-none"
+          style={{ borderColor: BORDER_TEAL_15 }}
+        >
+          <span
+            className="text-[clamp(0.75rem,1.5vw,1rem)] font-bold uppercase tracking-tight text-[var(--color-text)]"
+            style={{ fontFamily: "var(--font-display), sans-serif" }}
+          >
             {tEd("pressFastLine1")}
           </span>
-          <span className="theme-display text-[clamp(0.75rem,1.5vw,1rem)] tracking-tight text-[var(--color-text)]">
+          <span
+            className="text-[clamp(0.75rem,1.5vw,1rem)] font-bold uppercase tracking-tight text-[var(--color-text)]"
+            style={{ fontFamily: "var(--font-display), sans-serif" }}
+          >
             {tEd("pressFastLine2")}
           </span>
         </div>
-        <div className="flex min-h-[72px] items-center justify-center rounded-[18px] border border-[var(--color-border)] bg-white px-3 py-4">
-          <span className="theme-display text-[clamp(1rem,2vw,1.25rem)] tracking-tight text-[var(--color-text)]">
+        <div
+          className="flex min-h-[72px] items-center justify-center rounded-[18px] border bg-white px-3 py-4"
+          style={{ borderColor: BORDER_TEAL_15 }}
+        >
+          <span
+            className="text-[clamp(1rem,2vw,1.25rem)] font-bold uppercase tracking-tight text-[var(--color-text)]"
+            style={{ fontFamily: "var(--font-display), sans-serif" }}
+          >
             {tEd("pressSalon")}
           </span>
         </div>
-        <div className="flex min-h-[72px] items-center justify-center rounded-[18px] border border-[var(--color-border)] bg-white px-3 py-4 sm:col-span-2 lg:col-span-1">
-          <span className="theme-display text-[clamp(0.85rem,1.8vw,1.15rem)] tracking-tight text-[var(--color-text)]">
+        <div
+          className="flex min-h-[72px] items-center justify-center rounded-[18px] border bg-white px-3 py-4 sm:col-span-2 lg:col-span-1"
+          style={{ borderColor: BORDER_TEAL_15 }}
+        >
+          <span
+            className="text-[clamp(0.85rem,1.8vw,1.15rem)] font-bold uppercase tracking-tight text-[var(--color-text)]"
+            style={{ fontFamily: "var(--font-display), sans-serif" }}
+          >
             {tEd("pressTechCrunch")}
           </span>
         </div>
       </PressStrip>
 
       <section
-        className="theme-section border-b border-[var(--color-border)]"
-        style={{ backgroundColor: "var(--color-background)" }}
+        className={`${HOME_Y} border-b`}
+        style={{ backgroundColor: "var(--color-background)", borderColor: BORDER_TEAL_15 }}
         aria-labelledby="homepage-faq-heading"
       >
-        <PageContainer>
+        <div className={HOME_INNER}>
           <div className="grid gap-12 lg:grid-cols-[minmax(0,0.86fr)_minmax(0,1.14fr)] lg:items-start lg:gap-16">
             <div className="min-w-0">
               <p className="theme-eyebrow mb-4" style={{ color: "var(--color-primary)" }}>
@@ -795,7 +860,7 @@ export default async function Home() {
             </div>
             <FAQStack items={FAQ_STACK_PREVIEW} variant="editorial" />
           </div>
-        </PageContainer>
+        </div>
       </section>
     </div>
   );

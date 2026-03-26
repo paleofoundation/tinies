@@ -20,23 +20,32 @@ export function PressStrip({
 }: PressStripProps) {
   return (
     <section
-      className={cn("border-y border-[var(--color-border)]", className)}
+      className={cn("border-y", className)}
       style={{
-        backgroundColor: "color-mix(in srgb, var(--color-primary-50) 65%, var(--color-background))",
+        backgroundColor: "rgba(241, 249, 249, 0.6)",
+        borderColor: "rgba(10, 128, 128, 0.15)",
       }}
     >
-      <div className="theme-container py-10 sm:py-12 lg:py-14">
+      <div className="mx-auto w-full max-w-[1280px] px-6 py-[clamp(2.5rem,4vw,3rem)] lg:px-10">
         <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,0.34fr)_1fr] lg:gap-14">
           <div className="min-w-0">
-            <p className="theme-eyebrow mb-3" style={{ color: "var(--color-primary)" }}>
+            <p
+              className="mb-3 font-extrabold uppercase leading-none"
+              style={{
+                color: "var(--color-primary)",
+                fontFamily: "var(--font-display), sans-serif",
+                fontSize: "0.75rem",
+                letterSpacing: "0.08em",
+              }}
+            >
               {label}
             </p>
             {description ? (
               <p
                 className="text-sm leading-relaxed sm:text-base"
                 style={{
-                  color: "var(--color-text-secondary)",
-                  fontFamily: "var(--font-body)",
+                  color: "rgba(28, 28, 28, 0.7)",
+                  fontFamily: "var(--font-body), sans-serif",
                 }}
               >
                 {description}

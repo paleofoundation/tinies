@@ -60,9 +60,12 @@ export function FAQStack({
           <div
             key={item.id}
             className={cn(
-              "overflow-hidden border border-[var(--color-border)] bg-[var(--color-background)]",
-              editorial ? "rounded-[22px] shadow-[var(--shadow-sm)]" : "rounded-[var(--radius-xl)] shadow-[var(--shadow-sm)]"
+              "overflow-hidden bg-[var(--color-background)]",
+              editorial
+                ? "rounded-[22px] border shadow-[0_2px_8px_rgba(10,128,128,0.06)]"
+                : "rounded-[var(--radius-xl)] border border-[var(--color-border)] shadow-[var(--shadow-sm)]"
             )}
+            style={editorial ? { borderColor: "rgba(10, 128, 128, 0.15)" } : undefined}
           >
             <button
               id={buttonId}
