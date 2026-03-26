@@ -191,7 +191,15 @@ export function Header() {
               priority
             />
           ) : (
-            "tinies.app"
+            <span
+              className="select-none text-xl font-extrabold tracking-tight sm:text-2xl"
+              style={{
+                fontFamily: "var(--font-display), sans-serif",
+                color: "var(--color-primary)",
+              }}
+            >
+              Tinies
+            </span>
           )}
         </Link>
 

@@ -222,28 +222,67 @@ export default async function Home() {
 
       <HeroEditorial
         bleedClassName="theme-paper-grid bg-[var(--color-background)]"
-        eyebrow={tHero("subtagline")}
-        title={tHero("title")}
+        insetBetaNotice={tHero("betaInset")}
+        eyebrow={tHero("eyebrow")}
+        title={
+          <>
+            <span className="block">{tHero("titleLine1")}</span>
+            <span className="block" style={{ color: "var(--color-primary)" }}>
+              {tHero("titleLine2")}
+            </span>
+          </>
+        }
         description={tHero("tagline")}
         image={{ src: heroImageUrl, alt: "Rescue cats at Gardens of St Gertrude sanctuary, Cyprus", priority: true }}
         overlappingCard={
-          featuredCampaign ? (
-            <div
-              className="theme-card rounded-[var(--radius-xl)] px-4 py-3 text-center text-sm shadow-[var(--shadow-md)] sm:text-base"
-              style={{ fontFamily: "var(--font-body)" }}
+          <div
+            className="rounded-[24px] border border-[var(--color-border)] bg-white p-6 text-left shadow-[var(--shadow-lg)]"
+            style={{ fontFamily: "var(--font-body)" }}
+          >
+            <p
+              className="theme-display text-[clamp(1.35rem,3vw,1.875rem)] leading-[1.05]"
+              style={{ color: "var(--color-primary)" }}
             >
-              <span className="font-semibold" style={{ color: "var(--color-text)" }}>
-                Right now: <span className="font-normal">{campaignSnippet}</span>
-              </span>{" "}
-              <Link
+              {tHero("sanctuaryCardTitle")}
+            </p>
+            <div
+              className="mt-3 h-1.5 w-28 rounded-full"
+              style={{ backgroundColor: "var(--color-secondary)" }}
+              aria-hidden
+            />
+            <p
+              className="mt-4 text-sm leading-relaxed sm:text-[0.9375rem]"
+              style={{ color: "var(--color-text-secondary)" }}
+            >
+              {featuredCampaign ? (
+                <>
+                  Right now:{" "}
+                  <span className="font-medium" style={{ color: "var(--color-text)" }}>
+                    {campaignSnippet}
+                  </span>
+                </>
+              ) : (
+                tHero("sanctuaryCardBody")
+              )}
+            </p>
+            {featuredCampaign ? (
+              <EditorialButton
                 href={`/rescue/${featuredCampaign.orgSlug}/campaign/${featuredCampaign.slug}`}
-                className="inline-block font-semibold underline-offset-2 hover:underline"
-                style={{ color: "var(--color-secondary)" }}
+                variant="secondary"
+                className="mt-5 min-h-9 !border-[1.5px] !border-[var(--color-secondary)] !bg-white !text-[var(--color-secondary)] !shadow-none hover:!bg-[var(--color-secondary-muted-08)] px-4 py-2 text-xs font-bold uppercase tracking-[0.08em]"
               >
-                Learn more
-              </Link>
-            </div>
-          ) : undefined
+                {tHero("sanctuaryCardCta")}
+              </EditorialButton>
+            ) : (
+              <EditorialButton
+                href="/giving"
+                variant="secondary"
+                className="mt-5 min-h-9 !border-[1.5px] !border-[var(--color-secondary)] !bg-white !text-[var(--color-secondary)] !shadow-none hover:!bg-[var(--color-secondary-muted-08)] px-4 py-2 text-xs font-bold uppercase tracking-[0.08em]"
+              >
+                {tHero("sanctuaryCardCta")}
+              </EditorialButton>
+            )}
+          </div>
         }
         actions={
           <>
@@ -251,25 +290,30 @@ export default async function Home() {
               <HomeSearchBar variant="hero" />
             </div>
             <div
-              className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm sm:text-base"
-              style={{ fontFamily: "var(--font-body)", color: "var(--color-text-secondary)" }}
+              className="w-full max-w-3xl border-t border-[var(--color-border)] pt-6"
+              style={{ fontFamily: "var(--font-body)" }}
             >
-              <span>92+ verified providers</span>
-              <span className="hidden sm:inline" style={{ color: "var(--color-text-muted)" }} aria-hidden>
-                •
-              </span>
-              <span>90% to animal rescue</span>
-              <span className="hidden sm:inline" style={{ color: "var(--color-text-muted)" }} aria-hidden>
-                •
-              </span>
-              <span>EUR 2,000 guarantee</span>
+              <div
+                className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm font-medium sm:text-base"
+                style={{ color: "var(--color-text-secondary)" }}
+              >
+                <span>92+ verified providers</span>
+                <span className="hidden sm:inline" style={{ color: "var(--color-text-muted)" }} aria-hidden>
+                  •
+                </span>
+                <span>90% to animal rescue</span>
+                <span className="hidden sm:inline" style={{ color: "var(--color-text-muted)" }} aria-hidden>
+                  •
+                </span>
+                <span>EUR 2,000 guarantee</span>
+              </div>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <EditorialButton href="/services/search" variant="primary">
-                Book now
+                {tHero("findCareCta")}
               </EditorialButton>
               <EditorialButton href="/how-it-works" variant="secondary">
-                Meet & greet
+                Meet &amp; greet
               </EditorialButton>
             </div>
           </>

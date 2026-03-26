@@ -42,9 +42,17 @@
   },
   "home": {
     "hero": {
+      "betaInset": "Tinies is in beta. Help us improve.",
+      "eyebrow": "Trusted pet care and rescue adoption in Cyprus",
+      "titleLine1": "No matter",
+      "titleLine2": "The size.",
       "title": "No matter the size.",
-      "tagline": "Trusted pet care and rescue adoption in Cyprus. 90% of our proceeds go directly to animal rescue.",
-      "subtagline": "Every booking helps a tiny."
+      "tagline": "Book a walk. Help a tiny. Tinies connects pet owners with trusted care while directing 90% of commission to rescue animals across Cyprus.",
+      "subtagline": "Every booking helps a tiny.",
+      "sanctuaryCardTitle": "Every booking helps",
+      "sanctuaryCardBody": "Right now: food, litter, and vet care for more than 100 cats at Gardens of St Gertrude.",
+      "sanctuaryCardCta": "Learn more",
+      "findCareCta": "Find care"
     },
     "search": {
       "placeholder": "Address or area",
