@@ -105,8 +105,8 @@
 
   /* ── Display type scale (editorial layer only) ── */
   --display-xl: clamp(3rem, 9vw, 6.25rem);
-  /** Hero “NO MATTER THE SIZE.” — matches editorial mock cap (6.1rem) */
-  --display-hero-mock: clamp(3rem, 9vw, 6.1rem);
+  /** Hero h1 — Figma cap ~95.74px ≈ 5.984375rem at 16px root */
+  --display-hero-mock: clamp(3rem, 9vw, 5.984375rem);
   --display-lg: clamp(2.25rem, 7vw, 4.75rem);
   --display-md: clamp(1.75rem, 5vw, 3rem);
 

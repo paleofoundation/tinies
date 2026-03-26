@@ -69,14 +69,19 @@ export function HeroEditorial({
           <div className="min-w-0">
             {eyebrow ? (
               <p
-                className="theme-eyebrow mb-4 text-[0.75rem] tracking-[0.08em]"
-                style={{ color: "var(--color-primary)" }}
+                className="mb-4 text-[12px] font-extrabold uppercase leading-none tracking-[0.08em]"
+                style={{
+                  color: "var(--color-primary)",
+                  fontFamily: "var(--font-display)",
+                  marginTop: 0,
+                  marginInline: 0,
+                }}
               >
                 {eyebrow}
               </p>
             ) : null}
             <h1
-              className="theme-display max-w-[720px] text-[var(--display-hero-mock)] leading-[0.94]"
+              className="theme-display max-w-[720px] text-[var(--display-hero-mock)] leading-[0.92]"
               style={{ color: "var(--color-text)" }}
             >
               {title}

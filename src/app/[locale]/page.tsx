@@ -223,8 +223,15 @@ export default async function Home() {
         eyebrow={tHero("eyebrow")}
         title={
           <>
-            <span style={{ color: "var(--color-text)" }}>{tHero("titleLine1")}</span>
-            <span style={{ color: "var(--color-primary)" }}>{tHero("titleLine2")}</span>
+            <span className="block" style={{ color: "var(--color-text)" }}>
+              {tHero("titleLine1")}
+            </span>
+            <span className="block" style={{ color: "var(--color-text)" }}>
+              {tHero("titleLine2")}
+            </span>
+            <span className="block" style={{ color: "var(--color-primary)" }}>
+              {tHero("titleLine3")}
+            </span>
           </>
         }
         description={tHero("tagline")}
