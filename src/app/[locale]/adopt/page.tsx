@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { Heart } from "lucide-react";
-import Link from "next/link";
 import { getAllAvailableAdoptionListings } from "@/lib/adoption/available-listings";
 import {
   adoptBrowseQueryHasFilters,
@@ -8,6 +6,9 @@ import {
 } from "@/lib/adoption/adopt-browse-params";
 import { AdoptBrowseFilters } from "@/components/adoption/AdoptBrowseFilters";
 import { AdoptionListingCard } from "@/components/adoption/AdoptionListingCard";
+import { SectionHeader } from "@/components/marketing";
+import { PageContainer, Section } from "@/components/theme";
+import { Link } from "@/i18n/navigation";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
@@ -39,34 +40,33 @@ export default async function AdoptPage({ searchParams }: PageProps) {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
-      {/* Hero */}
-      <section className="relative overflow-hidden px-4 pt-10 pb-12 sm:px-6 sm:pt-14 sm:pb-16 lg:px-8">
-        <div className="absolute inset-0 rounded-b-[3rem] sm:rounded-b-[4rem]" style={{ backgroundColor: "rgba(244, 93, 72, 0.05)" }} />
-        <div className="relative mx-auto text-center" style={{ maxWidth: "var(--max-width)" }}>
-          <h1
-            className="font-normal tracking-tight sm:text-5xl lg:text-6xl"
-            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-4xl)", color: "var(--color-text)" }}
-          >
-            Every tiny deserves a home.
-          </h1>
-          <p className="mt-4 mx-auto max-w-2xl text-lg" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-            Rescue organisations list their animals on Tinies. Browse dogs and cats, apply through the platform, and connect with rescues and transport providers — locally in Cyprus or internationally.
-          </p>
-          <p className="mt-6">
+      <Section
+        background="transparent"
+        padded
+        className="theme-paper-grid border-b border-[var(--color-border)] !bg-[var(--color-secondary-muted-05)]"
+      >
+        <PageContainer>
+          <SectionHeader
+            align="center"
+            eyebrow="Adoption"
+            title="Every tiny deserves a home."
+            description="Rescue organisations list their animals on Tinies. Browse dogs and cats, apply through the platform, and connect with rescues and transport providers — locally in Cyprus or internationally."
+            className="mx-auto max-w-2xl"
+          />
+          <p className="mt-6 text-center">
             <Link
               href="/adopt/tinies-who-made-it"
               className="text-sm font-semibold hover:underline"
-              style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-primary)" }}
+              style={{ fontFamily: "var(--font-body)", color: "var(--color-primary)" }}
             >
               See tinies who made it →
             </Link>
           </p>
-        </div>
-      </section>
+        </PageContainer>
+      </Section>
 
-      {/* Two paths: Local vs International */}
-      <section className="px-4 pb-10 sm:px-6 lg:px-8">
-        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
+      <Section background="surface" padded className="border-b border-[var(--color-border)]">
+        <PageContainer>
           <div className="grid gap-8 sm:grid-cols-2">
             <div className="rounded-[var(--radius-lg)] border p-8" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)", padding: "var(--space-card)" }}>
               <h2 className="text-lg font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
@@ -99,14 +99,13 @@ export default async function AdoptPage({ searchParams }: PageProps) {
               </Link>
             </div>
           </div>
-        </div>
-      </section>
+        </PageContainer>
+      </Section>
 
       <AdoptBrowseFilters query={browseQuery} />
 
-      {/* Animal grid */}
       <section id="animals" className="px-4 pb-20 sm:px-6 lg:px-8" style={{ paddingBottom: "var(--space-section)" }}>
-        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
+        <PageContainer>
           <h2
             className="font-normal sm:text-2xl"
             style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-xl)", color: "var(--color-text)" }}
@@ -155,7 +154,7 @@ export default async function AdoptPage({ searchParams }: PageProps) {
               ))}
             </div>
           ) : null}
-        </div>
+        </PageContainer>
       </section>
     </div>
   );

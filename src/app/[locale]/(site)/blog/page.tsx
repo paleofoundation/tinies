@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { BlogCard } from "@/components/blog/BlogCard";
+import { SectionHeader } from "@/components/marketing";
+import { PageContainer, Section } from "@/components/theme";
 import { getBlogPostSummaries, postMatchesFilter } from "@/lib/blog/load-posts";
 import { getSiteImageWithFallback } from "@/lib/images/get-site-image";
 import { BLOG_FILTER_CATEGORIES, type BlogFilterCategory } from "@/lib/blog/types";
+import { Link } from "@/i18n/navigation";
 
 const BASE_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app").replace(/\/$/, "");
 
@@ -58,77 +60,72 @@ export default async function BlogIndexPage({ searchParams }: SearchProps) {
       className="min-h-screen"
       style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}
     >
-      <main
-        className="mx-auto px-4 py-16 sm:px-6 sm:py-20"
-        style={{ maxWidth: "var(--max-width)" }}
+      <Section
+        className="theme-paper-grid border-b border-[var(--color-border)]"
+        background="background"
+        padded
       >
-        <header className="mx-auto max-w-3xl text-center">
-          <h1
-            className="font-normal sm:text-5xl"
-            style={{
-              fontFamily: "var(--font-heading), serif",
-              fontSize: "var(--text-4xl)",
-              color: "var(--color-text)",
-            }}
-          >
-            The Tinies Blog
-          </h1>
-          <p
-            className="mx-auto mt-4 max-w-xl text-lg leading-relaxed"
-            style={{
-              fontFamily: "var(--font-body), sans-serif",
-              color: "var(--color-text-secondary)",
-            }}
-          >
-            Pet care tips, adoption stories, and rescue updates from Cyprus.
-          </p>
-        </header>
+        <PageContainer>
+          <SectionHeader
+            align="center"
+            eyebrow="Stories & guides"
+            title="The Tinies Blog"
+            description="Pet care tips, adoption stories, and rescue updates from Cyprus."
+            className="mx-auto max-w-2xl"
+          />
+        </PageContainer>
+      </Section>
 
-        <nav
-          className="mx-auto mt-12 flex max-w-4xl flex-wrap justify-center gap-2"
-          aria-label="Filter by category"
-        >
-          {BLOG_FILTER_CATEGORIES.map((cat) => {
-            const isActive = cat === activeFilter;
-            const href =
-              cat === "All" ? "/blog" : `/blog?category=${encodeURIComponent(cat)}`;
-            return (
-              <Link
-                key={cat}
-                href={href}
-                className="rounded-[var(--radius-pill)] border px-4 py-2 text-sm font-medium transition-colors"
-                style={{
-                  fontFamily: "var(--font-body), sans-serif",
-                  borderColor: isActive ? "var(--color-primary)" : "var(--color-border)",
-                  backgroundColor: isActive ? "var(--color-primary-50)" : "transparent",
-                  color: isActive ? "var(--color-primary)" : "var(--color-text-secondary)",
-                }}
+      <main>
+        <Section background="surface" padded className="border-b border-[var(--color-border)]">
+          <PageContainer>
+            <nav
+              className="flex max-w-4xl flex-wrap justify-center gap-2"
+              aria-label="Filter by category"
+            >
+              {BLOG_FILTER_CATEGORIES.map((cat) => {
+                const isActive = cat === activeFilter;
+                const href =
+                  cat === "All" ? "/blog" : `/blog?category=${encodeURIComponent(cat)}`;
+                return (
+                  <Link
+                    key={cat}
+                    href={href}
+                    className="rounded-[var(--radius-pill)] border px-4 py-2 text-sm font-medium transition-colors"
+                    style={{
+                      fontFamily: "var(--font-body), sans-serif",
+                      borderColor: isActive ? "var(--color-primary)" : "var(--color-border)",
+                      backgroundColor: isActive ? "var(--color-primary-50)" : "transparent",
+                      color: isActive ? "var(--color-primary)" : "var(--color-text-secondary)",
+                    }}
+                  >
+                    {cat}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {posts.length === 0 ? (
+              <p
+                className="mx-auto mt-16 max-w-md text-center text-sm"
+                style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}
               >
-                {cat}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {posts.length === 0 ? (
-          <p
-            className="mx-auto mt-16 max-w-md text-center text-sm"
-            style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}
-          >
-            No posts in this category yet.{" "}
-            <Link href="/blog" className="font-semibold hover:underline" style={{ color: "var(--color-primary)" }}>
-              View all posts
-            </Link>
-          </p>
-        ) : (
-          <ul className="mt-12 grid list-none gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post) => (
-              <li key={post.slug}>
-                <BlogCard post={post} />
-              </li>
-            ))}
-          </ul>
-        )}
+                No posts in this category yet.{" "}
+                <Link href="/blog" className="font-semibold hover:underline" style={{ color: "var(--color-primary)" }}>
+                  View all posts
+                </Link>
+              </p>
+            ) : (
+              <ul className="mt-12 grid list-none gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                {posts.map((post) => (
+                  <li key={post.slug}>
+                    <BlogCard post={post} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </PageContainer>
+        </Section>
       </main>
     </div>
   );

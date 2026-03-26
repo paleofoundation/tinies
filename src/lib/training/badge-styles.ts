@@ -17,7 +17,7 @@ export function badgeColorVar(token: string | null | undefined): string {
 /** Master "Tinies Verified Professional" accent — warm gold-leaning using brand secondary + warning. */
 export const MASTER_BADGE_STYLE = {
   border: "var(--color-secondary)",
-  background: "linear-gradient(135deg, rgba(244, 93, 72, 0.08) 0%, rgba(234, 179, 8, 0.12) 100%)",
+  background: "linear-gradient(135deg, var(--color-secondary-muted-08) 0%, var(--color-warning-bg) 100%)",
   text: "var(--color-text)",
   accent: "var(--color-secondary)",
 } as const;

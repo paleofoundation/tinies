@@ -10,6 +10,8 @@ import {
 } from "@/lib/giving/actions";
 import { getFeaturedCampaignsForMarketing } from "@/lib/campaign/campaign-public";
 import { GivingAnimatedTotal } from "@/components/giving/GivingAnimatedTotal";
+import { SectionHeader } from "@/components/marketing";
+import { PageContainer, Section } from "@/components/theme";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
@@ -75,26 +77,20 @@ export default async function GivingPage() {
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(donateActionJsonLd) }} />
 
-      {/* Section 1 — Hero */}
-      <section className="relative overflow-hidden px-4 pt-10 pb-16 sm:px-6 sm:pt-14 sm:pb-20 lg:px-8">
-        <div
-          className="absolute inset-0 rounded-b-[3rem] sm:rounded-b-[4rem]"
-          style={{ backgroundColor: "rgba(10, 128, 128, 0.06)" }}
-        />
-        <div className="relative mx-auto text-center" style={{ maxWidth: "var(--max-width)" }}>
-          <h1
-            className="font-normal tracking-tight sm:text-5xl lg:text-6xl"
-            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-4xl)", color: "var(--color-text)" }}
-          >
-            Tinies Giving: Every booking helps.
-          </h1>
-          <p
-            className="mt-5 mx-auto max-w-2xl text-lg leading-relaxed"
-            style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}
-          >
-            90% of our commission goes directly to rescue animal care in Cyprus. And our community gives even more.
-          </p>
-          <div className="mt-12">
+      <Section
+        className="theme-paper-grid border-b border-[var(--color-border)]"
+        background="background"
+        padded
+      >
+        <PageContainer>
+          <SectionHeader
+            align="center"
+            eyebrow="Transparency"
+            title="Tinies Giving: Every booking helps."
+            description="90% of our commission goes directly to rescue animal care in Cyprus. And our community gives even more."
+            className="mx-auto max-w-2xl"
+          />
+          <div className="mt-12 text-center">
             <p className="text-sm font-medium uppercase tracking-wide" style={{ color: "var(--color-text-muted)" }}>
               Total donated to date (all sources)
             </p>
@@ -102,8 +98,8 @@ export default async function GivingPage() {
               <GivingAnimatedTotal totalCents={stats.totalAllTime} className="inline-block" />
             </div>
           </div>
-        </div>
-      </section>
+        </PageContainer>
+      </Section>
 
       {featuredCampaigns.length > 0 ? (
         <section className="border-t px-4 py-14 sm:px-6 lg:px-8" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}>
@@ -125,7 +121,7 @@ export default async function GivingPage() {
                   style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)", boxShadow: "var(--shadow-sm)" }}
                 >
                   <Link href={`/rescue/${c.orgSlug}/campaign/${c.slug}`} className="block">
-                    <div className="relative aspect-[16/10] w-full" style={{ backgroundColor: "rgba(10, 128, 128, 0.06)" }}>
+                    <div className="relative aspect-[16/10] w-full" style={{ backgroundColor: "var(--color-primary-muted-06)" }}>
                       {c.coverPhotoUrl ? (
                         <Image src={c.coverPhotoUrl} alt="" fill className="object-cover" sizes="(max-width: 1024px) 100vw, 33vw" />
                       ) : null}

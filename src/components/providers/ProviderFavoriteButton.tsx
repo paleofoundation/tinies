@@ -85,7 +85,7 @@ export function ProviderFavoriteButton({
       style={{
         borderColor: favorited ? "var(--color-primary)" : "var(--color-border)",
         color: "var(--color-primary)",
-        backgroundColor: favorited ? "rgba(10, 128, 128, 0.12)" : "transparent",
+        backgroundColor: favorited ? "var(--color-primary-muted-12)" : "transparent",
       }}
       aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
       aria-pressed={favorited}

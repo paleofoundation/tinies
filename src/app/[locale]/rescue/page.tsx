@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Building2, MapPin } from "lucide-react";
+import { EditorialButton, SectionHeader } from "@/components/marketing";
+import { PageContainer, Section } from "@/components/theme";
 import { Link } from "@/i18n/navigation";
 import { prisma } from "@/lib/prisma";
 
@@ -49,36 +51,33 @@ export default async function RescuePartnersPage() {
   });
 
   return (
-    <div className="min-h-screen px-4 py-16 sm:px-6 lg:px-8" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
-      <div className="mx-auto max-w-5xl">
-        <h1 className="font-normal text-center" style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)" }}>
-          Our rescue partners
-        </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-center" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-          Verified organisations on Tinies. Open a profile to read their story, support a campaign, or browse animals ready for adoption.
-        </p>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
+      <Section
+        background="transparent"
+        padded
+        className="theme-paper-grid border-b border-[var(--color-border)] !bg-[var(--color-primary-muted-05)]"
+      >
+        <PageContainer className="max-w-5xl">
+          <SectionHeader
+            align="center"
+            eyebrow="Directory"
+            title="Our rescue partners"
+            description="Verified organisations on Tinies. Open a profile to read their story, support a campaign, or browse animals ready for adoption."
+            className="mx-auto max-w-2xl"
+          />
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+            <EditorialButton href="/adopt" variant="primary">
+              Browse adoptable animals
+            </EditorialButton>
+            <EditorialButton href="/giving" variant="secondary">
+              Tinies Giving
+            </EditorialButton>
+          </div>
+        </PageContainer>
+      </Section>
 
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-          <Link
-            href="/adopt"
-            className="inline-flex h-12 items-center justify-center rounded-[var(--radius-pill)] px-8 font-semibold text-white"
-            style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-primary)" }}
-          >
-            Browse adoptable animals
-          </Link>
-          <Link
-            href="/giving"
-            className="inline-flex h-12 items-center justify-center rounded-[var(--radius-pill)] border px-8 font-semibold"
-            style={{
-              fontFamily: "var(--font-body), sans-serif",
-              borderColor: "var(--color-border)",
-              color: "var(--color-primary)",
-            }}
-          >
-            Tinies Giving
-          </Link>
-        </div>
-
+      <div className="px-4 py-12 sm:px-6 lg:px-8">
+        <PageContainer className="max-w-5xl">
         {orgs.length === 0 ? (
           <p className="mt-16 text-center text-sm" style={{ color: "var(--color-text-muted)" }}>
             Verified rescue partners will appear here as they join the platform.
@@ -148,6 +147,7 @@ export default async function RescuePartnersPage() {
             })}
           </ul>
         )}
+        </PageContainer>
       </div>
     </div>
   );

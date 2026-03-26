@@ -14,6 +14,7 @@ import {
 import { CancellationPolicy } from "@/lib/constants";
 import { RoundUpToggle } from "@/components/giving/RoundUpToggle";
 import { updateOwnerRoundupEnabled } from "@/lib/giving/actions";
+import { BRAND_PRIMARY_HEX } from "@/lib/constants/brand";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? ""
@@ -329,7 +330,7 @@ export function BookingFlow({ provider, pets, roundupDefaults }: BookingFlowProp
                 clientSecret,
                 appearance: {
                   theme: "stripe",
-                  variables: { colorPrimary: "#0A8080" },
+                  variables: { colorPrimary: BRAND_PRIMARY_HEX },
                 },
               }}
             >
@@ -625,7 +626,7 @@ export function BookingFlow({ provider, pets, roundupDefaults }: BookingFlowProp
                       className="flex cursor-pointer items-center gap-2 rounded-[var(--radius-lg)] border px-3 py-2 text-sm"
                       style={{
                         borderColor: recurringDays.includes(d) ? "var(--color-primary)" : "var(--color-border)",
-                        backgroundColor: recurringDays.includes(d) ? "rgba(10, 128, 128, 0.08)" : "transparent",
+                        backgroundColor: recurringDays.includes(d) ? "var(--color-primary-muted-08)" : "transparent",
                         color: "var(--color-text)",
                       }}
                     >

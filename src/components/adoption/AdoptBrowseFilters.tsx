@@ -165,7 +165,7 @@ export function AdoptBrowseFilters({ query }: Props) {
               style={{
                 fontFamily: "var(--font-body), sans-serif",
                 borderColor: query.international ? "var(--color-primary)" : "var(--color-border)",
-                backgroundColor: query.international ? "rgba(10, 128, 128, 0.12)" : "var(--color-background)",
+                backgroundColor: query.international ? "var(--color-primary-muted-12)" : "var(--color-background)",
                 color: query.international ? "var(--color-primary)" : "var(--color-text-secondary)",
               }}
               aria-pressed={!!query.international}
@@ -215,7 +215,7 @@ export function AdoptBrowseFilters({ query }: Props) {
                   style={{
                     fontFamily: "var(--font-body), sans-serif",
                     borderColor: "var(--color-primary)",
-                    backgroundColor: "rgba(10, 128, 128, 0.12)",
+                    backgroundColor: "var(--color-primary-muted-12)",
                     color: "var(--color-primary)",
                   }}
                 >
@@ -235,7 +235,7 @@ export function AdoptBrowseFilters({ query }: Props) {
                   style={{
                     fontFamily: "var(--font-body), sans-serif",
                     borderColor: "var(--color-primary)",
-                    backgroundColor: "rgba(10, 128, 128, 0.12)",
+                    backgroundColor: "var(--color-primary-muted-12)",
                     color: "var(--color-primary)",
                   }}
                 >
@@ -255,7 +255,7 @@ export function AdoptBrowseFilters({ query }: Props) {
                   style={{
                     fontFamily: "var(--font-body), sans-serif",
                     borderColor: "var(--color-primary)",
-                    backgroundColor: "rgba(10, 128, 128, 0.12)",
+                    backgroundColor: "var(--color-primary-muted-12)",
                     color: "var(--color-primary)",
                   }}
                 >
@@ -275,7 +275,7 @@ export function AdoptBrowseFilters({ query }: Props) {
                   style={{
                     fontFamily: "var(--font-body), sans-serif",
                     borderColor: "var(--color-primary)",
-                    backgroundColor: "rgba(10, 128, 128, 0.12)",
+                    backgroundColor: "var(--color-primary-muted-12)",
                     color: "var(--color-primary)",
                   }}
                 >

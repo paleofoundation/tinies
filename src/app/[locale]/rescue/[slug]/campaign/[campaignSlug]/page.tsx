@@ -74,7 +74,7 @@ export default async function PublicCampaignPage({ params, searchParams }: Props
       <div
         className="relative w-full overflow-hidden"
         style={{
-          background: `linear-gradient(180deg, rgba(10, 128, 128, 0.09) 0%, var(--color-background) 100%)`,
+          background: `linear-gradient(180deg, var(--color-primary-muted-09) 0%, var(--color-background) 100%)`,
         }}
       >
         <div className="relative h-52 sm:h-64 md:h-72">
@@ -84,7 +84,7 @@ export default async function PublicCampaignPage({ params, searchParams }: Props
             <div
               className="h-full w-full"
               style={{
-                background: `linear-gradient(135deg, var(--color-primary) 0%, rgba(10, 128, 128, 0.75) 50%, var(--color-secondary) 100%)`,
+                background: `linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-muted-75) 50%, var(--color-secondary) 100%)`,
               }}
               aria-hidden
             />
@@ -132,7 +132,7 @@ export default async function PublicCampaignPage({ params, searchParams }: Props
             className="mb-10 rounded-[var(--radius-xl)] border px-5 py-4 sm:px-6 sm:py-5"
             style={{
               borderColor: "var(--color-primary-200)",
-              backgroundColor: "rgba(10, 128, 128, 0.08)",
+              backgroundColor: "var(--color-primary-muted-08)",
               fontFamily: "var(--font-body), sans-serif",
             }}
             role="status"

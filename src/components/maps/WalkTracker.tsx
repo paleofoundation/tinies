@@ -2,12 +2,13 @@
 
 import { useEffect, useRef, useMemo, useState } from "react";
 import { APIProvider, Map, useMap } from "@vis.gl/react-google-maps";
+import { BRAND_PRIMARY_HEX } from "@/lib/constants/brand";
 import { totalRouteDistanceKm, type WalkRoutePoint } from "@/lib/walk/route-metrics";
 
 type WalkPoint = WalkRoutePoint;
 type WalkActivity = { type: string; lat: number; lng: number; timestamp: number };
 
-const ROUTE_STROKE = "#0A8080";
+const ROUTE_STROKE = BRAND_PRIMARY_HEX;
 
 const ACTIVITY_COLORS: Record<string, string> = {
   pee: "#EAB308",

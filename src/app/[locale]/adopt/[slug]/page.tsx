@@ -223,7 +223,7 @@ export default async function AdoptionListingProfilePage({ params }: Props) {
                 className="rounded-[var(--radius-xl)] border p-6 sm:p-8"
                 style={{
                   borderColor: "var(--color-border)",
-                  backgroundColor: "rgba(10, 128, 128, 0.04)",
+                  backgroundColor: "var(--color-primary-muted-04)",
                   boxShadow: "var(--shadow-sm)",
                 }}
               >
@@ -443,7 +443,7 @@ export default async function AdoptionListingProfilePage({ params }: Props) {
                 {listing.sex ? ` · ${listing.sex}` : ""}
               </p>
               {listing.fosterLocation ? (
-                <p className="mt-3 inline-block rounded-full px-3 py-1 text-sm" style={{ backgroundColor: "rgba(10, 128, 128, 0.1)", color: "var(--color-text)", fontFamily: "var(--font-body), sans-serif" }}>
+                <p className="mt-3 inline-block rounded-full px-3 py-1 text-sm" style={{ backgroundColor: "var(--color-primary-muted-10)", color: "var(--color-text)", fontFamily: "var(--font-body), sans-serif" }}>
                   In foster · {listing.fosterLocation}
                 </p>
               ) : null}
@@ -478,7 +478,7 @@ export default async function AdoptionListingProfilePage({ params }: Props) {
                           <li
                             key={t}
                             className="rounded-full px-3 py-1 text-sm"
-                            style={{ backgroundColor: "rgba(10, 128, 128, 0.12)", color: "var(--color-text)", fontFamily: "var(--font-body), sans-serif" }}
+                            style={{ backgroundColor: "var(--color-primary-muted-12)", color: "var(--color-text)", fontFamily: "var(--font-body), sans-serif" }}
                           >
                             {t}
                           </li>
@@ -496,7 +496,7 @@ export default async function AdoptionListingProfilePage({ params }: Props) {
                           <li
                             key={t}
                             className="rounded-full px-3 py-1 text-sm"
-                            style={{ backgroundColor: "rgba(244, 93, 72, 0.12)", color: "var(--color-text)", fontFamily: "var(--font-body), sans-serif" }}
+                            style={{ backgroundColor: "var(--color-secondary-muted-12)", color: "var(--color-text)", fontFamily: "var(--font-body), sans-serif" }}
                           >
                             {t}
                           </li>

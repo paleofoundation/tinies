@@ -15,6 +15,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 const sharp = require("sharp");
 
 require("dotenv").config({ path: path.join(__dirname, ".env") });
@@ -188,17 +189,15 @@ async function processImage(filename) {
   const publicUrl = urlData.publicUrl;
   console.log("   🔗 URL: " + publicUrl);
 
-  const { error: dbError } = await supabase.from("site_images").upsert(
-    {
-      key: imageKey,
-      category: "blog",
-      label: "Blog: " + slug,
-      url: publicUrl,
-      alt: "",
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "key" }
-  );
+  const { error: dbError } = await supabase.from("site_images").insert({
+    id: crypto.randomUUID(),
+    key: imageKey,
+    category: "blog",
+    label: "Blog: " + slug,
+    url: publicUrl,
+    alt: "",
+    updated_at: new Date().toISOString(),
+  });
 
   if (dbError) {
     console.error("   ⚠️  Image uploaded but DB insert failed: " + dbError.message);

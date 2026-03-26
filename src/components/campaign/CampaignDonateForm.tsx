@@ -74,7 +74,7 @@ export function CampaignDonateForm({ orgSlug, campaignSlug }: Props) {
             className="h-11 min-w-[4.5rem] rounded-[var(--radius-lg)] border px-4 text-sm font-semibold transition-colors"
             style={{
               borderColor: amountCents === c && !customEur.trim() ? "var(--color-primary)" : "var(--color-border)",
-              backgroundColor: amountCents === c && !customEur.trim() ? "rgba(10, 128, 128, 0.1)" : "var(--color-background)",
+              backgroundColor: amountCents === c && !customEur.trim() ? "var(--color-primary-muted-10)" : "var(--color-background)",
               color: "var(--color-text)",
               fontFamily: "var(--font-body), sans-serif",
             }}

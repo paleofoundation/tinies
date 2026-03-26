@@ -325,7 +325,7 @@ export function ProviderOnboardingWizard({ initialProfile, areaPriceGuidance }: 
             <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>Write about yourself in 2–3 paragraphs. Include your experience with animals, why you love pet care, your home setup, and any qualifications. Min 200 chars, max 1000.</p>
             <div
               className="mt-4 rounded-[var(--radius-lg)] border p-4 text-sm"
-              style={{ borderColor: "var(--color-primary)", backgroundColor: "rgba(10, 128, 128, 0.06)" }}
+              style={{ borderColor: "var(--color-primary)", backgroundColor: "var(--color-primary-muted-06)" }}
             >
               <p className="font-medium" style={{ color: "var(--color-text)" }}>
                 After onboarding

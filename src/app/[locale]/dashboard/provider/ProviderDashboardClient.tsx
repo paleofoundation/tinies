@@ -442,7 +442,7 @@ export function ProviderDashboardClient({
         {showRequiredTrainingBanner && firstRequiredCourse ? (
           <div
             className="mt-6 flex flex-col gap-3 rounded-[var(--radius-lg)] border px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
-            style={{ borderColor: "var(--color-primary-200)", backgroundColor: "rgba(10, 128, 128, 0.06)" }}
+            style={{ borderColor: "var(--color-primary-200)", backgroundColor: "var(--color-primary-muted-06)" }}
             role="status"
           >
             <div className="flex gap-3">
@@ -624,7 +624,7 @@ export function ProviderDashboardClient({
               {(initialRecurringClients.length > 0 || initialRecurringUpcoming.length > 0) && (
                 <div
                   className="mt-6 rounded-[var(--radius-lg)] border p-4 sm:p-5"
-                  style={{ borderColor: "var(--color-primary)", backgroundColor: "rgba(10, 128, 128, 0.06)" }}
+                  style={{ borderColor: "var(--color-primary)", backgroundColor: "var(--color-primary-muted-06)" }}
                 >
                   <p className="font-semibold" style={{ color: "var(--color-text)" }}>
                     Recurring clients:{" "}

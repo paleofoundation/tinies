@@ -89,7 +89,7 @@ export default function ContactPage() {
           >
             <div
               className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-lg)]"
-              style={{ backgroundColor: "rgba(244, 93, 72, 0.12)", color: "var(--color-secondary)" }}
+              style={{ backgroundColor: "var(--color-secondary-muted-12)", color: "var(--color-secondary)" }}
             >
               <MessageCircle className="h-6 w-6" aria-hidden />
             </div>

@@ -96,7 +96,7 @@ export function CoursePlayer({ course }: Props) {
         className="mx-auto max-w-lg rounded-[var(--radius-xl)] border p-10 text-center shadow-[var(--shadow-md)]"
         style={{
           borderColor: "var(--color-primary-200)",
-          background: "linear-gradient(180deg, rgba(10, 128, 128, 0.08) 0%, var(--color-surface) 45%)",
+          background: "linear-gradient(180deg, var(--color-primary-muted-08) 0%, var(--color-surface) 45%)",
         }}
       >
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full" style={{ backgroundColor: "var(--color-primary-100)", color: "var(--color-primary)" }}>

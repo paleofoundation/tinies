@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Building2, Coins, Heart, PawPrint, Stethoscope } from "lucide-react";
+import { SectionHeader } from "@/components/marketing";
+import { PageContainer, Section } from "@/components/theme";
 import { Link } from "@/i18n/navigation";
 import { getGivingStats, getAnimalsSupportedCount } from "@/lib/giving/actions";
 import { getSiteImageWithFallback } from "@/lib/images/get-site-image";
@@ -53,27 +55,21 @@ export default async function AboutPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
       <main>
-        {/* Hero */}
-        <section className="relative overflow-hidden px-4 pt-12 pb-16 sm:px-6 sm:pt-16 sm:pb-20 lg:px-8">
-          <div
-            className="absolute inset-0 rounded-b-[3rem] sm:rounded-b-[4rem]"
-            style={{ backgroundColor: "rgba(10, 128, 128, 0.07)" }}
-          />
-          <div className="relative mx-auto text-center" style={{ maxWidth: "var(--max-width)" }}>
-            <h1
-              className="font-normal tracking-tight sm:text-5xl lg:text-6xl"
-              style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-4xl)", color: "var(--color-text)" }}
-            >
-              No matter the size.
-            </h1>
-            <p
-              className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed sm:text-xl"
-              style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}
-            >
-              Tinies was built with one purpose: to fund the rescue and care of animals who have no one else.
-            </p>
-          </div>
-        </section>
+        <Section
+          className="theme-soft-noise border-b border-[var(--color-border)]"
+          background="primary-50"
+          padded
+        >
+          <PageContainer>
+            <SectionHeader
+              align="center"
+              eyebrow="About Tinies"
+              title="No matter the size."
+              description="Tinies was built with one purpose: to fund the rescue and care of animals who have no one else."
+              className="mx-auto max-w-2xl"
+            />
+          </PageContainer>
+        </Section>
 
         {/* Our story */}
         <section className="px-4 pb-16 sm:px-6 lg:px-8" style={{ paddingBottom: "var(--space-section)" }}>
@@ -349,7 +345,7 @@ export default async function AboutPage() {
               >
                 <div
                   className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-lg)]"
-                  style={{ backgroundColor: "rgba(244, 93, 72, 0.12)", color: "var(--color-secondary)" }}
+                  style={{ backgroundColor: "var(--color-secondary-muted-12)", color: "var(--color-secondary)" }}
                 >
                   <Building2 className="h-6 w-6" aria-hidden />
                 </div>

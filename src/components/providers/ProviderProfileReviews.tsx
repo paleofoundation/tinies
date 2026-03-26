@@ -77,7 +77,7 @@ export function ProviderProfileReviews({ reviews, featuredId, avgRating, reviewC
           className="mt-6 rounded-[var(--radius-xl)] border p-6"
           style={{
             borderColor: "var(--color-primary)",
-            backgroundColor: "rgba(10, 128, 128, 0.06)",
+            backgroundColor: "var(--color-primary-muted-06)",
             boxShadow: "var(--shadow-md)",
           }}
         >

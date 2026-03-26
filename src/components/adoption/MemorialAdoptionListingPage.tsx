@@ -65,8 +65,8 @@ export function MemorialAdoptionListingPage({ listing }: Props) {
   const sectionTitleClass = "text-xs font-semibold uppercase tracking-wide";
   const sectionTitleStyle = { color: "var(--color-text-muted)" } as const;
   const bodyStyle = { fontFamily: "var(--font-body), sans-serif" } as const;
-  const mutedBg = "rgba(10, 128, 128, 0.04)";
-  const softBorder = "rgba(10, 128, 128, 0.12)";
+  const mutedBg = "var(--color-primary-muted-04)";
+  const softBorder = "var(--color-primary-muted-12)";
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: mutedBg, color: "var(--color-text)" }}>
@@ -347,7 +347,7 @@ export function MemorialAdoptionListingPage({ listing }: Props) {
 
               <div
                 className="mt-8 rounded-[var(--radius-lg)] border p-5"
-                style={{ borderColor: "var(--color-border)", backgroundColor: "rgba(10, 128, 128, 0.06)" }}
+                style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-primary-muted-06)" }}
               >
                 <Heart className="h-6 w-6" style={{ color: "var(--color-secondary)" }} aria-hidden />
                 <p className="mt-3 font-normal leading-snug" style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-lg)", color: "var(--color-text)" }}>

@@ -43,7 +43,7 @@ export default async function AdminCampaignsPage() {
                     <p className="font-medium">{c.title}</p>
                     <p className="text-xs text-[var(--color-text-muted)]">{c.slug}</p>
                     {c.featured ? (
-                      <span className="mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-semibold" style={{ backgroundColor: "rgba(244, 93, 72, 0.12)", color: "var(--color-secondary)" }}>
+                      <span className="mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-semibold" style={{ backgroundColor: "var(--color-secondary-muted-12)", color: "var(--color-secondary)" }}>
                         Featured
                       </span>
                     ) : null}

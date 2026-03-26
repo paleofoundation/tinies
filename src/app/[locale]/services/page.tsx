@@ -12,6 +12,8 @@ import {
   Heart,
   Leaf,
 } from "lucide-react";
+import { SectionHeader } from "@/components/marketing";
+import { PageContainer, Section } from "@/components/theme";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -37,23 +39,24 @@ const HOW_IT_WORKS = [
 export default function ServicesPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
-      <section className="relative overflow-hidden px-4 pt-10 pb-12 sm:px-6 sm:pt-14 sm:pb-16 lg:px-8">
-        <div className="absolute inset-0 rounded-b-[3rem] sm:rounded-b-[4rem]" style={{ backgroundColor: "rgba(10, 110, 92, 0.05)" }} />
-        <div className="relative mx-auto text-center" style={{ maxWidth: "var(--max-width)" }}>
-          <h1
-            className="font-normal tracking-tight sm:text-5xl"
-            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-4xl)", color: "var(--color-text)" }}
-          >
-            Find trusted care for your tiny.
-          </h1>
-          <p className="mt-4 mx-auto max-w-xl text-lg" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-            Dog walking, sitting, boarding, drop-ins, and daycare from verified providers in Cyprus.
-          </p>
-        </div>
-      </section>
+      <Section
+        background="transparent"
+        padded
+        className="theme-paper-grid border-b border-[var(--color-border)] !bg-[var(--color-primary-muted-05)]"
+      >
+        <PageContainer>
+          <SectionHeader
+            align="center"
+            eyebrow="Pet care"
+            title="Find trusted care for your tiny."
+            description="Dog walking, sitting, boarding, drop-ins, and daycare from verified providers in Cyprus."
+            className="mx-auto max-w-xl"
+          />
+        </PageContainer>
+      </Section>
 
       <section className="px-4 py-20 sm:px-6 lg:px-8" style={{ paddingTop: "var(--space-section)", paddingBottom: "var(--space-section)" }}>
-        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
+        <PageContainer>
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {CATEGORIES.map((cat) => (
               <Link
@@ -74,11 +77,11 @@ export default function ServicesPage() {
               </Link>
             ))}
           </div>
-        </div>
+        </PageContainer>
       </section>
 
       <section className="rounded-t-[2rem] bg-white px-4 py-20 sm:px-6 lg:px-8" style={{ paddingTop: "var(--space-section)", paddingBottom: "var(--space-section)" }}>
-        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
+        <PageContainer>
           <h2
             className="text-center font-normal"
             style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
@@ -96,11 +99,11 @@ export default function ServicesPage() {
               </div>
             ))}
           </div>
-        </div>
+        </PageContainer>
       </section>
 
       <section className="border-t px-4 py-20 sm:px-6 lg:px-8" style={{ borderColor: "var(--color-border)", paddingTop: "var(--space-section)", paddingBottom: "var(--space-section)" }}>
-        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
+        <PageContainer>
           <div className="flex flex-col gap-10 text-center sm:flex-row sm:justify-around">
             <div className="flex flex-col items-center gap-2">
               <div className="flex h-12 w-12 items-center justify-center rounded-full" style={{ backgroundColor: "var(--color-primary-100)", color: "var(--color-primary)" }}>
@@ -124,7 +127,7 @@ export default function ServicesPage() {
               <p className="text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>Tinies Giving Fund</p>
             </div>
           </div>
-        </div>
+        </PageContainer>
       </section>
     </div>
   );

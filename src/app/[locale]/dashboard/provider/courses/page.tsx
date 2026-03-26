@@ -45,7 +45,7 @@ export default async function ProviderCoursesPage() {
                 {c.required ? (
                   <span
                     className="mb-3 inline-block w-fit rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                    style={{ backgroundColor: "rgba(10, 128, 128, 0.12)", color: "var(--color-primary)" }}
+                    style={{ backgroundColor: "var(--color-primary-muted-12)", color: "var(--color-primary)" }}
                   >
                     Complete to appear in search
                   </span>

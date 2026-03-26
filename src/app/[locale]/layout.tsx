@@ -3,7 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
-import { Roboto } from "next/font/google";
+import { Poppins, Source_Sans_3 } from "next/font/google";
 import { getSiteImageWithFallback } from "@/lib/images/get-site-image";
 import { Toaster } from "sonner";
 import { FeedbackShell } from "@/components/feedback/FeedbackShell";
@@ -13,9 +13,16 @@ import { shouldShowBetaFeedbackUI } from "@/lib/feedback/should-show-beta-ui";
 import { createClient } from "@/lib/supabase/server";
 import { routing } from "@/i18n/routing";
 
-const roboto = Roboto({
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["700", "800", "900"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const sourceSans = Source_Sans_3({
+  subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  subsets: ["latin", "greek", "cyrillic"],
   variable: "--font-body",
   display: "swap",
 });
@@ -73,7 +80,11 @@ export default async function LocaleLayout({ children, params }: Props) {
   }
 
   return (
-    <html lang={locale} className={roboto.variable} suppressHydrationWarning>
+    <html
+      lang={locale}
+      className={`${poppins.variable} ${sourceSans.variable}`}
+      suppressHydrationWarning
+    >
       <body
         className="flex min-h-screen flex-col antialiased"
         style={{

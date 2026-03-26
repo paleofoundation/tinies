@@ -228,7 +228,7 @@ export default async function PublicRescueOrgPage({ params }: Props) {
             <div
               className="h-full w-full"
               style={{
-                background: `linear-gradient(135deg, var(--color-primary) 0%, rgba(10, 128, 128, 0.85) 45%, var(--color-secondary) 100%)`,
+                background: `linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-muted-85) 45%, var(--color-secondary) 100%)`,
               }}
               aria-hidden
             />
@@ -482,7 +482,7 @@ export default async function PublicRescueOrgPage({ params }: Props) {
               className="rounded-[var(--radius-xl)] border p-8 sm:p-10"
               style={{
                 borderColor: "var(--color-border)",
-                backgroundColor: "rgba(10, 128, 128, 0.06)",
+                backgroundColor: "var(--color-primary-muted-06)",
                 boxShadow: "var(--shadow-md)",
               }}
             >
@@ -594,7 +594,7 @@ export default async function PublicRescueOrgPage({ params }: Props) {
                   style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)", boxShadow: "var(--shadow-sm)" }}
                 >
                   <Link href={`/rescue/${org.slug}/campaign/${c.slug}`} className="block">
-                    <div className="relative aspect-[16/9] w-full" style={{ backgroundColor: "rgba(10, 128, 128, 0.08)" }}>
+                    <div className="relative aspect-[16/9] w-full" style={{ backgroundColor: "var(--color-primary-muted-08)" }}>
                       {c.coverPhotoUrl ? (
                         <Image src={c.coverPhotoUrl} alt="" fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
                       ) : null}
@@ -759,7 +759,7 @@ export default async function PublicRescueOrgPage({ params }: Props) {
                     >
                       <div
                         className="relative mx-auto aspect-square w-full overflow-hidden rounded-[var(--radius-xl)] border transition-opacity group-hover:opacity-95"
-                        style={{ borderColor: "var(--color-border)", backgroundColor: "rgba(10, 128, 128, 0.06)" }}
+                        style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-primary-muted-06)" }}
                       >
                         {thumb ? (
                           <Image src={thumb} alt="" fill className="object-cover opacity-90" sizes="160px" />

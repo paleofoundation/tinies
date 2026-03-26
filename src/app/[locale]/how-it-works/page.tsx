@@ -11,6 +11,8 @@ import {
   Home,
 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { EditorialButton, SectionHeader } from "@/components/marketing";
+import { PageContainer, Section } from "@/components/theme";
 import { Link } from "@/i18n/navigation";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
@@ -41,23 +43,25 @@ export default async function HowItWorksPage() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
-      <main className="mx-auto px-4 py-20 sm:px-6 lg:px-8" style={{ maxWidth: "var(--max-width)" }}>
-        <h1
-          className="font-normal tracking-tight sm:text-4xl"
-          style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
-        >
-          {t("title")}
-        </h1>
-        <p className="mt-2 max-w-2xl text-lg" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-          {t("intro")}
-        </p>
+      <Section
+        className="theme-paper-grid border-b border-[var(--color-border)]"
+        background="background"
+        padded
+      >
+        <PageContainer>
+          <SectionHeader
+            title={t("title")}
+            description={t("intro")}
+            className="max-w-3xl"
+          />
+        </PageContainer>
+      </Section>
 
+      <main>
+        <PageContainer className="py-16 sm:py-20">
         {/* For Pet Owners */}
-        <section className="mt-20">
-          <h2
-            className="font-normal"
-            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
-          >
+        <section>
+          <h2 className="theme-display text-[var(--display-md)]" style={{ color: "var(--color-text)" }}>
             {t("forOwnersTitle")}
           </h2>
           <p className="mt-2" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
@@ -91,22 +95,15 @@ export default async function HowItWorksPage() {
             })}
           </ul>
           <div className="mt-10">
-            <Link
-              href="/services/search"
-              className="inline-flex h-12 items-center rounded-[var(--radius-pill)] px-8 font-semibold text-white transition-opacity hover:opacity-90"
-              style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-primary)" }}
-            >
+            <EditorialButton href="/services/search" variant="primary">
               {t("findCareCta")}
-            </Link>
+            </EditorialButton>
           </div>
         </section>
 
         {/* For Adopters */}
         <section className="mt-20">
-          <h2
-            className="font-normal"
-            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
-          >
+          <h2 className="theme-display text-[var(--display-md)]" style={{ color: "var(--color-text)" }}>
             {t("forAdoptersTitle")}
           </h2>
           <p className="mt-2 max-w-2xl" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
@@ -140,13 +137,9 @@ export default async function HowItWorksPage() {
             })}
           </ul>
           <div className="mt-10">
-            <Link
-              href="/adopt"
-              className="inline-flex h-12 items-center rounded-[var(--radius-pill)] px-8 font-semibold text-white transition-opacity hover:opacity-90"
-              style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-secondary)" }}
-            >
+            <EditorialButton href="/adopt" variant="primary">
               {t("browseAnimalsCta")}
-            </Link>
+            </EditorialButton>
           </div>
         </section>
 
@@ -154,11 +147,12 @@ export default async function HowItWorksPage() {
           <Link
             href="/"
             className="hover:underline"
-            style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}
+            style={{ fontFamily: "var(--font-body)", color: "var(--color-text-secondary)" }}
           >
             {t("backHome")}
           </Link>
         </p>
+        </PageContainer>
       </main>
     </div>
   );

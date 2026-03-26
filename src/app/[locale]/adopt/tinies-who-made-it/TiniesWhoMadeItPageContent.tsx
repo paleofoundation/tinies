@@ -65,7 +65,7 @@ export default async function TiniesWhoMadeItPageContent() {
       ) : null}
 
       <section className="relative overflow-hidden px-4 pt-10 pb-12 sm:px-6 sm:pt-14 sm:pb-16 lg:px-8">
-        <div className="absolute inset-0 rounded-b-[3rem] sm:rounded-b-[4rem]" style={{ backgroundColor: "rgba(10, 128, 128, 0.06)" }} />
+        <div className="absolute inset-0 rounded-b-[3rem] sm:rounded-b-[4rem]" style={{ backgroundColor: "var(--color-primary-muted-06)" }} />
         <div className="relative mx-auto text-center" style={{ maxWidth: "var(--max-width)" }}>
           <h1
             className="font-normal tracking-tight sm:text-5xl lg:text-6xl"

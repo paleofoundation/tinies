@@ -299,7 +299,7 @@ function BookingCard({
       {(booking.status === "active" || booking.status === "completed") && (
         <div
           className="mt-4 rounded-[var(--radius-xl)] border p-4 sm:p-5"
-          style={{ borderColor: "var(--color-border)", backgroundColor: "rgba(10, 128, 128, 0.05)" }}
+          style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-primary-muted-05)" }}
         >
           <h4 className="text-sm font-semibold" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}>
             Moments from your carer

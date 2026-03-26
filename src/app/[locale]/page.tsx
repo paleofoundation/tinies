@@ -1,4 +1,5 @@
 import Image from "next/image";
+import type { ReactNode } from "react";
 import {
   Search,
   Calendar,
@@ -10,11 +11,21 @@ import {
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { HomeSearchBar } from "@/components/layout/HomeSearchBar";
+import { BlogCard } from "@/components/blog/BlogCard";
+import {
+  AdoptablesGrid,
+  EditorialButton,
+  FAQStack,
+  HeroEditorial,
+  ProviderGrid,
+  SectionHeader,
+  StatsBand,
+  TestimonialsGrid,
+} from "@/components/marketing";
+import { PageContainer, Section } from "@/components/theme";
 import { getHomepageData } from "@/lib/home/get-homepage-data";
 import { getBlogPostSummaries } from "@/lib/blog/load-posts";
 import { getSiteImageWithFallback } from "@/lib/images/get-site-image";
-import { BlogCard } from "@/components/blog/BlogCard";
-import { FaqEntry } from "@/components/faq/FaqEntry";
 import { formatPrice } from "@/lib/utils";
 
 export const revalidate = 300;
@@ -88,6 +99,12 @@ const homepageFaqJsonLd = {
   })),
 };
 
+const FAQ_STACK_ITEMS = HOMEPAGE_FAQ_ITEMS.map((item, index) => ({
+  id: `home-faq-${index}`,
+  question: item.question,
+  answer: item.answer,
+}));
+
 function formatSpecies(species: string): string {
   if (!species) return "Pet";
   return species.charAt(0).toUpperCase() + species.slice(1).toLowerCase();
@@ -121,6 +138,39 @@ function providerPhoto(p: {
   return first || null;
 }
 
+function HowItWorksCard({
+  icon,
+  title,
+  description,
+}: {
+  icon: ReactNode;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="theme-card flex flex-col rounded-[22px] p-8 text-center">
+      <div
+        className="mx-auto flex h-14 w-14 items-center justify-center rounded-full"
+        style={{ backgroundColor: "var(--color-primary-muted-12)", color: "var(--color-primary)" }}
+      >
+        {icon}
+      </div>
+      <h3
+        className="mt-4 text-lg font-extrabold leading-snug"
+        style={{ fontFamily: "var(--font-display)", color: "var(--color-text)" }}
+      >
+        {title}
+      </h3>
+      <p
+        className="mt-2 text-sm leading-relaxed"
+        style={{ fontFamily: "var(--font-body)", color: "var(--color-text-secondary)" }}
+      >
+        {description}
+      </p>
+    </div>
+  );
+}
+
 export default async function Home() {
   const tHero = await getTranslations("home.hero");
   const tPreview = await getTranslations("home.howItWorksPreview");
@@ -149,223 +199,133 @@ export default async function Home() {
 
   const donationDisplay = formatPrice(donationsTotalCents, { useSymbol: false });
 
+  const stats = [
+    { value: completedBookingsCount.toLocaleString("en-CY"), label: "bookings completed" },
+    { value: fiveStarReviewsCount.toLocaleString("en-CY"), label: "five-star reviews" },
+    { value: completedAdoptionsCount.toLocaleString("en-CY"), label: "animals adopted" },
+    { value: donationDisplay, label: "donated to rescue" },
+  ] as const;
+
+  const campaignSnippet = featuredCampaign
+    ? (featuredCampaign.subtitle?.trim() || featuredCampaign.title).length > 120
+      ? `${(featuredCampaign.subtitle?.trim() || featuredCampaign.title).slice(0, 117)}…`
+      : featuredCampaign.subtitle?.trim() || featuredCampaign.title
+    : null;
+
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}
+    >
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageFaqJsonLd) }} />
 
-      {/* Hero */}
-      <header className="relative min-h-[min(88vh,720px)] overflow-hidden">
-        <Image
-          src={heroImageUrl}
-          alt="Rescue cats at Gardens of St Gertrude sanctuary, Cyprus"
-          fill
-          priority
-          className="object-cover object-center"
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/50 to-black/60" aria-hidden />
-        <div className="relative z-10 flex min-h-[min(88vh,720px)] flex-col justify-end px-4 pb-14 pt-24 sm:px-6 sm:pb-20 sm:pt-28 lg:px-8">
-          <div className="mx-auto w-full text-center" style={{ maxWidth: "var(--max-width)" }}>
-            <h1
-              className="font-normal tracking-tight text-white drop-shadow-sm sm:text-5xl md:text-6xl"
-              style={{ fontFamily: "var(--font-heading), serif", fontSize: "clamp(2.25rem, 5vw, 3.5rem)", lineHeight: 1.1 }}
+      <HeroEditorial
+        bleedClassName="theme-paper-grid bg-[var(--color-background)]"
+        eyebrow={tHero("subtagline")}
+        title={tHero("title")}
+        description={tHero("tagline")}
+        image={{ src: heroImageUrl, alt: "Rescue cats at Gardens of St Gertrude sanctuary, Cyprus", priority: true }}
+        overlappingCard={
+          featuredCampaign ? (
+            <div
+              className="theme-card rounded-[var(--radius-xl)] px-4 py-3 text-center text-sm shadow-[var(--shadow-md)] sm:text-base"
+              style={{ fontFamily: "var(--font-body)" }}
             >
-              {tHero("title")}
-            </h1>
-            <p
-              className="mx-auto mt-5 max-w-2xl text-lg text-white/95 sm:text-xl"
-              style={{ fontFamily: "var(--font-body), sans-serif", textShadow: "0 1px 12px rgba(0,0,0,0.35)" }}
-            >
-              {tHero("tagline")}
-            </p>
-
-            <div className="mt-8 flex flex-col items-center gap-4">
-              <HomeSearchBar variant="hero" />
-              {featuredCampaign ? (
-                <div
-                  className="mx-auto flex max-w-2xl flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-[var(--radius-pill)] border px-4 py-2.5 text-center text-sm shadow-sm backdrop-blur-sm sm:text-base"
-                  style={{
-                    fontFamily: "var(--font-body), sans-serif",
-                    borderColor: "var(--color-secondary)",
-                    backgroundColor: "rgba(0, 0, 0, 0.28)",
-                    color: "rgba(255,255,255,0.95)",
-                  }}
-                >
-                  <span className="font-medium" style={{ color: "rgba(255,255,255,0.98)" }}>
-                    Right now:{" "}
-                    <span className="font-normal">
-                      {(featuredCampaign.subtitle?.trim() || featuredCampaign.title).length > 120
-                        ? `${(featuredCampaign.subtitle?.trim() || featuredCampaign.title).slice(0, 117)}…`
-                        : featuredCampaign.subtitle?.trim() || featuredCampaign.title}
-                    </span>
-                  </span>
-                  <Link
-                    href={`/rescue/${featuredCampaign.orgSlug}/campaign/${featuredCampaign.slug}`}
-                    className="inline-flex shrink-0 items-center font-semibold underline-offset-2 transition-opacity hover:opacity-90"
-                    style={{ color: "var(--color-secondary)" }}
-                  >
-                    Learn more
-                  </Link>
-                </div>
-              ) : null}
-              <div
-                className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm sm:text-base"
-                style={{ fontFamily: "var(--font-body), sans-serif", color: "rgba(255,255,255,0.92)" }}
+              <span className="font-semibold" style={{ color: "var(--color-text)" }}>
+                Right now: <span className="font-normal">{campaignSnippet}</span>
+              </span>{" "}
+              <Link
+                href={`/rescue/${featuredCampaign.orgSlug}/campaign/${featuredCampaign.slug}`}
+                className="inline-block font-semibold underline-offset-2 hover:underline"
+                style={{ color: "var(--color-secondary)" }}
               >
-                <span>92+ verified providers</span>
-                <span className="hidden sm:inline" aria-hidden>
-                  •
-                </span>
-                <span>90% to animal rescue</span>
-                <span className="hidden sm:inline" aria-hidden>
-                  •
-                </span>
-                <span>EUR 2,000 guarantee</span>
-              </div>
-              <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
-                <Link
-                  href="/services/search"
-                  className="inline-flex h-11 items-center justify-center rounded-full border-2 border-white/90 bg-white/10 px-6 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
-                  style={{ fontFamily: "var(--font-body), sans-serif" }}
-                >
-                  Book now
-                </Link>
-                <Link
-                  href="/how-it-works"
-                  className="inline-flex h-11 items-center justify-center rounded-full border-2 border-white/50 bg-transparent px-6 text-sm font-semibold text-white transition-colors hover:border-white hover:bg-white/10"
-                  style={{ fontFamily: "var(--font-body), sans-serif" }}
-                >
-                  Meet & greet
-                </Link>
-              </div>
+                Learn more
+              </Link>
             </div>
-          </div>
-        </div>
-      </header>
+          ) : undefined
+        }
+        actions={
+          <>
+            <div className="w-full max-w-3xl">
+              <HomeSearchBar variant="hero" />
+            </div>
+            <div
+              className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm sm:text-base"
+              style={{ fontFamily: "var(--font-body)", color: "var(--color-text-secondary)" }}
+            >
+              <span>92+ verified providers</span>
+              <span className="hidden sm:inline" style={{ color: "var(--color-text-muted)" }} aria-hidden>
+                •
+              </span>
+              <span>90% to animal rescue</span>
+              <span className="hidden sm:inline" style={{ color: "var(--color-text-muted)" }} aria-hidden>
+                •
+              </span>
+              <span>EUR 2,000 guarantee</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <EditorialButton href="/services/search" variant="primary">
+                Book now
+              </EditorialButton>
+              <EditorialButton href="/how-it-works" variant="secondary">
+                Meet & greet
+              </EditorialButton>
+            </div>
+          </>
+        }
+      />
 
-      {/* Social proof bar */}
-      <section
-        className="border-b px-4 py-6 sm:px-6 lg:px-8"
-        style={{ borderColor: "var(--color-border)", backgroundColor: "rgba(10, 128, 128, 0.06)" }}
-      >
-        <div className="mx-auto flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-10 sm:gap-y-3" style={{ maxWidth: "var(--max-width)" }}>
-          <p className="text-center sm:text-left" style={{ fontFamily: "var(--font-body), sans-serif" }}>
-            <span className="text-lg font-bold sm:text-xl" style={{ color: "var(--color-primary)" }}>
-              {completedBookingsCount.toLocaleString("en-CY")}
-            </span>{" "}
-            <span style={{ color: "var(--color-text-secondary)" }}>bookings completed</span>
-          </p>
-          <span className="hidden text-[var(--color-text-muted)] sm:inline" aria-hidden>
-            •
-          </span>
-          <p className="text-center sm:text-left" style={{ fontFamily: "var(--font-body), sans-serif" }}>
-            <span className="text-lg font-bold sm:text-xl" style={{ color: "var(--color-primary)" }}>
-              {fiveStarReviewsCount.toLocaleString("en-CY")}
-            </span>{" "}
-            <span style={{ color: "var(--color-text-secondary)" }}>five-star reviews</span>
-          </p>
-          <span className="hidden text-[var(--color-text-muted)] sm:inline" aria-hidden>
-            •
-          </span>
-          <p className="text-center sm:text-left" style={{ fontFamily: "var(--font-body), sans-serif" }}>
-            <span className="text-lg font-bold sm:text-xl" style={{ color: "var(--color-primary)" }}>
-              {completedAdoptionsCount.toLocaleString("en-CY")}
-            </span>{" "}
-            <span style={{ color: "var(--color-text-secondary)" }}>animals adopted</span>
-          </p>
-          <span className="hidden text-[var(--color-text-muted)] sm:inline" aria-hidden>
-            •
-          </span>
-          <p className="text-center sm:text-left" style={{ fontFamily: "var(--font-body), sans-serif" }}>
-            <span className="text-lg font-bold sm:text-xl" style={{ color: "var(--color-primary)" }}>
-              {donationDisplay}
-            </span>{" "}
-            <span style={{ color: "var(--color-text-secondary)" }}>donated to rescue</span>
-          </p>
-        </div>
-      </section>
+      <StatsBand stats={stats} />
 
-      {/* How it works */}
-      <section className="px-4 py-20 sm:px-6 lg:px-8" style={{ paddingTop: "var(--space-section)", paddingBottom: "var(--space-section)" }}>
-        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
-          <h2
-            className="text-center"
-            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
-          >
-            {tPreview("title")}
-          </h2>
-          <p className="mx-auto mt-2 max-w-lg text-center" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-            {tPreview("subtitle")}
-          </p>
+      <Section background="background" padded className="border-b border-[var(--color-border)]">
+        <PageContainer>
+          <SectionHeader
+            align="center"
+            title={tPreview("title")}
+            description={tPreview("subtitle")}
+            className="mx-auto"
+          />
           <div className="mt-12 grid gap-8 sm:grid-cols-3 sm:gap-6">
-            <div
-              className="flex flex-col rounded-[var(--radius-xl)] border border-[var(--color-primary)]/15 bg-white p-8 text-center shadow-[var(--shadow-sm)]"
-              style={{ boxShadow: "var(--shadow-md)" }}
-            >
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full" style={{ backgroundColor: "rgba(10, 128, 128, 0.12)", color: "var(--color-primary)" }}>
-                <Search className="h-7 w-7" strokeWidth={1.75} />
-              </div>
-              <h3 className="mt-4 font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
-                {tPreview("stepSearch")}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-                {tPreview("stepSearchDesc")}
-              </p>
-            </div>
-            <div
-              className="flex flex-col rounded-[var(--radius-xl)] border border-[var(--color-primary)]/15 bg-white p-8 text-center shadow-[var(--shadow-sm)]"
-              style={{ boxShadow: "var(--shadow-md)" }}
-            >
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full" style={{ backgroundColor: "rgba(10, 128, 128, 0.12)", color: "var(--color-primary)" }}>
-                <Calendar className="h-7 w-7" strokeWidth={1.75} />
-              </div>
-              <h3 className="mt-4 font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
-                {tPreview("stepBook")}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-                {tPreview("stepBookDesc")}
-              </p>
-            </div>
-            <div
-              className="flex flex-col rounded-[var(--radius-xl)] border border-[var(--color-primary)]/15 bg-white p-8 text-center shadow-[var(--shadow-sm)]"
-              style={{ boxShadow: "var(--shadow-md)" }}
-            >
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full" style={{ backgroundColor: "rgba(10, 128, 128, 0.12)", color: "var(--color-primary)" }}>
-                <Heart className="h-7 w-7" strokeWidth={1.75} />
-              </div>
-              <h3 className="mt-4 font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
-                {tPreview("stepRelax")}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-                {tPreview("stepRelaxDesc")}
-              </p>
-            </div>
+            <HowItWorksCard
+              icon={<Search className="h-7 w-7" strokeWidth={1.75} />}
+              title={tPreview("stepSearch")}
+              description={tPreview("stepSearchDesc")}
+            />
+            <HowItWorksCard
+              icon={<Calendar className="h-7 w-7" strokeWidth={1.75} />}
+              title={tPreview("stepBook")}
+              description={tPreview("stepBookDesc")}
+            />
+            <HowItWorksCard
+              icon={<Heart className="h-7 w-7" strokeWidth={1.75} />}
+              title={tPreview("stepRelax")}
+              description={tPreview("stepRelaxDesc")}
+            />
           </div>
-        </div>
-      </section>
+        </PageContainer>
+      </Section>
 
-      {/* Featured providers */}
-      <section className="border-t px-4 py-20 sm:px-6 lg:px-8" style={{ borderColor: "var(--color-border)", paddingTop: "var(--space-section)", paddingBottom: "var(--space-section)" }}>
-        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
-          <h2
-            className="text-center"
-            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
-          >
-            Trusted by pet owners across Cyprus
-          </h2>
-          <p className="mx-auto mt-2 max-w-xl text-center text-sm sm:text-base" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-            Verified carers with real reviews. Tap a profile to book or request a meet-and-greet.
-          </p>
+      <Section background="surface" padded className="border-b border-[var(--color-border)]">
+        <PageContainer>
+          <SectionHeader
+            align="center"
+            eyebrow="Verified carers"
+            title="Trusted by pet owners across Cyprus"
+            description="Verified carers with real reviews. Tap a profile to book or request a meet-and-greet."
+          />
           {featuredProviders.length === 0 ? (
-            <p className="mt-10 text-center text-sm" style={{ color: "var(--color-text-secondary)" }}>
+            <p
+              className="mt-10 text-center text-sm"
+              style={{ fontFamily: "var(--font-body)", color: "var(--color-text-secondary)" }}
+            >
               Verified providers will appear here as they join.{" "}
               <Link href="/services/search" className="font-semibold hover:underline" style={{ color: "var(--color-primary)" }}>
                 Browse search
               </Link>
             </p>
           ) : (
-            <div className="mt-10 flex gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-4 snap-x snap-mandatory sm:snap-none">
+            <ProviderGrid className="mt-10">
               {featuredProviders.map((p) => {
                 const img = providerPhoto(p);
                 const rating = p.avgRating ?? 0;
@@ -373,17 +333,19 @@ export default async function Home() {
                   <Link
                     key={p.slug}
                     href={`/services/provider/${p.slug}`}
-                    className="w-[min(280px,82vw)] shrink-0 snap-center overflow-hidden rounded-[var(--radius-xl)] border transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)] sm:w-auto"
-                    style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)", boxShadow: "var(--shadow-md)" }}
+                    className="theme-card block overflow-hidden rounded-[22px] no-underline"
                   >
-                    <div className="relative aspect-[4/3] w-full" style={{ backgroundColor: "rgba(10, 128, 128, 0.08)" }}>
+                    <div
+                      className="relative aspect-[4/3] w-full"
+                      style={{ backgroundColor: "var(--color-primary-muted-08)" }}
+                    >
                       {img ? (
                         <Image
                           src={img}
                           alt={`${p.displayName}, verified pet care provider`}
                           fill
                           className="object-cover"
-                          sizes="(max-width: 640px) 82vw, (max-width: 1024px) 50vw, 25vw"
+                          sizes="(max-width: 768px) 100vw, 50vw"
                         />
                       ) : (
                         <div className="flex h-full items-center justify-center text-4xl" aria-hidden>
@@ -392,7 +354,7 @@ export default async function Home() {
                       )}
                     </div>
                     <div className="p-5 text-left">
-                      <p className="font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
+                      <p className="font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--color-text)" }}>
                         {p.displayName}
                       </p>
                       <div className="mt-1 flex flex-wrap items-center gap-2">
@@ -407,7 +369,10 @@ export default async function Home() {
                         </p>
                       ) : null}
                       {p.district ? (
-                        <p className="mt-2 text-xs font-medium uppercase tracking-wide" style={{ color: "var(--color-primary)" }}>
+                        <p
+                          className="mt-2 text-xs font-medium uppercase tracking-wide"
+                          style={{ color: "var(--color-primary)" }}
+                        >
                           {p.district}
                         </p>
                       ) : null}
@@ -415,51 +380,49 @@ export default async function Home() {
                   </Link>
                 );
               })}
-            </div>
+            </ProviderGrid>
           )}
-        </div>
-      </section>
+        </PageContainer>
+      </Section>
 
-      {/* Tinies looking for homes */}
-      <section
-        className="rounded-t-[2rem] px-4 py-20 sm:px-6 sm:rounded-t-[3rem] lg:px-8"
-        style={{ paddingTop: "var(--space-section)", paddingBottom: "var(--space-section)", backgroundColor: "var(--color-surface)" }}
-      >
-        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
-          <h2
-            className="text-center"
-            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
-          >
-            Tinies looking for homes
-          </h2>
-          <p className="mx-auto mt-2 max-w-lg text-center" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-            Adopt a rescue animal and give them a forever home.
-          </p>
+      <Section background="background" padded className="border-b border-[var(--color-border)]">
+        <PageContainer>
+          <SectionHeader
+            align="center"
+            eyebrow="Adoption"
+            title="Tinies looking for homes"
+            description="Adopt a rescue animal and give them a forever home."
+          />
           {featuredListings.length === 0 ? (
-            <p className="mt-12 text-center text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+            <p
+              className="mt-12 text-center text-sm"
+              style={{ fontFamily: "var(--font-body)", color: "var(--color-text-secondary)" }}
+            >
               New adoptable animals will appear here soon.{" "}
               <Link href="/adopt" className="font-semibold hover:underline" style={{ color: "var(--color-primary)" }}>
                 Browse all adoptions
               </Link>
             </p>
           ) : (
-            <div className="mt-12 flex gap-6 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-4 snap-x snap-mandatory sm:snap-none">
+            <AdoptablesGrid className="mt-12">
               {featuredListings.map((listing) => {
                 const photo = listing.photos[0];
                 return (
                   <article
                     key={listing.slug}
-                    className="w-[min(280px,85vw)] shrink-0 snap-center overflow-hidden rounded-[var(--radius-xl)] border transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)] sm:w-auto"
-                    style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)", boxShadow: "var(--shadow-md)" }}
+                    className="theme-card flex flex-col overflow-hidden rounded-[22px]"
                   >
-                    <div className="relative aspect-[4/3] w-full border-b" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}>
+                    <div
+                      className="relative aspect-[4/3] w-full border-b"
+                      style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-background)" }}
+                    >
                       {photo ? (
                         <Image
                           src={photo}
                           alt={`${listing.name}, ${formatSpecies(listing.species)} — adoptable`}
                           fill
                           className="object-cover"
-                          sizes="(max-width: 640px) 85vw, (max-width: 1024px) 50vw, 25vw"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                         />
                       ) : (
                         <div className="flex h-full items-center justify-center text-6xl" aria-hidden>
@@ -467,24 +430,24 @@ export default async function Home() {
                         </div>
                       )}
                     </div>
-                    <div className="p-5">
-                      <h3 className="font-semibold" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
+                    <div className="flex flex-1 flex-col p-5">
+                      <h3 className="font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--color-text)" }}>
                         {listing.name}
                       </h3>
-                      <p className="text-sm" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+                      <p className="text-sm" style={{ fontFamily: "var(--font-body)", color: "var(--color-text-secondary)" }}>
                         {listing.breed ? `${listing.breed} · ` : ""}
                         {formatSpecies(listing.species)}
                         {listing.estimatedAge ? ` · ${listing.estimatedAge}` : ""}
                       </p>
                       {listing.personalitySnippet ? (
-                        <p className="mt-2 line-clamp-3 text-sm leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
+                        <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
                           {listing.personalitySnippet}
                         </p>
                       ) : null}
                       <Link
                         href={`/adopt/${listing.slug}`}
                         className="mt-4 inline-flex items-center gap-1 text-sm font-semibold hover:underline"
-                        style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-primary)" }}
+                        style={{ fontFamily: "var(--font-body)", color: "var(--color-primary)" }}
                       >
                         Meet {listing.name}
                         <ArrowRight className="h-4 w-4" aria-hidden />
@@ -493,142 +456,138 @@ export default async function Home() {
                   </article>
                 );
               })}
-            </div>
+            </AdoptablesGrid>
           )}
           <div className="mt-10 text-center">
-            <Link
-              href="/adopt"
-              className="inline-flex items-center gap-2 font-semibold hover:underline"
-              style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-primary)" }}
-            >
-              View all adoptable tinies
-              <span aria-hidden>→</span>
-            </Link>
+            <EditorialButton href="/adopt" variant="secondary">
+              View all adoptable tinies →
+            </EditorialButton>
           </div>
-        </div>
-      </section>
+        </PageContainer>
+      </Section>
 
-      {/* The Tinies Promise */}
-      <section className="border-t px-4 py-20 sm:px-6 lg:px-8" style={{ borderColor: "var(--color-border)", paddingTop: "var(--space-section)", paddingBottom: "var(--space-section)" }}>
-        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
-          <h2
-            className="text-center"
-            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
-          >
-            Why Tinies is different
-          </h2>
+      <Section background="background" padded className="border-b border-[var(--color-border)]">
+        <PageContainer>
+          <SectionHeader
+            align="center"
+            eyebrow="Our model"
+            title="Why Tinies is different"
+            className="mx-auto max-w-2xl"
+          />
           <div className="mt-12 grid gap-10 md:grid-cols-3 md:gap-8">
             <div className="text-center md:text-left">
-              <h3 className="text-lg font-semibold" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-primary)" }}>
+              <h3
+                className="text-lg font-extrabold"
+                style={{ fontFamily: "var(--font-display)", color: "var(--color-primary)" }}
+              >
                 90% to rescue
               </h3>
-              <p className="mt-3 text-sm leading-relaxed sm:text-base" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-                We&apos;re not a business that donates. We&apos;re a rescue operation that runs a marketplace. 90% of every commission feeds, shelters, and provides vet care for rescue animals.
+              <p
+                className="mt-3 text-sm leading-relaxed sm:text-base"
+                style={{ fontFamily: "var(--font-body)", color: "var(--color-text-secondary)" }}
+              >
+                We&apos;re not a business that donates. We&apos;re a rescue operation that runs a marketplace. 90% of every
+                commission feeds, shelters, and provides vet care for rescue animals.
               </p>
             </div>
             <div className="text-center md:text-left">
-              <h3 className="text-lg font-semibold" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-primary)" }}>
+              <h3
+                className="text-lg font-extrabold"
+                style={{ fontFamily: "var(--font-display)", color: "var(--color-primary)" }}
+              >
                 Real verification
               </h3>
-              <p className="mt-3 text-sm leading-relaxed sm:text-base" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+              <p
+                className="mt-3 text-sm leading-relaxed sm:text-base"
+                style={{ fontFamily: "var(--font-body)", color: "var(--color-text-secondary)" }}
+              >
                 Every provider is identity-verified. Every rescue org is registered. Every euro is tracked.
               </p>
             </div>
             <div className="text-center md:text-left">
-              <h3 className="text-lg font-semibold" style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-primary)" }}>
+              <h3
+                className="text-lg font-extrabold"
+                style={{ fontFamily: "var(--font-display)", color: "var(--color-primary)" }}
+              >
                 The Tinies Guarantee
               </h3>
-              <p className="mt-3 text-sm leading-relaxed sm:text-base" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+              <p
+                className="mt-3 text-sm leading-relaxed sm:text-base"
+                style={{ fontFamily: "var(--font-body)", color: "var(--color-text-secondary)" }}
+              >
                 Up to EUR 2,000 vet coverage. Full refund for no-shows. Your pet is protected.
               </p>
             </div>
           </div>
-        </div>
-      </section>
+        </PageContainer>
+      </Section>
 
-      {/* Recent reviews */}
-      <section
-        className="border-t px-4 py-20 sm:px-6 lg:px-8"
-        style={{
-          borderColor: "var(--color-border)",
-          paddingTop: "var(--space-section)",
-          paddingBottom: "var(--space-section)",
-          backgroundColor: "rgba(10, 128, 128, 0.04)",
-        }}
+      <TestimonialsGrid
+        background="primary-50"
+        intro={
+          <SectionHeader
+            align="center"
+            eyebrow="Community"
+            title="What pet owners are saying"
+            className="mx-auto"
+          />
+        }
       >
-        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
-          <h2
-            className="text-center"
-            style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
+        {recentReviews.length === 0 ? (
+          <p
+            className="col-span-full text-center text-sm"
+            style={{ fontFamily: "var(--font-body)", color: "var(--color-text-secondary)" }}
           >
-            What pet owners are saying
-          </h2>
-          {recentReviews.length === 0 ? (
-            <p className="mt-10 text-center text-sm" style={{ color: "var(--color-text-secondary)" }}>
-              Reviews from completed bookings will show here.
-            </p>
-          ) : (
-            <ul className="mt-12 grid list-none gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {recentReviews.map((r) => (
-                <li
-                  key={r.id}
-                  className="flex flex-col rounded-[var(--radius-xl)] border bg-white p-6 shadow-[var(--shadow-sm)]"
-                  style={{ borderColor: "var(--color-border)" }}
-                >
-                  <StarRow rating={r.rating} />
-                  <p className="mt-3 flex-1 text-sm leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}>
-                    &ldquo;{r.textExcerpt}&rdquo;
-                  </p>
-                  <p className="mt-4 text-xs" style={{ color: "var(--color-text-secondary)" }}>
-                    {r.reviewerFirstName} ·{" "}
-                    <Link href={`/services/provider/${r.providerSlug}`} className="font-medium hover:underline" style={{ color: "var(--color-primary)" }}>
-                      {r.providerName}
-                    </Link>
-                    <br />
-                    <time dateTime={r.createdAt.toISOString()}>{r.createdAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</time>
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </section>
-
-      {/* From the blog */}
-      {recentPosts.length > 0 ? (
-        <section
-          className="border-t px-4 py-20 sm:px-6 lg:px-8"
-          style={{
-            borderColor: "var(--color-border)",
-            paddingTop: "var(--space-section)",
-            paddingBottom: "var(--space-section)",
-          }}
-        >
-          <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
-            <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
-              <div>
-                <h2
-                  className="flex items-center gap-2"
-                  style={{
-                    fontFamily: "var(--font-heading), serif",
-                    fontSize: "var(--text-3xl)",
-                    color: "var(--color-text)",
-                  }}
-                >
-                  <BookOpen className="h-8 w-8 shrink-0 text-[var(--color-primary)]" aria-hidden />
-                  From the blog
-                </h2>
-                <p className="mt-2 max-w-lg" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
-                  Pet care tips, adoption guides, and rescue stories from Cyprus.
-                </p>
-              </div>
-              <Link
-                href="/blog"
-                className="shrink-0 text-sm font-semibold hover:underline"
-                style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-primary)" }}
+            Reviews from completed bookings will show here.
+          </p>
+        ) : (
+          recentReviews.map((r) => (
+            <div
+              key={r.id}
+              className="theme-card flex flex-col rounded-[var(--radius-xl)] p-6"
+            >
+              <StarRow rating={r.rating} />
+              <p
+                className="mt-3 flex-1 text-sm leading-relaxed"
+                style={{ fontFamily: "var(--font-body)", color: "var(--color-text)" }}
               >
-                View all posts →
-              </Link>
+                &ldquo;{r.textExcerpt}&rdquo;
+              </p>
+              <p className="mt-4 text-xs" style={{ color: "var(--color-text-secondary)" }}>
+                {r.reviewerFirstName} ·{" "}
+                <Link href={`/services/provider/${r.providerSlug}`} className="font-medium hover:underline" style={{ color: "var(--color-primary)" }}>
+                  {r.providerName}
+                </Link>
+                <br />
+                <time dateTime={r.createdAt.toISOString()}>
+                  {r.createdAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                </time>
+              </p>
+            </div>
+          ))
+        )}
+      </TestimonialsGrid>
+
+      {recentPosts.length > 0 ? (
+        <Section background="background" padded className="border-b border-[var(--color-border)]">
+          <PageContainer>
+            <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
+              <div className="flex items-start gap-3">
+                <BookOpen
+                  className="mt-1 h-8 w-8 shrink-0"
+                  style={{ color: "var(--color-primary)" }}
+                  aria-hidden
+                />
+                <SectionHeader
+                  eyebrow="Resources"
+                  title="From the blog"
+                  description="Pet care tips, adoption guides, and rescue stories from Cyprus."
+                  className="max-w-lg"
+                />
+              </div>
+              <EditorialButton href="/blog" variant="secondary" className="shrink-0">
+                View all posts
+              </EditorialButton>
             </div>
             <ul className="mt-12 grid list-none gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {recentPosts.map((post) => (
@@ -637,55 +596,32 @@ export default async function Home() {
                 </li>
               ))}
             </ul>
-          </div>
-        </section>
+          </PageContainer>
+        </Section>
       ) : null}
 
-      {/* Common questions */}
       <section
-        className="border-t px-4 py-20 sm:px-6 lg:px-8"
-        style={{
-          borderColor: "var(--color-border)",
-          paddingTop: "var(--space-section)",
-          paddingBottom: "var(--space-section)",
-          backgroundColor: "var(--color-background)",
-        }}
+        className="theme-section border-b border-[var(--color-border)]"
+        style={{ backgroundColor: "var(--color-background)" }}
         aria-labelledby="homepage-faq-heading"
       >
-        <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
+        <PageContainer>
           <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
             <h2
               id="homepage-faq-heading"
-              className="font-normal"
-              style={{
-                fontFamily: "var(--font-heading), serif",
-                fontSize: "var(--text-3xl)",
-                color: "var(--color-text)",
-              }}
+              className="theme-display text-[var(--display-md)]"
+              style={{ color: "var(--color-text)" }}
             >
               Common questions
             </h2>
-            <Link
-              href="/faq"
-              className="shrink-0 text-sm font-semibold hover:underline"
-              style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-primary)" }}
-            >
-              See all FAQs →
-            </Link>
+            <EditorialButton href="/faq" variant="secondary" className="shrink-0">
+              See all FAQs
+            </EditorialButton>
           </div>
-          <ul className="mt-10 flex list-none flex-col gap-3 sm:mt-12">
-            {HOMEPAGE_FAQ_ITEMS.map((item) => (
-              <li key={item.question}>
-                <FaqEntry question={item.question}>
-                  <p>{item.answer}</p>
-                </FaqEntry>
-              </li>
-            ))}
-          </ul>
-        </div>
+          <FAQStack items={FAQ_STACK_ITEMS} className="mt-10 sm:mt-12" />
+        </PageContainer>
       </section>
 
-      {/* Gardens of St Gertrude */}
       <section className="relative min-h-[420px] overflow-hidden sm:min-h-[480px]">
         <Image
           src={sanctuaryImageUrl}
@@ -696,53 +632,64 @@ export default async function Home() {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/40" aria-hidden />
         <div className="relative z-10 flex min-h-[420px] flex-col justify-center px-4 py-16 sm:min-h-[480px] sm:px-10 lg:px-16">
-          <div className="mx-auto w-full" style={{ maxWidth: "var(--max-width)" }}>
+          <PageContainer>
+            <p className="theme-eyebrow mb-3" style={{ color: "rgba(255,255,255,0.85)" }}>
+              Gardens of St Gertrude
+            </p>
             <h2
-              className="max-w-xl text-3xl font-normal text-white sm:text-4xl"
-              style={{ fontFamily: "var(--font-heading), serif", textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}
+              className="theme-display max-w-xl text-[clamp(1.75rem,4vw,2.75rem)] text-white"
+              style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}
             >
               This is where it started. 92 cats. One sanctuary. Every booking helps.
             </h2>
-            <div className="mt-8 flex flex-wrap gap-4">
-              <Link
+            <div className="mt-8 flex flex-wrap gap-3">
+              <EditorialButton
                 href="/about"
-                className="inline-flex h-12 items-center rounded-full bg-white px-6 text-sm font-semibold transition-opacity hover:opacity-90"
-                style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-primary)" }}
+                variant="secondary"
+                className="!border-white !bg-white !text-[var(--color-primary)] shadow-[var(--shadow-md)] hover:!bg-white/95"
               >
                 Learn our story
-              </Link>
+              </EditorialButton>
               <Link
                 href="/giving"
-                className="inline-flex h-12 items-center rounded-full border-2 border-white/90 px-6 text-sm font-semibold text-white transition-colors hover:bg-white/10"
-                style={{ fontFamily: "var(--font-body), sans-serif" }}
+                className="theme-btn-secondary inline-flex min-h-11 items-center justify-center border-white bg-transparent px-6 py-2.5 text-sm font-bold text-white shadow-none hover:bg-white/10"
               >
                 Support the sanctuary
               </Link>
             </div>
-          </div>
+          </PageContainer>
         </div>
       </section>
 
-      {/* Become a Guardian */}
-      <section className="px-4 py-16 sm:px-6 sm:py-20 lg:px-8" style={{ backgroundColor: "var(--color-primary)" }}>
-        <div className="mx-auto text-center" style={{ maxWidth: "42rem" }}>
-          <h2 className="text-2xl font-normal text-white sm:text-3xl" style={{ fontFamily: "var(--font-heading), serif" }}>
-            {activeGuardiansCount > 0
-              ? `Join ${activeGuardiansCount.toLocaleString("en-CY")} Tinies Guardians supporting rescue animals every month`
-              : "Join Tinies Guardians supporting rescue animals every month"}
-          </h2>
-          <p className="mt-4 text-white/90" style={{ fontFamily: "var(--font-body), sans-serif" }}>
-            Starting from EUR 3/month — 100% goes to the sanctuary you choose.
-          </p>
-          <Link
-            href="/giving/become-a-guardian"
-            className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-white px-8 text-sm font-semibold transition-opacity hover:opacity-90"
-            style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-primary)" }}
-          >
-            Become a Guardian
-          </Link>
-        </div>
-      </section>
+      <Section background="primary" padded className="!py-14 sm:!py-16">
+        <PageContainer>
+          <div className="mx-auto max-w-2xl text-center">
+            <h2
+              className="theme-display text-[var(--display-md)] text-white"
+              style={{ lineHeight: 1.05 }}
+            >
+              {activeGuardiansCount > 0
+                ? `Join ${activeGuardiansCount.toLocaleString("en-CY")} Tinies Guardians supporting rescue animals every month`
+                : "Join Tinies Guardians supporting rescue animals every month"}
+            </h2>
+            <p
+              className="mt-4 text-base leading-relaxed text-white/90 sm:text-lg"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              Starting from EUR 3/month — 100% goes to the sanctuary you choose.
+            </p>
+            <div className="mt-8 flex justify-center">
+              <EditorialButton
+                href="/giving/become-a-guardian"
+                variant="secondary"
+                className="!border-transparent !bg-white !text-[var(--color-primary)] shadow-[var(--shadow-md)] hover:!bg-white/95"
+              >
+                Become a Guardian
+              </EditorialButton>
+            </div>
+          </div>
+        </PageContainer>
+      </Section>
     </div>
   );
 }

@@ -250,7 +250,7 @@ export const ProviderRichProfileFields = forwardRef<ProviderRichProfileFieldsHan
                 className="inline-flex cursor-pointer items-center gap-2 rounded-[var(--radius-pill)] border px-3 py-1.5 text-sm"
                 style={{
                   borderColor: experienceTags.has(tag) ? "var(--color-primary)" : "var(--color-border)",
-                  backgroundColor: experienceTags.has(tag) ? "rgba(10, 128, 128, 0.08)" : "transparent",
+                  backgroundColor: experienceTags.has(tag) ? "var(--color-primary-muted-08)" : "transparent",
                   color: "var(--color-text)",
                 }}
               >
@@ -340,7 +340,7 @@ export const ProviderRichProfileFields = forwardRef<ProviderRichProfileFieldsHan
                     type="button"
                     onClick={() => setQualRows((rows) => rows.filter((_, i) => i !== idx))}
                     className="mt-2 inline-flex items-center gap-1 text-sm font-medium"
-                    style={{ color: "var(--color-error, #DC2626)" }}
+                    style={{ color: "var(--color-error)" }}
                   >
                     <Trash2 className="h-4 w-4" aria-hidden />
                     Remove
@@ -362,7 +362,7 @@ export const ProviderRichProfileFields = forwardRef<ProviderRichProfileFieldsHan
                 className="inline-flex cursor-pointer items-center gap-2 rounded-[var(--radius-pill)] border px-3 py-1.5 text-sm"
                 style={{
                   borderColor: languages.has(lang) ? "var(--color-primary)" : "var(--color-border)",
-                  backgroundColor: languages.has(lang) ? "rgba(10, 128, 128, 0.08)" : "transparent",
+                  backgroundColor: languages.has(lang) ? "var(--color-primary-muted-08)" : "transparent",
                 }}
               >
                 <input type="checkbox" className="sr-only" checked={languages.has(lang)} onChange={() => toggleLang(lang)} />

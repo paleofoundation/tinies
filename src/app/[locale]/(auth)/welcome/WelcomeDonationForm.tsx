@@ -95,7 +95,7 @@ export function WelcomeDonationForm({ charities, nextPath }: Props) {
               className="rounded-[var(--radius-lg)] border-2 px-4 py-2.5 text-sm font-semibold transition-colors disabled:opacity-50"
               style={{
                 borderColor: active ? "var(--color-primary)" : "var(--color-border)",
-                backgroundColor: active ? "rgba(10, 128, 128, 0.08)" : "transparent",
+                backgroundColor: active ? "var(--color-primary-muted-08)" : "transparent",
                 color: "var(--color-text)",
                 fontFamily: "var(--font-body), sans-serif",
               }}

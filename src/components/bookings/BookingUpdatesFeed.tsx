@@ -81,7 +81,7 @@ export function BookingUpdatesFeed({ bookingId, pollWhileActive }: Props) {
         >
           <div
             className="flex items-center gap-3 border-b px-4 py-3"
-            style={{ borderColor: "var(--color-border)", backgroundColor: "rgba(10, 128, 128, 0.06)" }}
+            style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-primary-muted-06)" }}
           >
             <div
               className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-semibold text-white"

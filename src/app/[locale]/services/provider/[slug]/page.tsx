@@ -400,7 +400,7 @@ export default async function ProviderProfilePage({ params }: Props) {
                   className="mt-4 rounded-[var(--radius-xl)] border p-6 sm:p-8"
                   style={{
                     borderColor: "var(--color-border)",
-                    backgroundColor: "rgba(244, 93, 72, 0.06)",
+                    backgroundColor: "var(--color-secondary-muted-06)",
                     boxShadow: "var(--shadow-sm)",
                   }}
                 >
@@ -425,7 +425,7 @@ export default async function ProviderProfilePage({ params }: Props) {
                     <span
                       key={tag}
                       className="rounded-[var(--radius-pill)] px-3 py-1 text-sm font-medium capitalize"
-                      style={{ backgroundColor: "rgba(10, 128, 128, 0.12)", color: "var(--color-primary)" }}
+                      style={{ backgroundColor: "var(--color-primary-muted-12)", color: "var(--color-primary)" }}
                     >
                       {tag}
                     </span>
