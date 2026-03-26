@@ -28,7 +28,7 @@ Karen saw two broken systems that could fix each other.
 
 ## How Tinies Works
 
-Tinies — named for what Karen has always called animals, all animals, regardless of size ("An elephant is a tiny. A bug is a tiny. A Great Dane is a tiny too.") — is a pet services marketplace and international animal adoption platform.
+Tinies — named for what Karen has always called animals, all animals, regardless of size ("An elephant is a tiny. A bug is a tiny. A Great Dane is a tiny too.") — is a pet services marketplace and international animal adoption platform. All tinies is tinies.
 
 The marketplace side works like this: pet owners in Cyprus search for verified, reviewed service providers offering dog walking, pet sitting, overnight boarding, drop-in visits, and daycare. Providers list their services for free. When a booking happens, Tinies takes a 12% commission.
 
