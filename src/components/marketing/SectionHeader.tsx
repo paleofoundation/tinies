@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 
 export type SectionHeaderProps = {
   eyebrow?: string;
+  /** Eyebrow color — mock uses coral on verified providers. */
+  eyebrowTone?: "primary" | "secondary";
   title: ReactNode;
   description?: ReactNode;
   align?: "start" | "center";
@@ -15,12 +17,15 @@ export type SectionHeaderProps = {
  */
 export function SectionHeader({
   eyebrow,
+  eyebrowTone = "primary",
   title,
   description,
   align = "start",
   className,
 }: SectionHeaderProps) {
   const isCenter = align === "center";
+  const eyebrowColor =
+    eyebrowTone === "secondary" ? "var(--color-secondary)" : "var(--color-primary)";
   return (
     <div
       className={cn(
@@ -30,10 +35,7 @@ export function SectionHeader({
       )}
     >
       {eyebrow ? (
-        <p
-          className="theme-eyebrow mb-3"
-          style={{ color: "var(--color-primary)" }}
-        >
+        <p className="theme-eyebrow mb-3" style={{ color: eyebrowColor }}>
           {eyebrow}
         </p>
       ) : null}

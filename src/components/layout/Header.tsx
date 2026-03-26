@@ -296,26 +296,26 @@ export function Header() {
           ) : !loading ? (
             <>
               <Link
-                href="/signup"
+                href="/login"
                 className="rounded-[var(--radius-pill)] border-2 bg-transparent px-5 py-2.5 text-sm font-semibold transition-opacity hover:opacity-90"
                 style={{
                   fontFamily: "var(--font-body), sans-serif",
-                  borderColor: "var(--color-primary)",
-                  color: "var(--color-primary)",
+                  borderColor: "var(--color-secondary)",
+                  color: "var(--color-secondary)",
                 }}
               >
-                {t("signUp")}
+                {t("signIn")}
               </Link>
               <Link
-                href="/login"
+                href="/signup"
                 className="flex h-10 items-center rounded-[var(--radius-pill)] px-6 font-semibold text-white transition-opacity hover:opacity-90"
                 style={{
                   fontFamily: "var(--font-body), sans-serif",
                   fontSize: "var(--text-sm)",
-                  backgroundColor: "var(--color-primary)",
+                  backgroundColor: "var(--color-secondary)",
                 }}
               >
-                {t("signIn")}
+                {t("signUp")}
               </Link>
             </>
           ) : null}

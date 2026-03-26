@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Plus } from "lucide-react";
 import { useState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -15,6 +15,8 @@ export type FAQStackProps = {
   items: readonly FAQStackItem[];
   /** When false, opening one item closes the others. */
   allowMultiple?: boolean;
+  /** Editorial mock: 22px radius, teal + icon, tighter gaps. */
+  variant?: "default" | "editorial";
   className?: string;
 };
 
@@ -24,8 +26,10 @@ export type FAQStackProps = {
 export function FAQStack({
   items,
   allowMultiple = false,
+  variant = "default",
   className,
 }: FAQStackProps) {
+  const editorial = variant === "editorial";
   const [openIds, setOpenIds] = useState<ReadonlySet<string>>(() => new Set());
 
   function toggle(id: string) {
@@ -47,7 +51,7 @@ export function FAQStack({
   }
 
   return (
-    <div className={cn("flex flex-col gap-3", className)}>
+    <div className={cn(editorial ? "flex flex-col gap-4" : "flex flex-col gap-3", className)}>
       {items.map((item) => {
         const open = openIds.has(item.id);
         const panelId = `faq-panel-${item.id}`;
@@ -55,7 +59,10 @@ export function FAQStack({
         return (
           <div
             key={item.id}
-            className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[var(--color-background)] shadow-[var(--shadow-sm)]"
+            className={cn(
+              "overflow-hidden border border-[var(--color-border)] bg-[var(--color-background)]",
+              editorial ? "rounded-[22px] shadow-[var(--shadow-sm)]" : "rounded-[var(--radius-xl)] shadow-[var(--shadow-sm)]"
+            )}
           >
             <button
               id={buttonId}
@@ -63,10 +70,16 @@ export function FAQStack({
               aria-expanded={open}
               aria-controls={panelId}
               onClick={() => toggle(item.id)}
-              className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-[var(--color-primary-50)]"
+              className={cn(
+                "flex w-full items-center justify-between gap-4 text-left transition-colors",
+                editorial ? "px-6 py-5 hover:bg-[var(--color-primary-muted-06)]" : "px-5 py-4 hover:bg-[var(--color-primary-50)]"
+              )}
             >
               <span
-                className="text-base font-semibold sm:text-lg"
+                className={cn(
+                  "font-semibold",
+                  editorial ? "text-base sm:text-lg" : "text-base sm:text-lg"
+                )}
                 style={{
                   color: "var(--color-text)",
                   fontFamily: "var(--font-body)",
@@ -74,14 +87,26 @@ export function FAQStack({
               >
                 {item.question}
               </span>
-              <ChevronDown
-                className={cn(
-                  "h-5 w-5 shrink-0 transition-transform duration-300 ease-out",
-                  open && "rotate-180"
-                )}
-                style={{ color: "var(--color-primary)" }}
-                aria-hidden
-              />
+              {editorial ? (
+                <Plus
+                  className={cn(
+                    "h-6 w-6 shrink-0 transition-transform duration-200 ease-out",
+                    open && "rotate-45"
+                  )}
+                  strokeWidth={2}
+                  style={{ color: "var(--color-primary)" }}
+                  aria-hidden
+                />
+              ) : (
+                <ChevronDown
+                  className={cn(
+                    "h-5 w-5 shrink-0 transition-transform duration-300 ease-out",
+                    open && "rotate-180"
+                  )}
+                  style={{ color: "var(--color-primary)" }}
+                  aria-hidden
+                />
+              )}
             </button>
             <div
               id={panelId}
@@ -94,7 +119,10 @@ export function FAQStack({
             >
               <div className="min-h-0 overflow-hidden">
                 <p
-                  className="px-5 pb-5 pt-0 text-sm leading-relaxed sm:text-base"
+                  className={cn(
+                    "pb-5 pt-0 text-sm leading-relaxed sm:text-base",
+                    editorial ? "px-6" : "px-5"
+                  )}
                   style={{
                     color: "var(--color-text-secondary)",
                     fontFamily: "var(--font-body)",

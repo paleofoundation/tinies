@@ -10,9 +10,11 @@ import { AddressAutocomplete } from "@/components/maps";
 type HomeSearchBarProps = {
   /** Larger rounded card layout for the homepage hero (service + location + CTA). */
   variant?: "default" | "hero";
+  /** Omit default top margin when parent controls spacing (e.g. hero stack). */
+  compactTopMargin?: boolean;
 };
 
-export function HomeSearchBar({ variant = "default" }: HomeSearchBarProps) {
+export function HomeSearchBar({ variant = "default", compactTopMargin = false }: HomeSearchBarProps) {
   const t = useTranslations("home.search");
   const serviceOptions = useMemo(
     () =>
@@ -69,13 +71,14 @@ export function HomeSearchBar({ variant = "default" }: HomeSearchBarProps) {
   }
 
   const isHero = variant === "hero";
+  const topPad = compactTopMargin ? "" : "mt-8 ";
 
   return (
     <form
       onSubmit={handleSubmit}
       className={
         isHero
-          ? "mt-8 flex w-full max-w-3xl flex-col gap-3 rounded-2xl border p-3 shadow-[var(--shadow-lg)] sm:mx-auto sm:flex-row sm:items-stretch sm:gap-0 sm:p-2 sm:shadow-[var(--shadow-md)]"
+          ? `${topPad}flex w-full max-w-3xl flex-col gap-3 rounded-[999px] border p-3 shadow-[var(--shadow-md)] sm:flex-row sm:items-stretch sm:gap-0 sm:p-1.5 sm:pl-2`
           : "mt-8 flex flex-col gap-3 sm:mx-auto sm:max-w-2xl sm:flex-row sm:items-stretch sm:justify-center sm:gap-0 sm:overflow-hidden sm:rounded-[var(--radius-lg)] sm:border sm:shadow-[var(--shadow-md)]"
       }
       style={{
@@ -92,7 +95,7 @@ export function HomeSearchBar({ variant = "default" }: HomeSearchBarProps) {
       >
         {isHero ? (
           <>
-            <div className="relative min-w-0 flex-1 sm:max-w-[220px] sm:flex-none">
+            <div className="relative min-w-0 flex-1 sm:max-w-[min(28%,220px)] sm:flex-none sm:shrink-0">
               <ChevronDown
                 className="absolute left-4 top-1/2 z-[1] h-5 w-5 -translate-y-1/2 pointer-events-none"
                 style={{ color: "var(--color-text-muted)" }}
@@ -100,7 +103,7 @@ export function HomeSearchBar({ variant = "default" }: HomeSearchBarProps) {
               <select
                 value={service}
                 onChange={(e) => setService(e.target.value)}
-                className="w-full appearance-none rounded-xl border py-3.5 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/30 sm:rounded-l-xl sm:rounded-r-none sm:border-r-0"
+                className="w-full appearance-none rounded-xl border py-3.5 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/30 sm:rounded-l-[999px] sm:rounded-r-none sm:border-r-0"
                 style={{
                   fontFamily: "var(--font-body), sans-serif",
                   backgroundColor: "var(--color-surface)",
@@ -123,7 +126,7 @@ export function HomeSearchBar({ variant = "default" }: HomeSearchBarProps) {
                 onChange={handleAddressChange}
                 placeholder={t("placeholder")}
                 defaultCountry="cy"
-                className="rounded-xl border py-3.5 sm:rounded-none sm:border-y-0 sm:border-r-0 sm:border-l sm:border-l-[var(--color-border)]"
+                className="rounded-xl border py-3.5 sm:rounded-none sm:border-y-0 sm:border-r-0 sm:border-l sm:border-l-[var(--color-border)] sm:min-h-[48px]"
               />
             </div>
           </>
@@ -171,7 +174,7 @@ export function HomeSearchBar({ variant = "default" }: HomeSearchBarProps) {
         disabled={loading}
         className={
           isHero
-            ? "inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl px-6 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-70 sm:h-auto sm:rounded-r-xl sm:px-8"
+            ? "inline-flex h-12 min-w-[min(28%,200px)] shrink-0 items-center justify-center gap-2 rounded-xl px-5 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-70 sm:h-[48px] sm:rounded-[999px] sm:px-7"
             : "inline-flex h-12 items-center justify-center gap-2 rounded-[var(--radius-pill)] px-6 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-70 sm:rounded-none sm:rounded-r-[var(--radius-lg)]"
         }
         style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-primary)" }}

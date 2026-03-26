@@ -11,6 +11,8 @@ export type HeroEditorialProps = {
   insetBetaNotice?: string;
   /** Optional texture or tint behind content (e.g. `theme-paper-grid`). */
   bleedClassName?: string;
+  /** Use serif (heading font) for description — matches editorial mock body. */
+  descriptionSerif?: boolean;
   image: {
     src: string;
     alt: string;
@@ -32,6 +34,7 @@ export function HeroEditorial({
   description,
   insetBetaNotice,
   bleedClassName,
+  descriptionSerif = false,
   image,
   overlappingCard,
   actions,
@@ -76,7 +79,7 @@ export function HeroEditorial({
               </p>
             ) : null}
             <h1
-              className="theme-display text-[var(--display-xl)]"
+              className="theme-display text-[var(--display-hero-mock)] leading-[0.94]"
               style={{ color: "var(--color-text)" }}
             >
               {title}
@@ -86,7 +89,9 @@ export function HeroEditorial({
                 className="mt-5 max-w-xl text-base leading-[1.75] sm:text-lg"
                 style={{
                   color: "var(--color-text-secondary)",
-                  fontFamily: "var(--font-body)",
+                  fontFamily: descriptionSerif
+                    ? "var(--font-heading), Georgia, serif"
+                    : "var(--font-body)",
                 }}
               >
                 {description}
