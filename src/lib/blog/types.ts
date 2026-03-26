@@ -5,6 +5,7 @@ export const BLOG_FILTER_CATEGORIES = [
   "Rescue Stories",
   "Cyprus Guide",
   "Business & Platform",
+  "Giving & Transparency",
 ] as const;
 
 export type BlogFilterCategory = (typeof BLOG_FILTER_CATEGORIES)[number];
