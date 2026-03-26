@@ -65,22 +65,31 @@ export async function updateSiteSocialUrls(input: SiteSocialFormInput): Promise<
   }
 
   const d = parsed.data;
-  await prisma.siteSettings.upsert({
-    where: { id: "default" },
-    create: {
-      id: "default",
-      socialLinkedInUrl: d.socialLinkedInUrl,
-      socialFacebookUrl: d.socialFacebookUrl,
-      socialXUrl: d.socialXUrl,
-      socialInstagramUrl: d.socialInstagramUrl,
-    },
-    update: {
-      socialLinkedInUrl: d.socialLinkedInUrl,
-      socialFacebookUrl: d.socialFacebookUrl,
-      socialXUrl: d.socialXUrl,
-      socialInstagramUrl: d.socialInstagramUrl,
-    },
-  });
+  try {
+    await prisma.siteSettings.upsert({
+      where: { id: "default" },
+      create: {
+        id: "default",
+        socialLinkedInUrl: d.socialLinkedInUrl,
+        socialFacebookUrl: d.socialFacebookUrl,
+        socialXUrl: d.socialXUrl,
+        socialInstagramUrl: d.socialInstagramUrl,
+      },
+      update: {
+        socialLinkedInUrl: d.socialLinkedInUrl,
+        socialFacebookUrl: d.socialFacebookUrl,
+        socialXUrl: d.socialXUrl,
+        socialInstagramUrl: d.socialInstagramUrl,
+      },
+    });
+  } catch (err) {
+    console.error("[site-settings] updateSiteSocialUrls upsert:", err);
+    return {
+      ok: false,
+      error:
+        "Could not save. Apply the latest database migration (site_settings table), then try again.",
+    };
+  }
 
   revalidateTag(SITE_SETTINGS_CACHE_TAG, "max");
   return { ok: true };
@@ -93,23 +102,35 @@ export async function getSiteSocialUrlsForAdmin(): Promise<
   const auth = await requireAdminUserId();
   if (!auth.ok) return { ok: false, error: auth.error };
 
-  const row = await prisma.siteSettings.findUnique({
-    where: { id: "default" },
-    select: {
-      socialLinkedInUrl: true,
-      socialFacebookUrl: true,
-      socialXUrl: true,
-      socialInstagramUrl: true,
-    },
-  });
-
-  return {
-    ok: true,
-    data: {
-      socialLinkedInUrl: row?.socialLinkedInUrl ?? "",
-      socialFacebookUrl: row?.socialFacebookUrl ?? "",
-      socialXUrl: row?.socialXUrl ?? "",
-      socialInstagramUrl: row?.socialInstagramUrl ?? "",
-    },
+  const empty: SiteSocialFormInput = {
+    socialLinkedInUrl: "",
+    socialFacebookUrl: "",
+    socialXUrl: "",
+    socialInstagramUrl: "",
   };
+
+  try {
+    const row = await prisma.siteSettings.findUnique({
+      where: { id: "default" },
+      select: {
+        socialLinkedInUrl: true,
+        socialFacebookUrl: true,
+        socialXUrl: true,
+        socialInstagramUrl: true,
+      },
+    });
+
+    return {
+      ok: true,
+      data: {
+        socialLinkedInUrl: row?.socialLinkedInUrl ?? "",
+        socialFacebookUrl: row?.socialFacebookUrl ?? "",
+        socialXUrl: row?.socialXUrl ?? "",
+        socialInstagramUrl: row?.socialInstagramUrl ?? "",
+      },
+    };
+  } catch (err) {
+    console.error("[site-settings] getSiteSocialUrlsForAdmin:", err);
+    return { ok: true, data: empty };
+  }
 }
