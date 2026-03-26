@@ -3,8 +3,12 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.tinies.app"),
+  alternates: {
+    canonical: "/",
+  },
   title: {
-    default: "Tinies - Trusted Pet Care & Rescue Adoption in Cyprus",
+    default: "Tinies \u2013 Trusted Pet Care & Rescue Adoption in Cyprus",
     template: "%s | Tinies",
   },
   description:
@@ -20,14 +24,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_GB",
-    url: "https://tinies.app",
+    url: "https://www.tinies.app",
     siteName: "Tinies",
-    title: "Tinies - Trusted Pet Care & Rescue Adoption in Cyprus",
+    title: "Tinies \u2013 Trusted Pet Care & Rescue Adoption in Cyprus",
     description: "No matter the size. Book verified pet care or adopt a rescue animal in Cyprus.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tinies - Trusted Pet Care & Rescue Adoption in Cyprus",
+    title: "Tinies \u2013 Trusted Pet Care & Rescue Adoption in Cyprus",
     description: "No matter the size. Book verified pet care or adopt a rescue animal in Cyprus.",
   },
 };
