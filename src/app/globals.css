@@ -115,8 +115,9 @@
   --space-card: 36px;
   --max-width: 1170px;
 
-  /* Blog: pale mint (category chips on primary bar; also “actually matter” on dark CTA) */
-  --blog-filter-bar-bg: #f0f8f8;
+  /* Blog category strip + “actually matter” accent on Stay connected band */
+  --blog-filter-bar-bg: #f0f9f9;
+  --blog-cta-band-bg: #0a8081;
   --blog-card-radius: 28px;
 
   /* Primary / secondary tints — use instead of hardcoded rgba(10,128,128,…) / coral rgba in UI */

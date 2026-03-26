@@ -7,7 +7,7 @@ export function BlogStayConnectedCTA() {
   return (
     <section
       className="mt-20 px-4 py-16 sm:px-6 sm:py-20 lg:px-8"
-      style={{ backgroundColor: "var(--color-primary-900)" }}
+      style={{ backgroundColor: "var(--blog-cta-band-bg)" }}
     >
       <div className="theme-container mx-auto max-w-4xl text-center">
         <p
