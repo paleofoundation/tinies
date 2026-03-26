@@ -1,10 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef } from "react";
 import { APIProvider, useMapsLibrary } from "@vis.gl/react-google-maps";
 
 const inputBaseClass =
   "w-full rounded-[var(--radius-lg)] border py-2.5 pl-4 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40";
+
+/** Flush field inside a composite bar (e.g. homepage hero): no outer radius/border, matches select row height. */
+const inputEmbeddedClass =
+  "min-h-12 h-12 w-full border-0 bg-transparent py-0 pl-4 pr-4 text-base leading-normal shadow-none outline-none placeholder:text-[var(--color-text-muted)] focus:ring-2 focus:ring-inset focus:ring-[var(--color-primary)]/35 rounded-none";
 const inputStyle: React.CSSProperties = {
   fontFamily: "var(--font-body), sans-serif",
   backgroundColor: "var(--color-surface)",
@@ -21,6 +25,8 @@ export type AddressAutocompleteProps = {
   className?: string;
   /** Optional: match Tinies search bar layout with icon (no border on one side) */
   withIcon?: boolean;
+  /** Strip border/radius for use inside a shared bordered container (hero search). */
+  embedded?: boolean;
 };
 
 function AddressAutocompleteInner({
@@ -31,6 +37,7 @@ function AddressAutocompleteInner({
   id,
   className = "",
   withIcon = false,
+  embedded = false,
 }: AddressAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const places = useMapsLibrary("places");
@@ -62,6 +69,12 @@ function AddressAutocompleteInner({
     };
   }, [places, defaultCountry]);
 
+  const composedClass = embedded
+    ? `${inputEmbeddedClass} ${className}`.trim()
+    : withIcon
+      ? `${inputBaseClass} min-w-0 flex-1 border-0 bg-transparent py-2.5 pr-3 pl-2 focus:ring-0 ${className}`.trim()
+      : `${inputBaseClass} ${className}`.trim();
+
   return (
     <input
       ref={inputRef}
@@ -71,12 +84,8 @@ function AddressAutocompleteInner({
       onChange={(e) => onChange(e.target.value, undefined, undefined)}
       placeholder={placeholder}
       autoComplete="off"
-      className={
-        withIcon
-          ? `${inputBaseClass} min-w-0 flex-1 border-0 bg-transparent py-2.5 pr-3 pl-2 focus:ring-0 ${className}`.trim()
-          : `${inputBaseClass} ${className}`.trim()
-      }
-      style={withIcon ? { ...inputStyle, border: "none" } : inputStyle}
+      className={composedClass}
+      style={embedded ? { ...inputStyle, backgroundColor: "transparent", border: "none" } : withIcon ? { ...inputStyle, border: "none" } : inputStyle}
       aria-label="Address or area"
     />
   );
@@ -90,7 +99,14 @@ function AddressAutocompleteFallback({
   id,
   className = "",
   withIcon = false,
+  embedded = false,
 }: AddressAutocompleteProps) {
+  const composedClass = embedded
+    ? `${inputEmbeddedClass} ${className}`.trim()
+    : withIcon
+      ? `${inputBaseClass} min-w-0 flex-1 border-0 bg-transparent py-2.5 pr-3 pl-2 focus:ring-0 ${className}`.trim()
+      : `${inputBaseClass} ${className}`.trim();
+
   return (
     <input
       type="text"
@@ -98,12 +114,8 @@ function AddressAutocompleteFallback({
       value={value}
       onChange={(e) => onChange(e.target.value, undefined, undefined)}
       placeholder={placeholder}
-      className={
-        withIcon
-          ? `${inputBaseClass} min-w-0 flex-1 border-0 bg-transparent py-2.5 pr-3 pl-2 focus:ring-0 ${className}`.trim()
-          : `${inputBaseClass} ${className}`.trim()
-      }
-      style={withIcon ? { ...inputStyle, border: "none" } : inputStyle}
+      className={composedClass}
+      style={embedded ? { ...inputStyle, backgroundColor: "transparent", border: "none" } : withIcon ? { ...inputStyle, border: "none" } : inputStyle}
       aria-label="Address or area"
     />
   );

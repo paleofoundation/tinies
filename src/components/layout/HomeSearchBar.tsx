@@ -78,7 +78,7 @@ export function HomeSearchBar({ variant = "default", compactTopMargin = false }:
       onSubmit={handleSubmit}
       className={
         isHero
-          ? `${topPad}flex w-full max-w-3xl flex-col gap-3 rounded-[999px] border p-3 shadow-[var(--shadow-md)] sm:flex-row sm:items-stretch sm:gap-0 sm:p-1.5 sm:pl-2`
+          ? `${topPad}relative flex w-full max-w-3xl flex-col overflow-hidden rounded-2xl border shadow-[var(--shadow-md)] divide-y divide-[var(--color-border)] sm:flex-row sm:divide-x sm:divide-y-0`
           : "mt-8 flex flex-col gap-3 sm:mx-auto sm:max-w-2xl sm:flex-row sm:items-stretch sm:justify-center sm:gap-0 sm:overflow-hidden sm:rounded-[var(--radius-lg)] sm:border sm:shadow-[var(--shadow-md)]"
       }
       style={{
@@ -89,13 +89,13 @@ export function HomeSearchBar({ variant = "default", compactTopMargin = false }:
       <div
         className={
           isHero
-            ? "flex flex-1 flex-col gap-2 sm:flex-row sm:items-stretch sm:gap-0"
+            ? "contents"
             : "flex flex-1 flex-col gap-1 sm:flex-row sm:flex-[2] sm:items-stretch"
         }
       >
         {isHero ? (
           <>
-            <div className="relative w-full flex-1 sm:w-auto sm:min-w-[13.5rem] sm:max-w-[min(46%,320px)] sm:flex-none sm:shrink-0">
+            <div className="relative flex w-full min-w-0 items-stretch sm:w-auto sm:min-w-[13.5rem] sm:max-w-[min(46%,320px)] sm:shrink-0">
               <ChevronDown
                 className="absolute left-4 top-1/2 z-[1] h-5 w-5 -translate-y-1/2 pointer-events-none"
                 style={{ color: "var(--color-text-muted)" }}
@@ -103,11 +103,9 @@ export function HomeSearchBar({ variant = "default", compactTopMargin = false }:
               <select
                 value={service}
                 onChange={(e) => setService(e.target.value)}
-                className="w-full appearance-none rounded-xl border py-3.5 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/30 sm:rounded-l-[999px] sm:rounded-r-none sm:border-r-0"
+                className="h-12 w-full min-h-12 cursor-pointer appearance-none border-0 bg-transparent py-0 pl-11 pr-4 text-base leading-normal focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--color-primary)]/30"
                 style={{
                   fontFamily: "var(--font-body), sans-serif",
-                  backgroundColor: "var(--color-surface)",
-                  borderColor: "var(--color-border)",
                   color: "var(--color-text)",
                 }}
                 aria-label={t("serviceAria")}
@@ -120,13 +118,14 @@ export function HomeSearchBar({ variant = "default", compactTopMargin = false }:
                 ))}
               </select>
             </div>
-            <div className="relative min-w-0 flex-1">
+            <div className="relative flex min-h-12 min-w-0 flex-1 items-stretch">
               <AddressAutocomplete
+                embedded
                 value={location}
                 onChange={handleAddressChange}
                 placeholder={t("placeholder")}
                 defaultCountry="cy"
-                className="rounded-xl border py-3.5 sm:rounded-none sm:border-y-0 sm:border-r-0 sm:border-l sm:border-l-[var(--color-border)] sm:min-h-[48px]"
+                className=""
               />
             </div>
           </>
@@ -174,7 +173,7 @@ export function HomeSearchBar({ variant = "default", compactTopMargin = false }:
         disabled={loading}
         className={
           isHero
-            ? "inline-flex h-12 min-w-[min(28%,200px)] shrink-0 items-center justify-center gap-2 rounded-xl px-5 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-70 sm:h-[48px] sm:rounded-[999px] sm:px-7"
+            ? "inline-flex h-12 min-h-12 w-full shrink-0 items-center justify-center gap-2 rounded-none px-5 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-70 sm:w-auto sm:min-w-[10.5rem] sm:px-7"
             : "inline-flex h-12 items-center justify-center gap-2 rounded-[var(--radius-pill)] px-6 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-70 sm:rounded-none sm:rounded-r-[var(--radius-lg)]"
         }
         style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-primary)" }}
