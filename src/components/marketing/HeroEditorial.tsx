@@ -7,8 +7,6 @@ export type HeroEditorialProps = {
   eyebrow?: string;
   title: ReactNode;
   description?: ReactNode;
-  /** Centered line above the grid (e.g. beta note) — matches editorial mock. */
-  insetBetaNotice?: string;
   /** Optional texture or tint behind content (e.g. `theme-paper-grid`). */
   bleedClassName?: string;
   image: {
@@ -23,14 +21,13 @@ export type HeroEditorialProps = {
 };
 
 /**
- * Full-width editorial hero: optional inset beta line, eyebrow, display title, media
+ * Full-width editorial hero: eyebrow, display title, media
  * with Claude-style offset frame + overlap card, and stacked actions.
  */
 export function HeroEditorial({
   eyebrow,
   title,
   description,
-  insetBetaNotice,
   bleedClassName,
   image,
   overlappingCard,
@@ -56,15 +53,6 @@ export function HeroEditorial({
       />
 
       <div className="theme-container relative z-[1] pt-6 pb-16 sm:pt-8 sm:pb-20 lg:pb-24">
-        {insetBetaNotice ? (
-          <p
-            className="mb-6 text-center text-sm"
-            style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-body)" }}
-          >
-            {insetBetaNotice}
-          </p>
-        ) : null}
-
         <div className="grid items-end gap-10 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:gap-12">
           <div className="min-w-0">
             {eyebrow ? (

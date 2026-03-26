@@ -219,7 +219,6 @@ export default async function Home() {
 
       <HeroEditorial
         bleedClassName="theme-paper-grid bg-[var(--color-background)]"
-        insetBetaNotice={tHero("betaInset")}
         eyebrow={tHero("eyebrow")}
         title={
           <>
