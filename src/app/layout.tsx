@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   title: {
-    default: "Tinies \u2013 Trusted Pet Care & Rescue Adoption in Cyprus",
+    default: "Tinies – Trusted Pet Care & Rescue Adoption in Cyprus",
     template: "%s | Tinies",
   },
   description:
@@ -26,12 +26,12 @@ export const metadata: Metadata = {
     locale: "en_GB",
     url: "https://www.tinies.app",
     siteName: "Tinies",
-    title: "Tinies \u2013 Trusted Pet Care & Rescue Adoption in Cyprus",
+    title: "Tinies – Trusted Pet Care & Rescue Adoption in Cyprus",
     description: "No matter the size. Book verified pet care or adopt a rescue animal in Cyprus.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tinies \u2013 Trusted Pet Care & Rescue Adoption in Cyprus",
+    title: "Tinies – Trusted Pet Care & Rescue Adoption in Cyprus",
     description: "No matter the size. Book verified pet care or adopt a rescue animal in Cyprus.",
   },
 };
