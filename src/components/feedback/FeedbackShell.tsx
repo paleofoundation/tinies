@@ -7,10 +7,13 @@ import { FeedbackUIContext } from "@/components/feedback/feedback-ui-context";
 
 export function FeedbackShell({
   showBetaUI,
+  showBetaBanner = true,
   defaultEmail,
   children,
 }: {
   showBetaUI: boolean;
+  /** When false, hide the top strip but keep the feedback FAB (if showBetaUI). */
+  showBetaBanner?: boolean;
   defaultEmail: string | null;
   children: ReactNode;
 }) {
@@ -20,7 +23,7 @@ export function FeedbackShell({
 
   return (
     <FeedbackUIContext.Provider value={value}>
-      {showBetaUI ? <BetaBanner /> : null}
+      {showBetaUI && showBetaBanner ? <BetaBanner /> : null}
       {children}
       {showBetaUI ? (
         <FeedbackWidget open={panelOpen} onOpenChange={setPanelOpen} defaultEmail={defaultEmail ?? ""} />

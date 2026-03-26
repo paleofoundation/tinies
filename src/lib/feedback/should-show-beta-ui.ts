@@ -12,3 +12,13 @@ export function shouldShowBetaFeedbackUI(): boolean {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
   return appUrl.includes("tinies.app");
 }
+
+/**
+ * Top beta strip (`BetaBanner`). Set NEXT_PUBLIC_HIDE_BETA_BANNER=true to hide it while keeping the
+ * feedback FAB + panel when `shouldShowBetaFeedbackUI()` is true.
+ */
+export function shouldShowBetaBanner(): boolean {
+  if (!shouldShowBetaFeedbackUI()) return false;
+  if (process.env.NEXT_PUBLIC_HIDE_BETA_BANNER === "true") return false;
+  return true;
+}

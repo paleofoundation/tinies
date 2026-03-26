@@ -35,7 +35,7 @@ export function BetaBanner() {
 
   return (
     <div
-      className="relative z-[60] flex w-full items-center justify-center gap-2 px-3 py-2 text-center text-xs sm:text-sm"
+      className="relative z-[60] w-full border-b border-[var(--color-border)]"
       style={{
         backgroundColor: "var(--color-primary-50)",
         color: "var(--color-primary)",
@@ -44,25 +44,27 @@ export function BetaBanner() {
       role="region"
       aria-label="Beta notice"
     >
-      <p className="min-w-0 flex-1 pr-6 sm:pr-8">
-        {t("betaBannerText")}
+      <div className="theme-container relative flex items-center justify-center py-2.5 pl-3 pr-12 text-center text-xs sm:py-2 sm:text-sm">
+        <p className="max-w-4xl leading-snug">
+          {t("betaBannerText")}
+          <button
+            type="button"
+            onClick={openFeedback}
+            className="font-semibold underline decoration-1 underline-offset-2 hover:opacity-90"
+            style={{ color: "var(--color-primary)" }}
+          >
+            {t("betaBannerLink")}
+          </button>
+        </p>
         <button
           type="button"
-          onClick={openFeedback}
-          className="font-semibold underline decoration-1 underline-offset-2 hover:opacity-90"
-          style={{ color: "var(--color-primary)" }}
+          onClick={dismiss}
+          className="absolute right-2 top-1/2 flex h-8 w-8 shrink-0 -translate-y-1/2 items-center justify-center rounded-lg hover:bg-[var(--color-primary-100)]"
+          aria-label={t("betaBannerDismiss")}
         >
-          {t("betaBannerLink")}
+          <X className="h-4 w-4" aria-hidden />
         </button>
-      </p>
-      <button
-        type="button"
-        onClick={dismiss}
-        className="absolute right-2 top-1/2 flex h-8 w-8 shrink-0 -translate-y-1/2 items-center justify-center rounded-lg hover:bg-[var(--color-primary-100)]"
-        aria-label={t("betaBannerDismiss")}
-      >
-        <X className="h-4 w-4" aria-hidden />
-      </button>
+      </div>
     </div>
   );
 }

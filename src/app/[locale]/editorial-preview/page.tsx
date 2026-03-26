@@ -215,8 +215,6 @@ export default function TiniesEditorialTheme() {
             <div style={{ position:"absolute",left:"7%",top:64,width:64,height:64,borderRadius:28,border:`1px solid ${T.border}`,background:T.primary50,pointerEvents:"none" }}/>
             <div style={{ position:"absolute",right:"9%",top:96,width:96,height:36,borderRadius:999,background:"rgba(244,93,72,0.12)",pointerEvents:"none" }}/>
 
-            <p style={{ textAlign:"center", fontSize:"0.875rem", color:T.textSec, marginBottom:24 }} className="fade-up">Tinies is in beta. Help us improve.</p>
-
             <div style={{ display:"grid", gap:40, alignItems:"end" }} className="lg-split-hero">
               <div style={{ position:"relative", zIndex:10 }} className="fade-up fade-up-d1">
                 <div style={{ ...eyebrow, color:T.primary, marginBottom:16 }}>Trusted pet care and rescue adoption in Cyprus</div>

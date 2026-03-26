@@ -9,7 +9,10 @@ import { Toaster } from "sonner";
 import { FeedbackShell } from "@/components/feedback/FeedbackShell";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { shouldShowBetaFeedbackUI } from "@/lib/feedback/should-show-beta-ui";
+import {
+  shouldShowBetaBanner,
+  shouldShowBetaFeedbackUI,
+} from "@/lib/feedback/should-show-beta-ui";
 import { createClient } from "@/lib/supabase/server";
 import { routing } from "@/i18n/routing";
 
@@ -70,6 +73,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages();
 
   const showBetaUI = shouldShowBetaFeedbackUI();
+  const showBetaBanner = shouldShowBetaBanner();
   let defaultFeedbackEmail: string | null = null;
   if (showBetaUI) {
     const supabase = await createClient();
@@ -94,7 +98,11 @@ export default async function LocaleLayout({ children, params }: Props) {
         }}
       >
         <NextIntlClientProvider messages={messages}>
-          <FeedbackShell showBetaUI={showBetaUI} defaultEmail={defaultFeedbackEmail}>
+          <FeedbackShell
+            showBetaUI={showBetaUI}
+            showBetaBanner={showBetaBanner}
+            defaultEmail={defaultFeedbackEmail}
+          >
             <Header />
             <div className="flex-1">{children}</div>
             <Footer />
