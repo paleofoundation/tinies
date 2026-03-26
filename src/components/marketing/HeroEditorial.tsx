@@ -69,18 +69,23 @@ export function HeroEditorial({
               </p>
             ) : null}
             <h1
-              className="theme-display max-w-[720px] text-[var(--display-hero-mock)] leading-[0.92]"
-              style={{ color: "var(--color-text)" }}
+              className="theme-display max-w-[720px] leading-[0.92]"
+              style={{
+                color: "var(--color-text)",
+                /* Tailwind arbitrary text-[var(--…)] may not emit font-size; spans inherit this. */
+                fontSize: "var(--display-hero-mock)",
+              }}
             >
               {title}
             </h1>
             {description ? (
               <div
-                className="mt-6 max-w-[560px] text-[clamp(1rem,2.5vw,1.25rem)] leading-[1.7]"
+                className="mt-6 max-w-[560px] leading-[1.7]"
                 style={{
                   color: "var(--color-text-secondary)",
                   fontFamily: "var(--font-body)",
                   fontWeight: 400,
+                  fontSize: "clamp(1rem, 2.5vw, 1.25rem)",
                 }}
               >
                 {description}
