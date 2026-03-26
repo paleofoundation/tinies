@@ -3,7 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
-import { Poppins, Source_Sans_3 } from "next/font/google";
+import { Inter, Poppins } from "next/font/google";
 import { getSiteImageWithFallback } from "@/lib/images/get-site-image";
 import { Toaster } from "sonner";
 import { FeedbackShell } from "@/components/feedback/FeedbackShell";
@@ -23,9 +23,8 @@ const poppins = Poppins({
   display: "swap",
 });
 
-const sourceSans = Source_Sans_3({
+const inter = Inter({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
   variable: "--font-body",
   display: "swap",
 });
@@ -86,7 +85,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <html
       lang={locale}
-      className={`${poppins.variable} ${sourceSans.variable}`}
+      className={`${poppins.variable} ${inter.variable}`}
       suppressHydrationWarning
     >
       <body
