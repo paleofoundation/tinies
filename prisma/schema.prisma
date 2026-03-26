@@ -1167,3 +1167,18 @@ model SiteImage {
   @@index([category])
   @@map("site_images")
 }
+
+// ---------------------------------------------------------------------------
+// Site-wide settings (singleton row id = default; admin-managed)
+// ---------------------------------------------------------------------------
+
+model SiteSettings {
+  id                 String   @id @default("default")
+  socialLinkedInUrl  String?  @map("social_linkedin_url") @db.Text
+  socialFacebookUrl  String?  @map("social_facebook_url") @db.Text
+  socialXUrl         String?  @map("social_x_url") @db.Text
+  socialInstagramUrl String?  @map("social_instagram_url") @db.Text
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  @@map("site_settings")
+}

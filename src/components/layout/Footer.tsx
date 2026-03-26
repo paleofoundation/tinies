@@ -1,10 +1,13 @@
 import { MapPin } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { getSiteSocialUrls } from "@/lib/site-settings/queries";
+import { FooterSocialLinks } from "./FooterSocialLinks";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export async function Footer() {
   const t = await getTranslations("footer");
+  const socialUrls = await getSiteSocialUrls();
 
   const columns = [
     {
@@ -61,10 +64,16 @@ export async function Footer() {
         <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <p
-              className="text-xl text-white"
+              className="text-xl font-semibold text-white"
               style={{ fontFamily: "var(--font-heading), serif" }}
             >
-              tinies.app
+              {t("brandTitle")}
+            </p>
+            <p
+              className="mt-2 text-lg italic text-white"
+              style={{ fontFamily: "var(--font-heading), serif" }}
+            >
+              {t("brandTagline")}
             </p>
             <p
               className="mt-2 text-lg italic text-white"
@@ -72,9 +81,7 @@ export async function Footer() {
             >
               {t("brandSubtitle")}
             </p>
-            <p className="mt-2 max-w-xs text-sm" style={{ color: "rgba(255,255,255,0.7)" }}>
-              {t("brandDescription")}
-            </p>
+            <FooterSocialLinks urls={socialUrls} />
           </div>
           <nav
             className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5"

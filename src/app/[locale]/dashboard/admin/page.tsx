@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { ImageIcon } from "lucide-react";
+import { ImageIcon, Share2 } from "lucide-react";
 import type { AdoptionListingStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getAllPlacements } from "./adoptions/actions";
@@ -269,6 +269,42 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
               style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", backgroundColor: "var(--color-primary)" }}
             >
               Manage images
+            </Link>
+          </div>
+        </section>
+
+        {/* Social links (footer) */}
+        <section
+          className="mt-8 rounded-[var(--radius-lg)] border p-8"
+          style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-md)" }}
+        >
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex gap-4">
+              <div
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--radius-lg)]"
+                style={{ backgroundColor: "var(--color-primary-50)", color: "var(--color-primary)" }}
+                aria-hidden
+              >
+                <Share2 className="h-6 w-6" />
+              </div>
+              <div>
+                <h2
+                  className="text-lg font-normal"
+                  style={{ fontFamily: "var(--font-heading), serif", color: "var(--color-text)" }}
+                >
+                  Social links
+                </h2>
+                <p className="mt-2 max-w-xl text-sm leading-relaxed" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
+                  LinkedIn, Facebook, X, and Instagram URLs for the footer. Icons show for visitors; empty fields stay inactive until you add a link.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/dashboard/admin/social-links"
+              className="inline-flex h-12 shrink-0 items-center justify-center rounded-[var(--radius-pill)] border-2 px-6 font-semibold transition-opacity hover:opacity-90"
+              style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "var(--text-base)", borderColor: "var(--color-primary)", color: "var(--color-primary)" }}
+            >
+              Edit social links
             </Link>
           </div>
         </section>

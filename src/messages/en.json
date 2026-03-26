@@ -8,8 +8,16 @@
     "signIn": "Sign In"
   },
   "footer": {
+    "brandTitle": "Tinies.app",
+    "brandTagline": "All tinies is tiny.",
     "brandSubtitle": "Book a walk. Help a tiny.",
-    "brandDescription": "Trusted pet care and rescue adoption in Cyprus.",
+    "social": {
+      "linkedIn": "Tinies on LinkedIn",
+      "facebook": "Tinies on Facebook",
+      "x": "Tinies on X",
+      "instagram": "Tinies on Instagram",
+      "notLinked": "Link not set yet — add it in Admin → Social links"
+    },
     "copyright": "© {year} Tinies. All rights reserved.",
     "cyprus": "Cyprus",
     "language": "Language",
