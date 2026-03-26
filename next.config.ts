@@ -5,6 +5,30 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   /* config options here */
+  async redirects() {
+    return [
+      {
+        source: "/blog/why-being-second-wins",
+        destination: "/blog/move-over-rover-why-being-second-wins",
+        permanent: true,
+      },
+      {
+        source: "/en/blog/why-being-second-wins",
+        destination: "/en/blog/move-over-rover-why-being-second-wins",
+        permanent: true,
+      },
+      {
+        source: "/el/blog/why-being-second-wins",
+        destination: "/el/blog/move-over-rover-why-being-second-wins",
+        permanent: true,
+      },
+      {
+        source: "/ru/blog/why-being-second-wins",
+        destination: "/ru/blog/move-over-rover-why-being-second-wins",
+        permanent: true,
+      },
+    ];
+  },
   reactCompiler: true,
   typescript: {
     ignoreBuildErrors: true,

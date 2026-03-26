@@ -1,6 +1,6 @@
 ---
-title: "Why Being Second Into a Market Is a Strategic Advantage (And Why We Built Tinies Anyway)"
-slug: "why-being-second-wins"
+title: "Move Over, Rover: Why Being Second Into a Market Is a Strategic Advantage"
+slug: "move-over-rover-why-being-second-wins"
 date: "2026-03-24"
 category: "Pet Care"
 categories: ["Pet Care"]
