@@ -115,6 +115,10 @@
   --space-card: 36px;
   --max-width: 1170px;
 
+  /* Blog index (editorial mock) */
+  --blog-filter-bar-bg: #f0f8f8;
+  --blog-card-radius: 28px;
+
   /* Primary / secondary tints — use instead of hardcoded rgba(10,128,128,…) / coral rgba in UI */
   --color-primary-muted-04: color-mix(in srgb, var(--color-primary) 4%, transparent);
   --color-primary-muted-05: color-mix(in srgb, var(--color-primary) 5%, transparent);

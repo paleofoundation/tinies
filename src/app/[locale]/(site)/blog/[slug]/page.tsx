@@ -1,20 +1,22 @@
 import type { Metadata } from "next";
 import { displayReadMinutesForPost } from "@/lib/blog/read-time";
 import Image from "next/image";
-import Link from "next/link";
-import { EditorialButton } from "@/components/marketing";
+import { BlogCard } from "@/components/blog/BlogCard";
+import { BlogStayConnectedCTA } from "@/components/blog/BlogStayConnectedCTA";
 import { PageContainer, Section } from "@/components/theme";
+import { formatBlogDateCompact } from "@/lib/blog/format-blog-date";
 import { notFound } from "next/navigation";
 import {
   absoluteBlogImageUrl,
+  blogCategoryDisplayLabel,
   getAllBlogPosts,
   getBlogPostBySlug,
   getRelatedPosts,
 } from "@/lib/blog/load-posts";
 import { getSiteImageWithFallback } from "@/lib/images/get-site-image";
+import { Link } from "@/i18n/navigation";
 import { MarkdownBody } from "./MarkdownBody";
 import { ShareButtons } from "./ShareButtons";
-import { BlogCard } from "@/components/blog/BlogCard";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -62,6 +64,8 @@ export default async function BlogPostPage({ params }: Props) {
   const imageResolved = await getSiteImageWithFallback(`blog-${slug}`, post.image);
   const postForView = { ...post, image: imageResolved };
   const ogImage = absoluteBlogImageUrl(imageResolved, BASE_URL);
+  const categoryLabel = blogCategoryDisplayLabel(post.category).toUpperCase();
+  const dateCompact = formatBlogDateCompact(post.dateISO);
 
   const articleJsonLd = {
     "@context": "https://schema.org",
@@ -103,35 +107,40 @@ export default async function BlogPostPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
       />
-      <Section
-        className="theme-paper-grid border-b border-[var(--color-border)]"
-        background="background"
-        padded
-      >
+      <Section className="border-b border-[var(--color-border)]" background="background" padded>
         <PageContainer>
           <div className="mx-auto max-w-[720px]">
             <Link
               href="/blog"
-              className="text-sm font-medium hover:underline"
-              style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}
+              className="text-sm font-semibold hover:underline"
+              style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-muted)" }}
             >
               ← Back to blog
             </Link>
 
             <header className="mt-6">
-              <p className="theme-eyebrow" style={{ color: "var(--color-primary)" }}>
-                {post.category}
+              <p
+                className="theme-eyebrow"
+                style={{ color: "var(--color-secondary)", fontFamily: "var(--font-display), sans-serif" }}
+              >
+                {categoryLabel}
               </p>
-              <h1 className="theme-display mt-3 text-[var(--display-lg)] leading-[0.95]" style={{ color: "var(--color-text)" }}>
+              <h1
+                className="mt-4 font-bold leading-[1.12] tracking-tight text-[var(--color-text)]"
+                style={{
+                  fontFamily: "var(--font-display), sans-serif",
+                  fontSize: "clamp(1.75rem, 5vw, 2.75rem)",
+                }}
+              >
                 {post.title}
               </h1>
               <div
-                className="mt-4 flex flex-wrap items-center gap-2 text-sm"
-                style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}
+                className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm"
+                style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-muted)" }}
               >
                 <span>{post.author}</span>
                 <span aria-hidden>·</span>
-                <time dateTime={post.dateISO}>{post.dateDisplay}</time>
+                <time dateTime={post.dateISO}>{dateCompact}</time>
                 <span aria-hidden>·</span>
                 <span>{displayReadMinutesForPost(post)} min read</span>
               </div>
@@ -143,8 +152,11 @@ export default async function BlogPostPage({ params }: Props) {
       <article className="mx-auto max-w-[720px] px-4 py-10 sm:px-6 sm:py-14">
         {postForView.image ? (
           <div
-            className="relative mt-10 aspect-[16/9] overflow-hidden rounded-[var(--radius-lg)] border"
-            style={{ borderColor: "var(--color-border)" }}
+            className="relative mt-2 aspect-[16/9] overflow-hidden border"
+            style={{
+              borderColor: "var(--color-neutral-200)",
+              borderRadius: "var(--blog-card-radius)",
+            }}
           >
             <Image
               src={postForView.image}
@@ -165,10 +177,16 @@ export default async function BlogPostPage({ params }: Props) {
 
         {related.length > 0 ? (
           <section className="mt-16 border-t pt-12" style={{ borderColor: "var(--color-border)" }}>
-            <h2 className="theme-display text-[var(--display-md)]" style={{ color: "var(--color-text)" }}>
+            <h2
+              className="font-black uppercase tracking-tight text-[var(--color-text)]"
+              style={{
+                fontFamily: "var(--font-display), sans-serif",
+                fontSize: "clamp(1.25rem, 3vw, 1.75rem)",
+              }}
+            >
               Related posts
             </h2>
-            <ul className="mt-8 grid list-none gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="mt-8 grid list-none gap-8 sm:grid-cols-2">
               {related.map((r) => (
                 <li key={r.slug}>
                   <BlogCard post={r} />
@@ -177,34 +195,9 @@ export default async function BlogPostPage({ params }: Props) {
             </ul>
           </section>
         ) : null}
-
-        <section
-          className="mt-16 rounded-[var(--radius-lg)] border p-8"
-          style={{
-            backgroundColor: "var(--color-surface)",
-            borderColor: "var(--color-border)",
-            boxShadow: "var(--shadow-md)",
-          }}
-        >
-          <h2 className="theme-display text-[var(--display-md)]" style={{ color: "var(--color-text)" }}>
-            Every booking helps a tiny.
-          </h2>
-          <p
-            className="mt-2 leading-relaxed"
-            style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}
-          >
-            Find trusted pet care or browse adoptable animals at tinies.app.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <EditorialButton href="/services" variant="primary">
-              Find pet care
-            </EditorialButton>
-            <EditorialButton href="/adopt" variant="secondary">
-              Browse adoptions
-            </EditorialButton>
-          </div>
-        </section>
       </article>
+
+      <BlogStayConnectedCTA />
     </div>
   );
 }

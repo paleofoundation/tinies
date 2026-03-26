@@ -135,12 +135,34 @@ export function getRelatedPosts(
     });
 }
 
+/** Filter tab label → frontmatter category values still used in markdown. */
+const FILTER_CATEGORY_ALIASES: Record<string, readonly string[]> = {
+  "Cyprus Cat Crisis": ["Cyprus Cat Crisis", "Cyprus Guide", "Cyprus"],
+  Solutions: ["Solutions", "Business & Platform"],
+  Impact: ["Impact", "Giving & Transparency"],
+  "About Tinies": ["About Tinies"],
+};
+
 export function postMatchesFilter(
   post: Pick<BlogPostSummary, "categories">,
   filter: string
 ): boolean {
   if (filter === "All") return true;
+  const aliases = FILTER_CATEGORY_ALIASES[filter];
+  if (aliases) {
+    return aliases.some((a) => post.categories.includes(a));
+  }
   return post.categories.includes(filter);
+}
+
+/** Map legacy frontmatter labels to editorial filter labels for display. */
+export function blogCategoryDisplayLabel(category: string): string {
+  const map: Record<string, string> = {
+    "Cyprus Guide": "Cyprus Cat Crisis",
+    "Business & Platform": "Solutions",
+    "Giving & Transparency": "Impact",
+  };
+  return map[category] ?? category;
 }
 
 export function absoluteBlogImageUrl(

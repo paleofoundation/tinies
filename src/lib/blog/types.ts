@@ -3,9 +3,10 @@ export const BLOG_FILTER_CATEGORIES = [
   "Pet Care",
   "Adoption",
   "Rescue Stories",
-  "Cyprus Guide",
-  "Business & Platform",
-  "Giving & Transparency",
+  "Cyprus Cat Crisis",
+  "Solutions",
+  "Impact",
+  "About Tinies",
 ] as const;
 
 export type BlogFilterCategory = (typeof BLOG_FILTER_CATEGORIES)[number];
