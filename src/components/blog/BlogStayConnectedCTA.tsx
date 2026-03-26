@@ -9,7 +9,7 @@ export function BlogStayConnectedCTA() {
       className="mt-20 px-4 py-16 sm:px-6 sm:py-20 lg:px-8"
       style={{ backgroundColor: "var(--color-primary-900)" }}
     >
-      <div className="theme-container mx-auto max-w-3xl text-center">
+      <div className="theme-container mx-auto max-w-4xl text-center">
         <p
           className="text-[0.72rem] font-extrabold uppercase tracking-[0.14em] text-white/90"
           style={{ fontFamily: "var(--font-display), sans-serif" }}
@@ -17,13 +17,16 @@ export function BlogStayConnectedCTA() {
           Stay connected
         </p>
         <h2
-          className="mt-4 font-black uppercase leading-[0.95] tracking-tight text-white"
+          className="mt-5 font-black uppercase leading-[0.92] tracking-tight"
           style={{
             fontFamily: "var(--font-display), sans-serif",
-            fontSize: "clamp(1.75rem, 5vw, 3rem)",
+            fontSize: "clamp(2.25rem, 7vw, 3.85rem)",
           }}
         >
-          Stories that actually matter
+          <span className="block text-white">Stories that</span>
+          <span className="block" style={{ color: "var(--color-primary-200)" }}>
+            actually matter
+          </span>
         </h2>
         <p
           className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg"
@@ -39,7 +42,8 @@ export function BlogStayConnectedCTA() {
             style={{
               fontFamily: "var(--font-body), sans-serif",
               backgroundColor: "var(--color-secondary)",
-              boxShadow: "var(--shadow-md)",
+              boxShadow:
+                "var(--shadow-md), 0 8px 28px color-mix(in srgb, var(--color-secondary) 42%, transparent)",
             }}
           >
             Become a Guardian
