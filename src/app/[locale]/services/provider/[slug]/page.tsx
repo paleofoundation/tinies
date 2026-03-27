@@ -4,7 +4,9 @@ import type { ProviderReviewPublic } from "@/app/[locale]/services/book/booking-
 import { resolveListingVideoUrl } from "@/lib/adoption/listing-video";
 import { getFavoriteViewerState } from "@/lib/providers/favorite-actions";
 import { ProviderProfileMarkup } from "./ProviderProfileMarkup";
+import { getProviderImpactStats } from "./get-provider-impact-stats";
 import { withQueryTimeout } from "@/lib/utils/with-query-timeout";
+import type { ProviderForBooking } from "@/app/[locale]/services/book/booking-action-types";
 
 /** Coerce Prisma/serialized values so .toFixed and client props never throw. */
 function asDisplayRating(v: unknown): number | null {
@@ -48,18 +50,6 @@ const PRICE_UNIT_LABELS: Record<string, string> = {
   per_night: "per night",
 };
 
-function responseTimeLabel(minutes: number | null): string | null {
-  if (minutes == null) return null;
-  if (minutes < 60) return `Usually responds within ${minutes} minutes`;
-  const h = Math.round(minutes / 60);
-  return `Usually responds within ${h} hour${h === 1 ? "" : "s"}`;
-}
-
-function repeatClientLine(rate: number | null): string | null {
-  if (rate == null) return null;
-  return `${Math.round(rate)}% of clients book again`;
-}
-
 function responseRateLabel(rr: number | null): string | null {
   if (rr == null) return null;
   const pct = rr <= 1 ? Math.round(rr * 100) : Math.round(rr);
@@ -78,6 +68,11 @@ function pickFeaturedReviewId(reviews: ProviderReviewPublic[]): string | null {
     }
   }
   return best.id;
+}
+
+function buildGalleryUrls(p: ProviderForBooking): string[] {
+  const ordered = [p.avatarUrl, ...p.photos].filter((u): u is string => typeof u === "string" && u.trim().length > 0);
+  return [...new Set(ordered)];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -159,6 +154,16 @@ export default async function ProviderProfilePage({ params }: Props) {
   const districtLabel = provider?.district?.trim() || "Cyprus";
   const videoResolved = provider?.videoIntroUrl ? resolveListingVideoUrl(provider.videoIntroUrl) : null;
   const featuredReviewId = pickFeaturedReviewId(reviews);
+  const galleryUrls = provider ? buildGalleryUrls(provider) : [];
+
+  let impactStats: Awaited<ReturnType<typeof getProviderImpactStats>> = null;
+  if (provider) {
+    try {
+      impactStats = await getProviderImpactStats(provider.providerId);
+    } catch (e) {
+      console.error("ProviderProfilePage getProviderImpactStats", e);
+    }
+  }
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -188,8 +193,6 @@ export default async function ProviderProfilePage({ params }: Props) {
       })) ?? [],
   };
 
-  const respTime = responseTimeLabel(provider?.responseTimeMinutes ?? null);
-  const repeatLine = repeatClientLine(provider?.repeatClientRate ?? null);
   const rrLabel = responseRateLabel(provider?.responseRate ?? null);
 
   return (
@@ -198,7 +201,7 @@ export default async function ProviderProfilePage({ params }: Props) {
       slug={slug}
       name={name}
       provider={provider}
-      heroImage={heroImage}
+      galleryUrls={galleryUrls}
       initials={initials}
       districtLabel={districtLabel}
       videoResolved={videoResolved}
@@ -210,9 +213,8 @@ export default async function ProviderProfilePage({ params }: Props) {
       favorited={favorited}
       favoriteViewerKind={favoriteViewer.kind}
       profileUrl={profileUrl}
-      respTime={respTime}
-      repeatLine={repeatLine}
       rrLabel={rrLabel}
+      impactStats={impactStats}
     />
   );
 }

@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 import {
@@ -6,9 +5,9 @@ import {
   Calendar,
   Check,
   Clock,
-  Heart,
   MapPin,
   MessageCircle,
+  Repeat2,
   ShieldCheck,
   Star,
 } from "lucide-react";
@@ -25,7 +24,10 @@ import { ProviderVideoIntro } from "@/components/providers/ProviderVideoIntro";
 import { MeetAndGreetRequestModal } from "./MeetAndGreetRequestModal";
 import { ProviderProfilePageReviews } from "./ProviderProfilePageReviews";
 import { ProviderProfileSharePanel } from "./ProviderProfileSharePanel";
+import { ProviderGalleryClient } from "./ProviderGalleryClient";
+import { ProviderAboutAccordion, type AboutAccordionSection } from "./ProviderAboutAccordion";
 import type { ResolvedListingVideo } from "@/lib/adoption/listing-video";
+import type { ProviderImpactStats } from "./get-provider-impact-stats";
 
 const SERVICE_TYPE_LABELS: Record<string, string> = {
   walking: "Dog Walking",
@@ -106,12 +108,89 @@ function buildAvailabilityGrid(av: Record<string, boolean> | null) {
   }));
 }
 
+function responseTimePillLabel(
+  minutes: number | null | undefined,
+  completedBookings: number,
+  reviewCount: number
+): string {
+  if (minutes != null && Number.isFinite(minutes)) {
+    if (minutes < 60) return `Usually responds within ${minutes} minutes`;
+    const h = Math.round(minutes / 60);
+    return `Usually responds within ${h} hour${h === 1 ? "" : "s"}`;
+  }
+  if (completedBookings === 0 && reviewCount === 0) return "New provider";
+  return "Responds quickly";
+}
+
+function formatCertSidebarDate(d: Date): string {
+  return new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function buildAboutSections(provider: ProviderForBooking | null): {
+  sections: AboutAccordionSection[];
+  defaultOpenId: string;
+} {
+  if (!provider) return { sections: [], defaultOpenId: "" };
+  const sections: AboutAccordionSection[] = [];
+
+  const aboutBits: string[] = [];
+  if (provider.bio?.trim()) aboutBits.push(provider.bio.trim());
+  if (provider.emergencyProtocol?.trim()) aboutBits.push(`Emergencies: ${provider.emergencyProtocol.trim()}`);
+  if (provider.insuranceDetails?.trim()) aboutBits.push(`Insurance: ${provider.insuranceDetails.trim()}`);
+  if (aboutBits.length) sections.push({ id: "about", title: "About me", body: aboutBits.join("\n\n") });
+
+  const petExp: string[] = [];
+  if (provider.whyIDoThis?.trim()) petExp.push(provider.whyIDoThis.trim());
+  if (provider.experienceTags?.length) petExp.push(`Experience: ${provider.experienceTags.join(", ")}`);
+  if (provider.qualifications?.length) {
+    petExp.push(
+      provider.qualifications
+        .map((q) => {
+          const meta = [q.issuer, q.year].filter(Boolean).join(" · ");
+          const head = meta ? `${q.title} — ${meta}` : q.title;
+          return q.description ? `${head}\n${q.description}` : head;
+        })
+        .join("\n\n")
+    );
+  }
+  if (provider.previousExperience?.trim()) petExp.push(provider.previousExperience.trim());
+  if (provider.acceptedBreeds.length) petExp.push(`Breed experience: ${provider.acceptedBreeds.join(", ")}`);
+  if (provider.notAccepted.length) petExp.push(`Not accepted: ${provider.notAccepted.join(", ")}`);
+  if (petExp.length) sections.push({ id: "pet-exp", title: "My experience with pets", body: petExp.join("\n\n") });
+
+  if (provider.typicalDay?.trim()) {
+    sections.push({
+      id: "typical",
+      title: "What a typical booking looks like",
+      body: provider.typicalDay.trim(),
+    });
+  }
+
+  const homeBits: string[] = [];
+  if (provider.homeDescription?.trim()) homeBits.push(provider.homeDescription.trim());
+  if (provider.childrenInHome?.trim()) homeBits.push(`Children in home: ${provider.childrenInHome}`);
+  if (provider.dogsOnFurniture != null) homeBits.push(`Pets on furniture: ${provider.dogsOnFurniture ? "Yes" : "No"}`);
+  if (provider.pottyBreakFrequency?.trim()) homeBits.push(`Potty breaks: ${provider.pottyBreakFrequency}`);
+  if (homeBits.length) sections.push({ id: "home", title: "My home setup", body: homeBits.join("\n\n") });
+
+  if (provider.infoWantedAboutPet?.trim()) {
+    sections.push({
+      id: "about-pet",
+      title: "What I\u2019d like to know about your pet",
+      body: provider.infoWantedAboutPet.trim(),
+    });
+  }
+
+  const defaultOpenId = sections.find((s) => s.id === "about")?.id ?? sections[0]?.id ?? "";
+  return { sections, defaultOpenId };
+}
+
 export type ProviderProfileMarkupProps = {
   jsonLd: Record<string, unknown>;
   slug: string;
   name: string;
   provider: ProviderForBooking | null;
-  heroImage: string | null;
+  galleryUrls: string[];
   initials: string;
   districtLabel: string;
   videoResolved: ResolvedListingVideo | null;
@@ -123,9 +202,8 @@ export type ProviderProfileMarkupProps = {
   favorited: boolean;
   favoriteViewerKind: FavoriteViewerKind;
   profileUrl: string;
-  respTime: string | null;
-  repeatLine: string | null;
   rrLabel: string | null;
+  impactStats: ProviderImpactStats | null;
 };
 
 const cardTitleClass = "text-[1.125rem] font-bold";
@@ -137,7 +215,7 @@ export function ProviderProfileMarkup({
   slug,
   name,
   provider,
-  heroImage,
+  galleryUrls,
   initials,
   districtLabel,
   videoResolved,
@@ -149,18 +227,25 @@ export function ProviderProfileMarkup({
   favorited,
   favoriteViewerKind,
   profileUrl,
-  respTime,
-  repeatLine,
   rrLabel,
+  impactStats,
 }: ProviderProfileMarkupProps) {
   const availabilityGrid = buildAvailabilityGrid(provider?.availability ?? null);
+  const firstName = name.trim().split(/\s+/)[0] || name;
+  const { sections: aboutSections, defaultOpenId: aboutDefaultOpenId } = buildAboutSections(provider);
+  const responsePill = responseTimePillLabel(
+    provider?.responseTimeMinutes ?? null,
+    provider?.completedBookingsCount ?? 0,
+    reviewCount
+  );
+  const repeatClientsDisplay = impactStats?.repeatClientsCount ?? provider?.repeatClientCount ?? 0;
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-primary-50)", color: "var(--color-text)" }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <div className={`${HOME_INNER} pb-16 pt-0`}>
-        <div className="grid gap-8 lg:grid-cols-[1fr_360px] lg:items-start lg:gap-8">
+        <div className="grid gap-8 lg:grid-cols-[1fr_380px] lg:items-start lg:gap-8">
           <div className="min-w-0 space-y-8">
             <div className="pt-5 pb-2">
               <Link
@@ -182,27 +267,8 @@ export function ProviderProfileMarkup({
             </div>
 
             <ContentCard className="overflow-hidden p-0" noPadding>
-              <div className="relative h-[200px] w-full sm:h-[260px] lg:h-[320px]">
-                {heroImage ? (
-                  <Image
-                    src={heroImage}
-                    alt=""
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 1024px) 100vw, 752px"
-                    priority
-                  />
-                ) : (
-                  <div
-                    className="flex h-full w-full items-center justify-center text-5xl font-bold text-white"
-                    style={{ fontFamily: "var(--font-body), sans-serif", backgroundColor: "var(--color-primary)" }}
-                    aria-hidden
-                  >
-                    {initials}
-                  </div>
-                )}
-              </div>
-              <div className="px-7 pb-7 pt-7">
+              <ProviderGalleryClient images={galleryUrls} initials={initials} />
+              <div className="px-7 pb-7 pt-5">
                 <div className="flex flex-wrap items-center gap-3">
                   <h1
                     className="uppercase"
@@ -260,6 +326,18 @@ export function ProviderProfileMarkup({
                   </span>
                 </div>
 
+                <div
+                  className="mt-3 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[0.75rem] font-semibold"
+                  style={{
+                    fontFamily: "var(--font-body)",
+                    backgroundColor: "rgba(10, 128, 128, 0.06)",
+                    color: "var(--color-primary)",
+                  }}
+                >
+                  <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                  {responsePill}
+                </div>
+
                 {provider?.backgroundCheckPassed ? (
                   <div className="mt-3 flex flex-wrap gap-2">
                     <span
@@ -290,23 +368,6 @@ export function ProviderProfileMarkup({
                   </div>
                 ) : null}
 
-                {(respTime || repeatLine) && (
-                  <div className="mt-3 flex flex-wrap gap-4 text-sm" style={{ color: "rgba(28,28,28,0.5)" }}>
-                    {respTime ? (
-                      <span className="inline-flex items-center gap-1">
-                        <Clock className="h-4 w-4 shrink-0" aria-hidden />
-                        {respTime}
-                      </span>
-                    ) : null}
-                    {repeatLine ? (
-                      <span className="inline-flex items-center gap-1">
-                        <Heart className="h-4 w-4 shrink-0" aria-hidden />
-                        {repeatLine}
-                      </span>
-                    ) : null}
-                  </div>
-                )}
-
                 {provider && provider.confirmedHolidays.length > 0 ? (
                   <div className="mt-3 flex flex-wrap gap-2">
                     {provider.confirmedHolidays.map((id) => (
@@ -325,7 +386,7 @@ export function ProviderProfileMarkup({
                   </div>
                 ) : null}
 
-                <div className="mt-6 flex flex-wrap gap-3">
+                <div className="mt-6 flex flex-wrap gap-2.5">
                   <Link
                     href={`/services/book/${slug}`}
                     className="inline-flex items-center justify-center rounded-full px-6 py-3 text-[0.875rem] font-semibold text-white transition-opacity hover:opacity-90"
@@ -353,19 +414,62 @@ export function ProviderProfileMarkup({
                     Message
                   </Link>
                   {provider ? (
-                    <Suspense fallback={null}>
-                      <ProviderFavoriteButton
-                        providerUserId={provider.providerId}
-                        initialFavorited={favorited}
-                        viewerKind={favoriteViewerKind}
-                        loginReturnPath={`/services/provider/${slug}`}
-                        size="lg"
-                      />
-                    </Suspense>
+                    <div className="inline-flex shrink-0 [&_a]:flex [&_a]:h-[46px] [&_a]:w-[46px] [&_a]:items-center [&_a]:justify-center [&_a]:rounded-full [&_a]:border [&_a]:border-[rgba(10,128,128,0.15)] [&_button]:flex [&_button]:h-[46px] [&_button]:w-[46px] [&_button]:items-center [&_button]:justify-center [&_button]:rounded-full [&_button]:border [&_button]:border-[rgba(10,128,128,0.15)]">
+                      <Suspense fallback={null}>
+                        <ProviderFavoriteButton
+                          providerUserId={provider.providerId}
+                          initialFavorited={favorited}
+                          viewerKind={favoriteViewerKind}
+                          loginReturnPath={`/services/provider/${slug}`}
+                          size="lg"
+                        />
+                      </Suspense>
+                    </div>
                   ) : null}
                 </div>
               </div>
             </ContentCard>
+
+            {impactStats ? (
+              <div
+                className="rounded-[20px] px-7 py-5 text-white"
+                style={{
+                  background: "linear-gradient(135deg, var(--color-primary) 0%, #0B9494 100%)",
+                  boxShadow: CARD_SHADOW,
+                }}
+              >
+                <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-0">
+                  {[
+                    { v: impactStats.completedBookingsCount.toLocaleString("en-GB"), l: "Bookings completed" },
+                    { v: repeatClientsDisplay.toLocaleString("en-GB"), l: "Repeat clients" },
+                    { v: formatEur(impactStats.totalEarnedCents), l: "Total earned" },
+                    { v: formatEur(impactStats.rescueFundedCents), l: "Rescue funded" },
+                  ].map((stat, i) => (
+                    <div
+                      key={stat.l}
+                      className={`min-w-0 px-2 text-center lg:px-4 ${i > 0 ? "lg:border-l" : ""}`}
+                      style={i > 0 ? { borderColor: "rgba(255,255,255,0.2)" } : undefined}
+                    >
+                      <p className="text-[1.25rem] font-extrabold leading-tight" style={{ fontFamily: "var(--font-body)" }}>
+                        {stat.v}
+                      </p>
+                      <p
+                        className="mt-1 text-[0.6875rem] font-medium uppercase tracking-wide"
+                        style={{ color: "rgba(255,255,255,0.65)", fontFamily: "var(--font-body)" }}
+                      >
+                        {stat.l}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+                <p
+                  className="mt-5 text-center text-[0.6875rem]"
+                  style={{ color: "rgba(255,255,255,0.55)", fontFamily: "var(--font-body)" }}
+                >
+                  Every booking through Tinies funds rescue animal care across Cyprus.
+                </p>
+              </div>
+            ) : null}
 
             {videoResolved && provider ? (
               <ContentCard className="[&_section]:mt-0">
@@ -373,139 +477,19 @@ export function ProviderProfileMarkup({
               </ContentCard>
             ) : null}
 
-            {provider?.whyIDoThis?.trim() ? (
+            {aboutSections.length > 0 ? (
               <ContentCard>
-                <section aria-labelledby="why-heading">
-                  <h2 id="why-heading" className={`${cardTitleClass} mb-4`} style={{ fontFamily: "var(--font-body)", color: "var(--color-text)" }}>
-                    Why I do this
-                  </h2>
-                  <p className={`${cardBodyClass} whitespace-pre-wrap`} style={cardBodyStyle}>
-                    {provider.whyIDoThis.trim()}
-                  </p>
-                </section>
+                <h2 className={`${cardTitleClass} mb-4`} style={{ fontFamily: "var(--font-body)", color: "var(--color-text)" }}>
+                  About {firstName}
+                </h2>
+                <ProviderAboutAccordion sections={aboutSections} defaultOpenId={aboutDefaultOpenId} />
               </ContentCard>
             ) : null}
 
-            <ContentCard>
-              <section aria-labelledby="exp-heading">
-                <h2 id="exp-heading" className={`${cardTitleClass} mb-4`} style={{ fontFamily: "var(--font-body)", color: "var(--color-text)" }}>
-                  Experience &amp; qualifications
-                </h2>
-                {provider?.experienceTags && provider.experienceTags.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {provider.experienceTags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded-full px-3 py-1 text-sm font-medium capitalize"
-                        style={{ backgroundColor: "rgba(10, 128, 128, 0.12)", color: "var(--color-primary)" }}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-
-                {provider?.qualifications && provider.qualifications.length > 0 ? (
-                  <ul className="mt-6 space-y-3">
-                    {provider.qualifications.map((q, i) => (
-                      <li
-                        key={`${q.title}-${i}`}
-                        className="rounded-xl border p-4"
-                        style={{ borderColor: BORDER_TEAL_15, backgroundColor: "var(--color-primary-50)" }}
-                      >
-                        <p className="font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--color-text)" }}>
-                          {q.title}
-                        </p>
-                        <p className="mt-1 text-sm" style={{ color: "rgba(28,28,28,0.7)" }}>
-                          {[q.issuer, q.year].filter(Boolean).join(" · ")}
-                          {q.description ? ` — ${q.description}` : ""}
-                        </p>
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-
-                {provider?.previousExperience?.trim() ? (
-                  <p className={`mt-6 whitespace-pre-wrap ${cardBodyClass}`} style={cardBodyStyle}>
-                    {provider.previousExperience.trim()}
-                  </p>
-                ) : null}
-
-                {provider && (provider.acceptedBreeds.length > 0 || provider.notAccepted.length > 0) ? (
-                  <div className="mt-8 grid gap-6 sm:grid-cols-2">
-                    {provider.acceptedBreeds.length > 0 ? (
-                      <div>
-                        <h3 className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>
-                          Breed experience
-                        </h3>
-                        <p className="mt-2 text-sm" style={{ color: "rgba(28,28,28,0.7)" }}>
-                          {provider.acceptedBreeds.join(", ")}
-                        </p>
-                      </div>
-                    ) : null}
-                    {provider.notAccepted.length > 0 ? (
-                      <div>
-                        <h3 className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>
-                          Not accepted
-                        </h3>
-                        <p className="mt-2 text-sm" style={{ color: "rgba(28,28,28,0.7)" }}>
-                          {provider.notAccepted.join(", ")}
-                        </p>
-                      </div>
-                    ) : null}
-                  </div>
-                ) : null}
-              </section>
-            </ContentCard>
-
-            {(provider?.homePhotos?.length || provider?.homeDescription?.trim()) && (
-              <ContentCard>
-                <section aria-labelledby="home-heading">
-                  <h2 id="home-heading" className={`${cardTitleClass} mb-4`} style={{ fontFamily: "var(--font-body)", color: "var(--color-text)" }}>
-                    Where your pet will stay
-                  </h2>
-                  {provider?.homeDescription?.trim() ? (
-                    <p className={`${cardBodyClass} max-w-3xl`} style={cardBodyStyle}>
-                      {provider.homeDescription.trim()}
-                    </p>
-                  ) : null}
-                  {provider && provider.homePhotos.length > 0 ? (
-                    <div className="mt-6">
-                      <div className="relative aspect-[4/3] max-w-3xl overflow-hidden rounded-xl border" style={{ borderColor: BORDER_TEAL_15 }}>
-                        <Image src={provider.homePhotos[0]} alt="" fill className="object-cover" sizes="(max-width: 1024px) 100vw, 720px" />
-                      </div>
-                      {provider.homePhotos.length > 1 ? (
-                        <ul className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3">
-                          {provider.homePhotos.slice(1).map((src, i) => (
-                            <li key={`${src}-${i}`} className="relative aspect-square overflow-hidden rounded-xl border" style={{ borderColor: BORDER_TEAL_15 }}>
-                              <Image src={src} alt="" fill className="object-cover" sizes="180px" />
-                            </li>
-                          ))}
-                        </ul>
-                      ) : null}
-                    </div>
-                  ) : null}
-                </section>
-              </ContentCard>
-            )}
-
-            <ContentCard>
-              <section aria-labelledby="about-heading">
-                <h2 id="about-heading" className={`${cardTitleClass} mb-4`} style={{ fontFamily: "var(--font-body)", color: "var(--color-text)" }}>
-                  About
-                </h2>
-                <p className={`${cardBodyClass} whitespace-pre-wrap`} style={cardBodyStyle}>
-                  {provider?.bio ??
-                    "This provider has not added a bio yet. Message them to learn more about their experience."}
-                </p>
-              </section>
-            </ContentCard>
-
-            {(provider?.homeType ||
+            {(provider?.homeType != null ||
               provider?.hasYard != null ||
               provider?.smokingHome != null ||
-              provider?.petsInHome ||
-              provider?.childrenInHome) && (
+              (provider?.petsInHome != null && provider.petsInHome.trim() !== "")) && (
               <ContentCard>
                 <section aria-labelledby="env-heading">
                   <h2 id="env-heading" className={`${cardTitleClass} mb-4`} style={{ fontFamily: "var(--font-body)", color: "var(--color-text)" }}>
@@ -513,70 +497,57 @@ export function ProviderProfileMarkup({
                   </h2>
                   <div
                     className="grid gap-3"
-                    style={{ gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))" }}
+                    style={{ gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))" }}
                   >
                     {provider?.homeType ? (
-                      <div className="rounded-xl p-4" style={{ backgroundColor: "var(--color-primary-50)" }}>
+                      <div className="rounded-xl p-3.5" style={{ backgroundColor: "var(--color-primary-50)" }}>
                         <p
                           className="text-[0.6875rem] font-bold uppercase tracking-[0.06em]"
                           style={{ color: "rgba(28,28,28,0.5)" }}
                         >
                           Home type
                         </p>
-                        <p className="mt-2 text-[0.9375rem] font-semibold" style={{ color: "var(--color-text)" }}>
+                        <p className="mt-1.5 text-[0.875rem] font-semibold" style={{ color: "var(--color-text)" }}>
                           {provider.homeType === "house" ? "House" : provider.homeType === "apartment" ? "Apartment" : provider.homeType}
                         </p>
                       </div>
                     ) : null}
                     {provider?.hasYard != null ? (
-                      <div className="rounded-xl p-4" style={{ backgroundColor: "var(--color-primary-50)" }}>
+                      <div className="rounded-xl p-3.5" style={{ backgroundColor: "var(--color-primary-50)" }}>
                         <p
                           className="text-[0.6875rem] font-bold uppercase tracking-[0.06em]"
                           style={{ color: "rgba(28,28,28,0.5)" }}
                         >
                           Yard
                         </p>
-                        <p className="mt-2 text-[0.9375rem] font-semibold" style={{ color: "var(--color-text)" }}>
+                        <p className="mt-1.5 text-[0.875rem] font-semibold" style={{ color: "var(--color-text)" }}>
                           {provider.hasYard ? (provider.yardFenced ? "Yes, fenced" : "Yes") : "No"}
                         </p>
                       </div>
                     ) : null}
                     {provider?.smokingHome != null ? (
-                      <div className="rounded-xl p-4" style={{ backgroundColor: "var(--color-primary-50)" }}>
+                      <div className="rounded-xl p-3.5" style={{ backgroundColor: "var(--color-primary-50)" }}>
                         <p
                           className="text-[0.6875rem] font-bold uppercase tracking-[0.06em]"
                           style={{ color: "rgba(28,28,28,0.5)" }}
                         >
-                          Smoking home
+                          Smoking
                         </p>
-                        <p className="mt-2 text-[0.9375rem] font-semibold" style={{ color: "var(--color-text)" }}>
+                        <p className="mt-1.5 text-[0.875rem] font-semibold" style={{ color: "var(--color-text)" }}>
                           {provider.smokingHome ? "Yes" : "No"}
                         </p>
                       </div>
                     ) : null}
-                    {provider?.petsInHome ? (
-                      <div className="rounded-xl p-4" style={{ backgroundColor: "var(--color-primary-50)" }}>
+                    {provider?.petsInHome?.trim() ? (
+                      <div className="rounded-xl p-3.5" style={{ backgroundColor: "var(--color-primary-50)" }}>
                         <p
                           className="text-[0.6875rem] font-bold uppercase tracking-[0.06em]"
                           style={{ color: "rgba(28,28,28,0.5)" }}
                         >
-                          Pets in home
+                          Other pets
                         </p>
-                        <p className="mt-2 text-[0.9375rem] font-semibold" style={{ color: "var(--color-text)" }}>
+                        <p className="mt-1.5 text-[0.875rem] font-semibold" style={{ color: "var(--color-text)" }}>
                           {provider.petsInHome}
-                        </p>
-                      </div>
-                    ) : null}
-                    {provider?.childrenInHome ? (
-                      <div className="rounded-xl p-4" style={{ backgroundColor: "var(--color-primary-50)" }}>
-                        <p
-                          className="text-[0.6875rem] font-bold uppercase tracking-[0.06em]"
-                          style={{ color: "rgba(28,28,28,0.5)" }}
-                        >
-                          Children in home
-                        </p>
-                        <p className="mt-2 text-[0.9375rem] font-semibold" style={{ color: "var(--color-text)" }}>
-                          {provider.childrenInHome}
                         </p>
                       </div>
                     ) : null}
@@ -584,56 +555,6 @@ export function ProviderProfileMarkup({
                 </section>
               </ContentCard>
             )}
-
-            {provider?.typicalDay ? (
-              <ContentCard>
-                <section aria-labelledby="typical-heading">
-                  <h2 id="typical-heading" className={`${cardTitleClass} mb-4`} style={{ fontFamily: "var(--font-body)", color: "var(--color-text)" }}>
-                    A typical day
-                  </h2>
-                  <p className={`${cardBodyClass} whitespace-pre-wrap`} style={cardBodyStyle}>
-                    {provider.typicalDay}
-                  </p>
-                </section>
-              </ContentCard>
-            ) : null}
-
-            {provider?.infoWantedAboutPet ? (
-              <ContentCard>
-                <section aria-labelledby="info-heading">
-                  <h2 id="info-heading" className={`${cardTitleClass} mb-4`} style={{ fontFamily: "var(--font-body)", color: "var(--color-text)" }}>
-                    What I&apos;d like to know about your pet
-                  </h2>
-                  <p className={`${cardBodyClass} whitespace-pre-wrap`} style={cardBodyStyle}>
-                    {provider.infoWantedAboutPet}
-                  </p>
-                </section>
-              </ContentCard>
-            ) : null}
-
-            {(provider?.emergencyProtocol?.trim() || provider?.insuranceDetails?.trim()) ? (
-              <ContentCard>
-                <h2 className={`${cardTitleClass} mb-4`} style={{ fontFamily: "var(--font-body)", color: "var(--color-text)" }}>
-                  Good to know
-                </h2>
-                {provider?.emergencyProtocol?.trim() ? (
-                  <p className={`${cardBodyClass} mb-3`} style={cardBodyStyle}>
-                    <span className="font-semibold" style={{ color: "var(--color-text)" }}>
-                      Emergencies:{" "}
-                    </span>
-                    {provider.emergencyProtocol.trim()}
-                  </p>
-                ) : null}
-                {provider?.insuranceDetails?.trim() ? (
-                  <p className={`${cardBodyClass}`} style={cardBodyStyle}>
-                    <span className="font-semibold" style={{ color: "var(--color-text)" }}>
-                      Insurance:{" "}
-                    </span>
-                    {provider.insuranceDetails.trim()}
-                  </p>
-                ) : null}
-              </ContentCard>
-            ) : null}
 
             <ContentCard noPadding className="overflow-hidden">
               <h2
@@ -749,22 +670,16 @@ export function ProviderProfileMarkup({
               </div>
             </ContentCard>
 
-            {provider?.photos && provider.photos.length > 0 ? (
-              <ContentCard>
-                <section aria-labelledby="photos-heading">
-                  <h2 id="photos-heading" className={`${cardTitleClass} mb-4`} style={{ fontFamily: "var(--font-body)", color: "var(--color-text)" }}>
-                    Gallery
-                  </h2>
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                    {provider.photos.map((url, i) => (
-                      <div key={`${url}-${i}`} className="relative aspect-square overflow-hidden rounded-xl border" style={{ borderColor: BORDER_TEAL_15 }}>
-                        <Image src={url} alt="" fill className="object-cover" sizes="(max-width: 640px) 50vw, 33vw" />
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              </ContentCard>
-            ) : null}
+            <ContentCard>
+              <section aria-labelledby="reviews-heading">
+                <ProviderProfilePageReviews
+                  reviews={reviews}
+                  featuredId={featuredReviewId}
+                  avgRating={avgRating}
+                  reviewCount={reviewCount}
+                />
+              </section>
+            </ContentCard>
 
             {provider?.serviceAreaLat != null && provider?.serviceAreaLng != null && provider?.serviceAreaRadiusKm != null && (
               <ContentCard className="overflow-hidden p-0" noPadding>
@@ -790,17 +705,6 @@ export function ProviderProfileMarkup({
                 <ProviderCertificationsSection certifications={provider.certifications} />
               </ContentCard>
             ) : null}
-
-            <ContentCard>
-              <section aria-labelledby="reviews-heading">
-                <ProviderProfilePageReviews
-                  reviews={reviews}
-                  featuredId={featuredReviewId}
-                  avgRating={avgRating}
-                  reviewCount={reviewCount}
-                />
-              </section>
-            </ContentCard>
           </div>
 
           <aside className="flex flex-col gap-5 lg:sticky lg:top-20">
@@ -842,16 +746,39 @@ export function ProviderProfileMarkup({
                 className="text-[0.8125rem] font-bold uppercase tracking-[0.06em]"
                 style={{ fontFamily: "var(--font-body)", color: "rgba(28,28,28,0.5)" }}
               >
-                Trust signals
+                Trust &amp; credentials
               </p>
               <div className="mt-4 flex flex-col gap-4">
-                <TrustSignalRow
-                  icon={<BadgeCheck className="h-4 w-4" style={{ color: "var(--color-primary)" }} aria-hidden />}
-                  label={provider?.verified ? "Verified on Tinies" : "Not yet verified"}
-                />
+                <div className="flex items-center gap-3">
+                  <div
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+                    style={{ backgroundColor: "rgba(10, 128, 128, 0.08)" }}
+                  >
+                    <BadgeCheck className="h-4 w-4" style={{ color: "var(--color-primary)" }} aria-hidden />
+                  </div>
+                  <span
+                    className="text-sm font-semibold"
+                    style={{
+                      fontFamily: "var(--font-body)",
+                      color: provider?.verified ? "var(--color-primary)" : "var(--color-text)",
+                    }}
+                  >
+                    {provider?.verified ? "Verified identity" : "Identity not verified"}
+                  </span>
+                </div>
+                {provider?.backgroundCheckPassed ? (
+                  <TrustSignalRow
+                    icon={<ShieldCheck className="h-4 w-4" style={{ color: "var(--color-primary)" }} aria-hidden />}
+                    label="Background check passed"
+                  />
+                ) : null}
                 <TrustSignalRow
                   icon={<Calendar className="h-4 w-4" style={{ color: "var(--color-primary)" }} aria-hidden />}
                   label={`Member since ${formatMemberSinceLabel(provider?.memberSince ?? new Date())}`}
+                />
+                <TrustSignalRow
+                  icon={<Clock className="h-4 w-4" style={{ color: "var(--color-primary)" }} aria-hidden />}
+                  label={responsePill}
                 />
                 <TrustSignalRow
                   icon={<MessageCircle className="h-4 w-4" style={{ color: "var(--color-primary)" }} aria-hidden />}
@@ -861,10 +788,75 @@ export function ProviderProfileMarkup({
                   icon={<Star className="h-4 w-4" style={{ color: "var(--color-primary)" }} aria-hidden />}
                   label={`${(provider?.completedBookingsCount ?? 0).toLocaleString("en-GB")} completed bookings`}
                 />
+                <TrustSignalRow
+                  icon={<Repeat2 className="h-4 w-4" style={{ color: "var(--color-primary)" }} aria-hidden />}
+                  label={`${repeatClientsDisplay.toLocaleString("en-GB")} repeat clients`}
+                />
               </div>
+
+              {provider && provider.certifications.length > 0 ? (
+                <div className="mt-4 border-t pt-4" style={{ borderColor: BORDER_TEAL_15 }}>
+                  <p
+                    className="text-[0.75rem] font-bold uppercase tracking-[0.06em]"
+                    style={{ fontFamily: "var(--font-body)", color: "rgba(28,28,28,0.5)" }}
+                  >
+                    Certifications
+                  </p>
+                  <ul className="mt-3 flex flex-col gap-2">
+                    {provider.certifications.map((c) => (
+                      <li
+                        key={`${c.courseSlug}-${c.completedAt.toISOString()}`}
+                        className="flex gap-3 rounded-xl border px-3.5 py-3"
+                        style={{
+                          borderColor: BORDER_TEAL_15,
+                          backgroundColor: "var(--color-primary-50)",
+                        }}
+                      >
+                        <div
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]"
+                          style={{ backgroundColor: "var(--color-primary)" }}
+                          aria-hidden
+                        >
+                          <Check className="h-5 w-5 text-white" strokeWidth={2.5} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[0.8125rem] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--color-text)" }}>
+                            {c.badgeLabel}
+                          </p>
+                          <p className="mt-0.5 text-[0.6875rem]" style={{ fontFamily: "var(--font-body)", color: "rgba(28,28,28,0.5)" }}>
+                            {c.courseTitle} · {c.score}% · {formatCertSidebarDate(c.completedAt)}
+                          </p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
             </ContentCard>
 
             <ProviderProfileSharePanel shareUrl={profileUrl} shareTitle={`Book ${name} on Tinies`} />
+
+            <div
+              className="rounded-2xl border p-5 text-center"
+              style={{
+                borderColor: BORDER_TEAL_15,
+                background: "linear-gradient(135deg, rgba(244,93,72,0.08) 0%, rgba(10,128,128,0.06) 100%)",
+              }}
+            >
+              <p className="text-[0.8125rem] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--color-text)" }}>
+                Every booking helps rescue animals
+              </p>
+              <p className="mt-2 text-xs leading-relaxed" style={{ fontFamily: "var(--font-body)", color: "rgba(28,28,28,0.7)" }}>
+                About 90% of Tinies commission supports rescue care and transparency through Tinies Giving.
+              </p>
+              <Link
+                href="/giving"
+                className="mt-3 inline-flex items-center gap-1 text-[0.8125rem] font-bold hover:underline"
+                style={{ fontFamily: "var(--font-body)", color: "var(--color-secondary)" }}
+              >
+                Learn more →
+              </Link>
+            </div>
           </aside>
         </div>
       </div>
