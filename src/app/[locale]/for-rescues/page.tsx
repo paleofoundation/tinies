@@ -5,7 +5,7 @@ import { PageContainer, Section } from "@/components/theme";
 import { Link } from "@/i18n/navigation";
 
 export const metadata: Metadata = {
-  title: "For Rescue Organisations | Tinies",
+  title: "For Rescue Organisations",
   description:
     "List your animals for free. Reach adopters across Cyprus and Europe. Manage applications through your dashboard. You run the adoptions — we give you the tools and the audience.",
 };
@@ -44,6 +44,7 @@ export default function ForRescuesPage() {
         <PageContainer>
           <SectionHeader
             align="center"
+            titleAs="h1"
             eyebrow="Rescue partners"
             title="For rescue organisations"
             description="List your animals for free. Reach adopters across Cyprus and Europe. Manage applications through your dashboard. You run the adoptions — we give you the tools and the audience."

@@ -5,7 +5,7 @@ import QRCode from "qrcode";
 import { Download } from "lucide-react";
 
 type Props = {
-  /** Full URL to encode (e.g. https://tinies.app/give or /give/charity-slug). */
+  /** Full URL to encode (e.g. https://tinies.app/giving/donate or /giving/charity-slug). */
   url: string;
   /** Label for the download button and filename. */
   label?: string;

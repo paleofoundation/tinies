@@ -2,7 +2,7 @@ import Link from "next/link";
 import { InviteCharityForm } from "./InviteCharityForm";
 
 export const metadata = {
-  title: "Invite Charity | Admin | Tinies",
+  title: "Invite Charity (Admin)",
   description: "Invite a charity to join Tinies Giving.",
 };
 

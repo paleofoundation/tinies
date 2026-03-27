@@ -12,7 +12,7 @@ import { PageContainer, Section } from "@/components/theme";
 import { Link } from "@/i18n/navigation";
 
 export const metadata: Metadata = {
-  title: "For Providers | Join Tinies",
+  title: "For Providers",
   description:
     "List your pet care services for free. We bring you customers, take only 12% when you earn, and help you build your reputation with reviews. Flexible schedule — sign up today.",
 };
@@ -81,8 +81,9 @@ export default function ForProvidersPage() {
         <PageContainer>
           <SectionHeader
             align="center"
+            titleAs="h1"
             eyebrow="Providers"
-            title="For providers"
+            title="For providers (pet sitters & dog walkers)"
             description="Offer pet care on your terms. Free to join, 12% only when you earn. And 90% of our commission goes to rescue animal care. When you earn through Tinies, the tinies get fed, treated, and sheltered too."
             className="mx-auto max-w-2xl"
           />

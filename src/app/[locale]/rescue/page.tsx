@@ -5,11 +5,12 @@ import { EditorialButton, SectionHeader } from "@/components/marketing";
 import { PageContainer, Section } from "@/components/theme";
 import { Link } from "@/i18n/navigation";
 import { prisma } from "@/lib/prisma";
+import { withQueryTimeout } from "@/lib/utils/with-query-timeout";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
 export const metadata: Metadata = {
-  title: "Rescue partners | Tinies",
+  title: "Rescue partners",
   description: "Verified rescue organisations on Tinies in Cyprus — adoption listings, campaigns, and ways to help.",
   openGraph: {
     title: "Rescue partners | Tinies",
@@ -35,20 +36,40 @@ function locationLine(district: string | null, location: string | null): string 
   return [...new Set(parts)].join(" · ");
 }
 
+type RescuePartnerRow = {
+  slug: string;
+  name: string;
+  mission: string | null;
+  logoUrl: string | null;
+  coverPhotoUrl: string | null;
+  district: string | null;
+  location: string | null;
+};
+
 export default async function RescuePartnersPage() {
-  const orgs = await prisma.rescueOrg.findMany({
-    where: { verified: true },
-    orderBy: { name: "asc" },
-    select: {
-      slug: true,
-      name: true,
-      mission: true,
-      logoUrl: true,
-      coverPhotoUrl: true,
-      district: true,
-      location: true,
-    },
-  });
+  let orgs: RescuePartnerRow[] = [];
+  try {
+    orgs = await withQueryTimeout(
+      prisma.rescueOrg.findMany({
+        where: { verified: true },
+        orderBy: { name: "asc" },
+        select: {
+          slug: true,
+          name: true,
+          mission: true,
+          logoUrl: true,
+          coverPhotoUrl: true,
+          district: true,
+          location: true,
+        },
+      }),
+      [],
+      "rescue-partners:list",
+      5000
+    );
+  } catch (e) {
+    console.error("RescuePartnersPage findMany", e);
+  }
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}>

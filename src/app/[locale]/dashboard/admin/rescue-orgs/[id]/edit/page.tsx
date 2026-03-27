@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const org = await getRescueOrgById(id);
   return {
-    title: org ? `Edit ${org.name} | Admin | Tinies` : "Edit rescue org | Admin | Tinies",
+    title: org ? `Edit ${org.name} (Admin)` : "Edit rescue org (Admin)",
   };
 }
 

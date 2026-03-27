@@ -13,7 +13,7 @@ const PAGES = [
   "/adopt",
   "/adopt/tinies-who-made-it",
   "/giving",
-  "/give",
+  "/giving/donate",
   "/how-it-works",
   "/about",
   "/for-providers",

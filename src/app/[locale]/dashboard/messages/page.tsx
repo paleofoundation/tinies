@@ -6,7 +6,7 @@ import { MessagesListClient } from "./MessagesListClient";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Messages | Tinies",
+  title: "Messages",
   description: "Your conversations with providers and owners.",
 };
 

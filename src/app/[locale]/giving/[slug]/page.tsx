@@ -2,12 +2,22 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCharityBySlug } from "@/lib/giving/actions";
+import { getCanonicalSiteOrigin } from "@/lib/constants/site-url";
 import { CharityDonateForm } from "./CharityDonateForm";
 import { SetPreferredCharityButton } from "./SetPreferredCharityButton";
 
 export const dynamic = "force-dynamic";
 
+const SITE_ORIGIN = getCanonicalSiteOrigin();
+
 type Props = { params: Promise<{ slug: string }> };
+
+function absoluteOgImageUrl(src: string, origin: string): string {
+  const t = src.trim();
+  if (/^https?:\/\//i.test(t)) return t;
+  if (t.startsWith("/")) return `${origin}${t}`;
+  return `${origin}/${t}`;
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -17,10 +27,39 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   } catch (e) {
     console.error("getCharityBySlug (metadata)", e);
   }
-  if (!charity) return { title: "Charity | Tinies Giving" };
+  if (!charity) notFound();
+
+  const title = charity.name;
+  const ogTitle = `${charity.name} · Tinies Giving`;
+  const description =
+    charity.mission?.trim() ||
+    `Donate to ${charity.name} through Tinies Giving — 100% to animal rescue partners in Cyprus.`;
+  const url = `${SITE_ORIGIN}/giving/${charity.slug}`;
+  const imageCandidates = [charity.logoUrl, ...charity.photos].filter((u): u is string => Boolean(u?.trim()));
+  const ogImages = imageCandidates.slice(0, 4).map((src) => ({
+    url: absoluteOgImageUrl(src, SITE_ORIGIN),
+    alt: charity.name,
+  }));
+  const primaryOg = ogImages[0]?.url;
+
   return {
-    title: `${charity.name} | Tinies Giving`,
-    description: charity.mission ?? `Support ${charity.name} through Tinies.`,
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title: ogTitle,
+      description,
+      url,
+      siteName: "Tinies",
+      type: "website",
+      images: ogImages.length > 0 ? ogImages : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: ogTitle,
+      description,
+      ...(primaryOg ? { images: [primaryOg] } : {}),
+    },
   };
 }
 

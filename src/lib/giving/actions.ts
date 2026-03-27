@@ -828,7 +828,7 @@ function countryToFlag(country: string | null): string {
 }
 
 // ---------------------------------------------------------------------------
-// Quick Donate (5.6) — public /give page, no login required
+// Quick Donate (5.6) — public `/giving/donate` (legacy `/give` redirects), no login required
 // ---------------------------------------------------------------------------
 
 /** Create PaymentIntent for one-time quick donate. No login required. Webhook records Donation. */
@@ -1012,7 +1012,7 @@ export async function createQuickGuardianSubscription(params: CreateQuickGuardia
       },
     });
     revalidatePath("/giving");
-    revalidatePath("/give");
+    revalidatePath("/giving/donate");
     return { clientSecret, subscriptionId: subscription.id };
   } catch (e) {
     console.error("createQuickGuardianSubscription", e);

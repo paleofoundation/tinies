@@ -6,7 +6,7 @@ import type { Metadata } from "next";
  */
 
 export const metadata: Metadata = {
-  title: "Blog | Tinies",
+  title: "Blog",
   description:
     "Pet care tips, adoption stories, and rescue updates from Cyprus — the Tinies blog.",
 };

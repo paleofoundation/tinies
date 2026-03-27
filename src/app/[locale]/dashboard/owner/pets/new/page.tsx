@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PetForm } from "../../PetForm";
 
 export const metadata: Metadata = {
-  title: "Add Pet | Tinies",
+  title: "Add Pet",
   description: "Add a pet to your profile.",
 };
 

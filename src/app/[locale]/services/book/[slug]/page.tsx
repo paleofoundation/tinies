@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const provider = await getProviderBySlug(slug);
   const name = provider?.providerName ?? "Provider";
   return {
-    title: `Book with ${name} | Tinies`,
+    title: `Book with ${name}`,
     description: `Book pet care with ${name}. Choose service, dates, and pets.`,
   };
 }

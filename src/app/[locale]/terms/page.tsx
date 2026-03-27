@@ -4,7 +4,7 @@ import Link from "next/link";
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | Tinies",
+  title: "Terms of Service",
   description:
     "Terms of Service for Tinies — the pet care marketplace and adoption platform for Cyprus. Commission, bookings, adoption coordination, Tinies Giving, and your rights.",
   openGraph: {

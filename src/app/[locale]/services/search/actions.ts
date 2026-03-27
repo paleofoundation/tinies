@@ -1,5 +1,6 @@
 "use server";
 
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { geocodeAddress } from "@/lib/utils/geocoding";
 import type { SearchProviderCard, SearchFilters } from "@/lib/utils/search-helpers";
@@ -24,23 +25,30 @@ export async function getSearchProviders(
     select: { id: true },
   });
 
+  const userAnd: Prisma.UserWhereInput[] = [];
+  const districtTrimmed = filters.district?.trim();
+  if (districtTrimmed) {
+    userAnd.push({
+      district: { equals: districtTrimmed, mode: "insensitive" },
+    });
+  }
+  if (requiredCourses.length > 0) {
+    userAnd.push(
+      ...requiredCourses.map((rc) => ({
+        providerCertifications: {
+          some: { courseId: rc.id, passed: true },
+        },
+      }))
+    );
+  }
+
   const profiles = await prisma.providerProfile.findMany({
     where: {
       verified: true,
       ...(filters.homeType ? { homeType: filters.homeType } : {}),
       ...(filters.hasYard === true ? { hasYard: true } : {}),
       ...(filters.holiday ? { confirmedHolidays: { has: filters.holiday } } : {}),
-      ...(requiredCourses.length > 0
-        ? {
-            user: {
-              AND: requiredCourses.map((rc) => ({
-                providerCertifications: {
-                  some: { courseId: rc.id, passed: true },
-                },
-              })),
-            },
-          }
-        : {}),
+      ...(userAnd.length > 0 ? { user: { AND: userAnd } } : {}),
     },
     include: {
       user: { select: { name: true, avatarUrl: true, district: true } },
@@ -122,7 +130,11 @@ export async function getSearchProviders(
     );
   }
 
-  result = await mergeProviderAvatarSiteImages(result);
+  try {
+    result = await mergeProviderAvatarSiteImages(result);
+  } catch (e) {
+    console.error("mergeProviderAvatarSiteImages", e);
+  }
 
   result.sort((a, b) => {
     switch (sort) {

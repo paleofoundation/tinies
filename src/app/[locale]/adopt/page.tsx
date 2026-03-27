@@ -48,6 +48,7 @@ export default async function AdoptPage({ searchParams }: PageProps) {
         <PageContainer>
           <SectionHeader
             align="center"
+            titleAs="h1"
             eyebrow="Adoption"
             title="Every tiny deserves a home."
             description="Rescue organisations list their animals on Tinies. Browse dogs and cats, apply through the platform, and connect with rescues and transport providers — locally in Cyprus or internationally."

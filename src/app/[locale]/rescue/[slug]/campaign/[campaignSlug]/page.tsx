@@ -33,8 +33,9 @@ function formatEurCents(cents: number): string {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, campaignSlug } = await params;
   const data = await getPublicCampaignByOrgAndSlug(slug, campaignSlug);
-  if (!data) return { title: "Campaign | Tinies" };
-  const title = `${data.title} | ${data.org.name} | Tinies`;
+  if (!data) return { title: "Campaign" };
+  const title = `${data.title} · ${data.org.name}`;
+  const ogTitle = `${title} | Tinies`;
   const description = data.subtitle?.trim() || data.description.slice(0, 160);
   const url = `${BASE_URL}/rescue/${data.org.slug}/campaign/${data.slug}`;
   const og = data.coverPhotoUrl ?? data.org.coverPhotoUrl;
@@ -42,14 +43,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     openGraph: {
-      title,
+      title: ogTitle,
       description,
       url,
       siteName: "Tinies",
       type: "website",
       images: og ? [{ url: og }] : undefined,
     },
-    twitter: { card: "summary_large_image", title, description },
+    twitter: { card: "summary_large_image", title: ogTitle, description },
   };
 }
 

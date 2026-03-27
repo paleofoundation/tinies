@@ -40,6 +40,7 @@ const COMMISSION_RATE = 0.12;
 export async function getProviderBySlug(
   slug: string
 ): Promise<ProviderForBooking | null> {
+  try {
   const profile = await prisma.providerProfile.findUnique({
     where: { slug },
     include: { user: { select: { name: true, avatarUrl: true, district: true, createdAt: true } } },
@@ -50,7 +51,12 @@ export async function getProviderBySlug(
     where: { providerId: profile.userId, status: BookingStatus.completed },
   });
 
-  const certifications = await getPublicCertificationsForProviderUserId(profile.userId);
+  let certifications: Awaited<ReturnType<typeof getPublicCertificationsForProviderUserId>> = [];
+  try {
+    certifications = await getPublicCertificationsForProviderUserId(profile.userId);
+  } catch (e) {
+    console.error("getPublicCertificationsForProviderUserId", e);
+  }
 
   const raw = profile.servicesOffered as unknown;
   const services: ServiceOffer[] = Array.isArray(raw)
@@ -68,10 +74,15 @@ export async function getProviderBySlug(
       ? (profile.availability as Record<string, boolean>)
       : null;
 
-  const avatarOverride = (
-    await getSiteImageWithFallback(`provider-${profile.slug}`, profile.user.avatarUrl ?? "")
-  ).trim();
-  const avatarUrl = avatarOverride || profile.user.avatarUrl;
+  let avatarUrl = profile.user.avatarUrl ?? "";
+  try {
+    const avatarOverride = (
+      await getSiteImageWithFallback(`provider-${profile.slug}`, profile.user.avatarUrl ?? "")
+    ).trim();
+    avatarUrl = avatarOverride || profile.user.avatarUrl || "";
+  } catch (e) {
+    console.error("getSiteImageWithFallback (provider avatar)", e);
+  }
 
   return {
     slug: profile.slug,
@@ -123,12 +134,17 @@ export async function getProviderBySlug(
     confirmedHolidays: profile.confirmedHolidays,
     certifications,
   };
+  } catch (e) {
+    console.error("getProviderBySlug", e);
+    return null;
+  }
 }
 
 /** Get reviews for a provider by slug (for public profile page). */
 export async function getProviderReviewsBySlug(
   slug: string
 ): Promise<ProviderReviewPublic[]> {
+  try {
   const { computeGivingTier } = await import("@/lib/giving/actions");
   const profile = await prisma.providerProfile.findUnique({
     where: { slug },
@@ -138,17 +154,17 @@ export async function getProviderReviewsBySlug(
   const reviews = await prisma.review.findMany({
     where: { providerId: profile.userId },
     orderBy: { createdAt: "desc" },
+    take: 100,
     include: {
       reviewer: { select: { id: true, name: true } },
       booking: { select: { serviceType: true } },
     },
   });
-  const tiers = new Map<string, GivingTier>();
-  for (const r of reviews) {
-    if (!tiers.has(r.reviewer.id)) {
-      tiers.set(r.reviewer.id, await computeGivingTier(r.reviewer.id));
-    }
-  }
+  const uniqueReviewerIds = [...new Set(reviews.map((r) => r.reviewer.id))];
+  const tierEntries = await Promise.all(
+    uniqueReviewerIds.map(async (id) => [id, await computeGivingTier(id)] as const)
+  );
+  const tiers = new Map<string, GivingTier>(tierEntries);
   return reviews.map((r) => ({
     id: r.id,
     reviewerName: r.reviewer.name,
@@ -162,6 +178,10 @@ export async function getProviderReviewsBySlug(
     responseAt: r.responseAt,
     serviceType: r.booking?.serviceType ?? "walking",
   }));
+  } catch (e) {
+    console.error("getProviderReviewsBySlug", e);
+    return [];
+  }
 }
 
 /** Defaults for booking checkout round-up (logged-in owner). */

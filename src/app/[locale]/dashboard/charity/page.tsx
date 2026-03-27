@@ -10,7 +10,7 @@ import { CharityDashboardClient } from "./CharityDashboardClient";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Charity Dashboard | Tinies",
+  title: "Charity Dashboard",
   description: "Your donation activity, supporters, and profile.",
 };
 

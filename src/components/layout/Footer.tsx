@@ -39,7 +39,7 @@ export async function Footer() {
       links: [
         { href: "/giving", label: t("links.tiniesGiving") },
         { href: "/giving/become-a-guardian", label: t("links.becomeGuardian") },
-        { href: "/give", label: t("links.donate") },
+        { href: "/giving/donate", label: t("links.donate") },
       ],
     },
     {

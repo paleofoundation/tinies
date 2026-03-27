@@ -7,11 +7,11 @@ import {
 } from "@/lib/constants/seo-landings";
 import { getBlogPostSummaries } from "@/lib/blog/load-posts";
 import type { BlogPostSummary } from "@/lib/blog/types";
+import { getCanonicalSiteOrigin } from "@/lib/constants/site-url";
 
 export const dynamic = "force-dynamic";
 
-/** Canonical site origin for sitemap URLs (www per product SEO). */
-const BASE_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://www.tinies.app").replace(/\/$/, "");
+const BASE_URL = getCanonicalSiteOrigin();
 
 function blogPostLastModified(post: BlogPostSummary): Date {
   const parsed = Date.parse(post.dateISO);
@@ -21,33 +21,65 @@ function blogPostLastModified(post: BlogPostSummary): Date {
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticNow = new Date();
 
-  const [
-    providers,
-    listings,
-    rescues,
-    charities,
-  ] = await Promise.all([
-    prisma.providerProfile.findMany({
-      where: { verified: true },
-      select: { slug: true, updatedAt: true },
-    }),
-    prisma.adoptionListing.findMany({
-      where: {
-        status: "available",
-        active: true,
-        org: { verified: true },
-      },
-      select: { slug: true, updatedAt: true },
-    }),
-    prisma.rescueOrg.findMany({
-      where: { verified: true },
-      select: { slug: true, updatedAt: true },
-    }),
-    prisma.charity.findMany({
-      where: { active: true, verified: true },
-      select: { slug: true, updatedAt: true },
-    }),
-  ]);
+  let providers: { slug: string; updatedAt: Date }[] = [];
+  let listings: { slug: string; updatedAt: Date }[] = [];
+  let rescues: { slug: string; updatedAt: Date }[] = [];
+  let charities: { slug: string; updatedAt: Date }[] = [];
+
+  try {
+    [providers, listings, rescues, charities] = await Promise.all([
+      prisma.providerProfile.findMany({
+        where: { verified: true, slug: { not: "" } },
+        select: { slug: true, updatedAt: true },
+      }),
+      prisma.adoptionListing.findMany({
+        where: {
+          status: "available",
+          active: true,
+          org: { verified: true },
+        },
+        select: { slug: true, updatedAt: true },
+      }),
+      prisma.rescueOrg.findMany({
+        where: { verified: true, slug: { not: "" } },
+        select: { slug: true, updatedAt: true },
+      }),
+      prisma.charity.findMany({
+        where: { active: true, verified: true, slug: { not: "" } },
+        select: { slug: true, updatedAt: true },
+      }),
+    ]);
+  } catch (e) {
+    console.error("sitemap database queries", e);
+  }
+
+  /** Dedupe by slug (keep first) so duplicate DB rows do not emit duplicate URLs. */
+  const dedupeBySlug = <T extends { slug: string }>(rows: T[]): T[] => {
+    const seen = new Set<string>();
+    return rows.filter((row) => {
+      const s = row.slug?.trim();
+      if (!s || seen.has(s)) return false;
+      seen.add(s);
+      return true;
+    });
+  };
+
+  /** Adoption URLs are resolved case-insensitively in the app; emit one URL per logical slug. */
+  const dedupeListingsBySlugCaseInsensitive = <T extends { slug: string }>(rows: T[]): T[] => {
+    const seen = new Set<string>();
+    return rows.filter((row) => {
+      const s = row.slug?.trim();
+      if (!s) return false;
+      const k = s.toLowerCase();
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+  };
+  providers = dedupeBySlug(providers);
+  listings = dedupeListingsBySlugCaseInsensitive(dedupeBySlug(listings));
+  rescues = dedupeBySlug(rescues);
+  charities = dedupeBySlug(charities);
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: BASE_URL, lastModified: staticNow, changeFrequency: "daily", priority: 1 },
@@ -61,6 +93,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     { url: `${BASE_URL}/giving`, lastModified: staticNow, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${BASE_URL}/giving/donate`, lastModified: staticNow, changeFrequency: "weekly", priority: 0.75 },
     { url: `${BASE_URL}/giving/become-a-guardian`, lastModified: staticNow, changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE_URL}/how-it-works`, lastModified: staticNow, changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE_URL}/for-providers`, lastModified: staticNow, changeFrequency: "monthly", priority: 0.7 },
@@ -120,7 +153,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  const blogSummaries = getBlogPostSummaries();
+  let blogSummaries: BlogPostSummary[] = [];
+  try {
+    blogSummaries = getBlogPostSummaries();
+  } catch (e) {
+    console.error("sitemap getBlogPostSummaries", e);
+  }
   const blogPages: MetadataRoute.Sitemap = blogSummaries.map((post) => ({
     url: `${BASE_URL}/blog/${post.slug}`,
     lastModified: blogPostLastModified(post),

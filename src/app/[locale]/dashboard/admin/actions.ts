@@ -17,21 +17,10 @@ import {
   sanitizeParentIds,
 } from "@/lib/adoption/listing-input-normalize";
 import { normalizeListingPhotoUrls } from "@/lib/adoption/listing-photos";
+import { ensureUniqueAdoptionListingSlug } from "@/lib/adoption/ensure-unique-listing-slug";
 
 const GARDENS_ORG_SLUG = "gardens-of-st-gertrude";
 const GARDENS_ORG_NAME = "Gardens of St Gertrude";
-
-function ensureUniqueSlug(baseSlug: string): Promise<string> {
-  return prisma.adoptionListing
-    .findMany({ where: { slug: { startsWith: baseSlug } }, select: { slug: true } })
-    .then((rows) => {
-      const used = new Set(rows.map((r) => r.slug));
-      if (!used.has(baseSlug)) return baseSlug;
-      let suffix = 1;
-      while (used.has(`${baseSlug}-${suffix}`)) suffix++;
-      return `${baseSlug}-${suffix}`;
-    });
-}
 
 export async function getOrCreateGardensRescueOrg(userId: string, userEmail: string, userName: string) {
   let org = await prisma.rescueOrg.findFirst({ where: { slug: GARDENS_ORG_SLUG } });
@@ -86,7 +75,7 @@ export async function createAdoptionListing(input: CreateListingInput): Promise<
     );
 
     const baseSlug = slugify(input.name, { lower: true, strict: true }) || "listing";
-    const slug = await ensureUniqueSlug(baseSlug);
+    const slug = await ensureUniqueAdoptionListingSlug(baseSlug);
 
     const feeCents = input.localAdoptionFeeEur != null ? Math.round(input.localAdoptionFeeEur * 100) : null;
     const status = STATUS_MAP[input.status] ?? AdoptionListingStatus.available;

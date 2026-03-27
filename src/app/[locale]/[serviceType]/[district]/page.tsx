@@ -10,6 +10,7 @@ import {
   DISTRICT_SLUG_TO_NAME,
   SERVICE_TYPE_TO_LABEL,
 } from "@/lib/constants/seo-landings";
+import { withQueryTimeout } from "@/lib/utils/with-query-timeout";
 
 export const dynamic = "force-dynamic";
 
@@ -62,14 +63,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { serviceType, district } = await params;
   const serviceLabel = SERVICE_TYPE_TO_LABEL[SERVICE_SLUG_TO_TYPE[serviceType]] ?? serviceType;
   const districtName = DISTRICT_SLUG_TO_NAME[district] ?? district;
-  const title = `${serviceLabel} in ${districtName} | Tinies`;
+  const title = `${serviceLabel} in ${districtName}`;
+  const ogTitle = `${title} | Tinies`;
   const description = getDistrictDescription(serviceLabel, districtName);
   const url = `${BASE_URL}/${serviceType}/${district}`;
   return {
     title,
     description,
     openGraph: {
-      title,
+      title: ogTitle,
       description,
       url,
       siteName: "Tinies",
@@ -77,7 +79,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: ogTitle,
       description,
     },
   };
@@ -88,7 +90,7 @@ export default async function DistrictServicePage({ params }: Props) {
   const internalType = SERVICE_SLUG_TO_TYPE[serviceType];
   const districtName = DISTRICT_SLUG_TO_NAME[district] ?? district;
 
-  if (!internalType || !districtName) {
+  if (!internalType || !Object.prototype.hasOwnProperty.call(DISTRICT_SLUG_TO_NAME, district)) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-20 text-center">
         <h1 className="text-xl font-semibold" style={{ color: "var(--color-text)" }}>Page not found</h1>
@@ -100,10 +102,15 @@ export default async function DistrictServicePage({ params }: Props) {
   }
 
   const serviceLabel = SERVICE_TYPE_TO_LABEL[internalType] ?? serviceType;
-  const providers = await getSearchProviders({
-    serviceType: internalType,
-    district: districtName,
-  });
+  const providers = await withQueryTimeout(
+    getSearchProviders({
+      serviceType: internalType,
+      district: districtName,
+    }),
+    [],
+    `district-seo:${serviceType}/${district}`,
+    5000
+  );
 
   const faqs = DISTRICT_FAQS.default;
   const faqJsonLd = {

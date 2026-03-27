@@ -6,7 +6,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 const HELLO_EMAIL = "hello@tinies.app";
 
 export const metadata: Metadata = {
-  title: "Contact Us | Tinies",
+  title: "Contact Us",
   description:
     "Get in touch with Tinies for help with bookings, adoption, partnerships, or press. We reply by email as soon as we can.",
   openGraph: {

@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
   const name = otherParty?.name ?? "Conversation";
   return {
-    title: `${name} | Messages | Tinies`,
+    title: `${name} · Messages`,
     description: `Chat with ${name}.`,
   };
 }

@@ -22,15 +22,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   } catch (e) {
     console.error("getListingBySlug (metadata)", e);
   }
-  if (!listing) return { title: "Adopt | Tinies" };
-  const title = `Apply to adopt ${listing.name} | Tinies`;
+  if (!listing) return { title: "Adopt" };
+  const title = `Apply to adopt ${listing.name}`;
+  const ogTitle = `${title} | Tinies`;
   const description = `Apply to adopt ${listing.name}, a ${listing.species}${listing.breed ? ` (${listing.breed})` : ""} in Cyprus.`;
   const url = `${BASE_URL}/adopt/apply/${slug}`;
   return {
     title,
     description,
-    openGraph: { title, description, url, siteName: "Tinies", type: "website" },
-    twitter: { card: "summary_large_image", title, description },
+    openGraph: { title: ogTitle, description, url, siteName: "Tinies", type: "website" },
+    twitter: { card: "summary_large_image", title: ogTitle, description },
   };
 }
 

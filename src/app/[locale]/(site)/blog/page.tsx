@@ -11,7 +11,7 @@ import { Link } from "@/i18n/navigation";
 const BASE_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app").replace(/\/$/, "");
 
 export const metadata: Metadata = {
-  title: "The Tinies Blog | Tinies",
+  title: "The Tinies Blog",
   description:
     "Pet care tips, adoption stories, and rescue updates from Cyprus — guides for pet owners and adopters from the Tinies team.",
   openGraph: {

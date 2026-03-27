@@ -7,7 +7,7 @@ import { AdopterDashboardClient } from "./AdopterDashboardClient";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Adopter Dashboard | Tinies",
+  title: "Adopter Dashboard",
   description: "Your adoption applications and status.",
 };
 

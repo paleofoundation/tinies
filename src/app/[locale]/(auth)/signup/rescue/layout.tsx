@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Register your rescue | Tinies",
+  title: "Register your rescue",
   description:
     "Create a free rescue organisation account on Tinies. List adoptable animals, manage applications, and reach adopters in Cyprus and across Europe.",
 };

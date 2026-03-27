@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
 export const metadata: Metadata = {
-  title: "Search Pet Care Providers | Tinies",
+  title: "Search Pet Care Providers",
   description:
     "Find verified dog walkers, pet sitters, and boarders in Cyprus. Filter by service, district, price, and rating.",
   openGraph: {

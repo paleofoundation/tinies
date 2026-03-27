@@ -63,6 +63,7 @@ export default async function AboutPage() {
           <PageContainer>
             <SectionHeader
               align="center"
+              titleAs="h1"
               eyebrow="About Tinies"
               title="No matter the size."
               description="Tinies was built with one purpose: to fund the rescue and care of animals who have no one else."

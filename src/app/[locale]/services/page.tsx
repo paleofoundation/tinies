@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { Star } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { getHomepageData } from "@/lib/home/get-homepage-data";
+import { getHomepageData, type HomepageData } from "@/lib/home/get-homepage-data";
+import { withQueryTimeout } from "@/lib/utils/with-query-timeout";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Pet Care Services | Tinies",
+  title: "Pet Care Services",
   description:
     "Find trusted care for your tiny. Dog walking, pet sitting, boarding, drop-in visits, and daycare from verified providers in Cyprus.",
 };
@@ -79,6 +80,19 @@ const HOW_BOOKING_STEPS = [
   },
 ] as const;
 
+const EMPTY_HOME_DATA: HomepageData = {
+  completedBookingsCount: 0,
+  fiveStarReviewsCount: 0,
+  completedAdoptionsCount: 0,
+  donationsTotalCents: 0,
+  verifiedProvidersCount: 0,
+  activeGuardiansCount: 0,
+  featuredProviders: [],
+  featuredListings: [],
+  recentReviews: [],
+  featuredCampaign: null,
+};
+
 function StarRow({ rating }: { rating: number }) {
   const rounded = Math.min(5, Math.max(0, Math.round(rating)));
   return (
@@ -99,7 +113,12 @@ function StarRow({ rating }: { rating: number }) {
 }
 
 export default async function ServicesPage() {
-  const homeData = await getHomepageData();
+  const homeData = await withQueryTimeout(
+    getHomepageData(),
+    EMPTY_HOME_DATA,
+    "services-page:getHomepageData",
+    5000
+  );
   const { verifiedProvidersCount, completedBookingsCount, recentReviews } = homeData;
   const testimonials = recentReviews.slice(0, 3);
 

@@ -29,16 +29,16 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const post = getBlogPostBySlug(slug);
-  if (!post) return { title: "Blog | Tinies" };
+  if (!post) return { title: "Blog" };
 
   const imageResolved = await getSiteImageWithFallback(`blog-${slug}`, post.image);
   const ogImage = absoluteBlogImageUrl(imageResolved, BASE_URL);
   const metaDescription = post.seoDescription.trim() || post.excerpt;
   return {
-    title: `${post.title} | Tinies`,
+    title: post.title,
     description: metaDescription,
     openGraph: {
-      title: post.title,
+      title: `${post.title} | Tinies`,
       description: metaDescription,
       type: "article",
       publishedTime: post.dateISO,
@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: post.title,
+      title: `${post.title} | Tinies`,
       description: metaDescription,
       ...(ogImage ? { images: [ogImage] } : {}),
     },

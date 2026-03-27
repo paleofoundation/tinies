@@ -269,7 +269,7 @@ export function CharityDashboardClient({
                 <div className="shrink-0">
                   <p className="mb-2 text-sm font-medium" style={{ color: "var(--color-text)" }}>Quick Donate QR Code</p>
                   <p className="mb-3 text-xs" style={{ color: "var(--color-text-secondary)" }}>Share this so supporters can give in 15 seconds.</p>
-                  <QRCodeGenerator url={`/give/${charity.slug}`} label={charity.name} size={200} />
+                  <QRCodeGenerator url={`/giving/${charity.slug}`} label={charity.name} size={200} />
                 </div>
               </div>
             </section>

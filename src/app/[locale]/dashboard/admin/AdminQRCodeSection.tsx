@@ -15,12 +15,12 @@ export function AdminQRCodeSection({ charities }: { charities: Charity[] }) {
         Quick Donate QR Codes
       </h2>
       <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
-        Generate QR codes for the /give page. Download as PNG for print.
+        Generate QR codes for the /giving/donate page. Download as PNG for print.
       </p>
       <div className="mt-6 flex flex-wrap gap-12">
         <div>
           <p className="mb-2 text-sm font-medium" style={{ color: "var(--color-text)" }}>General give page</p>
-          <QRCodeGenerator url="/give" label="tinies-give" size={200} />
+          <QRCodeGenerator url="/giving/donate" label="tinies-give" size={200} />
         </div>
         {charities.length > 0 && (
           <div>
@@ -36,7 +36,7 @@ export function AdminQRCodeSection({ charities }: { charities: Charity[] }) {
               ))}
             </select>
             {selectedSlug && selectedCharity && (
-              <QRCodeGenerator url={`/give/${selectedSlug}`} label={selectedCharity.name} size={200} />
+              <QRCodeGenerator url={`/giving/${selectedSlug}`} label={selectedCharity.name} size={200} />
             )}
           </div>
         )}

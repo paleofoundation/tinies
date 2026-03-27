@@ -9,7 +9,7 @@ import { dashboardHrefForUser, roleFromDashboardHref } from "@/lib/utils/dashboa
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Account settings | Tinies",
+  title: "Account settings",
   description: "Manage your Tinies account preferences.",
 };
 

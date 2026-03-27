@@ -20,7 +20,7 @@ import { RescueDashboardClient } from "./RescueDashboardClient";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Rescue Dashboard | Tinies",
+  title: "Rescue Dashboard",
   description: "Manage your adoption listings and inquiries.",
 };
 

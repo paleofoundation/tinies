@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Sign up | Tinies",
+  title: "Sign up",
   description: "Create your Tinies account. Pet owners, providers, rescues, and adopters welcome.",
 };
 

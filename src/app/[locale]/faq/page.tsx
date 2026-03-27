@@ -140,7 +140,7 @@ const faqStructuredData = {
 };
 
 export const metadata: Metadata = {
-  title: "FAQ | Tinies",
+  title: "FAQ",
   description:
     "Answers for pet owners, service providers, adopters, and supporters — bookings, payouts, adoption, Tinies Giving, and more.",
   openGraph: {

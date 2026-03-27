@@ -8,7 +8,7 @@ import { ShareSuccessStoryForm } from "./ShareSuccessStoryForm";
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
 export const metadata: Metadata = {
-  title: "Share your adoption story | Tinies",
+  title: "Share your adoption story",
   description: "Tell us how your tiny is doing in their forever home. Your story may appear on Tinies who made it after approval.",
   openGraph: {
     title: "Share your adoption story | Tinies",

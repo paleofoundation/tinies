@@ -5,7 +5,7 @@ import { getOwnerGivingData } from "@/lib/giving/actions";
 import { OwnerGivingSettings } from "./OwnerGivingSettings";
 
 export const metadata: Metadata = {
-  title: "Giving Settings | Tinies",
+  title: "Giving Settings",
   description: "Preferred charity, round-up, Guardian subscription, and giving history.",
 };
 

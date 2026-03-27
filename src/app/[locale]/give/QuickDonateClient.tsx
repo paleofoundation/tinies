@@ -65,7 +65,10 @@ function PaymentStep({
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: typeof window !== "undefined" ? `${window.location.origin}${window.location.pathname}?success=1` : "/give?success=1",
+        return_url:
+          typeof window !== "undefined"
+            ? `${window.location.origin}${window.location.pathname}?success=1`
+            : "/giving/donate?success=1",
       },
     });
     setLoading(false);
@@ -215,15 +218,16 @@ export function QuickDonateClient({ initialCharities, preselectedCharity }: Prop
           type="button"
           onClick={() => {
             if (navigator.share) {
+              const shareUrl = `${window.location.origin}${window.location.pathname}`;
               navigator.share({
                 title: "Tinies — Help rescue animals",
-                url: window.location.origin + "/give",
+                url: shareUrl,
                 text: successMeta.isMonthly
                   ? `I just became a ${successMeta.tier} — giving monthly to ${successMeta.charityName}. Join me: `
                   : `I just donated to ${successMeta.charityName}. Give in 15 seconds: `,
               });
             } else {
-              navigator.clipboard?.writeText(`${window.location.origin}/give`);
+              navigator.clipboard?.writeText(`${window.location.origin}${window.location.pathname}`);
               toast.success("Link copied!");
             }
           }}

@@ -10,6 +10,8 @@ export type SectionHeaderProps = {
   description?: ReactNode;
   align?: "start" | "center";
   className?: string;
+  /** Use h1 for the page’s primary heading (one per page). Default h2. */
+  titleAs?: "h1" | "h2";
 };
 
 /**
@@ -22,10 +24,12 @@ export function SectionHeader({
   description,
   align = "start",
   className,
+  titleAs = "h2",
 }: SectionHeaderProps) {
   const isCenter = align === "center";
   const eyebrowColor =
     eyebrowTone === "secondary" ? "var(--color-secondary)" : "var(--color-primary)";
+  const TitleTag = titleAs === "h1" ? "h1" : "h2";
   return (
     <div
       className={cn(
@@ -39,7 +43,7 @@ export function SectionHeader({
           {eyebrow}
         </p>
       ) : null}
-      <h2
+      <TitleTag
         className={cn(
           "theme-display text-[var(--display-md)]",
           isCenter && "mx-auto max-w-2xl"
@@ -47,7 +51,7 @@ export function SectionHeader({
         style={{ color: "var(--color-text)" }}
       >
         {title}
-      </h2>
+      </TitleTag>
       {description ? (
         <div
           className={cn(

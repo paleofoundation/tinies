@@ -3,7 +3,7 @@ import Link from "next/link";
 import { RescueOrgForm } from "../RescueOrgForm";
 
 export const metadata: Metadata = {
-  title: "Register Rescue Organisation | Admin | Tinies",
+  title: "Register Rescue Organisation (Admin)",
   description: "Create a new rescue organisation on Tinies.",
 };
 

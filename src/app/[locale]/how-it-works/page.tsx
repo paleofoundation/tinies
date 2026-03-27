@@ -18,17 +18,21 @@ import { Link } from "@/i18n/navigation";
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
 export const metadata: Metadata = {
-  title: "How It Works | Tinies Pet Care & Adoption",
+  title: "How It Works · Pet Care & Adoption",
   description:
     "Tinies is a marketplace connecting pet owners with independent providers, and adopters with rescues and transport. We don't provide services ourselves — we give you the platform, payments, and tools.",
   openGraph: {
-    title: "How It Works | Tinies Pet Care & Adoption",
+    title: "How It Works · Pet Care & Adoption | Tinies",
     description: "Tinies connects pet owners with verified providers and adopters with rescues. Book care or adopt through one platform.",
     url: `${BASE_URL}/how-it-works`,
     siteName: "Tinies",
     type: "website",
   },
-  twitter: { card: "summary_large_image", title: "How It Works | Tinies Pet Care & Adoption", description: "Tinies connects pet owners with verified providers and adopters with rescues." },
+  twitter: {
+    card: "summary_large_image",
+    title: "How It Works · Pet Care & Adoption | Tinies",
+    description: "Tinies connects pet owners with verified providers and adopters with rescues.",
+  },
 };
 
 const OWNER_ICONS = [Search, CreditCard, Camera, Star] as const;
@@ -50,6 +54,7 @@ export default async function HowItWorksPage() {
       >
         <PageContainer>
           <SectionHeader
+            titleAs="h1"
             title={t("title")}
             description={t("intro")}
             className="max-w-3xl"

@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { getCanonicalSiteOrigin } from "@/lib/constants/site-url";
 import "./globals.css";
 
+const siteOrigin = getCanonicalSiteOrigin();
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.tinies.app"),
-  alternates: {
-    canonical: "/",
-  },
+  /** Per-page canonicals resolve from metadataBase + pathname; do not set a root canonical. */
+  metadataBase: new URL(siteOrigin),
   title: {
     default: "Tinies – Trusted Pet Care & Rescue Adoption in Cyprus",
     template: "%s | Tinies",
@@ -24,7 +25,6 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_GB",
-    url: "https://www.tinies.app",
     siteName: "Tinies",
     title: "Tinies – Trusted Pet Care & Rescue Adoption in Cyprus",
     description: "No matter the size. Book verified pet care or adopt a rescue animal in Cyprus.",

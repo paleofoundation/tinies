@@ -11,16 +11,17 @@ type Props = { params: Promise<{ cardId: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { cardId } = await params;
   const card = await getTiniesCardPublicById(cardId);
-  if (!card) return { title: "Tinies Card | Tinies" };
+  if (!card) return { title: "Tinies Card" };
   const pet = card.petNames.join(", ");
-  const title = `${pet}'s day with ${card.providerName} | Tinies Card`;
+  const title = `${pet}'s day with ${card.providerName}`;
+  const ogTitle = `${title} · Tinies Card`;
   const description = `See ${pet}'s Tinies Card — trusted pet care in Cyprus.`;
   const ogImage = card.photos[0];
   return {
     title,
     description,
     openGraph: {
-      title,
+      title: ogTitle,
       description,
       url: `${APP_URL}/card/${card.id}`,
       siteName: "Tinies",
@@ -29,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: ogImage ? "summary_large_image" : "summary",
-      title,
+      title: ogTitle,
       description,
       ...(ogImage ? { images: [ogImage] } : {}),
     },

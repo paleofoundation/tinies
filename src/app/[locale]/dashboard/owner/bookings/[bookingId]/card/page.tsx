@@ -17,12 +17,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { title: "Tinies Card | Tinies" };
+  if (!user) return { title: "Tinies Card" };
   const card = await getTiniesCardForOwnerBooking(bookingId, user.id);
-  if (!card) return { title: "Tinies Card | Tinies" };
+  if (!card) return { title: "Tinies Card" };
   const pet = card.petNames.join(", ");
   return {
-    title: `${pet}'s Tinies Card | Tinies`,
+    title: `${pet}'s Tinies Card`,
     description: `Activity report from ${card.providerName} on Tinies.`,
   };
 }

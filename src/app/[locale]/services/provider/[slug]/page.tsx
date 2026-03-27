@@ -24,6 +24,7 @@ import { ProviderProfileReviews } from "@/components/providers/ProviderProfileRe
 import { ProviderCertificationsSection } from "@/components/providers/ProviderCertificationsSection";
 import { ProviderVideoIntro } from "@/components/providers/ProviderVideoIntro";
 import { MeetAndGreetRequestModal } from "./MeetAndGreetRequestModal";
+import { withQueryTimeout } from "@/lib/utils/with-query-timeout";
 
 function formatMemberSinceLabel(value: Date | string | number): string {
   const d = new Date(value);
@@ -126,7 +127,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     console.error("getProviderBySlug (metadata)", e);
   }
   const name = provider?.providerName ?? slugToName(slug);
-  const title = `${name} | Pet Care Provider | Tinies`;
+  const title = `${name} · Pet Care Provider`;
+  const ogTitle = `${title} | Tinies`;
   const description =
     provider?.headline?.trim() ||
     provider?.bio?.slice(0, 155) ||
@@ -138,14 +140,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     openGraph: {
-      title,
+      title: ogTitle,
       description,
       url,
       siteName: "Tinies",
       type: "profile",
       images: og ? [{ url: og }] : undefined,
     },
-    twitter: { card: "summary_large_image", title, description },
+    twitter: { card: "summary_large_image", title: ogTitle, description },
   };
 }
 
@@ -154,9 +156,24 @@ export default async function ProviderProfilePage({ params }: Props) {
   let provider: Awaited<ReturnType<typeof getProviderBySlug>> = null;
   let reviews: ProviderReviewPublic[] = [];
   try {
-    [provider, reviews] = await Promise.all([getProviderBySlug(slug), getProviderReviewsBySlug(slug)]);
+    const loaded = await withQueryTimeout(
+      Promise.all([getProviderBySlug(slug), getProviderReviewsBySlug(slug)]),
+      [null, []] as [typeof provider, ProviderReviewPublic[]],
+      `provider-profile:${slug}`,
+      8000
+    );
+    [provider, reviews] = loaded;
   } catch (e) {
     console.error("ProviderProfilePage data fetch", e);
+  }
+  let favoriteViewer: Awaited<ReturnType<typeof getFavoriteViewerState>> = {
+    kind: "guest",
+    favoritedProviderUserIds: [],
+  };
+  try {
+    favoriteViewer = await getFavoriteViewerState();
+  } catch (e) {
+    console.error("ProviderProfilePage getFavoriteViewerState", e);
   }
   const name = provider?.providerName ?? slugToName(slug);
   const initials = name
@@ -167,7 +184,6 @@ export default async function ProviderProfilePage({ params }: Props) {
     .slice(0, 2);
   const messageHref = provider ? `/dashboard/messages/with/${provider.providerId}` : "/dashboard/messages";
 
-  const favoriteViewer = await getFavoriteViewerState();
   const favorited =
     provider != null &&
     favoriteViewer.kind === "owner" &&

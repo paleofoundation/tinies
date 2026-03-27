@@ -4,7 +4,7 @@ import Link from "next/link";
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Tinies",
+  title: "Privacy Policy",
   description:
     "Privacy Policy for Tinies — how we collect, use, and protect your personal data under GDPR. Stripe, Twilio, Resend, Supabase, and your rights.",
   openGraph: {

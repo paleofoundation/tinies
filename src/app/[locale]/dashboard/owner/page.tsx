@@ -9,7 +9,7 @@ import { OwnerFavoritesSection } from "./OwnerFavoritesSection";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Owner Dashboard | Tinies",
+  title: "Owner Dashboard",
   description: "Your pet care bookings and pets.",
 };
 

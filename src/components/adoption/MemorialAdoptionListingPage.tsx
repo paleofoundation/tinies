@@ -4,8 +4,16 @@ import Link from "next/link";
 import { MapPin, Heart } from "lucide-react";
 import type { PublicAdoptionListing } from "@/lib/adoption/public-listing";
 import { resolveListingVideoUrl } from "@/lib/adoption/listing-video";
+import { getCanonicalSiteOrigin } from "@/lib/constants/site-url";
 
-const BASE_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app").replace(/\/$/, "");
+const SITE_ORIGIN = getCanonicalSiteOrigin();
+
+function absoluteOgImageUrl(src: string, origin: string): string {
+  const t = src.trim();
+  if (/^https?:\/\//i.test(t)) return t;
+  if (t.startsWith("/")) return `${origin}${t}`;
+  return `${origin}/${t}`;
+}
 
 /** Default land campaign seeded for Gardens of St Gertrude; safe to link from memorial copy. */
 export const SAFE_LAND_CAMPAIGN_SLUG = "safe-land-for-92-cats";
@@ -16,24 +24,35 @@ function formatSpecies(species: string): string {
 }
 
 export function memorialListingMetadata(listing: PublicAdoptionListing): Metadata {
-  const title = `In loving memory of ${listing.name} | Tinies`;
+  const title = `In loving memory of ${listing.name}`;
+  const ogTitle = `${title} | Tinies`;
   const description =
     listing.backstory?.trim().slice(0, 155) ||
     `Remembering ${listing.name}, cared for by ${listing.org.name} in Cyprus.`;
-  const url = `${BASE_URL}/adopt/${listing.slug}`;
-  const ogImages = listing.photos.filter(Boolean).slice(0, 4).map((src) => ({ url: src }));
+  const url = `${SITE_ORIGIN}/adopt/${listing.slug}`;
+  const ogImages = listing.photos
+    .filter(Boolean)
+    .slice(0, 4)
+    .map((src) => ({ url: absoluteOgImageUrl(src, SITE_ORIGIN), alt: listing.name }));
+  const primaryImage = ogImages[0]?.url;
   return {
     title,
     description,
+    alternates: { canonical: url },
     openGraph: {
-      title,
+      title: ogTitle,
       description,
       url,
       siteName: "Tinies",
       type: "website",
       images: ogImages.length > 0 ? ogImages : undefined,
     },
-    twitter: { card: "summary_large_image", title, description },
+    twitter: {
+      card: "summary_large_image",
+      title: ogTitle,
+      description,
+      ...(primaryImage ? { images: [primaryImage] } : {}),
+    },
   };
 }
 

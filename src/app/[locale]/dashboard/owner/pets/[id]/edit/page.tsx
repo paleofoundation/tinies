@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { pet } = await getPetForEdit(id);
   const name = pet?.name ?? "Pet";
   return {
-    title: `Edit ${name} | Tinies`,
+    title: `Edit ${name}`,
     description: `Edit ${name}'s profile.`,
   };
 }

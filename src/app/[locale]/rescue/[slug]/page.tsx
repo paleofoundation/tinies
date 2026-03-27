@@ -87,9 +87,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const org = await getPublicRescueOrgBySlug(slug);
   if (!org) {
-    return { title: "Rescue organisation | Tinies" };
+    return { title: "Rescue organisation" };
   }
-  const title = `${org.name} | Tinies`;
+  const title = org.name;
+  const ogTitle = `${org.name} | Tinies`;
   const desc =
     org.description?.trim() ||
     org.mission?.trim() ||
@@ -100,14 +101,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description: desc.slice(0, 160),
     openGraph: {
-      title,
+      title: ogTitle,
       description: desc.slice(0, 200),
       url,
       siteName: "Tinies",
       type: "website",
       images: ogImage ? [{ url: ogImage }] : undefined,
     },
-    twitter: { card: "summary_large_image", title, description: desc.slice(0, 200) },
+    twitter: { card: "summary_large_image", title: ogTitle, description: desc.slice(0, 200) },
   };
 }
 

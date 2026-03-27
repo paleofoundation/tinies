@@ -17,8 +17,9 @@ import { FromCyprusToCountryPageContent } from "../FromCyprusToCountryPageConten
 import TiniesWhoMadeItPageContent, {
   tiniesWhoMadeItMetadata,
 } from "../tinies-who-made-it/TiniesWhoMadeItPageContent";
+import { getCanonicalSiteOrigin } from "@/lib/constants/site-url";
 
-const BASE_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app").replace(/\/$/, "");
+const BASE_URL = getCanonicalSiteOrigin();
 
 /** If the dynamic segment wins over the static `tinies-who-made-it` route, still show the gallery (not a listing 404). */
 const RESERVED_ADOPTION_SLUGS = new Set(["tinies-who-made-it"]);
@@ -41,6 +42,13 @@ function buildListingMetaDescription(listing: PublicAdoptionListing): string {
   return `${base} ${extra}`;
 }
 
+function absoluteOgImageUrl(src: string, origin: string): string {
+  const t = src.trim();
+  if (/^https?:\/\//i.test(t)) return t;
+  if (t.startsWith("/")) return `${origin}${t}`;
+  return `${origin}/${t}`;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   if (RESERVED_ADOPTION_SLUGS.has(slug)) {
@@ -50,9 +58,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (countrySegment !== null) {
     const seo = getCountryAdoptionSeo(countrySegment);
     if (!seo) {
-      return { title: "International adoption | Tinies" };
+      notFound();
     }
-    const title = `Adopt a Rescue Animal from Cyprus to ${seo.seoTitleCountry} | Tinies`;
+    const title = `Adopt a Rescue Animal from Cyprus to ${seo.seoTitleCountry}`;
+    const ogTitle = `${title} | Tinies`;
     const description = `Adopt a rescue dog or cat from Cyprus to ${seo.seoTitleCountry}. EU pet passport, vet preparation, transport, and Tinies coordination — one transparent fee, no hidden costs.`;
     const url = `${BASE_URL}/adopt/from-cyprus-to-${countrySegment}`;
     return {
@@ -60,7 +69,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       alternates: { canonical: url },
       openGraph: {
-        title,
+        title: ogTitle,
         description,
         url,
         siteName: "Tinies",
@@ -68,29 +77,43 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
       twitter: {
         card: "summary_large_image",
-        title,
+        title: ogTitle,
         description,
       },
     };
   }
   const listing = await getPublicAdoptionListingBySlug(slug);
-  if (!listing) return { title: "Adopt | Tinies" };
-  const title = `${listing.name}${listing.lineageTitle ? ` — ${listing.lineageTitle}` : ""} — Adopt | Tinies`;
+  if (!listing) notFound();
+  if (listing.isMemorial) {
+    return memorialListingMetadata(listing);
+  }
+  const title = `${listing.name}${listing.lineageTitle ? ` — ${listing.lineageTitle}` : ""} — Adopt`;
+  const ogTitle = `${title} | Tinies`;
   const description = buildListingMetaDescription(listing);
   const url = `${BASE_URL}/adopt/${slug}`;
-  const ogImages = listing.photos.filter(Boolean).slice(0, 4).map((src) => ({ url: src }));
+  const ogImages = listing.photos
+    .filter(Boolean)
+    .slice(0, 4)
+    .map((src) => ({ url: absoluteOgImageUrl(src, BASE_URL), alt: listing.name }));
+  const primaryOg = ogImages[0]?.url;
   return {
     title,
     description,
+    alternates: { canonical: url },
     openGraph: {
-      title,
+      title: ogTitle,
       description,
       url,
       siteName: "Tinies",
       type: "website",
       images: ogImages.length > 0 ? ogImages : undefined,
     },
-    twitter: { card: "summary_large_image", title, description },
+    twitter: {
+      card: "summary_large_image",
+      title: ogTitle,
+      description,
+      ...(primaryOg ? { images: [primaryOg] } : {}),
+    },
   };
 }
 

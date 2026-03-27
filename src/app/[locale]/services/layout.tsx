@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: {
-    default: "Pet Care Services | Tinies",
-    template: "%s | Tinies",
-  },
+  /** Root layout supplies `template: "%s | Tinies"` — use a plain segment title (no nested template, no trailing "| Tinies"). */
+  title: "Pet Care Services",
   description:
     "Find trusted pet care in Cyprus. Dog walking, sitting, boarding, drop-ins, and daycare from verified providers.",
 };
