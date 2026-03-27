@@ -21,10 +21,13 @@ export function MeetAndGreetRequestModal({
   providerSlug,
   providerName,
   variant = "default",
+  className,
 }: {
   providerSlug: string;
   providerName: string;
-  variant?: "default" | "light";
+  variant?: "default" | "light" | "editorial";
+  /** Merged onto the trigger button (e.g. `w-full justify-center`). */
+  className?: string;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -103,7 +106,11 @@ export function MeetAndGreetRequestModal({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex h-12 items-center justify-center gap-2 rounded-[var(--radius-pill)] border-2 px-6 font-semibold transition-opacity hover:opacity-90"
+        className={`inline-flex items-center justify-center gap-2 font-semibold transition-opacity hover:opacity-90 ${
+          variant === "editorial"
+            ? "rounded-full border-2 px-6 py-3 text-[0.875rem]"
+            : "h-12 rounded-[var(--radius-pill)] border-2 px-6"
+        } ${className ?? ""}`}
         style={
           variant === "light"
             ? {
@@ -113,16 +120,25 @@ export function MeetAndGreetRequestModal({
                 color: "white",
                 backgroundColor: "transparent",
               }
-            : {
-                fontFamily: "var(--font-body), sans-serif",
-                borderColor: "var(--color-border)",
-                color: "var(--color-text)",
-                backgroundColor: "white",
-              }
+            : variant === "editorial"
+              ? {
+                  fontFamily: "var(--font-body), sans-serif",
+                  fontWeight: 600,
+                  fontSize: "0.875rem",
+                  borderColor: "var(--color-primary)",
+                  color: "var(--color-text)",
+                  backgroundColor: "var(--color-background)",
+                }
+              : {
+                  fontFamily: "var(--font-body), sans-serif",
+                  borderColor: "var(--color-border)",
+                  color: "var(--color-text)",
+                  backgroundColor: "white",
+                }
         }
       >
         <Heart className="h-4 w-4" />
-        Request Meet & Greet
+        {variant === "editorial" ? "Request meet & greet" : "Request Meet & Greet"}
       </button>
 
       {open && (
