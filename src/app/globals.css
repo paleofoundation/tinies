@@ -250,3 +250,24 @@ header nav a[href]:hover {
 .animate-ticker:hover {
   animation-play-state: paused;
 }
+
+/* ── Blog markdown (GFM tables): row-label column + aligned data columns ── */
+.blog-markdown-body table thead tr {
+  border-bottom: 2px solid var(--color-border);
+}
+
+.blog-markdown-body table th:first-child,
+.blog-markdown-body table td:first-child {
+  width: 180px;
+  min-width: 180px;
+  max-width: 220px;
+  text-align: left;
+  vertical-align: middle;
+  overflow-wrap: anywhere;
+}
+
+.blog-markdown-body table th:not(:first-child),
+.blog-markdown-body table td:not(:first-child) {
+  text-align: center;
+  vertical-align: middle;
+}

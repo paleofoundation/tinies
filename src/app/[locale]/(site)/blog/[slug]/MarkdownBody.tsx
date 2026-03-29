@@ -65,28 +65,27 @@ const components: Components = {
   ),
   table: ({ children }: { children?: ReactNode }) => (
     <div className="my-6 overflow-x-auto">
-      <table className="w-full min-w-[320px] border-collapse text-sm">{children}</table>
+      <table className="w-full min-w-[min(100%,520px)] border-collapse text-sm table-fixed">
+        {children}
+      </table>
     </div>
   ),
-  thead: ({ children }: { children?: ReactNode }) => (
-    <thead>
-      <tr className="border-b-2 border-[var(--color-border)]">{children}</tr>
-    </thead>
-  ),
+  /* react-markdown already emits thead > tr > th; do not wrap an extra <tr> (breaks alignment). */
+  thead: ({ children }: { children?: ReactNode }) => <thead>{children}</thead>,
   tbody: ({ children }: { children?: ReactNode }) => <tbody>{children}</tbody>,
   tr: ({ children }: { children?: ReactNode }) => (
     <tr className="border-b border-[var(--color-border)]">{children}</tr>
   ),
   th: ({ children }: { children?: ReactNode }) => (
     <th
-      className="px-4 py-3 text-left font-semibold text-[var(--color-text)]"
+      className="px-3 py-3 font-semibold text-[var(--color-text)] sm:px-4"
       style={{ fontFamily: "var(--font-body), sans-serif" }}
     >
       {children}
     </th>
   ),
   td: ({ children }: { children?: ReactNode }) => (
-    <td className="px-4 py-3 text-[var(--color-text)]">{children}</td>
+    <td className="px-3 py-3 text-[var(--color-text)] sm:px-4">{children}</td>
   ),
   code: ({ className, children }: { className?: string; children?: ReactNode }) => {
     const isInline = !className;
@@ -112,7 +111,10 @@ const components: Components = {
 
 export function MarkdownBody({ content }: { content: string }) {
   return (
-    <div className="text-[var(--color-text)] leading-[1.8]" style={bodyStyle}>
+    <div
+      className="blog-markdown-body text-[var(--color-text)] leading-[1.8]"
+      style={bodyStyle}
+    >
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
         {content}
       </ReactMarkdown>
