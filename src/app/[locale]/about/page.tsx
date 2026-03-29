@@ -6,8 +6,9 @@ import { PageContainer, Section } from "@/components/theme";
 import { Link } from "@/i18n/navigation";
 import { getGivingStats, getAnimalsSupportedCount } from "@/lib/giving/actions";
 import { getSiteImageWithFallback } from "@/lib/images/get-site-image";
+import { getCanonicalSiteOrigin } from "@/lib/constants/site-url";
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+const BASE_URL = getCanonicalSiteOrigin();
 
 const GARDENS_HERO_IMAGE =
   "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_cats_v2.jpg";
@@ -29,6 +30,7 @@ export const metadata: Metadata = {
   title: "About Tinies | Built to Fund Animal Rescue",
   description:
     "Tinies exists to fund rescue and care for animals who have no one else. A Cyprus pet care and adoption marketplace where 90% of every commission goes back to the animals — starting with Gardens of St Gertrude.",
+  alternates: { canonical: `${BASE_URL}/about` },
   openGraph: {
     title: "About Tinies | Built to Fund Animal Rescue",
     description:

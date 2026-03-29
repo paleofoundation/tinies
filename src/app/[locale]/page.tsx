@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import { BookOpen, Star, ArrowRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
@@ -17,12 +18,18 @@ import {
 } from "@/components/marketing";
 import { getHomepageData } from "@/lib/home/get-homepage-data";
 import { getBlogPostSummaries } from "@/lib/blog/load-posts";
-import { getSiteImageWithFallback } from "@/lib/images/get-site-image";
+import { getSiteImageUrlsForKeys, getSiteImageWithFallback } from "@/lib/images/get-site-image";
 import { formatPrice } from "@/lib/utils";
+import { getCanonicalSiteOrigin } from "@/lib/constants/site-url";
 
 export const revalidate = 300;
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+const BASE_URL = getCanonicalSiteOrigin();
+
+export const metadata: Metadata = {
+  alternates: { canonical: BASE_URL },
+  openGraph: { url: BASE_URL },
+};
 
 const HERO_CATS_URL =
   "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_cats_v2.jpg";
@@ -181,12 +188,13 @@ export default async function Home() {
   const tEd = await getTranslations("home.editorial");
   const homeData = await getHomepageData();
   const recentPostsRaw = getBlogPostSummaries().slice(0, 3);
-  const recentPosts = await Promise.all(
-    recentPostsRaw.map(async (p) => ({
-      ...p,
-      image: await getSiteImageWithFallback(`blog-${p.slug}`, p.image),
-    }))
-  );
+  const recentBlogKeys = recentPostsRaw.map((p) => `blog-${p.slug}`);
+  const recentBlogMap = await getSiteImageUrlsForKeys(recentBlogKeys);
+  const recentPosts = recentPostsRaw.map((p) => {
+    const admin = recentBlogMap.get(`blog-${p.slug}`)?.trim();
+    const fb = p.image.trim();
+    return { ...p, image: admin || fb || "" };
+  });
   const heroImageUrl = await getSiteImageWithFallback("page-homepage-hero", HERO_CATS_URL);
   const sanctuaryImageUrl = await getSiteImageWithFallback("page-homepage-sanctuary", SANCTUARY_STORY_URL);
 
@@ -231,10 +239,10 @@ export default async function Home() {
           <>
             <span className="block" style={{ color: "var(--color-text)" }}>
               {tHero("titleLine1")}
-            </span>
+            </span>{" "}
             <span className="block" style={{ color: "var(--color-text)" }}>
               {tHero("titleLine2")}
-            </span>
+            </span>{" "}
             <span className="block" style={{ color: "var(--color-primary)" }}>
               {tHero("titleLine3")}
             </span>

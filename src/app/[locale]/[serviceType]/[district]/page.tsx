@@ -11,10 +11,11 @@ import {
   SERVICE_TYPE_TO_LABEL,
 } from "@/lib/constants/seo-landings";
 import { withQueryTimeout } from "@/lib/utils/with-query-timeout";
+import { getCanonicalSiteOrigin } from "@/lib/constants/site-url";
 
 export const dynamic = "force-dynamic";
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+const BASE_URL = getCanonicalSiteOrigin();
 
 type Props = {
   params: Promise<{ serviceType: string; district: string }>;
@@ -70,6 +71,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
+    alternates: { canonical: url },
     openGraph: {
       title: ogTitle,
       description,
@@ -137,7 +139,7 @@ export default async function DistrictServicePage({ params }: Props) {
           className="font-normal tracking-tight sm:text-4xl"
           style={{ fontFamily: "var(--font-heading), serif", fontSize: "var(--text-3xl)", color: "var(--color-text)" }}
         >
-          {serviceLabel} in {districtName}
+          {`${serviceLabel} in ${districtName}`}
         </h1>
         <p className="mt-4 max-w-2xl text-lg" style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}>
           {getDistrictDescription(serviceLabel, districtName)}

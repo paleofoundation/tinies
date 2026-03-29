@@ -4,11 +4,23 @@ import { Link } from "@/i18n/navigation";
 import { getHomepageData, type HomepageData } from "@/lib/home/get-homepage-data";
 import { withQueryTimeout } from "@/lib/utils/with-query-timeout";
 import { cn } from "@/lib/utils";
+import { getCanonicalSiteOrigin } from "@/lib/constants/site-url";
+
+const SITE_ORIGIN = getCanonicalSiteOrigin();
 
 export const metadata: Metadata = {
   title: "Pet Care Services",
   description:
     "Find trusted care for your tiny. Dog walking, pet sitting, boarding, drop-in visits, and daycare from verified providers in Cyprus.",
+  alternates: { canonical: `${SITE_ORIGIN}/services` },
+  openGraph: {
+    title: "Pet Care Services | Tinies",
+    description:
+      "Find trusted care for your tiny. Dog walking, pet sitting, boarding, drop-in visits, and daycare from verified providers in Cyprus.",
+    url: `${SITE_ORIGIN}/services`,
+    siteName: "Tinies",
+    type: "website",
+  },
 };
 
 export const revalidate = 300;
@@ -170,7 +182,7 @@ export default async function ServicesPage() {
           >
             <span className="block" style={{ color: "var(--color-text)" }}>
               Find trusted care
-            </span>
+            </span>{" "}
             <span className="block" style={{ color: "var(--color-primary)" }}>
               For your tiny.
             </span>

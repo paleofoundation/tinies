@@ -4,12 +4,14 @@ import { Link } from "@/i18n/navigation";
 import { prisma } from "@/lib/prisma";
 import { withQueryTimeout } from "@/lib/utils/with-query-timeout";
 import { RescueDirectoryCard, type RescueDirectoryCardOrg } from "./RescueDirectoryCard";
+import { getCanonicalSiteOrigin } from "@/lib/constants/site-url";
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+const BASE_URL = getCanonicalSiteOrigin();
 
 export const metadata: Metadata = {
   title: "Rescue partners",
   description: "Verified rescue organisations on Tinies in Cyprus — adoption listings, campaigns, and ways to help.",
+  alternates: { canonical: `${BASE_URL}/rescue` },
   openGraph: {
     title: "Rescue partners | Tinies",
     description: "Verified rescue organisations on Tinies in Cyprus — adoption listings, campaigns, and ways to help.",
@@ -217,7 +219,7 @@ export default async function RescuePartnersPage() {
           >
             <span className="block" style={{ color: "#1C1C1C" }}>
               our rescue
-            </span>
+            </span>{" "}
             <span className="block" style={{ color: "var(--color-primary)" }}>
               partners
             </span>

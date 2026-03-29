@@ -13,14 +13,25 @@ import {
   getBlogPostBySlug,
   getRelatedPosts,
 } from "@/lib/blog/load-posts";
-import { getSiteImageWithFallback } from "@/lib/images/get-site-image";
+import { getSiteImageUrlsForKeys } from "@/lib/images/get-site-image";
 import { Link } from "@/i18n/navigation";
 import { MarkdownBody } from "./MarkdownBody";
 import { ShareButtons } from "./ShareButtons";
+import { getCanonicalSiteOrigin } from "@/lib/constants/site-url";
 
 type Props = { params: Promise<{ slug: string }> };
 
-const BASE_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app").replace(/\/$/, "");
+const BASE_URL = getCanonicalSiteOrigin();
+
+function resolveBlogImageFromMap(
+  map: Map<string, string>,
+  postSlug: string,
+  fallback: string
+): string {
+  const admin = map.get(`blog-${postSlug}`)?.trim();
+  const fb = fallback.trim();
+  return admin || fb || "";
+}
 
 export async function generateStaticParams() {
   return getAllBlogPosts().map((post) => ({ slug: post.slug }));
@@ -31,12 +42,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = getBlogPostBySlug(slug);
   if (!post) return { title: "Blog" };
 
-  const imageResolved = await getSiteImageWithFallback(`blog-${slug}`, post.image);
+  const relatedForMeta = getRelatedPosts(slug, post.category, post.categories, 3);
+  const keys = [`blog-${slug}`, ...relatedForMeta.map((r) => `blog-${r.slug}`)];
+  const siteImgMap = await getSiteImageUrlsForKeys(keys);
+  const imageResolved = resolveBlogImageFromMap(siteImgMap, slug, post.image);
   const ogImage = absoluteBlogImageUrl(imageResolved, BASE_URL);
   const metaDescription = post.seoDescription.trim() || post.excerpt;
   return {
     title: post.title,
     description: metaDescription,
+    alternates: { canonical: `${BASE_URL}/blog/${post.slug}` },
     openGraph: {
       title: `${post.title} | Tinies`,
       description: metaDescription,
@@ -61,7 +76,10 @@ export default async function BlogPostPage({ params }: Props) {
   if (!post) notFound();
 
   const postUrl = `${BASE_URL}/blog/${post.slug}`;
-  const imageResolved = await getSiteImageWithFallback(`blog-${slug}`, post.image);
+  const relatedRaw = getRelatedPosts(slug, post.category, post.categories, 3);
+  const keys = [`blog-${slug}`, ...relatedRaw.map((r) => `blog-${r.slug}`)];
+  const siteImgMap = await getSiteImageUrlsForKeys(keys);
+  const imageResolved = resolveBlogImageFromMap(siteImgMap, slug, post.image);
   const postForView = { ...post, image: imageResolved };
   const ogImage = absoluteBlogImageUrl(imageResolved, BASE_URL);
   const categoryLabel = blogCategoryDisplayLabel(post.category).toUpperCase();
@@ -90,13 +108,10 @@ export default async function BlogPostPage({ params }: Props) {
     ...(ogImage ? { image: [ogImage] } : {}),
   };
 
-  const relatedRaw = getRelatedPosts(slug, post.category, post.categories, 3);
-  const related = await Promise.all(
-    relatedRaw.map(async (r) => ({
-      ...r,
-      image: await getSiteImageWithFallback(`blog-${r.slug}`, r.image),
-    }))
-  );
+  const related = relatedRaw.map((r) => ({
+    ...r,
+    image: resolveBlogImageFromMap(siteImgMap, r.slug, r.image),
+  }));
 
   return (
     <div

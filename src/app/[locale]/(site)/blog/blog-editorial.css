@@ -1,0 +1,40 @@
+@keyframes blog-editorial-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.blog-editorial-fade-up {
+  animation: blog-editorial-fade-up 0.6s ease both;
+}
+
+.blog-editorial-hover-lift {
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  box-shadow: 0 2px 8px rgba(10, 128, 128, 0.06);
+}
+
+.blog-editorial-hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(10, 128, 128, 0.08);
+}
+
+.blog-editorial-feature-img {
+  transition: transform 0.5s ease;
+}
+
+.blog-editorial-feature-wrap:hover .blog-editorial-feature-img {
+  transform: scale(1.06);
+}
+
+.blog-editorial-card-img {
+  transition: transform 0.5s ease;
+}
+
+.blog-editorial-card-link:hover .blog-editorial-card-img {
+  transform: scale(1.06);
+}

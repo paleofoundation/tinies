@@ -44,12 +44,19 @@ const DEFAULT_OG_IMAGE =
   "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_cats_v2.jpg";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [ogUrl, faviconUrl] = await Promise.all([
-    getSiteImageWithFallback("og-default", DEFAULT_OG_IMAGE),
-    getSiteImageWithFallback("favicon", "/favicon.png"),
-  ]);
-  const og = ogUrl.trim();
-  const fav = faviconUrl.trim() || "/favicon.png";
+  let og = "";
+  let fav = "/favicon.png";
+  try {
+    const [ogUrl, faviconUrl] = await Promise.all([
+      getSiteImageWithFallback("og-default", DEFAULT_OG_IMAGE),
+      getSiteImageWithFallback("favicon", "/favicon.png"),
+    ]);
+    og = ogUrl.trim();
+    fav = faviconUrl.trim() || "/favicon.png";
+  } catch (e) {
+    console.error("locale layout generateMetadata site images", e);
+    og = DEFAULT_OG_IMAGE;
+  }
   const isPng = fav.toLowerCase().endsWith(".png");
   return {
     ...(og ? { openGraph: { images: [{ url: og }] }, twitter: { images: [og] } } : {}),
@@ -75,11 +82,15 @@ export default async function LocaleLayout({ children, params }: Props) {
   const showBetaBanner = shouldShowBetaBanner();
   let defaultFeedbackEmail: string | null = null;
   if (showBetaUI) {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    defaultFeedbackEmail = user?.email ?? null;
+    try {
+      const supabase = await createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      defaultFeedbackEmail = user?.email ?? null;
+    } catch (e) {
+      console.error("locale layout Supabase session", e);
+    }
   }
 
   return (

@@ -5,6 +5,21 @@ import { formatBlogDateCompact } from "@/lib/blog/format-blog-date";
 import { blogCategoryDisplayLabel } from "@/lib/blog/load-posts";
 import type { BlogPostSummary } from "@/lib/blog/types";
 
+const BORDER_TEAL = "rgba(10, 128, 128, 0.15)";
+const SHADOW_LG = "0 8px 32px rgba(10, 128, 128, 0.1)";
+
+function FeaturedArrowIcon() {
+  return (
+    <svg className="size-4 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+      <path
+        fillRule="evenodd"
+        d="M3 10a.75.75 0 01.75-.75h10.19l-3.72-3.72a.75.75 0 111.06-1.06l5 5a.75.75 0 010 1.06l-5 5a.75.75 0 11-1.06-1.06l3.72-3.72H3.75A.75.75 0 013 10z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
 type Props = {
   post: BlogPostSummary;
 };
@@ -12,80 +27,87 @@ type Props = {
 export function BlogFeaturedPost({ post }: Props) {
   const readMinutes = displayReadMinutesForPost(post);
   const dateLine = formatBlogDateCompact(post.dateISO);
-  const categoryLabel = blogCategoryDisplayLabel(post.category).toUpperCase();
+  const categoryLabel = blogCategoryDisplayLabel(post.category);
 
   return (
-    <article className="mb-16 lg:mb-20">
-      <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12 lg:gap-x-14">
-        <Link
-          href={`/blog/${post.slug}`}
-          className="relative block aspect-[16/10] overflow-hidden lg:aspect-[5/4]"
-          style={{ borderRadius: "var(--blog-card-radius)" }}
-        >
-          {post.image ? (
-            <Image
-              src={post.image}
-              alt={post.title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              priority
-            />
-          ) : (
-            <div
-              className="flex h-full w-full items-center justify-center px-6 text-center text-lg font-semibold leading-snug text-[var(--color-primary)]"
-              style={{
-                fontFamily: "var(--font-display), sans-serif",
-                backgroundColor: "var(--color-primary-50)",
-              }}
-            >
-              {post.title}
-            </div>
-          )}
-        </Link>
-
-        <div className="flex min-w-0 flex-col lg:py-2">
-          <p
-            className="theme-eyebrow mb-3"
-            style={{ color: "var(--color-secondary)", fontFamily: "var(--font-display), sans-serif" }}
-          >
-            {categoryLabel}
-          </p>
-          <h2
-            className="text-2xl font-bold leading-tight tracking-tight sm:text-3xl lg:text-[2rem] lg:leading-[1.15]"
-            style={{ fontFamily: "var(--font-display), sans-serif", color: "var(--color-text)" }}
-          >
-            <Link href={`/blog/${post.slug}`} className="hover:opacity-85">
-              {post.title}
-            </Link>
-          </h2>
-          <p
-            className="mt-4 line-clamp-4 text-base leading-relaxed sm:text-lg"
-            style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-secondary)" }}
-          >
-            {post.excerptDisplay}
-          </p>
-          <p
-            className="mt-5 text-sm"
-            style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text-muted)" }}
-          >
-            <time dateTime={post.dateISO}>{dateLine}</time>
-            <span aria-hidden className="mx-2">
-              •
-            </span>
-            <span>
-              {readMinutes} min read
-            </span>
-          </p>
+    <section className="bg-[var(--color-background)]">
+      <div className="mx-auto w-full max-w-[1280px] px-6 py-[clamp(3rem,6vw,5rem)] lg:px-10">
+        <div className="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr]">
           <Link
             href={`/blog/${post.slug}`}
-            className="mt-6 inline-flex w-fit text-sm font-bold hover:underline"
-            style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-secondary)" }}
+            className="blog-editorial-feature-wrap relative block h-[clamp(280px,30vw,440px)] overflow-hidden rounded-[24px]"
+            style={{ boxShadow: SHADOW_LG }}
           >
-            Read article →
+            {post.image ? (
+              <Image
+                src={post.image}
+                alt={post.title}
+                fill
+                className="blog-editorial-feature-img object-cover"
+                sizes="(max-width: 1024px) 100vw, 58vw"
+                priority
+              />
+            ) : (
+              <div
+                className="flex h-full w-full items-center justify-center px-6 text-center text-lg font-semibold leading-snug"
+                style={{
+                  fontFamily: "var(--font-display), sans-serif",
+                  backgroundColor: "var(--color-primary-50)",
+                  color: "var(--color-primary)",
+                }}
+              >
+                {post.title}
+              </div>
+            )}
           </Link>
+
+          <div className="blog-editorial-fade-up min-w-0">
+            <p
+              className="text-[0.75rem] font-extrabold uppercase tracking-[0.08em]"
+              style={{ fontFamily: "var(--font-display), sans-serif", color: "var(--color-secondary)" }}
+            >
+              {categoryLabel}
+            </p>
+            <h2
+              className="mt-4 text-[clamp(1.5rem,3.5vw,2.25rem)] font-extrabold leading-[1.15]"
+              style={{ fontFamily: "var(--font-body), sans-serif", color: "var(--color-text)" }}
+            >
+              <Link
+                href={`/blog/${post.slug}`}
+                className="transition-colors hover:text-[var(--color-primary)]"
+              >
+                {post.title}
+              </Link>
+            </h2>
+            <p
+              className="mt-4 text-base leading-[1.8]"
+              style={{ fontFamily: "var(--font-body), sans-serif", color: "rgba(28, 28, 28, 0.7)" }}
+            >
+              {post.excerptDisplay}
+            </p>
+            <div
+              className="mt-5 flex items-center gap-4 text-[0.8125rem]"
+              style={{ color: "rgba(28, 28, 28, 0.5)" }}
+            >
+              <time dateTime={post.dateISO}>{dateLine}</time>
+              <span
+                className="size-1 shrink-0 rounded-full"
+                style={{ backgroundColor: BORDER_TEAL }}
+                aria-hidden
+              />
+              <span>{readMinutes} min read</span>
+            </div>
+            <Link
+              href={`/blog/${post.slug}`}
+              className="group/read mt-6 inline-flex items-center gap-2 text-[0.875rem] font-bold transition-all duration-200 ease-out group-hover/read:gap-3"
+              style={{ color: "var(--color-secondary)", fontFamily: "var(--font-body), sans-serif" }}
+            >
+              Read article
+              <FeaturedArrowIcon />
+            </Link>
+          </div>
         </div>
       </div>
-    </article>
+    </section>
   );
 }

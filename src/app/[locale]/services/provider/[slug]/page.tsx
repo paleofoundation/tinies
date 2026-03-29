@@ -7,6 +7,7 @@ import { ProviderProfileMarkup } from "./ProviderProfileMarkup";
 import { getProviderImpactStats } from "./get-provider-impact-stats";
 import { withQueryTimeout } from "@/lib/utils/with-query-timeout";
 import type { ProviderForBooking } from "@/app/[locale]/services/book/booking-action-types";
+import { getCanonicalSiteOrigin } from "@/lib/constants/site-url";
 
 /** Coerce Prisma/serialized values so .toFixed and client props never throw. */
 function asDisplayRating(v: unknown): number | null {
@@ -86,16 +87,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const name = provider?.providerName ?? slugToName(slug);
   const title = `${name} · Pet Care Provider`;
   const ogTitle = `${title} | Tinies`;
-  const description =
+  const rawDesc =
     provider?.headline?.trim() ||
-    provider?.bio?.slice(0, 155) ||
+    (provider?.bio?.trim() ? provider.bio.trim().slice(0, 155) : "") ||
     `View ${name}'s profile, services, availability, and reviews. Book trusted pet care in Cyprus.`;
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+  const description = rawDesc.trim() || `Book ${name} for trusted pet care in Cyprus on Tinies.`;
+  const baseUrl = getCanonicalSiteOrigin();
   const url = `${baseUrl}/services/provider/${slug}`;
   const og = provider?.avatarUrl ?? provider?.photos[0];
   return {
     title,
     description,
+    alternates: { canonical: url },
     openGraph: {
       title: ogTitle,
       description,
@@ -104,7 +107,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: "profile",
       images: og ? [{ url: og }] : undefined,
     },
-    twitter: { card: "summary_large_image", title: ogTitle, description },
+    twitter: { card: "summary_large_image", title: ogTitle, description, ...(og ? { images: [og] } : {}) },
   };
 }
 
@@ -148,7 +151,7 @@ export default async function ProviderProfilePage({ params }: Props) {
   const avgRating = asDisplayRating(provider?.avgRating ?? null);
   const reviewCount = provider?.reviewCount ?? 0;
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+  const baseUrl = getCanonicalSiteOrigin();
   const profileUrl = `${baseUrl}/services/provider/${slug}`;
   const heroImage = provider?.avatarUrl ?? provider?.photos[0] ?? null;
   const districtLabel = provider?.district?.trim() || "Cyprus";

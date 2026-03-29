@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 import { FaqAccordionItem } from "./FaqAccordionItem";
 import { FaqEditorialSection } from "./FaqEditorialSection";
+import { getCanonicalSiteOrigin } from "@/lib/constants/site-url";
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app";
+const BASE_URL = getCanonicalSiteOrigin();
 
 const HOME_INNER = "mx-auto w-full max-w-[1280px] px-6 lg:px-10";
 const BORDER_TEAL_15 = "rgba(10, 128, 128, 0.15)";
@@ -147,6 +148,7 @@ export const metadata: Metadata = {
   title: "FAQ",
   description:
     "Answers for pet owners, service providers, adopters, and supporters — bookings, payouts, adoption, Tinies Giving, and more.",
+  alternates: { canonical: `${BASE_URL}/faq` },
   openGraph: {
     title: "FAQ | Tinies",
     description: "Common questions about pet care bookings, provider payouts, adoption, and Tinies Giving.",
@@ -186,7 +188,7 @@ export default function FaqPage() {
             >
               <span className="block" style={{ color: "#1C1C1C" }}>
                 frequently asked
-              </span>
+              </span>{" "}
               <span className="block" style={{ color: "var(--color-primary)" }}>
                 questions
               </span>

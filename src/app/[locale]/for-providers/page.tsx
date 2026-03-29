@@ -148,7 +148,7 @@ export default function ForProvidersPage() {
           >
             <span className="block" style={{ color: "#1C1C1C" }}>
               earn money
-            </span>
+            </span>{" "}
             <span className="block" style={{ color: "#0A8080" }}>
               caring for pets.
             </span>

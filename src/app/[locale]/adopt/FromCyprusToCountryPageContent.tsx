@@ -6,8 +6,9 @@ import type { CountryAdoptionSeo } from "@/lib/adoption/country-requirements";
 import { getApprovedSuccessStoriesForDestinationMatchers } from "@/lib/adoption/success-stories";
 import { AdoptionListingCard } from "@/components/adoption/AdoptionListingCard";
 import type { AdoptBrowseListing } from "@/lib/adoption/available-listings";
+import { getCanonicalSiteOrigin } from "@/lib/constants/site-url";
 
-const BASE_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://tinies.app").replace(/\/$/, "");
+const BASE_URL = getCanonicalSiteOrigin();
 
 function formatStoryDate(d: Date): string {
   return new Intl.DateTimeFormat("en-GB", {
@@ -23,29 +24,37 @@ type Props = { seo: CountryAdoptionSeo };
 export async function FromCyprusToCountryPageContent({ seo }: Props) {
   const country = seo.slug;
 
-  const [listingsRaw, stories] = await Promise.all([
-    prisma.adoptionListing.findMany({
-      where: {
-        status: "available",
-        active: true,
-        internationalEligible: true,
-        destinationCountries: { hasSome: seo.listingDestinationValues },
-      },
-      select: {
-        slug: true,
-        name: true,
-        species: true,
-        breed: true,
-        estimatedAge: true,
-        sex: true,
-        photos: true,
-        org: { select: { name: true, slug: true, location: true, verified: true } },
-      },
-      take: 12,
-      orderBy: { updatedAt: "desc" },
-    }),
-    getApprovedSuccessStoriesForDestinationMatchers(seo.successStoryCountryMatchers, 6),
-  ]);
+  let listingsRaw: AdoptBrowseListing[] = [];
+  let stories: Awaited<ReturnType<typeof getApprovedSuccessStoriesForDestinationMatchers>> = [];
+  try {
+    const [listings, storyRows] = await Promise.all([
+      prisma.adoptionListing.findMany({
+        where: {
+          status: "available",
+          active: true,
+          internationalEligible: true,
+          destinationCountries: { hasSome: seo.listingDestinationValues },
+        },
+        select: {
+          slug: true,
+          name: true,
+          species: true,
+          breed: true,
+          estimatedAge: true,
+          sex: true,
+          photos: true,
+          org: { select: { name: true, slug: true, location: true, verified: true } },
+        },
+        take: 12,
+        orderBy: { updatedAt: "desc" },
+      }),
+      getApprovedSuccessStoriesForDestinationMatchers(seo.successStoryCountryMatchers, 6),
+    ]);
+    listingsRaw = listings;
+    stories = storyRows;
+  } catch (e) {
+    console.error("FromCyprusToCountryPageContent data", country, e);
+  }
 
   const listings: AdoptBrowseListing[] = listingsRaw;
 

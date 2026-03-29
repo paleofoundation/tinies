@@ -7,6 +7,26 @@ const nextConfig: NextConfig = {
   /* config options here */
   async redirects() {
     return [
+      {
+        source: "/rescue/paws-of-cyprus-rescue",
+        destination: "/rescue/paws-of-cyprus",
+        permanent: true,
+      },
+      {
+        source: "/en/rescue/paws-of-cyprus-rescue",
+        destination: "/en/rescue/paws-of-cyprus",
+        permanent: true,
+      },
+      {
+        source: "/el/rescue/paws-of-cyprus-rescue",
+        destination: "/el/rescue/paws-of-cyprus",
+        permanent: true,
+      },
+      {
+        source: "/ru/rescue/paws-of-cyprus-rescue",
+        destination: "/ru/rescue/paws-of-cyprus",
+        permanent: true,
+      },
       { source: "/give", destination: "/giving/donate", permanent: true },
       { source: "/en/give", destination: "/en/giving/donate", permanent: true },
       { source: "/el/give", destination: "/el/giving/donate", permanent: true },
