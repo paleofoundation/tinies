@@ -145,7 +145,7 @@ export async function adminUpdateSiteImageMeta(input: {
       },
       update: { alt },
     });
-    revalidateTag(SITE_IMAGES_CACHE_TAG, "max");
+    revalidateTag(SITE_IMAGES_CACHE_TAG);
     return { ok: true };
   } catch (e) {
     console.error("adminUpdateSiteImageMeta", e);
@@ -227,6 +227,7 @@ export async function adminUploadSiteImage(input: {
     const { error: upErr } = await admin.storage.from(BUCKET).upload(path, buffer, {
       contentType: mime,
       upsert: true,
+      cacheControl: "0",
     });
     if (upErr) {
       console.error("adminUploadSiteImage storage", upErr);
@@ -242,17 +243,19 @@ export async function adminUploadSiteImage(input: {
       data: { publicUrl },
     } = admin.storage.from(BUCKET).getPublicUrl(path);
 
+    const bustUrl = `${publicUrl}?v=${Date.now()}`;
+
     await prisma.siteImage.update({
       where: { imageKey: input.imageKey },
       data: {
-        url: publicUrl,
+        url: bustUrl,
         ...(input.alt !== undefined ? { alt: input.alt.trim() } : {}),
         ...(input.label !== undefined ? { label: input.label.trim().slice(0, 500) } : {}),
       },
     });
 
-    revalidateTag(SITE_IMAGES_CACHE_TAG, "max");
-    return { ok: true, publicUrl };
+    revalidateTag(SITE_IMAGES_CACHE_TAG);
+    return { ok: true, publicUrl: bustUrl };
   } catch (e) {
     console.error("adminUploadSiteImage", e);
     const msg = e instanceof Error ? e.message : String(e);
