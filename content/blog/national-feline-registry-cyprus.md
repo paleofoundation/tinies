@@ -9,7 +9,7 @@ excerpt: "Cyprus cannot manage what it cannot count. A mandatory microchip regis
 image: "/images/blog/cat-microchip-registry.jpg"
 ---
 
-The government of Cyprus estimates the stray cat population at roughly one million. Activists say the number is higher. The International Cat Care report from 2025 acknowledged that no reliable census methodology has ever been applied to the island's cat population.
+The government of Cyprus estimates the stray cat population at roughly one million. Activists say the number is higher. The [International Cat Care](https://icatcare.org/) report from 2025 acknowledged that no reliable census methodology has ever been applied to the island's cat population.
 
 This is the first problem, and it is more important than it appears. Cyprus is attempting to manage a crisis it has never accurately measured. There is no baseline count. There is no geographic distribution map. There is no data on colony sizes, growth rates, or sterilization coverage by district. Every number cited in policy discussions is an estimate built on estimates.
 
@@ -17,11 +17,11 @@ The absence of data is not incidental. It is structural. And it guarantees that 
 
 ## The Source of New Strays
 
-The stray population in Cyprus is sustained by two pipelines. The first is reproduction among existing strays. The second is abandonment of owned cats.
+The stray population in Cyprus is sustained by two pipelines. The first is reproduction among existing strays. The second is [abandonment](/blog/why-cyprus-has-so-many-stray-cats-and-what-you-can-do) of owned cats.
 
 The second pipeline is rarely discussed with the specificity it deserves. After the COVID-19 pandemic, large numbers of cats that had been adopted during lockdowns were abandoned when owners returned to pre-pandemic routines. This is documented across multiple reports. But abandonment is not limited to pandemic-era adoptions. It is a continuous process. People acquire kittens, fail to sterilize them, and release them when litters arrive or when circumstances change. There is no legal consequence and no traceability.
 
-The reason there is no consequence is that there is no system for connecting a cat to an owner. Microchipping is technically required under EU regulation for cats traveling across borders, but there is no domestic requirement for microchipping owned cats within Cyprus, and no centralized registry that would allow an abandoned cat to be traced back to its owner.
+The reason there is no consequence is that there is no system for connecting a cat to an owner. Microchipping is technically required under [EU regulation](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32019R0880) for cats traveling across borders, but there is no domestic requirement for microchipping owned cats within Cyprus, and no centralized registry that would allow an abandoned cat to be traced back to its owner.
 
 ## What a National Registry Would Do
 
@@ -31,7 +31,7 @@ First, it would create traceability. When an abandoned cat is found, a microchip
 
 Second, it would generate the first accurate dataset on the owned cat population. If every owned cat is registered, the difference between the total estimated population and the registered population approximates the true stray count. This number — which does not currently exist — is essential for designing sterilization programs of the right scale.
 
-Third, it would enable mandatory sterilization verification. If registration requires proof of sterilization or a sterilization bond (a refundable deposit returned upon proof of neutering), the reproductive output of the owned population drops to near zero. The owned cat population is the easier of the two pipelines to control, and it is currently completely uncontrolled.
+Third, it would enable mandatory sterilization verification. If registration requires proof of [sterilization](/blog/real-economics-stray-cat-care-cyprus) or a sterilization bond (a refundable deposit returned upon proof of neutering), the reproductive output of the owned population drops to near zero. The owned cat population is the easier of the two pipelines to control, and it is currently completely uncontrolled.
 
 Fourth, it would create a foundation for municipal accountability. With a registry, each municipality can be measured on sterilization rates, abandonment rates, and colony management. Without a registry, there is no metric, no benchmark, and no accountability.
 

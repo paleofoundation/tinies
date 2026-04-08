@@ -16,7 +16,7 @@ This is not what happens. What happens, when no one intervenes, is slower and ug
 
 ## The First Phase: Overcrowding
 
-An unmanaged colony grows quickly. A single breeding pair can produce dozens of descendants within two years. Without sterilisation, the population in a given area can double in 12 to 18 months under favourable conditions — and Cyprus's year-round warmth provides exactly those conditions.
+An unmanaged colony grows quickly. A single breeding pair can produce dozens of descendants within two years. Without [sterilisation](/blog/the-bleeding-cost-of-running-cat-sanctuary-cyprus), the population in a given area can double in 12 to 18 months under favourable conditions — and Cyprus's year-round warmth provides exactly those conditions.
 
 At first, a growing colony is merely visible. More cats at the feeding station. More kittens appearing in spring. More toms spraying territory markers. Residents may notice and comment, or they may not. The cats are, at this stage, mostly healthy. Food sources — whether from intentional feeding, restaurant waste, or scavenging — are sufficient to support the current population.
 
@@ -26,7 +26,7 @@ But carrying capacity is not infinite. As the colony grows, competition for food
 
 Dense populations accelerate disease transmission. In a Cypriot stray cat colony, three categories of disease cause the most damage.
 
-**Feline panleukopenia** (also called feline parvovirus) is highly contagious, environmentally persistent, and has a mortality rate of 50–90% in unvaccinated cats, with kittens being the most vulnerable. The virus can survive in soil and on surfaces for months. In a dense colony, a single infected cat can trigger an outbreak that kills dozens of kittens within weeks.
+**Feline panleukopenia** (also called feline parvovirus) is highly contagious, environmentally persistent, and has a mortality rate of 50–90% in unvaccinated cats, with kittens being the most vulnerable. The virus can survive in soil and on surfaces for months. In a dense colony, a single infected cat can trigger an outbreak that kills dozens of kittens within weeks. Learn more about [feline panleukopenia prevention and management](https://icatcare.org/articles/feline-infectious-enteritis-feline-parvovirus-panleukopenia-virus/).
 
 **Upper respiratory infections** — feline herpesvirus and calicivirus — are endemic in virtually every unmanaged colony. They spread through sneezing, shared food, and direct contact. In healthy adult cats, these infections are unpleasant but survivable. In kittens, immunocompromised cats, or animals already weakened by malnutrition, they can be fatal. Chronic respiratory infection also makes cats less able to compete for food, creating a downward spiral.
 
@@ -54,17 +54,17 @@ This boom-and-bust pattern is well documented in unmanaged feral cat populations
 
 ## Environmental Impact
 
-Cats are obligate carnivores and effective predators. In Cyprus, the environmental impact of 1.5 million outdoor cats on native wildlife is substantial, though frequently overlooked in discussions that focus solely on the welfare of the cats themselves.
+Cats are obligate carnivores and effective predators. In Cyprus, the [environmental impact](/blog/ecology-of-cats-in-cyprus) of 1.5 million outdoor cats on native wildlife is substantial, though frequently overlooked in discussions that focus solely on the welfare of the cats themselves.
 
 Cyprus is a critical stopover point for migratory birds travelling between Europe and Africa. The island's position in the Eastern Mediterranean makes it an important resting and refuelling site during spring and autumn migration. An uncontrolled cat population exerts significant predation pressure on ground-nesting birds, reptiles, and small mammals.
 
-The endemic Cyprus wheatear, the Cyprus warbler, and several species of gecko and snake are all subject to cat predation. While cats are not the only threat these species face — habitat loss and climate change are also significant factors — predation by an artificially inflated domestic predator population is an added pressure that native species did not evolve to withstand.
+The endemic Cyprus wheatear, the Cyprus warbler, and several species of gecko and snake are all subject to cat predation. While cats are not the only threat these species face — habitat loss and climate change are also significant factors — predation by an artificially inflated domestic predator population is an added pressure that native species did not evolve to withstand. See the work of [BirdLife Cyprus](https://www.birdlifecyprus.org/) documenting these conservation concerns.
 
-This creates an uncomfortable tension between animal welfare advocates, who focus on the cats, and conservation biologists, who focus on the broader ecosystem. Both are right. The cats are suffering, and the wildlife is suffering. The common cause of both forms of suffering is the same: human failure to manage the situation.
+This creates an uncomfortable tension between animal welfare advocates, who focus on the cats, and conservation biologists, who focus on the broader ecosystem. Both are right. The cats are suffering, and the wildlife is suffering. The common cause of both forms of suffering is the same: human failure to manage the situation. Learn more about effective [trap-neuter-return strategies](https://www.alleycat.org/resources/why-trap-neuter-return-feral-cats-the-case-for-tnr/).
 
 ## Public Health Risks
 
-Unmanaged cat colonies pose public health risks that extend beyond the cats themselves. Toxoplasmosis, caused by the parasite Toxoplasma gondii, is shed in cat faeces and can persist in soil for months. While toxoplasmosis is typically mild in healthy adults, it poses serious risks to pregnant women and immunocompromised individuals.
+Unmanaged cat colonies pose public health risks that extend beyond the cats themselves. Toxoplasmosis, caused by the parasite [Toxoplasma gondii](https://www.cdc.gov/toxoplasmosis/about/index.html), is shed in cat faeces and can persist in soil for months. While toxoplasmosis is typically mild in healthy adults, it poses serious risks to pregnant women and immunocompromised individuals.
 
 Rabies is currently absent from Cyprus, but the island's proximity to regions where rabies is endemic — and the difficulty of vaccinating a large, unmanaged stray population — means that the risk is not zero. A single introduction event, via an illegally imported animal or a stowaway on a cargo ship, could spread rapidly through an unvaccinated population.
 
@@ -76,6 +76,6 @@ Accumulated cat faeces in public spaces, playgrounds, and agricultural land is b
 
 Inaction is not cost-free. It is simply a cost that is distributed differently — borne by the cats in suffering, by wildlife in population decline, by volunteers in exhaustion and personal expense, by public health systems in preventable disease, and by communities in degraded living conditions.
 
-The argument for intervention is not sentimental. It is practical. Managed colonies — sterilised, vaccinated, fed, and monitored — are healthier, smaller, and less ecologically damaging than unmanaged ones. The cost of systematic TNR and colony management is a fraction of the cost of the problems that unmanaged populations create.
+The argument for intervention is not sentimental. It is practical. Managed colonies — sterilised, vaccinated, fed, and monitored — are healthier, smaller, and less ecologically damaging than unmanaged ones. The cost of systematic [TNR and colony management](/blog/the-injection-that-could-end-cyprus-cat-crisis) is a fraction of the cost of the problems that unmanaged populations create.
 
 But the cost of doing nothing is easy to ignore, because it accrues slowly, invisibly, and to populations — feline and avian and reptilian — that do not vote, do not file complaints, and do not write letters to the municipal council.

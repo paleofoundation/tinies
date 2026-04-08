@@ -28,7 +28,7 @@ Of course, this is the minimum. Kittens, nursing mothers, and sick cats require 
 
 ## Scaling Up: Monthly and Annual Costs
 
-A volunteer managing a colony of 30 cats can expect to spend approximately €25–€40 per month on dry food alone. Add in occasional wet food for sick cats, flea treatment (approximately €2–€4 per cat per month for spot-on treatments purchased in bulk), and basic first aid supplies (wound spray, eye drops), and the monthly cost for a 30-cat colony runs to approximately €60–€100.
+A volunteer managing a colony of 30 cats can expect to spend approximately €25–€40 per month on dry food alone. Add in occasional wet food for sick cats, flea treatment (approximately €2–€4 per cat per month for spot-on treatments purchased in bulk), and basic first aid supplies (wound spray, eye drops), and the monthly cost for a 30-cat colony runs to approximately €60–€100. This burden is why [volunteer support is critical](/blog/the-stray-cat-crisis-in-cyprus).
 
 That is €720–€1,200 per year to maintain a colony of 30 cats at a basic level of care. It is not nothing, but it is far less than most people assume, and it is frequently paid entirely out of one volunteer's pocket.
 
@@ -36,7 +36,7 @@ The larger sanctuaries and rescue operations in Cyprus, managing 50 to 200+ cats
 
 ## The Sterilisation Economics
 
-Feeding is the ongoing cost. Sterilisation is the investment that makes all other costs manageable.
+Feeding is the ongoing cost. [Sterilisation](/blog/the-injection-that-could-end-cyprus-cat-crisis) is the investment that makes all other costs manageable.
 
 A spay surgery for a female cat in Cyprus costs approximately €40–€80 at a private veterinarian, depending on the clinic and location. Neuter surgery for a male cat costs approximately €30–€50. Some subsidised programmes, when they exist, bring costs down to €15–€25 per surgery.
 
@@ -76,7 +76,7 @@ Current spending on stray cat management in Cyprus — combining municipal budge
 
 Estimates vary, but sterilising enough cats to stabilise the population would require sterilising approximately 70–75% of breeding females. At an estimated population of 1.5 million, with roughly 40% being breeding-age females, that means sterilising approximately 420,000–450,000 cats. At an average cost of €50 per surgery, that is a one-time investment of €21–€22.5 million.
 
-That number sounds large in isolation. It is less than a single kilometre of motorway. It is roughly what Cyprus spends on tourism marketing in a year. It is a policy choice, not an economic impossibility.
+That number sounds large in isolation. It is less than a single kilometre of motorway. It is roughly what Cyprus spends on tourism marketing in a year. It is a policy choice, not an economic impossibility. This is why [comprehensive solutions](/blog/national-feline-registry-cyprus) like a mandatory registry are essential to drive scale.
 
 Until that investment is made, the system will continue to rely on the unpaid labour and personal funds of volunteers who are, in the most literal sense, subsidising a government responsibility with their own time and money.
 

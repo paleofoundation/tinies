@@ -14,7 +14,7 @@ A few years ago I had an idea I could not let go of. A franchise model for bouti
 
 I called it Cause Hotel. I bought the domain. I worked through the numbers. I pitched it.
 
-[Y Combinator](https://ycombinator.com) passed.
+[Y Combinator](https://www.ycombinator.com) passed.
 
 ## What they said
 
@@ -38,9 +38,7 @@ That problem requires property. And property requires a different kind of busine
 
 What I would build differently now is not the concept but the structure. Rather than a top-down franchise requiring significant upfront capital and centralized control, the more resilient version is a certification and network model. Properties that meet defined standards — for animal welfare commitments, revenue transparency, sanctuary integration, and independent verification — earn a Cause Hotel designation. The network provides identity, marketing reach, and community. The individual properties retain their autonomy and their character.
 
-> "It doesn't scale like software" is not the same as "it doesn't work." Most things that matter in the world don't scale like software.
-
-This is closer to what [the Paleo Foundation](https://paleofoundation.com) does for food certification — standards that mean something, built on criteria that are independently auditable, applied across a network of producers who benefit from the shared identity. Applied to hospitality, it is a different category. But the logic is the same: certification creates trust, trust creates preference, preference creates commercial value, commercial value funds the mission.
+This is closer to what [the Paleo Foundation](https://paleofoundation.com) does for food certification — standards that mean something, built on criteria that are independently auditable, applied across a network of producers who benefit from the shared identity. Applied to hospitality, it is a different category. But the logic is the same: [certification creates trust, trust creates preference, preference creates commercial value, commercial value funds the mission](/blog/the-90-percent-model).
 
 ## What the timing looks like now
 

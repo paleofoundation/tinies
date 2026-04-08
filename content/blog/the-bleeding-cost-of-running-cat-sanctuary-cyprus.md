@@ -24,13 +24,13 @@ A colony of 20 cats is manageable with discipline and a small network of support
 
 ## Why the current model keeps failing
 
-The donation model is not a bad model because donors are bad people. It is a bad model because it is structurally mismatched to the problem it is trying to solve.
+The donation model is not a bad model because donors are bad people. It is a bad model because it is structurally mismatched to the problem it is trying to solve. [What the real economics actually demand](/blog/real-economics-stray-cat-care-cyprus) is far more than episodic generosity.
 
 Donations are episodic. Animal welfare costs are continuous. Donations spike after a viral post, a media story, a particularly affecting photograph. Then they drop. The cats do not drop. The food bill does not drop. The vet appointments do not reschedule themselves around the fundraising calendar.
 
 > Donations are episodic. Animal welfare costs are continuous. The cats do not adjust to the fundraising calendar.
 
-Volunteer burnout compounds this. [The people running sanctuaries in Cyprus](/blog/the-stray-cat-crisis-in-cyprus) are not doing it because it is easy or well-compensated. They are doing it because they cannot look away. That is not a renewable resource. When they burn out — and many do — the animals they were caring for do not automatically find a new home. They return to the street, or the colony collapses, or another already-stretched operator takes on more than they can carry.
+Volunteer burnout compounds this. [The people running sanctuaries in Cyprus](/blog/the-stray-cat-crisis-in-cyprus) are not doing it because it is easy or well-compensated. They are doing it because they cannot look away. That is not a renewable resource. [When they burn out — and many do — the animals they were caring for do not automatically find a new home.](/blog/what-happens-stray-cats-cyprus-no-intervention) They return to the street, or the colony collapses, or another already-stretched operator takes on more than they can carry.
 
 This is the cycle. It has been the cycle for decades. [Cyprus has 1.5 million stray cats](/blog/why-cyprus-has-15-million-stray-cats) and the number is not falling. The effort being expended is real and it is not enough, not because the people are failing, but because the model they are working within cannot succeed.
 

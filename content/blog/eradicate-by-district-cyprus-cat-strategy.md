@@ -9,7 +9,7 @@ excerpt: "The World Health Organization did not eradicate smallpox by vaccinatin
 image: "/images/blog/district-eradication-strategy.jpg"
 ---
 
-The World Health Organization declared smallpox eradicated in 1980. The campaign that achieved this did not attempt to vaccinate every person on earth simultaneously. It used a strategy called ring containment: identify an outbreak, vaccinate everyone within the surrounding ring, monitor the boundary, and move to the next zone. District by district. Ring by ring. Until the disease had nowhere left to go.
+The World Health Organization declared smallpox eradicated in 1980. The campaign that achieved this did not attempt to vaccinate every person on earth simultaneously. It used a strategy called ring containment: identify an outbreak, vaccinate everyone within the surrounding ring, monitor the boundary, and move to the next zone. District by district. Ring by ring. Until the disease had nowhere left to go. This epidemiological principle applies equally to managing dense animal populations.
 
 Cyprus has been approaching its cat crisis the opposite way. Sterilization efforts are scattered across the entire island, conducted by dozens of independent organizations and volunteer groups with no geographic coordination. A volunteer in Nicosia traps and neuters fifteen cats. A shelter in Larnaca sterilizes twenty. A government-funded program in Limassol handles fifty. Each effort is isolated. None of them achieve the density of coverage required to reduce the population in any single area.
 
@@ -23,7 +23,7 @@ The approach that population biology and epidemiology both support is the same: 
 
 Applied to the Cyprus cat crisis, this means selecting a single municipality or district, achieving near-total sterilization coverage within that district before moving to the next, and maintaining the treated district through monitoring and boundary management.
 
-The 12-year controlled field study published in PNAS demonstrated this principle directly. Researchers found that high-intensity TNR — sterilizing over 70 percent of cats — only produced population decline when applied across contiguous areas. When applied to isolated pockets within a larger untreated landscape, the effect was nullified by immigration.
+The 12-year controlled field study [published in PNAS](https://www.pnas.org/doi/10.1073/pnas.2119000119) demonstrated this principle directly. Researchers found that high-intensity TNR — sterilizing over 70 percent of cats — only produced population decline when applied across contiguous areas. When applied to isolated pockets within a larger untreated landscape, the effect was nullified by immigration.
 
 The implication is clear: Cyprus needs to stop treating the entire island at low intensity and start treating one district at a time at maximum intensity.
 
@@ -49,7 +49,7 @@ The total number of surgeries is the same in both scenarios. The outcomes are ra
 
 ## The Role of New Technology
 
-The district eradication model becomes even more powerful when combined with emerging non-surgical sterilization methods. The AMH gene therapy contraceptive developed by Harvard and the Cincinnati Zoo — a single injection that permanently prevents ovulation without surgery — would dramatically accelerate the saturation phase of each district campaign.
+The district eradication model becomes even more powerful when combined with emerging non-surgical sterilization methods. The [AMH gene therapy contraceptive developed by Harvard and the Cincinnati Zoo](https://news.harvard.edu/gazette/story/2023/06/birth-control-for-cats-is-effective-but-ahead-of-its-time/) — a single injection that permanently prevents ovulation without surgery — would dramatically accelerate the saturation phase of each district campaign.
 
 With surgical sterilization, a team can process perhaps 10 to 20 cats per day given trapping, transport, surgery, and recovery logistics. With an injectable contraceptive, the same team could process 50 to 100 per day. A small municipality's entire cat population could be treated in a single week.
 
@@ -71,7 +71,7 @@ The barriers are not technical. They are organizational. And organizational barr
 
 ## The Proof of Concept
 
-The pilot does not need to start with government funding. A private-public partnership between an existing sanctuary, a veterinary practice, and a municipality could demonstrate the model at negligible cost.
+The pilot does not need to start with government funding. A private-public partnership between an existing sanctuary, a veterinary practice, and a municipality could demonstrate the model at negligible cost. This approach complements the broader [measurement infrastructure](/blog/cyprus-cat-population-dashboard) and [tourism strategy](/blog/cyprus-cat-crisis-tourism-industry) needed to sustain the effort.
 
 Gardens of St. Gertrude in Parekklisia already operates a 92-cat sanctuary. The village council already engages with cat-related issues. A concentrated two-week sterilization campaign in Parekklisia — supported by volunteer trappers, funded by sanctuary donations, and conducted in partnership with a local veterinary clinic — could serve as the proof of concept that makes the case for scaling the model district by district across the island.
 

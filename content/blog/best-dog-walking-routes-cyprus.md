@@ -9,7 +9,7 @@ image: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_
 author: "Tinies Team"
 ---
 
-Cyprus has beautiful walking terrain — coastal paths, mountain trails, urban parks, and archaeological sites surrounded by greenery. But not all of it is dog-friendly, and the intense summer heat means knowing where to find shade and water is as important as knowing the distance.
+Cyprus has beautiful walking terrain — coastal paths, mountain trails, urban parks, and archaeological sites surrounded by greenery. But not all of it is dog-friendly, and [the intense summer heat means knowing where to find shade and water](/blog/pet-care-cost-cyprus-2026-price-guide) is as important as knowing the distance.
 
 Here are the best dog walking routes in Limassol, Nicosia, Larnaca, and Paphos, with practical advice for every season.
 
@@ -161,4 +161,4 @@ A dramatic [Avakas Gorge](https://en.wikipedia.org/wiki/Avakas_Gorge) hike in th
 
 ## Need a walker?
 
-If you do not have time to walk your dog daily, a professional dog walker can help. [Search for verified dog walkers in your area on Tinies](/services/search?service=walking). Every booking funds animal rescue in Cyprus.
+If you do not have time to walk your dog daily, a professional dog walker can help. [Search for verified dog walkers in your area on Tinies](/services/search?service=walking). Every booking funds [animal rescue in Cyprus](/blog/the-stray-cat-crisis-in-cyprus). Check our [complete pet care pricing guide](/blog/pet-care-cost-cyprus-2026-price-guide) to understand typical walking rates by city.

@@ -56,7 +56,7 @@ This is what [Tinies](https://tinies.app) is built to do. Not as a crisis respon
 
 ## The Question Nobody in Pet Services Is Asking
 
-The major pet care platforms — Rover, Wag, Fetch — are built around a stable, suburban, primarily American user. The implicit assumption is that pet ownership happens in a context of relative safety and permanence: you have a home, you travel occasionally, you need someone to watch your dog.
+The major pet care platforms — [Rover](https://www.rover.com/), [Wag](https://www.wag.com/), [Fetch](https://fetchpetcare.com/) — are built around a stable, suburban, primarily American user. The implicit assumption is that pet ownership happens in a context of relative safety and permanence: you have a home, you travel occasionally, you need someone to watch your dog.
 
 That assumption excludes most of the world.
 

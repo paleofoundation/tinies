@@ -20,7 +20,7 @@ This is not a trust-and-safety policy. It is a containment strategy.
 
 When a platform has to punish providers for leaving, it is admitting something it would prefer not to say directly: the value it offers is not sufficient to make people stay voluntarily. The penalty exists to replace the loyalty that the platform has not earned.
 
-Compare this to how the best marketplaces retain the people who power them. They lower their take rate as providers complete more bookings. They pay quickly and reliably. They build tools that make providers more successful — better profiles, better matching, better communication. They make leaving feel like a loss rather than a relief.
+Compare this to how the best marketplaces retain the people who power them. They lower their take rate as providers complete more bookings. They pay quickly and reliably. They build tools that make providers more successful — better profiles, better matching, better communication. They make leaving feel like a loss rather than a relief. [Being second into a market gives you the advantage of learning from these patterns](/blog/move-over-rover-why-being-second-wins).
 
 PetBacker starts new sitters at a 25% commission fee. The rate can drop with completed bookings — but it can also go back up if the platform decides conduct rules have been violated. Promoting a competitor is a conduct violation. So is exchanging a phone number before a booking is confirmed. The floor of the relationship is surveillance, not service.
 
@@ -44,7 +44,7 @@ The answer to that question requires actually building something worth choosing.
 
 [We wrote about why Wag failed](/blog/why-wag-failed-lessons-pet-care) for exactly this reason. A 40% commission, no mission, no meaningful loyalty to the providers who made the platform work. The trust collapsed faster than the user base could be rebuilt.
 
-[The Tinies model](/blog/tinies-model-booking-fee-funds-sanctuary) starts from a different premise. Lower commission. Fast payout. And a reason to be here that goes beyond the transaction — [every booking funds animal rescue operations in Cyprus](/blog/she-built-a-tech-company-to-feed-92-cats). The providers on the platform are not inputs. They are the people making it possible to care for 92 cats in Parekklisia.
+[The Tinies model](/blog/tinies-model-booking-fee-funds-sanctuary) starts from a different premise. Lower commission. Fast payout. And a reason to be here that goes beyond the transaction — [every booking funds animal rescue operations in Cyprus](/blog/she-built-a-tech-company-to-feed-92-cats). The providers on the platform are not inputs. They are the people making it possible to care for 92 cats in Parekklisia. Learn [exactly what you can earn as a pet sitter on Tinies](/blog/become-pet-sitter-cyprus-earn-money).
 
 ## What loyalty actually looks like
 

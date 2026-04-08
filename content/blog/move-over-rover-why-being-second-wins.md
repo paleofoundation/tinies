@@ -16,7 +16,7 @@ There is a version of this post that reads as a startup pitch. There is another 
 
 ## Rover Already Proved the Market Exists
 
-[Rover.com](https://www.rover.com) didn't invent pet sitting. They industrialized it. Over a decade of venture funding, aggressive market expansion, and a 2021 SPAC at a $1.35 billion valuation, they built the category infrastructure — the expectation that you can open an app and find someone to watch your dog. That behavioral adoption cost them hundreds of millions of dollars and years of friction.
+[Rover.com](https://www.rover.com) didn't invent pet sitting. They industrialized it. Over a decade of venture funding, aggressive market expansion, and a 2021 SPAC at a $1.35 billion valuation, they built the category infrastructure — the expectation that you can open an app and find someone to watch your dog. That behavioral adoption cost them hundreds of millions of dollars and years of friction. In contrast, other platforms like [Wag](/blog/why-wag-failed-lessons-pet-care) failed to maintain the trust needed to sustain growth.
 
 [Tinies](https://tinies.app) didn't pay any of that.
 
@@ -82,4 +82,4 @@ Rover paid the price of market creation.
 
 ---
 
-*Tinies is a pet services marketplace and international animal adoption platform. A majority of platform revenue funds animal sanctuaries in Cyprus and beyond. Learn more at [tinies.app](https://tinies.app) or support [Gardens of St. Gertrude](https://gardensofstgertrude.com) directly.*
+*Tinies is a pet services marketplace and international animal adoption platform. A majority of platform revenue funds animal sanctuaries in Cyprus and beyond. [Learn how Tinies compares to competitors](/blog/petbacker-vs-tinies-cyprus-comparison), read about [why Wag failed](/blog/why-wag-failed-lessons-pet-care), or support [Gardens of St. Gertrude](https://gardensofstgertrude.com) directly.*

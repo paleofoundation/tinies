@@ -20,11 +20,11 @@ Expect questions about previous pets, vet details, and how you will keep the cat
 
 ## Veterinary preparation
 
-Your cat will need a microchip, rabies vaccination, and health documentation appropriate to your destination country. EU adopters often face a shorter timeline than UK adopters because of titre-test rules post-Brexit. The rescue or Tinies placement coordinators can outline the sequence so you are not guessing which step comes first.
+Your cat will need a microchip, rabies vaccination, and health documentation appropriate to your destination country. EU adopters often face a shorter timeline than UK adopters because of [titre-test rules post-Brexit](/blog/international-pet-adoption-cyprus-hidden-costs). The rescue or Tinies placement coordinators can outline the sequence so you are not guessing which step comes first.
 
 ## Travel and handover
 
-Options include registered pet couriers, cargo flights, and sometimes volunteer flight escorts. Costs vary; ask for a written estimate that includes crate, paperwork, and any overnight holding. On arrival, give the cat a single quiet room with litter, water, and hiding spots — stress is normal, and patience wins.
+Options include registered pet couriers, cargo flights, and sometimes volunteer flight escorts. Costs vary; ask for a written estimate that includes crate, paperwork, and any overnight holding. On arrival, [give the cat a single quiet room with litter, water, and hiding spots](/blog/preparing-your-home-for-a-new-rescue-animal) — stress is normal, and patience wins.
 
 ## After adoption
 

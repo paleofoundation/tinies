@@ -29,7 +29,7 @@ It does not mean we are not building a real business. [Tinies](https://tinies.ap
 
 What it means is that the revenue model was designed around a question that most platforms never ask: *what is this money for?*
 
-Approximately 90% of Tinies' booking commission goes directly to [Gardens of St. Gertrude](https://gardensofstgertrude.com) and partner sanctuaries. That number was not arrived at by working backward from a target margin. It was arrived at by looking at what the sanctuaries actually need and building a commission structure that could reliably deliver it at scale.
+Approximately 90% of Tinies' booking commission goes directly to [Gardens of St. Gertrude](https://gardensofstgertrude.com) and partner sanctuaries—the core idea behind [the 90% model](/en/blog/the-90-percent-model). That number was not arrived at by working backward from a target margin. It was arrived at by looking at what the sanctuaries actually need and building a commission structure that could reliably deliver it at scale.
 
 The platform is sustainable. The mission is the reason for the sustainability, not the thing that gets funded after the real business is profitable enough.
 
@@ -47,7 +47,7 @@ Tinies exists because I was looking at all of that from the inside and asking wh
 
 ## The People Who Take Care of Animals
 
-There is a category of person who takes care of animals professionally — as a sitter, a walker, a boarding host, a sanctuary worker, a rescue coordinator — who is structurally undervalued by every existing platform and institution in the space.
+There is a category of person who takes care of animals professionally — as a sitter, a walker, a boarding host, a sanctuary worker, a rescue coordinator — who is structurally undervalued by every existing platform and institution in the space. We've seen this repeatedly with [failing pet care marketplaces](/en/blog/why-wag-failed-lessons-pet-care) that prioritize extraction over partnership.
 
 They are not undervalued because the work is unskilled. Anyone who has managed the care of multiple animals simultaneously, navigated a pet health emergency, or coordinated an international adoption across three countries and two languages knows this is not unskilled work. They are undervalued because the platforms they depend on are designed to treat them as interchangeable supply, because the commission structures extract maximum margin from their labor, and because when something goes wrong they are usually the ones absorbing the cost.
 

@@ -26,7 +26,7 @@ This is not a charity purchasing a property to use as a sanctuary. It is a busin
 
 ## Why the financing exists
 
-European agricultural and rural development financing has supported this kind of rural business transition for decades. The EU's Common Agricultural Policy includes mechanisms specifically designed to support new entrants into agricultural businesses — including young farmers and non-traditional operators taking over existing holdings. Cyprus, as an EU member, has access to these instruments.
+European agricultural and rural development financing has supported this kind of rural business transition for decades. [The EU's Common Agricultural Policy](https://agriculture.ec.europa.eu/common-agricultural-policy_en) includes mechanisms specifically designed to support new entrants into agricultural businesses — including young farmers and non-traditional operators taking over existing holdings. Cyprus, as an EU member, has access to these instruments.
 
 Rural tourism and agrotourism financing is separately available through both EU structural funds and Cypriot national programmes. A property that combines agricultural production with hospitality — a working vineyard that also takes guests, for instance — sits squarely within the category of rural diversification that these instruments are designed to support.
 
@@ -36,7 +36,7 @@ None of this is guaranteed. Financing requires a credible business plan, a clear
 
 [Cyprus has approximately 1.5 million stray cats](/en/blog/why-cyprus-has-15-million-stray-cats) and [a tourism sector that has not yet seriously engaged with what that could mean](/en/blog/cyprus-cat-crisis-tourism-industry). The island has ancient, documented ties to cats — [the oldest evidence of the human-cat bond on earth was found here](/en/blog/the-island-where-cats-were-first-loved). That is not a liability. It is a positioning asset that no other place in the Mediterranean can claim.
 
-[Countries that have solved versions of this problem](/en/blog/mediterranean-stray-cat-scorecard) — Italy through legal colony protection, Istanbul through community ownership, Greek islands through intensive TNR — have done so by treating cats as a feature of place rather than a problem to be hidden. A network of rural properties in Cyprus that explicitly embraces this identity would be the first of its kind at scale. The first mover in that space defines the category.
+[Countries that have solved versions of this problem](/en/blog/mediterranean-stray-cat-scorecard) — [Italy through legal colony protection](/en/blog/italy-law-281-cat-colony-rights-lessons-cyprus), [Istanbul through community ownership](/en/blog/istanbul-community-cat-model-lessons-cyprus), [Greek islands through intensive TNR](/en/blog/greek-islands-cat-population-lessons) — have done so by treating cats as a feature of place rather than a problem to be hidden. A network of rural properties in Cyprus that explicitly embraces this identity would be the first of its kind at scale. The first mover in that space defines the category.
 
 ## The honest constraints
 

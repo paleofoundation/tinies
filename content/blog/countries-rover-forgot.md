@@ -30,7 +30,7 @@ It means, concretely, that people surrender animals they love because they had n
 
 ## Greece
 
-Greece has one of the most severe stray animal crises in Europe. Estimates place the stray dog population alone at over one million. Urban pet ownership is growing rapidly, particularly among younger Greeks in Athens and Thessaloniki, but formal pet care infrastructure is almost entirely absent. There is no dominant local marketplace. There is no organized professional sitter network.
+Greece has one of the most severe stray animal crises in Europe, similar to [Cyprus](/blog/the-stray-cat-crisis-in-cyprus). Estimates place the stray dog population alone at over one million. Urban pet ownership is growing rapidly, particularly among younger Greeks in Athens and Thessaloniki, but formal pet care infrastructure is almost entirely absent. There is no dominant local marketplace. There is no organized professional sitter network.
 
 What Greece has is a culture that is beginning to change — from treating strays as a municipal nuisance to recognizing companion animals as part of the social fabric. A platform that enters this market with sanctuary-linked bookings and an international adoption pipeline is not just a marketplace. It is infrastructure for that transition.
 
@@ -70,7 +70,7 @@ Rover operates in Spain. It does not operate with the mission alignment, the wel
 
 This is harder to talk about commercially, but it is the most important category.
 
-Conflict displacement does not just uproot people. It abandons animals. Families fleeing Lebanon, Syria, and Gaza have faced impossible choices about pets that most Western pet owners have never had to consider. The infrastructure for emergency pet rehoming, cross-border adoption, and crisis-context animal welfare coordination is essentially nonexistent in formal marketplace terms.
+Conflict displacement does not just uproot people. It abandons animals. Families fleeing Lebanon, Syria, and Gaza have faced impossible choices about pets that most Western pet owners have never had to consider. The infrastructure for emergency pet rehoming, [cross-border adoption](/blog/how-international-pet-adoption-works-from-cyprus-to-the-uk), and crisis-context animal welfare coordination is essentially nonexistent in formal marketplace terms.
 
 Tinies' adoption platform was built with this in mind — not as a marketing feature, but as a structural capability. Cross-border adoption pipelines, sanctuary partnerships, and international coordination infrastructure are not nice-to-haves in these markets. They are the entire point.
 
@@ -80,9 +80,9 @@ We will not pretend a marketplace solves a humanitarian crisis. But infrastructu
 
 ## The United States
 
-The US market is the largest pet services market in the world. It is also already served by Rover, Wag, Fetch, and a growing list of regional competitors.
+The US market is the largest pet services market in the world. It is also already served by [Rover](https://www.rover.com), [Wag](/blog/why-wag-failed-lessons-pet-care), Fetch, and a growing list of regional competitors.
 
-Tinies will enter the US market. The differentiation there is not geographic — it is structural. A welfare-linked revenue model, sitter protections designed from the ground up rather than retrofitted, and an international adoption infrastructure that no US-native platform has built are the basis for competing in a crowded market on terms that the incumbents cannot easily replicate.
+Tinies will enter the US market. The differentiation there is not geographic — it is structural. A [welfare-linked revenue model](/blog/tinies-model-booking-fee-funds-sanctuary), sitter protections designed from the ground up rather than retrofitted, and an international adoption infrastructure that no US-native platform has built are the basis for competing in a crowded market on terms that the incumbents cannot easily replicate.
 
 The US launch comes after the markets where Tinies is most needed and least competed for. That sequencing is intentional.
 

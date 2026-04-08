@@ -23,7 +23,7 @@ On Tinies, providers complete [ID verification](/how-it-works) before they can a
 Beyond ID, ask these questions before booking anyone, on any platform:
 
 - **Do they have experience with your species and breed?** A sitter who is great with Labrador retrievers may not know how to handle a reactive terrier or a senior cat with kidney disease.
-- **Do they carry insurance for boarding?** If they are keeping your pet in their home overnight, this matters. The [Cyprus Veterinary Services](http://www.moa.gov.cy/moa/vs/vs.nsf/) does not regulate pet sitters specifically, so provider-level verification is the main safeguard.
+- **Do they carry insurance for boarding?** If they are keeping your pet in their home overnight, this matters. Professional [pet sitter certifications and insurance](https://petsitters.org/page/CertificationLanding) are important safeguards. The [Cyprus Veterinary Services](http://www.moa.gov.cy/moa/vs/vs.nsf/) does not regulate pet sitters specifically, so provider-level verification is the main safeguard.
 - **Are they available for a meet-and-greet?** If someone is unwilling to meet you and your pet before a booking, that is a red flag.
 
 ## Read reviews — but read them like a local
@@ -44,7 +44,7 @@ Not every animal needs the same thing, and Cyprus has specific conditions that a
 
 Here is how to think about service types:
 
-**Dog walking** is ideal for owners who work long hours and need their dog exercised during the day. If you want to know the best routes, we have published a guide to the [best dog walking routes across all four major cities](/blog/best-dog-walking-routes-cyprus).
+**Dog walking** is ideal for owners who work long hours and need their dog exercised during the day. If you want to know the best routes, we have published a guide to the [best dog walking routes across all four major cities](/blog/best-dog-walking-routes-cyprus). A good [dog walker in Limassol, Nicosia, Larnaca or Paphos](/services/search?service=walking) will adjust schedules based on seasonal heat.
 
 **Drop-in visits** are usually the best fit for cats. Most cats do not need to leave their home — they need someone to come in once or twice a day to feed them, check their water, clean the litter tray, and confirm they are healthy. A calm, quiet visit from a [pet sitter in Paphos](/pet-sitting/paphos) or [Larnaca](/pet-sitting/larnaca) is worth more to a cat than an elaborate boarding setup.
 

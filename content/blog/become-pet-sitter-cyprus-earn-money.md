@@ -84,7 +84,7 @@ The wizard guides you through setting up your profile. You will be asked to:
 
 **Step 3: Complete the safety course**
 
-Tinies requires all providers to complete a basic safety course before their profile goes live. It covers pet first aid, emergency procedures, how to handle anxious or reactive animals, and platform policies. The course takes about thirty minutes and earns you a certification badge on your profile.
+Tinies requires all providers to complete a basic [safety course](/for-providers) before their profile goes live. It covers pet first aid, emergency procedures, how to handle anxious or reactive animals, and platform policies. The course takes about thirty minutes and earns you a certification badge on your profile. This aligns with professional standards like [NAPPS Certification](https://petsitters.org/page/CertificationLanding) and [CPACP certification](https://paccert.org/cpacp/).
 
 **Step 4: Get verified**
 
@@ -118,7 +118,7 @@ We have seen what works. The providers who get the most bookings have:
 
 Beyond the lower commission, there are structural reasons why Tinies is worth your time:
 
-**You are funding rescue.** Ninety percent of every commission goes to animal rescue in Cyprus. Your profile shows the cumulative impact of your bookings: "Your bookings have generated EUR X in donations to rescue." Owners see this and feel good about booking through the platform. It is a loyalty driver that benefits everyone.
+**You are funding rescue.** Ninety percent of every commission goes to [animal rescue in Cyprus](/blog/she-built-a-tech-company-to-feed-92-cats). Your profile shows the cumulative impact of your bookings: "Your bookings have generated EUR X in donations to rescue." Owners see this and feel good about booking through the platform. It is a loyalty driver that benefits everyone.
 
 **Training and certifications.** Complete additional courses to earn badges that appear on your profile. These signal professionalism and build trust.
 

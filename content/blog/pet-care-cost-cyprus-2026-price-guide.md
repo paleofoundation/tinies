@@ -126,7 +126,7 @@ Several factors influence what you will pay:
 
 On Tinies, the price you see on a provider's profile is the provider's rate. A twelve percent service fee is added at checkout — this covers payment processing via [Stripe](https://stripe.com/), the Tinies Guarantee (up to EUR 2,000 vet coverage), and platform operations.
 
-Ninety percent of that service fee goes directly to animal rescue organisations in Cyprus. Every booking you make through Tinies funds the rescue and care of animals across the island.
+Ninety percent of that service fee goes directly to [animal rescue organisations in Cyprus](/blog/the-stray-cat-crisis-in-cyprus). Every booking you make through Tinies funds [the rescue and care of animals across the island](/blog/she-built-a-tech-company-to-feed-92-cats).
 
 On [PetBacker](https://www.petbacker.com/), the fee structure is different. PetBacker deducts fifteen to twenty-five percent from the provider's earnings, with the rate depending on the number of bookings the provider has completed. If a provider is found to be working on multiple platforms simultaneously, the fee increases to forty percent.
 
@@ -138,9 +138,9 @@ Price matters, but it is not the only factor. When choosing a pet care provider 
 
 **Verification.** On Tinies, every provider is identity-verified before they appear in search results. Look for the verified badge.
 
-**Reviews.** Read reviews from other pet owners. A provider with ten five-star reviews at EUR 18 per walk is a better bet than an unreviewed provider at EUR 10.
+**Reviews.** Read reviews from other pet owners. A provider with ten five-star reviews at EUR 18 per walk is a better bet than an unreviewed provider at EUR 10. Learn [how to find a trusted pet sitter](/blog/how-to-find-a-trusted-pet-sitter-in-cyprus) by reading patterns across reviews.
 
-**Experience.** Check the provider's bio for relevant experience — years of pet care, specific breed knowledge, veterinary training, or certifications.
+**Experience.** Check the provider's bio for relevant experience — years of pet care, specific breed knowledge, [professional certifications](/blog/become-pet-sitter-cyprus-earn-money), or training courses like [NAPPS](https://petsitters.org/page/CertificationLanding) or [CPACP](https://paccert.org/cpacp/).
 
 **Home setup.** For boarding and daycare, check the provider's photos. Is there a garden? Is the space clean? Are there other animals in the home?
 

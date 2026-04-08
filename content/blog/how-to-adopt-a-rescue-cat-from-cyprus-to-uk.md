@@ -18,7 +18,7 @@ This guide walks through every step.
 
 ## Why Adopt from Cyprus?
 
-Cyprus has one of the highest stray cat populations in Europe relative to its size. The island's warm climate, historical culture around outdoor cats, and limited municipal animal control infrastructure have created a situation where rescue organisations care for far more cats than can be placed locally. Many of these cats are healthy, socialised, and desperate for permanent homes — but the local adoption market simply cannot absorb them all.
+[Cyprus has one of the highest stray cat populations in Europe](/blog/the-stray-cat-crisis-in-cyprus) relative to its size. The island's warm climate, historical culture around outdoor cats, and limited municipal animal control infrastructure have created a situation where rescue organisations care for far more cats than can be placed locally. Many of these cats are healthy, socialised, and desperate for permanent homes — but the local adoption market simply cannot absorb them all.
 
 Meanwhile, the UK's "adopt don't shop" movement has created strong demand for rescue animals. Breed-specific rescues often have long waiting lists. Shelter cats are frequently adopted within days of listing. The supply of adoptable cats in the UK does not match the demand from people wanting to give a rescue cat a home.
 
@@ -30,7 +30,7 @@ Since Brexit, the UK is no longer part of the EU pet travel scheme. This means t
 
 ### Microchip
 
-The cat must be microchipped with an ISO 11784/11785 compliant 15-digit microchip. This must be done before or on the same day as the rabies vaccination. The microchip number is the cat's permanent identifier and appears on all subsequent documentation.
+The cat must be microchipped with an [ISO 11784/11785 compliant 15-digit microchip](https://en.wikipedia.org/wiki/ISO_11784_and_ISO_11785). This must be done before or on the same day as the rabies vaccination. The microchip number is the cat's permanent identifier and appears on all subsequent documentation.
 
 ### Rabies Vaccination
 
@@ -38,7 +38,7 @@ The cat must receive a rabies vaccination after being microchipped. The vaccine 
 
 ### Rabies Antibody Titre Test
 
-This is the step that makes UK adoption take longer than EU adoption. A blood sample must be taken at least 30 days after the rabies vaccination and sent to an EU-approved laboratory for a rabies antibody titre test. The test must show a titre level of at least 0.5 IU/ml.
+This is the step that makes UK adoption take longer than EU adoption. A blood sample must be taken at least 30 days after the rabies vaccination and sent to an [EU-approved laboratory for a rabies antibody titre test](https://food.ec.europa.eu/animals/movement-pets/designated-laboratories-performing-rabies-antibody-titration-tests_en). The test must show a titre level of at least 0.5 IU/ml.
 
 The results typically take 2-3 weeks to come back. The cat cannot travel to the UK until the titre test result is available and satisfactory. There is no waiting period after receiving a satisfactory result — the cat can travel as soon as the result is confirmed.
 
@@ -126,9 +126,11 @@ Before your rescue cat arrives, you will need:
 
 **Essential supplies:** Litter tray, litter, food bowls, water bowls, age-appropriate food (ask the rescue what the cat has been eating), a carrier for vet visits, a scratching post.
 
-**A safe room:** Set up one quiet room where the cat will spend its first few days. Moving 3,200km is stressful. The cat needs time to decompress in a small, safe space before exploring the rest of the home. Include the litter tray, food, water, a hiding spot (a box with a blanket works), and something that smells like the rescue (ask the rescue to send a blanket or towel with the cat).
+**A safe room:** [Set up one quiet room where the cat will spend its first few days](/blog/preparing-your-home-for-a-new-rescue-animal). Moving 3,200km is stressful. The cat needs time to decompress in a small, safe space before exploring the rest of the home. Include the litter tray, food, water, a hiding spot (a box with a blanket works), and something that smells like the rescue (ask the rescue to send a blanket or towel with the cat).
 
 **A local vet appointment:** Book a registration appointment with a local vet within the first week. Bring all the cat's documentation — passport, vaccination records, titre test results. Your UK vet will want to review everything and set up the cat's ongoing care schedule.
+
+**Pet insurance:** Consider [UK pet insurance for rescue animals](https://www.agriapet.co.uk/rehoming/), which often offers free cover in the first weeks after adoption.
 
 **Patience:** A rescue cat from Cyprus may take days, weeks, or even months to fully settle. Some cats are confident from day one. Others hide under the bed for a week. Both are normal. Let the cat set the pace.
 

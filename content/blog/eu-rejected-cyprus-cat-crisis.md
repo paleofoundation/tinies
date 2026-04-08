@@ -25,15 +25,15 @@ To understand why Cyprus has so many stray cats, you need to understand a few in
 
 **Culture.** Outdoor cats have been part of Cypriot life for centuries. Many people feed strays but do not consider them their responsibility to sterilise. The cultural norm of community cats — fed by many, owned by none — means that population control falls through the cracks. Feeding a cat is an act of compassion. Paying EUR 50-80 to sterilise someone else's community cat is a harder ask.
 
-**Government capacity.** Municipal animal management budgets in Cyprus are thin. The district veterinary services handle rabies vaccination programs and some stray management, but the resources allocated to [Trap-Neuter-Return](https://www.alleycat.org/resources/why-trap-neuter-return-feral-cats-the-case-for-tnr/) (TNR) programs are far below what the population requires. There is no national spay/neuter mandate for owned cats, and enforcement of existing animal welfare laws is inconsistent.
+**Government capacity.** Municipal animal management budgets in Cyprus are thin. The district veterinary services handle rabies vaccination programs and some stray management, but the resources allocated to [Trap-Neuter-Return](https://www.alleycat.org/resources/why-trap-neuter-return-feral-cats-the-case-for-tnr/) (TNR) programs are far below what the population requires. There is no national spay/neuter mandate for owned cats, and enforcement of existing animal welfare laws is inconsistent. For more on TNR limitations and systemic failures, see [the stray cat crisis overview](/blog/the-stray-cat-crisis-in-cyprus).
 
 **Abandonment.** Cyprus has a significant expat population. When foreign residents leave the island — whether for work transfers, retirement moves, or simply because their circumstances change — some leave their cats behind. This is not unique to Cyprus, but the combination of a transient population and a warm climate creates a steady inflow of newly abandoned animals.
 
 ## The 2023 catastrophe
 
-In 2023, a devastating outbreak of feline panleukopenia virus (FPV) swept through Cyprus, killing thousands of cats across the island. FPV is a highly contagious virus that attacks the gastrointestinal tract and immune system. In a population of unvaccinated, immunocompromised strays, it spreads like wildfire.
+In 2023, a devastating outbreak of [feline infectious peritonitis](https://www.abcdcatsvets.org/guideline-for-feline-panleukopenia/) swept through Cyprus, killing thousands of cats across the island. The virus is highly contagious and attacks immune function. In a population of unvaccinated, immunocompromised strays, it spreads like wildfire.
 
-The outbreak [made international headlines](https://www.bbc.com/news/world-europe-66149287). The BBC, The Guardian, and media across Europe covered the mass die-off. Images of sick and dying cats filled social media. Rescue organisations that were already stretched beyond capacity found themselves overwhelmed by the scale of the crisis.
+The outbreak made international headlines. Multiple major news outlets covered the mass die-off. Images of sick and dying cats filled social media. Rescue organisations that were already stretched beyond capacity found themselves overwhelmed by the scale of the crisis.
 
 The government's response was widely criticised as slow and underfunded. Vaccination drives were eventually organised, but by then the virus had already killed an estimated 300,000 cats according to some reports — though the true number is impossible to verify because most stray cats die uncounted.
 
@@ -57,7 +57,7 @@ These organisations run TNR programs, pulling cats off the streets, sterilising 
 
 They do this with volunteer labour and personal funds. There is no government grant program for rescue organisations in Cyprus. There is no municipal budget line for TNR. Every sterilisation, every vaccination, every vet bill for an injured street cat is paid out of donations, fundraisers, and the personal savings of the people doing the work.
 
-[Gardens of St Gertrude](/rescue/gardens-of-st-gertrude), a cat sanctuary in Parekklisia, is one of these organisations. Since 2017, the founders have personally invested over EUR 460,000 in animal rescue across Cyprus — not only for the ninety-two cats in their own sanctuary, but paying veterinary bills for other rescue organisations who needed help with emergencies they could not cover.
+[Gardens of St Gertrude](/rescue/gardens-of-st-gertrude), a cat sanctuary in Parekklisia, is one of these organisations. Since 2017, the founders have personally invested over EUR 460,000 in animal rescue across Cyprus — not only for the ninety-two cats in their own sanctuary, but paying veterinary bills for other rescue organisations who needed help with emergencies they could not cover. This is detailed in [She Built a Tech Company to Feed 92 Cats](/blog/she-built-a-tech-company-to-feed-92-cats).
 
 [Patch of Heaven](/rescue/patch-of-heaven) Animal Haven in Limassol is another, caring for over one hundred cats and dogs with a constant need for food, litter, and veterinary care.
 
@@ -73,7 +73,7 @@ That is the idea behind Tinies. It is a pet services marketplace — owners book
 
 The EU will not fund this. The government has not funded this at the scale required. So the marketplace itself becomes the funding mechanism. Every transaction is a micro-donation. Every repeat booking is a recurring gift. Every new provider who joins the platform is another node in a network that channels commercial activity into rescue.
 
-It is not enough to solve the crisis alone. But it is a model that scales with every new user, every new booking, every new provider. And it does not depend on the generosity of any single person or the political will of any institution.
+It is not enough to solve the crisis alone. But it is a model that scales with every new user, every new booking, every new provider. And it does not depend on the generosity of any single person or the political will of any institution. Learn more about [the broader economics of stray cat care](/blog/real-economics-stray-cat-care-cyprus) and how this model fits into larger solutions.
 
 ## What you can do
 

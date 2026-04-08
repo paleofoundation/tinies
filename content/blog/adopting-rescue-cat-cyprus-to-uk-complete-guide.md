@@ -9,9 +9,9 @@ image: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_
 author: "Tinies Team"
 ---
 
-Every year, hundreds of rescue cats and dogs travel from Cyprus to new homes in the United Kingdom. The demand is real — the UK has a strong adopt-don't-shop culture and more people wanting rescue animals than the local supply can meet. Cyprus has thousands of healthy, loving animals in rescue who need homes.
+Every year, hundreds of rescue cats and dogs travel from Cyprus to new homes in the United Kingdom. The demand is real — the UK has a strong adopt-don't-shop culture and more people wanting rescue animals than the local supply can meet. [Cyprus has thousands of healthy, loving animals in rescue](/blog/the-stray-cat-crisis-in-cyprus) who need homes.
 
-But the process of getting a rescue animal from Cyprus to the UK is not simple. Post-Brexit rules, veterinary requirements, transport logistics, and documentation timelines mean the process typically takes six to twelve weeks from approval to arrival.
+But the process of getting a rescue animal from Cyprus to the UK is not simple. [Post-Brexit rules, veterinary requirements, transport logistics, and documentation timelines](/blog/international-pet-adoption-cyprus-hidden-costs) mean the process typically takes six to twelve weeks from approval to arrival.
 
 This guide covers everything: the requirements, the timeline, the costs, and what to expect at every step.
 
@@ -37,7 +37,7 @@ If the rescue organisation approves your application, Tinies initiates the logis
 
 The rescue organisation schedules and completes the following veterinary work:
 
-**Vaccinations.** Dogs receive DHPP (distemper, hepatitis, parainfluenza, parvovirus). Cats receive FVRCP (feline viral rhinotracheitis, calicivirus, panleukopenia). These are standard core vaccinations.
+**Vaccinations.** Dogs receive [DHPP (distemper, hepatitis, parainfluenza, parvovirus)](https://www.petmd.com/dog/general-health/dhpp-vaccination-for-dogs). Cats receive [FVRCP (feline viral rhinotracheitis, calicivirus, panleukopenia)](https://www.petmd.com/cat/general-health/fvrcp-vaccine). These are standard core vaccinations.
 
 **Rabies vaccination.** Required for UK entry. Must be administered after or on the same day as microchipping.
 
@@ -45,7 +45,7 @@ The rescue organisation schedules and completes the following veterinary work:
 
 **Spay or neuter.** If not already done, the animal is sterilised before travel.
 
-**Rabies titer test.** This is the critical step for UK-bound animals. A blood sample is drawn at least thirty days after the rabies vaccination and sent to an EU-approved laboratory. The test confirms that the animal has developed sufficient antibodies against rabies (see [UK government guidance on rabies blood tests for pet travel](https://www.gov.uk/taking-your-pet-abroad/rabies-blood-test)). Results typically take two to three weeks. This is the longest single step in the process and the main reason UK adoptions take longer than EU adoptions.
+**Rabies titer test.** This is the critical step for UK-bound animals. A blood sample is drawn at least thirty days after the rabies vaccination and sent to an [EU-approved laboratory for rabies antibody titration](https://food.ec.europa.eu/animals/movement-pets/designated-laboratories-performing-rabies-antibody-titration-tests_en). The test confirms that the animal has developed sufficient antibodies against rabies (see [UK government guidance on rabies blood tests for pet travel](https://www.gov.uk/taking-your-pet-abroad/rabies-blood-test)). Results typically take two to three weeks. This is the longest single step in the process and the main reason UK adoptions take longer than EU adoptions.
 
 **Tapeworm treatment (dogs only).** Dogs must receive tapeworm treatment (praziquantel) twenty-four to one hundred and twenty hours before arrival in the UK. This is administered by a veterinarian and recorded in the pet passport.
 

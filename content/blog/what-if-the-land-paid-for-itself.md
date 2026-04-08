@@ -24,7 +24,7 @@ The same logic applies to olive groves and herb farms, where the land itself is 
 
 > The features that protect cats are mostly the same features that define a working rural property. This is not a coincidence.
 
-What these properties share is not just physical safety. It is that the presence of resident cats becomes part of their identity. Guests remember the cat. They photograph it. They return because of it and tell others. [Cyprus has already established a reputation as a place defined by its relationship with cats](/blog/cyprus-cat-crisis-tourism-industry) — a reputation that hospitality and agrotourism operators have barely begun to leverage.
+What these properties share is not just physical safety. It is that the presence of resident cats becomes part of their identity. Guests remember the cat. They photograph it. They return because of it and tell others. [Cyprus has already established a reputation as a place defined by its relationship with cats](/blog/cyprus-cat-crisis-tourism-industry) — a reputation that hospitality and agrotourism operators have barely begun to leverage. The [ancient history](/blog/the-island-where-cats-were-first-loved) of cats on the island adds depth to this positioning that no other Mediterranean location can offer.
 
 ## What Cyprus has that most places don't
 
@@ -34,7 +34,7 @@ The rural landscape — particularly the Troodos foothills, the Limassol hinterl
 
 This means distressed rural properties in Cyprus come to market at prices that reflect the difficulty of finding a motivated buyer — not the intrinsic value of the land, the buildings, or the established business identity. For a buyer who is also solving a sanctuary funding problem, that gap is an opportunity.
 
-[The Mediterranean context matters too.](/blog/mediterranean-stray-cat-scorecard) Countries that have handled their stray animal populations most effectively — Italy, parts of Greece — have done so through a combination of legal frameworks, community ownership of the problem, and operational infrastructure. Cyprus has the community ownership piece in abundance. What it lacks is the operational infrastructure. A network of cause-aligned rural properties is one version of what that infrastructure could look like.
+[The Mediterranean context matters too.](/blog/mediterranean-stray-cat-scorecard) Countries that have handled their stray animal populations most effectively — [Italy](/blog/italy-law-281-cat-colony-rights-lessons-cyprus), parts of Greece — have done so through a combination of legal frameworks, community ownership of the problem, and operational infrastructure. Cyprus has the community ownership piece in abundance. What it lacks is the operational infrastructure. A network of cause-aligned rural properties is one version of what that infrastructure could look like.
 
 ## The question this raises
 

@@ -18,7 +18,7 @@ So Karen did something unusual. Instead of starting a GoFundMe or launching a do
 
 ## The Problem Nobody Was Solving
 
-[Cyprus has one of the highest stray animal populations in Europe.](/en/blog/why-cyprus-has-15-million-stray-cats) The island's mild climate and historically relaxed approach to animal control have created a situation where tens of thousands of stray cats and dogs roam villages, cities, and the countryside. Rescue organizations — mostly volunteer-run, mostly underfunded — do what they can. But [the scale of the problem outpaces the resources available](/en/blog/the-stray-cat-crisis-in-cyprus).
+[Cyprus has one of the highest stray animal populations in Europe.](/en/blog/why-cyprus-has-15-million-stray-cats) The island's mild climate and historically relaxed approach to animal control have created a situation where tens of thousands of stray cats and dogs roam villages, cities, and the countryside. Rescue organizations — mostly volunteer-run, mostly underfunded — do what they can. But [the scale of the problem outpaces the resources available](/en/blog/the-stray-cat-crisis-in-cyprus), and [the economic burden](/en/blog/the-bleeding-cost-of-running-cat-sanctuary-cyprus) falls almost entirely on a small number of dedicated people.
 
 Meanwhile, Cyprus has no centralized platform for pet services. If you need a dog walker in Limassol, you ask in a Facebook group and hope someone reliable responds. If you need a pet sitter while you travel, you ask friends or take your chances. There are no verified profiles, no reviews, no payment protection, no accountability.
 
@@ -40,7 +40,7 @@ Every booking confirmation tells the pet owner exactly what their commission fun
 
 ## Not a Tech Company. A Feeding Schedule.
 
-The distinction matters. [Rover](https://rover.com), the largest pet services marketplace in the world, was acquired by Blackstone in 2024 for $2.3 billion. [Wag!, its competitor, went public and then nearly collapsed.](/en/blog/why-wag-failed-lessons-pet-care) These are companies built to generate returns for investors.
+The distinction matters. [Rover](https://www.rover.com/), the largest pet services marketplace in the world, was acquired by [Blackstone](https://www.blackstone.com/) in 2024 for $2.3 billion. [Wag!, its competitor, went public and then nearly collapsed.](/en/blog/why-wag-failed-lessons-pet-care) These are companies built to generate returns for investors.
 
 Tinies is built to generate kibble for cats.
 

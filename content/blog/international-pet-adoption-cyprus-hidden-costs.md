@@ -10,15 +10,15 @@ image: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_
 author: "Tinies Team"
 ---
 
-Adopting a rescue cat or dog from Cyprus and bringing them to another country is one of the most meaningful things you can do for an animal that would otherwise spend its life on the street. It is also more complicated, more expensive, and more time-consuming than most people expect.
+[Adopting a rescue cat or dog from Cyprus](/blog/how-to-adopt-a-rescue-cat-from-cyprus-to-uk) and bringing them to another country is one of the most meaningful things you can do for an animal that would otherwise spend its life on the street. It is also more complicated, more expensive, and more time-consuming than most people expect.
 
 This is not a deterrent. It is a preparation guide. The process is entirely manageable if you know what to expect. The problem is that most people do not know what to expect until they are already in the middle of it.
 
 ## The EU Pet Passport
 
-Cyprus is an EU member state, which means animals travelling to other EU countries can do so under the EU pet passport system. This is the single biggest administrative advantage of adopting from Cyprus rather than from a non-EU country.
+Cyprus is an EU member state, which means animals travelling to other EU countries can do so under the [EU pet passport system](https://food.ec.europa.eu/animals/movement-pets_en). This is the single biggest administrative advantage of adopting from Cyprus rather than from a non-EU country.
 
-An EU pet passport requires the animal to be microchipped (ISO 11784/11785 compliant, 15-digit), vaccinated against rabies, and have the vaccination recorded in the passport by an authorised veterinarian. The passport itself is a standardised document recognised across all EU member states.
+An EU pet passport requires the animal to be microchipped ([ISO 11784/11785 compliant, 15-digit](https://en.wikipedia.org/wiki/ISO_11784_and_ISO_11785)), vaccinated against rabies, and have the vaccination recorded in the passport by an authorised veterinarian. The passport itself is a standardised document recognised across all EU member states.
 
 Cost of the passport, microchip, and initial rabies vaccination in Cyprus: approximately €30–€60, depending on the veterinarian.
 
@@ -38,9 +38,9 @@ Cost of the AHC in Cyprus: approximately €20–€40. But the real cost is in 
 
 ## The Rabies Titre Test: When and Why
 
-For travel to certain countries — including Australia, Japan, Singapore, and some Middle Eastern states — a rabies antibody titre test is required. This is a blood test that proves the animal has a sufficient immune response to the rabies vaccine.
+For travel to certain countries — including [Australia](https://www.agriculture.gov.au/biosecurity-trade/cats-dogs), [Japan](https://www.maff.go.jp/aqs/english/animal/dog/index.html), Singapore, and some Middle Eastern states — a rabies antibody titre test is required. This is a blood test that proves the animal has a sufficient immune response to the rabies vaccine.
 
-The titre test must be performed at least 30 days after vaccination, and the results must show an antibody level of at least 0.5 IU/ml. The blood sample must be analysed by an EU-approved laboratory. In Cyprus, samples are typically sent to labs in France, Germany, or the UK.
+The titre test must be performed at least 30 days after vaccination, and the results must show an antibody level of at least 0.5 IU/ml. The blood sample must be analysed by an [EU-approved laboratory for rabies antibody titration](https://food.ec.europa.eu/animals/movement-pets/designated-laboratories-performing-rabies-antibody-titration-tests_en). In Cyprus, samples are typically sent to labs in France, Germany, or the UK.
 
 Timeline: blood draw to results is typically three to four weeks, but can take six weeks during busy periods. Some destination countries then require a waiting period of three to six months after a successful titre test before the animal can travel.
 
@@ -66,11 +66,11 @@ Quarantine requirements vary dramatically by country. For the most common adopti
 
 **Germany, France, Netherlands, other EU:** No quarantine with a valid EU pet passport.
 
-**United States:** As of 2024, the US requires dogs to be microchipped, at least six months old, and to arrive with specific CDC documentation. Cats face fewer restrictions but still require a health certificate. No quarantine for cats from Cyprus. Dog requirements have become significantly more complex — check current USDA/CDC rules before proceeding.
+**United States:** As of 2024, the US requires dogs to be [microchipped with an ISO-compliant chip, at least six months old, and to arrive with specific CDC documentation](https://www.cdc.gov/importation/dogs/rabies-free-low-risk-countries.html). Cats face fewer restrictions but still require a health certificate. No quarantine for cats from Cyprus. Dog requirements have become significantly more complex — check current USDA/CDC rules before proceeding.
 
-**Australia:** Mandatory 10-day quarantine upon arrival at an approved facility (Melbourne or Sydney). Extensive pre-travel testing including titre test. Total timeline from start of process to animal arriving home: approximately 8–12 months. Total cost including quarantine: approximately €2,000–€4,000.
+**Australia:** [Mandatory 10–30 day quarantine upon arrival at an approved facility in Melbourne](https://www.agriculture.gov.au/biosecurity-trade/cats-dogs). Extensive pre-travel testing including titre test. Total timeline from start of process to animal arriving home: approximately 8–12 months. Total cost including quarantine: approximately €2,000–€4,000.
 
-**Japan:** Quarantine of up to 180 days if pre-travel requirements are not met. With full compliance (titre test, waiting period, proper documentation), quarantine can be reduced to 12 hours. Total timeline: 8–10 months minimum.
+**Japan:** [Quarantine of up to 180 days if pre-travel requirements are not met](https://www.maff.go.jp/aqs/english/animal/dog/index.html). With full compliance (titre test, waiting period, proper documentation), quarantine can be reduced to 12 hours. Total timeline: 8–10 months minimum.
 
 ## The Real Cost Range
 

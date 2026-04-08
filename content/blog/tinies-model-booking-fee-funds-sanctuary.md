@@ -68,7 +68,7 @@ This matters not because Tinies is uniquely virtuous, but because the rescue sec
 
 ## The Limits of the Model
 
-The Tinies model is not a solution to the stray cat crisis in Cyprus. No single organisation's funding model can be. The scale of the problem — an estimated 1.5 million stray cats — requires government investment, systematic national sterilisation programmes, and policy changes that are far beyond the reach of any marketplace platform.
+The Tinies model is not a solution to [the stray cat crisis in Cyprus](/en/blog/the-stray-cat-crisis-in-cyprus). No single organisation's funding model can be. The scale of the problem — an estimated 1.5 million stray cats — requires government investment, systematic national sterilisation programmes, and policy changes that are far beyond the reach of any marketplace platform.
 
 What the model does is demonstrate that sustainable, non-donation-dependent funding for animal rescue is possible. It proves that a commercial platform can be built with charity at its structural core, not as an afterthought or a marketing angle. And it provides a reliable, growing stream of funding to the rescues and sanctuaries that are doing the daily work of keeping cats alive.
 

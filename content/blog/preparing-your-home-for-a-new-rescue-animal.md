@@ -34,4 +34,4 @@ Follow rescue guidance. Parallel walks on neutral ground work for many dogs. For
 
 Not eating for more than 24 hours (12 for young kittens), vomiting with lethargy, or difficulty breathing are urgent. Stress diarrhoea can be common; hydration matters.
 
-You are not failing if progress is slow. You are succeeding if the animal eats, sleeps, and eventually chooses to sit nearer to you. Tinies was built by people who know what it is to feed ninety-two mouths — **every tiny** settling into a sofa for the first time is why we keep building.
+You are not failing if progress is slow. You are succeeding if the animal eats, sleeps, and eventually chooses to sit nearer to you. Tinies was built by people who know what it is to [feed ninety-two rescue cats](/blog/she-built-a-tech-company-to-feed-92-cats) — **every tiny** settling into a sofa for the first time is why we keep building.

@@ -10,11 +10,11 @@ image: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_
 author: "Tinies Team"
 ---
 
-Adopting from Cyprus to the UK is legal, common, and well mapped — but it is not instant. Post-Brexit rules added a rabies antibody titre test for cats and dogs, which usually makes the journey a few months longer than adoption to an EU country. Understanding the sequence saves stress for you and the rescue.
+Adopting from Cyprus to the UK is legal, common, and well mapped — but it is not instant. Post-Brexit rules added a [rabies antibody titre test](/blog/international-pet-adoption-cyprus-hidden-costs) for cats and dogs, which usually makes the journey a few months longer than adoption to an EU country. Understanding the sequence saves stress for you and the rescue.
 
 ## The documentation chain
 
-The animal must be microchipped with a fifteen-digit ISO chip before or on the same day as the rabies vaccine. After vaccination, a blood sample for the titre test is taken no earlier than thirty days later. The lab must report a satisfactory result before travel can be booked. Your vet in Cyprus completes an EU pet passport or animal health certificate close to departure.
+The animal must be microchipped with a fifteen-digit [ISO 11784/11785 chip](https://en.wikipedia.org/wiki/ISO_11784_and_ISO_11785) before or on the same day as the rabies vaccine. After vaccination, a blood sample for the titre test is taken no earlier than thirty days later. The lab must report a satisfactory result before travel can be booked. Your vet in Cyprus completes an [EU pet passport](https://food.ec.europa.eu/animals/movement-pets_en) or animal health certificate close to departure.
 
 ## Timeline expectations
 
@@ -30,4 +30,4 @@ You will collect the animal according to the courier or airline’s instructions
 
 ## Why it is worth the wait
 
-Every successful UK adoption frees sanctuary space in Cyprus and funds another spay surgery. Tinies connects rescues and adopters so fewer animals depend on luck and WhatsApp threads. If you are UK-based and ready for the timeline, **no matter the size** of your flat, there is probably a tiny on the island already purring for a name you have not chosen yet.
+Every successful UK adoption frees sanctuary space in Cyprus and funds another spay surgery. Tinies connects rescues and adopters so fewer animals depend on luck and WhatsApp threads. If you are UK-based and ready for the timeline, **no matter the size** of your flat, there is probably a tiny on the island already purring for a name you have not chosen yet. See our [complete step-by-step adoption guide](/blog/adopting-rescue-cat-cyprus-to-uk-complete-guide) for detailed requirements and timelines.

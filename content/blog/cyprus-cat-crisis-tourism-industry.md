@@ -11,7 +11,7 @@ image: "/images/blog/cyprus-cat-tourism.jpg"
 
 Cyprus earned a record €3.69 billion in tourism revenue in 2025, a 15.2 percent increase over the previous year. More than four million tourists visited the island. Tourism accounts for roughly 20 percent of the country's GDP and is projected to reach 25 percent by 2030.
 
-The island is already known globally as the "Island of Cats." This is not a nickname anyone chose strategically. It emerged organically because visitors cannot walk through any town center, archaeological site, or beach promenade without encountering dozens of cats. Social media is saturated with photos and videos of Cyprus cats. The 9,500-year-old burial of a cat alongside a human discovered at Shillourokambos is the earliest known evidence of a domesticated cat on earth. The Monastery of St. Nicholas of the Cats has been a feline sanctuary since the fourth century.
+The island is already known globally as the "Island of Cats." This is not a nickname anyone chose strategically. It emerged organically because visitors cannot walk through any town center, archaeological site, or beach promenade without encountering dozens of cats. Social media is saturated with photos and videos of Cyprus cats. The [9,500-year-old burial of a cat alongside a human discovered at Shillourokambos](https://www.sciencedaily.com/releases/2004/04/040409092827.htm) is the earliest known evidence of a domesticated cat on earth. The [Monastery of St. Nicholas of the Cats](https://www.atlasobscura.com/places/holy-monastery-of-saint-nicholas-of-the-cats) has been a feline sanctuary since the fourth century.
 
 And yet no one has calculated what this brand is worth, or what it could be worth if managed deliberately.
 
@@ -23,7 +23,7 @@ The result is a paradox: the thing that makes Cyprus distinctive and viral on so
 
 ## What Managed Cat Tourism Looks Like
 
-Japan has demonstrated that cat-focused tourism is not a niche curiosity. It is a legitimate economic sector. Tashirojima (Cat Island) draws tens of thousands of visitors annually to a remote island with a population of fewer than one hundred humans. Cat cafés in Tokyo, Osaka, and Kyoto generate millions in annual revenue. The town of Onomichi has built an entire tourism brand around its cat population, complete with cat-themed shops, trails, and maps.
+Japan has demonstrated that cat-focused tourism is not a niche curiosity. It is a legitimate economic sector. [Tashirojima (Cat Island)](https://www.japan.travel/en/spot/1765/) draws tens of thousands of visitors annually to a remote island with a population of fewer than one hundred humans. Cat cafés in Tokyo, Osaka, and Kyoto generate millions in annual revenue. The town of [Onomichi has built an entire tourism brand around its cat population](https://www.japan.travel/en/sg/jbyj-blog/cats-cafes-and-temples-exploring-onomichis-cat-alley/), complete with cat-themed shops, trails, and maps.
 
 Cyprus has something Japan's cat islands do not: a 9,500-year-old archaeological record, a saint who reportedly introduced cats to the island, a functioning monastery that has cared for cats for over a thousand years, and a climate that allows year-round outdoor engagement with animals.
 
@@ -41,7 +41,7 @@ The third component is a donation integration layer. Every interaction point —
 
 The fourth component is a cat health certification program for sanctuary districts. Tourists do not want to see visibly sick or injured animals. A managed district where cats are sterilized, vaccinated, treated for parasites, and ear-tipped signals quality and care. This costs money but generates far more in tourism spend and international reputation.
 
-The fifth component is a transparent impact reporting system. Visitors who donate should see exactly where their money went. Tinies already operates on this principle — approximately 90 percent of booking commissions fund cat sanctuaries. Scaling this transparency to the broader cat tourism ecosystem would differentiate Cyprus from every other animal welfare destination in the world.
+The fifth component is a transparent impact reporting system. Visitors who donate should see exactly where their money went. Tinies already operates on this principle — approximately 90 percent of booking commissions fund cat sanctuaries. Scaling this transparency to the broader cat tourism ecosystem would differentiate Cyprus from every other animal welfare destination in the world. See [the Real Economics of Stray Cat Care in Cyprus](/blog/real-economics-stray-cat-care-cyprus) for more on this model.
 
 ## The Revenue Math
 

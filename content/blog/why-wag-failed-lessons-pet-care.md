@@ -9,7 +9,7 @@ image: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_
 author: "Tinies Team"
 ---
 
-In July 2025, [Wag](https://www.wag.com/) — once valued at $650 million, once a household name in American pet care — [filed for Chapter 11 bankruptcy protection](https://www.sfgate.com/tech/article/sf-tech-company-wag-files-for-bankruptcy-20790355.php). The company had lost $69.5 million between 2022 and 2024. Its stock, which had traded above $4 at its SPAC listing, [was delisted from Nasdaq amid the bankruptcy proceedings](https://www.tipranks.com/news/company-announcements/wag-group-faces-nasdaq-delisting-amid-bankruptcy).
+In July 2025, [Wag](https://www.wag.com/) — once valued at $650 million, once a household name in American pet care — [filed for Chapter 11 bankruptcy protection](https://www.sfgate.com/tech/article/sf-tech-company-wag-files-for-bankruptcy-20790355.php). The company had lost $69.5 million between 2022 and 2024. Its stock, which had traded above $4 at its SPAC listing, [was delisted from Nasdaq amid the bankruptcy proceedings](https://www.tipranks.com/news/company-announcements/wag-group-faces-nasdaq-delisting-amid-bankruptcy). This failure provides critical lessons for the [next generation of pet care platforms](/blog/petbacker-vs-tinies-cyprus-comparison).
 
 For anyone building or using a pet care platform, the question is not just "what happened to Wag" but "what can we learn from it?"
 
@@ -19,7 +19,7 @@ The answer is uncomfortable but clear: Wag treated pet care as a commodity trans
 
 **The commission problem.** Wag took approximately 40% of every booking. Providers — the dog walkers who actually walked the dogs, in the rain, in the heat, early in the morning — kept 60%. For a thirty-minute walk priced at $20, the walker received $12 and Wag kept $8. That is a lot of money for a platform that provides a search page and a payment form.
 
-By comparison, [Rover](https://www.rover.com/) takes approximately 20% from providers (plus an 11% fee charged to owners, making the effective total take about 38%). Tinies takes 12%, and 90% of that goes to animal rescue. The remaining effective platform revenue is about 1.2% of the booking price.
+By comparison, [Rover](https://www.rover.com/) takes approximately 20% from providers (plus an 11% fee charged to owners, making the effective total take about 38%). [Tinies takes 12%](/blog/petbacker-vs-tinies-cyprus-comparison), and [90% of that goes to animal rescue](/blog/tinies-model-booking-fee-funds-sanctuary). The remaining effective platform revenue is about 1.2% of the booking price.
 
 Wag's commission was not justified by the value it provided. Providers had no training, no certification, no career progression, no loyalty benefits. The platform offered no reason for a good walker to stay on Wag rather than build a direct client relationship.
 
@@ -49,6 +49,6 @@ Wag proved that you can raise hundreds of millions of dollars, acquire millions 
 
 The next generation of pet care platforms — and Tinies aims to be one — needs to do better. Lower commissions. Real investment in provider quality. A mission that gives people a reason to care.
 
-If you are a pet care provider, you deserve better than 60 cents on the dollar. [Join Tinies](/for-providers) and keep 88% of every booking while funding rescue.
+If you are a pet care provider, you deserve better than 60 cents on the dollar. [Join Tinies](/for-providers) and keep 88% of every booking while funding rescue. Compare [Tinies vs PetBacker](/blog/petbacker-vs-tinies-cyprus-comparison) if you're evaluating options.
 
-If you are a pet owner, you deserve a platform that treats your provider well and puts the excess toward something good. [Find care on Tinies](/services).
+If you are a pet owner, you deserve a platform that treats your provider well and puts the excess toward something good. [Find care on Tinies](/services) or [learn how to find a trusted sitter](/blog/how-to-find-a-trusted-pet-sitter-in-cyprus).

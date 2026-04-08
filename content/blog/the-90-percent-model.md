@@ -52,7 +52,7 @@ If you are an operator or investor looking at rural Cyprus property: the opportu
 
 If you are a traveler who has ever come back from Cyprus thinking about the cats you met: the way to help is not just a one-time donation. It is choosing, systematically, the businesses that are structured to make your spending count.
 
-[Cyprus has 1.5 million stray cats](/en/blog/why-cyprus-has-15-million-stray-cats) and a small, determined community trying to care for them with tools that were not designed for this problem. Better tools exist. The 90% model is one of them. The only question is how many people decide to build with it.
+[Cyprus has 1.5 million stray cats](/en/blog/why-cyprus-has-15-million-stray-cats) and [a small, determined community trying to care for them](/en/blog/the-stray-cat-crisis-in-cyprus) with tools that were not designed for this problem. Better tools exist. The 90% model is one of them. The only question is how many people decide to build with it.
 
 ---
 

@@ -28,7 +28,7 @@ These organisations operate on shoestring budgets. Many are unregistered chariti
 
 The work is relentless. A typical rescue founder's week might include: trapping a feral cat colony for spay/neuter, driving two hours to a specialist vet because the local one cannot handle a particular surgery, fostering four kittens who are too young to survive without bottle-feeding every three hours, coordinating the transport of an adopted cat to a family in Germany, fundraising on social media to cover a EUR 800 emergency vet bill, and answering the phone call from a stranger who says "I found a kitten, can you take it?" — knowing that the answer should be "I have no space" but somehow always ends up being "bring it over."
 
-Gardens of St Gertrude, a sanctuary in Parekklisia, cares for 92 cats. Its founder, Karen Pendergrass, has funded the entire operation out of pocket since it opened. No external donations. No government support. Just a woman, her family, and 92 cats who need to eat every day.
+[Gardens of St Gertrude](/blog/she-built-a-tech-company-to-feed-92-cats), a sanctuary in Parekklisia, cares for 92 cats. Its founder, Karen Pendergrass, has funded the entire operation out of pocket since it opened. No external donations. No government support. Just a woman, her family, and 92 cats who need to eat every day.
 
 Malcolm's Cat Sanctuary, Patch of Heaven, and dozens of other organisations across the island do similar work in similar conditions. Some have a few dozen animals. Some have hundreds.
 
@@ -46,7 +46,7 @@ The result is that the actual work of animal rescue falls primarily to private i
 
 In some parts of Cyprus, particularly rural areas, stray cats are seen as pests. Poisoning — typically with antifreeze or pesticide-laced food left in areas where cats congregate — occurs with disturbing regularity. Rescue organisations report poisoning incidents throughout the year, with seasonal spikes that sometimes coincide with agricultural cycles.
 
-Poisoning is illegal under Cyprus law and carries penalties including imprisonment. But prosecutions are rare, and the perpetrators are almost never identified. The cats simply appear dead, sometimes in groups, and the rescue community absorbs the grief and moves on to the next crisis.
+Poisoning is illegal under Cyprus law and carries penalties including imprisonment. But prosecutions are rare, and the perpetrators are almost never identified. The cats simply appear dead, sometimes in groups, and the rescue community absorbs the grief and moves on to the next crisis. Understanding [what happens without intervention](/blog/what-happens-stray-cats-cyprus-no-intervention) is essential to combat this cruelty.
 
 This is the reality that rescue workers live with. It is not picturesque. It is not the version of Cyprus that appears in travel brochures. But it is real, and it shapes every decision that every rescue organisation on the island makes.
 
@@ -58,7 +58,7 @@ Despite the challenges, there are reasons for cautious optimism.
 
 **Technology is helping.** Platforms that connect rescue organisations with international adopters, coordinate veterinary logistics, and handle transport paperwork are making international adoption more accessible and more professional. What used to require weeks of WhatsApp coordination can increasingly be managed through structured digital tools.
 
-**Community feeding programmes are stabilising populations.** In many areas, organised community feeding — where volunteers maintain feeding stations and monitor cat colonies — combined with TNR, is beginning to stabilise local populations. The cats are healthier, the reproduction rate drops, and the colonies shrink gradually over time.
+**Community feeding programmes are stabilising populations.** In many areas, organised community feeding — where volunteers maintain feeding stations and monitor cat colonies — combined with [TNR](/blog/ecology-of-cats-in-cyprus), is beginning to stabilise local populations. The cats are healthier, the reproduction rate drops, and the colonies shrink gradually over time.
 
 **Awareness is growing.** Both within Cyprus and internationally, awareness of the stray animal situation is increasing. Social media has made the work of rescue organisations visible to audiences far beyond the island. International donors, volunteers, and adopters are engaging with Cyprus animal welfare in numbers that would have been unimaginable a decade ago.
 
@@ -80,7 +80,7 @@ Whether you live in Cyprus, in Europe, or anywhere else, there are concrete acti
 
 ### If You Live Outside Cyprus
 
-**Adopt a rescue from Cyprus.** International adoption is well-established and the process, while it requires patience, is straightforward. Your adoption fee and the care you provide to that animal directly reduces the burden on rescue organisations.
+**Adopt a rescue from Cyprus.** [International adoption](/blog/how-international-pet-adoption-works-from-cyprus-to-the-uk) is well-established and the process, while it requires patience, is straightforward. Your adoption fee and the care you provide to that animal directly reduces the burden on rescue organisations.
 
 **Donate to a Cyprus rescue organisation.** Even small amounts matter when budgets are measured in hundreds rather than thousands. Direct donations to organisations like Gardens of St Gertrude, Malcolm's Cat Sanctuary, or Patch of Heaven go directly to animal care.
 

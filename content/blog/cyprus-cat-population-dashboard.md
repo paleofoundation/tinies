@@ -39,11 +39,11 @@ The output is a dashboard accessible to Veterinary Services, municipalities, vol
 
 ## The Citizen Science Model
 
-Citizen science — enlisting the public to collect scientific data — has proven effective in far more complex monitoring scenarios than counting cats. BirdLife Cyprus already operates a citizen science program for monitoring bird populations on the island. The eBird platform, run by the Cornell Lab of Ornithology, collects over 100 million bird observations per year from volunteers worldwide and has become one of the most valuable ecological datasets on earth.
+Citizen science — enlisting the public to collect scientific data — has proven effective in far more complex monitoring scenarios than counting cats. [BirdLife Cyprus already operates a citizen science program for monitoring bird populations on the island](https://birdlifecyprus.org/). The [eBird platform, run by the Cornell Lab of Ornithology](https://www.birds.cornell.edu/citizenscience/), collects over 100 million bird observations per year from volunteers worldwide and has become one of the most valuable ecological datasets on earth.
 
 Cat monitoring is in many ways easier than bird monitoring. Cats are less mobile, more visible, and concentrated in predictable locations near food sources. They do not migrate. They are large enough to photograph clearly with any modern smartphone.
 
-The Cyprus Veterinary Association has already proposed a smartphone app to identify areas with large feral cat concentrations. This proposal has not been implemented. It should be, and it should be expanded beyond simple location reporting to include the photographic and analytical capabilities described above.
+The Cyprus Veterinary Association has already proposed a smartphone app to identify areas with large feral cat concentrations. This proposal has not been implemented. It should be, and it should be expanded beyond simple location reporting to include the photographic and analytical capabilities described above. A similar data-driven approach is essential, as discussed in [Eradicate by District](/blog/eradicate-by-district-cyprus-cat-strategy).
 
 ## What Computer Vision Enables
 
@@ -53,7 +53,7 @@ Ear-tipping is a visual marker specifically designed to be identifiable from a d
 
 Aggregated over thousands of photos across hundreds of colonies, this produces a sterilization coverage map of the entire island — the single most important metric for evaluating whether the government's €300,000 investment is achieving anything.
 
-Individual cat re-identification — distinguishing one cat from another based on coat pattern — is more technically challenging but advancing rapidly. Several research groups have demonstrated re-identification accuracy above 90 percent for domestic cats in controlled settings. Applied to the citizen science dataset, this capability would enable population size estimation through mark-recapture statistics, the same methodology used to estimate wildlife populations in ecological research.
+Individual cat re-identification — distinguishing one cat from another based on coat pattern — is more technically challenging but advancing rapidly. Several research groups have demonstrated re-identification accuracy above 90 percent for domestic cats in controlled settings. Applied to the citizen science dataset, this capability would enable population size estimation through mark-recapture statistics, the same methodology used to estimate wildlife populations in ecological research. This measurement infrastructure is foundational to the [district eradication strategy](/blog/eradicate-by-district-cyprus-cat-strategy).
 
 ## The Accountability Layer
 
@@ -81,7 +81,7 @@ The instinct when facing a crisis is to spend money on action: more surgeries, m
 
 If Cyprus doubled its sterilization budget to €600,000 per year without knowing where the unsterilized cats are, what the current coverage is, or whether last year's spending produced any result, the additional €300,000 would produce the same outcome as the first: unmeasurable.
 
-A population dashboard costs a fraction of the sterilization budget and multiplies the effectiveness of every euro spent on sterilization by directing it to where it is needed most.
+A population dashboard costs a fraction of the sterilization budget and multiplies the effectiveness of every euro spent on sterilization by directing it to where it is needed most. Measurement systems are equally critical to the broader [tourism potential](/blog/cyprus-cat-crisis-tourism-industry) and [waste management interventions](/blog/cyprus-cat-crisis-waste-management).
 
 You cannot manage what you cannot measure. Cyprus has been trying to manage a million-cat crisis with no measurement system for decades. The result is what you would expect.
 

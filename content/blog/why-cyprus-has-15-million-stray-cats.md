@@ -16,7 +16,7 @@ That ratio is not a quirky cultural detail. It is the result of decades of compo
 
 ## The Colonial Roots of a Feeding Culture
 
-Cyprus has lived with outdoor cats for millennia. The earliest archaeological evidence of cat domestication anywhere in the world was found at Shillourokambos, a Neolithic settlement in southern Cyprus, dating to approximately 7500 BCE. Cats and this island have history.
+Cyprus has lived with outdoor cats for millennia. The earliest archaeological evidence of cat domestication anywhere in the world was found at [Shillourokambos, a Neolithic settlement in southern Cyprus, dating to approximately 7500 BCE](https://www.sciencedaily.com/releases/2004/04/040409092827.htm). Cats and this island have history.
 
 But the modern stray cat situation has more specific origins. During British colonial rule (1878–1960), cats were actively encouraged in villages and military installations as pest control. Grain stores, barracks, and port warehouses all relied on resident cat populations to manage rodents. Feeding these cats was not sentimental — it was practical. Communities developed the habit of putting out scraps, and cats became a permanent fixture of outdoor life.
 
@@ -32,7 +32,7 @@ Cyprus has never come close to that threshold on a national level.
 
 ## TNR: Good Theory, Poor Execution
 
-Trap-neuter-return is the internationally recognised gold standard for humane stray cat population management. The principle is simple: trap feral and stray cats, sterilise them, and return them to their territory. Over time, the colony stabilises and gradually shrinks through natural attrition.
+Trap-neuter-return is the internationally recognised gold standard for humane stray cat population management. The principle is simple: trap feral and stray cats, sterilise them, and return them to their territory. Over time, the colony stabilises and gradually shrinks through natural attrition. Learn more about [best practices and TNR resources from Alley Cat Allies](https://www.alleycat.org/resources/why-trap-neuter-return-feral-cats-the-case-for-tnr/).
 
 In practice, TNR in Cyprus has been patchy, underfunded, and inconsistent. Government-sponsored sterilisation programmes have existed, but they tend to operate in short bursts — a funded campaign for six months here, a municipal initiative for a year there — before money runs out or political priorities shift.
 
@@ -44,7 +44,7 @@ The fundamental problem is coverage. TNR works when it is systematic, sustained,
 
 Dense, unmanaged cat populations are breeding grounds for infectious disease. Two viruses are of particular concern in Cyprus: Feline Immunodeficiency Virus (FIV) and Feline Leukaemia Virus (FeLV).
 
-FIV spreads primarily through bite wounds, which are common in unneutered male cats fighting over territory and mates. Prevalence studies in Cypriot stray populations have found FIV rates significantly higher than the European average. FeLV, which spreads through saliva, nasal secretions, and shared food bowls, thrives in exactly the kind of communal feeding situations that are ubiquitous across the island.
+FIV spreads primarily through bite wounds, which are common in unneutered male cats fighting over territory and mates. Prevalence studies in Cypriot stray populations have found FIV rates significantly higher than the European average. [FeLV, which spreads through saliva, nasal secretions, and shared food bowls](https://icatcare.org/articles/feline-infectious-enteritis-feline-parvovirus-panleukopenia-virus), thrives in exactly the kind of communal feeding situations that are ubiquitous across the island.
 
 Both viruses are immunosuppressive. Infected cats become more vulnerable to secondary infections, respiratory disease, and cancers. They also become more expensive to treat, which places additional strain on already overstretched rescue organisations. A cat with FIV can live for years with proper care, but "proper care" is a luxury that most strays in Cyprus never receive.
 
@@ -60,7 +60,7 @@ The result is predictable. Municipalities outsource the problem to volunteers, w
 
 ## EU Inaction
 
-Cyprus is a member of the European Union, and the EU has frameworks for animal welfare. But stray animal management falls largely outside the scope of EU regulation. The EU's main animal welfare legislation focuses on farmed animals, animals used in research, and animals during transport. Companion animals, and particularly stray companion animals, occupy a regulatory grey zone.
+Cyprus is a member of the European Union, and the EU has [frameworks for animal welfare](https://food.ec.europa.eu/animals/animal-welfare/eu-animal-welfare-legislation_en). But stray animal management falls largely outside the scope of EU regulation. The EU's main animal welfare legislation focuses on farmed animals, animals used in research, and animals during transport. Companion animals, and particularly stray companion animals, occupy a regulatory grey zone.
 
 The European Parliament has passed non-binding resolutions calling on member states to address stray animal populations humanely. Various MEPs have raised the Cyprus situation specifically. But resolutions without enforcement mechanisms are suggestions, not solutions. There is no EU directive requiring member states to implement TNR. There is no EU funding stream dedicated to stray animal sterilisation. There is no mechanism to compel Cyprus — or any other member state — to spend more on animal welfare.
 
@@ -72,4 +72,4 @@ The stray cat population in Cyprus is not stable. It is growing. Every year, the
 
 Meanwhile, the cats keep breeding. The colonies keep expanding. The diseases keep spreading. The feeding stations keep running out of food. And the volunteers keep waking up at 5 a.m. to fill them anyway, because if they do not, nobody will.
 
-The problem is not mysterious. The biology is well understood. The solutions are known. The obstacle is the same one it has always been: political will and sustained funding. Until those materialise, the number will keep climbing, and the island will keep adding cats faster than anyone can help them.
+The problem is not mysterious. The biology is well understood. The solutions are known. The obstacle is the same one it has always been: political will and sustained funding. Until those materialise, the number will keep climbing, and the island will keep adding cats faster than anyone can help them. For concrete solutions to this crisis, see [The Cyprus Cat Crisis Tourism Industry](/blog/cyprus-cat-crisis-tourism-industry), [The Cyprus Cat Crisis Will Never Be Solved Without Fixing the Bins](/blog/cyprus-cat-crisis-waste-management), and [Eradicate by District](/blog/eradicate-by-district-cyprus-cat-strategy).

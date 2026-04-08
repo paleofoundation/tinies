@@ -10,7 +10,7 @@ image: "https://raw.githubusercontent.com/paleofoundation/Cats/main/assets/hero_
 author: "Karen Pendergrass"
 ---
 
-In 2021, Rover went public via SPAC at a valuation of $1.35 billion. In 2023, Blackstone — the private equity firm with $1 trillion in assets under management — took a significant stake in A Place for Pets, Rover's parent company.
+In 2021, [Rover](https://www.rover.com/) went public via SPAC at a valuation of $1.35 billion. In 2024, [Blackstone](https://www.blackstone.com/) — the private equity firm with $1 trillion in assets under management — acquired [Rover](https://www.rover.com/) in a $2.3 billion all-cash deal.
 
 I want to be precise about what that means in practice, because it is the clearest possible illustration of why Tinies is structured the way it is.
 
@@ -30,7 +30,7 @@ This is not speculation. It is the documented lifecycle of PE-backed marketplace
 
 This is where I am going to say something that sounds like a joke and is not.
 
-I would rather have Kim Kardashian on the cap table than Blackstone.
+I would rather have Kim Kardashian on the cap table than [Blackstone](https://www.blackstone.com/).
 
 Not because I have any particular view on celebrity investing. Because the incentive structure is completely different.
 
@@ -64,7 +64,7 @@ The $2.3 billion number is not arbitrary — it is approximately the valuation a
 
 It would also be the end of the thing.
 
-I am not making a virtue of turning down money that has not been offered. I am making a structural argument: the decisions you make about capital determine what kind of company you can build. If you optimize for the exit, you build for the exit. If you optimize for the mission, you build for the mission. These are not the same company, and you cannot convert one into the other after the fact.
+This is the pattern documented across [failing pet care competitors](/en/blog/why-wag-failed-lessons-pet-care): prioritize extraction, lose everything that makes the business meaningful. I am not making a virtue of turning down money that has not been offered. I am making a structural argument: the decisions you make about capital determine what kind of company you can build. If you optimize for the exit, you build for the exit. If you optimize for the mission, you build for the mission. These are not the same company, and you cannot convert one into the other after the fact.
 
 ---
 

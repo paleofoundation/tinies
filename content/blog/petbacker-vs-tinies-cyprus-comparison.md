@@ -13,7 +13,7 @@ author: "Tinies Team"
 
 If you are looking for pet care in Cyprus — or looking to offer pet care services — you have probably come across [PetBacker](https://www.petbacker.com/). It is a Singapore-based marketplace that has been active in Cyprus for several years, with listings across boarding, sitting, walking, and daycare.
 
-Tinies is different. It is a Cyprus-based platform built specifically for this market, with a [mission to fund animal rescue](/giving) through every booking. We built it because we wanted pet owners in Limassol, Nicosia, Larnaca, and Paphos to have the same quality of service you would find on [Rover](https://www.rover.com/) in the US or the UK — but with every transaction supporting the island's rescue organisations.
+Tinies is different. It is a Cyprus-based platform built specifically for this market, with a [mission to fund animal rescue](/giving) through every booking. We built it because we wanted pet owners in Limassol, Nicosia, Larnaca, and Paphos to have the same quality of service you would find on [Rover](https://www.rover.com/) in the US or the UK — but with every transaction supporting the island's rescue organisations. We also learned key lessons from [why Wag failed](/blog/why-wag-failed-lessons-pet-care) and why [being second into a market can be advantageous](/blog/move-over-rover-why-being-second-wins).
 
 This is an honest comparison. We will tell you what PetBacker does well, where Tinies is different, and why we think the model matters.
 
@@ -52,7 +52,7 @@ This is the single biggest difference and the one that affects providers most di
 - **No exclusivity requirement** — list on Tinies, PetBacker, Bazaraki, wherever you want
 - No penalty for being on multiple platforms, ever
 
-We wrote a separate piece on [why exclusivity penalties hurt providers and the market](/blog/petbacker-punishes-competitors-tinies-alternative). The short version: penalising people for leaving is not a sign of a platform worth staying on.
+We wrote a separate piece on [why exclusivity penalties hurt providers and the market](/blog/petbacker-punishes-competitors-tinies-alternative). The short version: penalising people for leaving is not a sign of a platform worth staying on. For detailed earnings comparisons, see our [guide to earning EUR 500-2,000/month as a pet sitter](/blog/become-pet-sitter-cyprus-earn-money).
 
 ### Real numbers from the Cyprus market
 
@@ -77,7 +77,7 @@ On PetBacker, the commission funds the company's operations in Singapore.
 
 On Tinies, **90% of the 12% service fee goes directly to animal rescue organisations in Cyprus**. That is not a pledge or a campaign — it is the structural reason the platform exists. The amount donated, the organisations funded, and the per-charity breakdown are all publicly visible on the [Tinies Giving dashboard](/giving), updated in real time.
 
-Cyprus has [more than 1.5 million stray cats](/blog/why-cyprus-has-15-million-stray-cats) and the [government spends almost nothing on their care](/blog/cyprus-government-stray-animal-spending). The rescue organisations doing the actual work — trapping, sterilising, feeding, fostering, rehoming — run almost entirely on personal donations and volunteer labour. Every booking on Tinies generates a contribution to that work. Every dog walk, every cat drop-in, every overnight stay.
+Cyprus has [more than 1.5 million stray cats](/blog/why-cyprus-has-15-million-stray-cats) and the [government spends almost nothing on their care](/blog/cyprus-government-stray-animal-spending). The rescue organisations doing the actual work — [trapping, sterilising, feeding, fostering, rehoming](/blog/the-stray-cat-crisis-in-cyprus) — run almost entirely on personal donations and volunteer labour. Every booking on Tinies generates a contribution to that work. Every dog walk, every cat drop-in, every overnight stay.
 
 We wrote a full explanation of [how the 90% model works](/blog/the-90-percent-model) and [how a single booking fee funds a sanctuary](/blog/tinies-model-booking-fee-funds-sanctuary) if you want the detail.
 
@@ -148,7 +148,7 @@ Tinies is built on a fundamentally different premise. It is not a transaction pl
 
 **For owners:** you get verified, reviewed providers with transparent cancellation policies, secure payment that only charges when your booking is confirmed, and the knowledge that your booking directly supports animal rescue through [Tinies Giving](/giving). If you are new to finding care, our guide on [how to find a trusted pet sitter in Cyprus](/blog/how-to-find-a-trusted-pet-sitter-in-cyprus) walks through what to look for.
 
-**For Cyprus:** you get a platform that reinvests in the island instead of extracting from it. One that addresses the [stray animal crisis](/blog/the-stray-cat-crisis-in-cyprus) structurally, through every transaction, rather than treating it as someone else's problem.
+**For Cyprus:** you get a platform that reinvests in the island instead of extracting from it. One that addresses the [stray animal crisis](/blog/the-stray-cat-crisis-in-cyprus) structurally, through every transaction, rather than treating it as someone else's problem. See our [complete 2026 pet care pricing guide](/blog/pet-care-cost-cyprus-2026-price-guide) for context on what services cost across the island.
 
 ## The bottom line
 
