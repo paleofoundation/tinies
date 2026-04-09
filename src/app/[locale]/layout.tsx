@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -107,6 +108,18 @@ export default async function LocaleLayout({ children, params }: Props) {
           color: "var(--color-text)",
         }}
       >
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-KEF5KR8R7B"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-KEF5KR8R7B');
+          `}
+        </Script>
         <NextIntlClientProvider messages={messages}>
           <FeedbackShell
             showBetaUI={showBetaUI}
