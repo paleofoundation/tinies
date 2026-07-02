@@ -8,7 +8,7 @@ date: "2026-03-15"
 
 There is a woman in Parekklisia, a quiet village on the southern coast of Cyprus between Limassol and the British military base at Akrotiri, who feeds 92 cats every day.
 
-Her name is Karen Pendergrass. She runs a cat sanctuary called [Gardens of St Gertrude](https://gardensofstgertrude.com) out of her home. Some of the cats arrived as kittens, dropped at the edge of her property in cardboard boxes. Some were found sick on the side of the road, brought to her by neighbors who had heard she was "the cat lady." Some wandered in and never left. Ninety-two cats, at last count. The number goes up more often than it goes down.
+Her name is [Karen Pendergrass](https://karenpendergrass.com). She runs a cat sanctuary called [Gardens of St Gertrude](https://gardensofstgertrude.com) out of her home. Some of the cats arrived as kittens, dropped at the edge of her property in cardboard boxes. Some were found sick on the side of the road, brought to her by neighbors who had heard she was "the cat lady." Some wandered in and never left. Ninety-two cats, at last count. The number goes up more often than it goes down.
 
 The sanctuary has never accepted a single donation. Not one euro. Karen and her family have funded everything — food, litter, vet bills, medications, spay and neuter surgeries, emergency treatments — entirely out of pocket, supported by her work running the [Paleo Foundation](https://paleofoundation.com), a food certification organization she founded over a decade ago.
 
